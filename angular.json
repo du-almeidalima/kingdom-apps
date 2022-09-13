@@ -1,0 +1,8 @@
+{
+  "$schema": "./node_modules/nx/schemas/workspace-schema.json",
+  "version": 2,
+  "projects": {
+    "ministry-maps": "apps/ministry-maps",
+    "ministry-maps-e2e": "apps/ministry-maps-e2e"
+  }
+}
