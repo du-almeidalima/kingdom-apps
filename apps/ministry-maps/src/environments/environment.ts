@@ -3,7 +3,8 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false,
+  production: process.env['NODE_ENV'],
+  test: process.env['NX_API_URL']
 };
 
 /*

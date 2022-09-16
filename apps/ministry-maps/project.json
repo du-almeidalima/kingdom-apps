@@ -4,8 +4,10 @@
   "prefix": "kingdom-apps",
   "targets": {
     "build": {
-      "executor": "@angular-devkit/build-angular:browser",
-      "outputs": ["{options.outputPath}"],
+      "executor": "@nrwl/angular:webpack-browser",
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/apps/ministry-maps",
         "index": "apps/ministry-maps/src/index.html",
@@ -17,8 +19,13 @@
           "apps/ministry-maps/src/favicon.ico",
           "apps/ministry-maps/src/assets"
         ],
-        "styles": ["apps/ministry-maps/src/styles.scss"],
-        "scripts": []
+        "styles": [
+          "apps/ministry-maps/src/styles.scss"
+        ],
+        "scripts": [],
+        "customWebpackConfig": {
+          "path": "apps/ministry-maps/webpack.config.js"
+        }
       },
       "configurations": {
         "production": {
@@ -54,7 +61,7 @@
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@angular-devkit/build-angular:dev-server",
+      "executor": "@nrwl/angular:webpack-server",
       "configurations": {
         "production": {
           "browserTarget": "ministry-maps:build:production"
@@ -82,7 +89,9 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/apps/ministry-maps"],
+      "outputs": [
+        "coverage/apps/ministry-maps"
+      ],
       "options": {
         "jestConfig": "apps/ministry-maps/jest.config.ts",
         "passWithNoTests": true

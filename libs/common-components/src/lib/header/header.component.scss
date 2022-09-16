@@ -1,0 +1,12 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+
+  background-color: var(--backgroundColor, black);
+
+  &__logo {
+    padding: 2rem;
+    font-size: 2rem;
+    font-weight: bold;
+  }
+}
