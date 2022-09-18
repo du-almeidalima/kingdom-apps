@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "du-ministry-maps": {
+      "hosting": {
+        "ministry-maps": [
+          "du-ministry-maps"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "du-ministry-maps"
+  }
+}

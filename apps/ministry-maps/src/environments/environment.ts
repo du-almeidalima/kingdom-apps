@@ -3,8 +3,16 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
+  firebase: {
+    projectId: process.env['NX_FIREBASE_PROJECT_ID'],
+    appId: process.env['NX_FIREBASE_APP_ID'],
+    storageBucket: process.env['NX_FIREBASE_STORAGE_BUCKET'],
+    apiKey: process.env['NX_FIREBASE_API_KEY'],
+    authDomain: process.env['NX_FIREBASE_AUTH_DOMAIN'],
+    messagingSenderId: process.env['NX_FIREBASE_MESSAGING_SENDER_ID'],
+    measurementId: process.env['NX_FIREBASE_MEASUREMENT_ID'],
+  },
   production: process.env['NODE_ENV'],
-  test: process.env['NX_API_URL']
 };
 
 /*

@@ -41,12 +41,6 @@
               "maximumError": "4kb"
             }
           ],
-          "fileReplacements": [
-            {
-              "replace": "apps/ministry-maps/src/environments/environment.ts",
-              "with": "apps/ministry-maps/src/environments/environment.prod.ts"
-            }
-          ],
           "outputHashing": "all"
         },
         "development": {
@@ -95,6 +89,16 @@
       "options": {
         "jestConfig": "apps/ministry-maps/jest.config.ts",
         "passWithNoTests": true
+      }
+    },
+    "deploy": {
+      "executor": "@angular/fire:deploy",
+      "options": {
+        "prerender": false,
+        "ssr": false,
+        "browserTarget": "ministry-maps:build:production",
+        "firebaseProject": "du-ministry-maps",
+        "firebaseHostingSite": "du-ministry-maps"
       }
     }
   },
