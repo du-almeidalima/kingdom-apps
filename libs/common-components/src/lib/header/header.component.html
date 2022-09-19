@@ -1,4 +1,4 @@
-<header class='header' [style.--backgroundColor]="backgroundColorVar">
-  <div class='header__logo'>{{initials}}</div>
-  <div class='header__menu'></div>
+<header class='header' [style.--backgroundColor]='backgroundColorVar'>
+  <div class='header__logo' [style.--logoBackgroundColor]='logoBackgroundColor'>{{initials}}</div>
+  <ng-content></ng-content>
 </header>
