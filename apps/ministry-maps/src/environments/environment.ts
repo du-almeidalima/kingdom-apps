@@ -12,7 +12,7 @@ export const environment = {
     messagingSenderId: process.env['NX_FIREBASE_MESSAGING_SENDER_ID'],
     measurementId: process.env['NX_FIREBASE_MEASUREMENT_ID'],
   },
-  production: process.env['NODE_ENV'],
+  production: process.env['NODE_ENV'] === 'production',
 };
 
 /*

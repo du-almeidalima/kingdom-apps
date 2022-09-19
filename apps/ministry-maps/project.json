@@ -20,7 +20,7 @@
           "apps/ministry-maps/src/assets"
         ],
         "styles": [
-          "apps/ministry-maps/src/styles.scss"
+          "apps/ministry-maps/src/styles/main.scss"
         ],
         "scripts": [],
         "customWebpackConfig": {
