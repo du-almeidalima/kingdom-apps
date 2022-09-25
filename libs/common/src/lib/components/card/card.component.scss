@@ -1,0 +1,8 @@
+@use '../../styles/abstract/variables';
+
+.card {
+  padding: 2.4rem;
+
+  background-color: variables.$white-300;
+  box-shadow: variables.$shadow-z1;
+}

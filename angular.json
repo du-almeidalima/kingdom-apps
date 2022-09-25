@@ -2,7 +2,7 @@
   "$schema": "./node_modules/nx/schemas/workspace-schema.json",
   "version": 2,
   "projects": {
-    "common-components": "libs/common-components",
+    "common": "libs/common",
     "ministry-maps": "apps/ministry-maps",
     "ministry-maps-e2e": "apps/ministry-maps-e2e"
   }

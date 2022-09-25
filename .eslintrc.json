@@ -40,7 +40,16 @@
       "extends": [
         "plugin:@nrwl/nx/typescript"
       ],
-      "rules": {}
+      "rules": {
+        "@typescript-eslint/no-shadow": [
+          "error",
+          {
+            "builtinGlobals": false,
+            "hoist": "functions",
+            "ignoreOnInitialization": false
+          }
+        ]
+      }
     },
     {
       "files": [

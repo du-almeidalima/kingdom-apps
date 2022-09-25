@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { environment } from '../environments/environment';
-import { primaryGreen } from '../styles/abstract/variables';
+import { primaryGreen } from '@kingdom-apps/common';
 
 @Component({
   selector: 'kingdom-apps-root',

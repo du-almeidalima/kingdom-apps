@@ -22,6 +22,11 @@
         "styles": [
           "apps/ministry-maps/src/styles/main.scss"
         ],
+        "stylePreprocessorOptions": {
+          "includePaths": [
+            "libs/common/src/lib/styles"
+          ]
+        },
         "scripts": [],
         "customWebpackConfig": {
           "path": "apps/ministry-maps/webpack.config.js"

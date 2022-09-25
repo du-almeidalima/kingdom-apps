@@ -1,15 +1,15 @@
 {
   "projectType": "library",
-  "sourceRoot": "libs/common-components/src",
+  "sourceRoot": "libs/common/src",
   "prefix": "lib",
   "targets": {
     "test": {
       "executor": "@nrwl/jest:jest",
       "outputs": [
-        "coverage/libs/common-components"
+        "coverage/libs/common"
       ],
       "options": {
-        "jestConfig": "libs/common-components/jest.config.ts",
+        "jestConfig": "libs/common/jest.config.ts",
         "passWithNoTests": true
       }
     },
@@ -17,8 +17,8 @@
       "executor": "@nrwl/linter:eslint",
       "options": {
         "lintFilePatterns": [
-          "libs/common-components/**/*.ts",
-          "libs/common-components/**/*.html"
+          "libs/common/**/*.ts",
+          "libs/common/**/*.html"
         ]
       }
     }
