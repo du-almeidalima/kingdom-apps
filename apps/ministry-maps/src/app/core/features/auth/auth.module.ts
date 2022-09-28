@@ -5,12 +5,11 @@ import { RouterModule, Routes } from '@angular/router';
 import { CommonComponentsModule } from '@kingdom-apps/common';
 
 import { LoginPageComponent } from './pages/login-page/login-page.component';
-import { AuthRepository } from './repository/auth.repository';
-import { FirebaseAuthDatasourceService } from './repository/firebase/firebase-auth-datasource.service';
-import { UserRepository } from './repository/user.repository';
-import { FirebaseUserDatasourceService } from './repository/firebase/firebase-user-datasource.service';
+import { AuthRepository } from './repositories/auth.repository';
+import { FirebaseAuthDatasourceService } from './repositories/firebase/firebase-auth-datasource.service';
+import { AuthService } from './services/auth.service';
 
-const AUTH_ROUTES: Routes = [{ path: '', component: LoginPageComponent }];
+const AUTH_ROUTES: Routes = [{ path: 'login', component: LoginPageComponent }];
 
 @NgModule({
   declarations: [LoginPageComponent],
@@ -20,10 +19,7 @@ const AUTH_ROUTES: Routes = [{ path: '', component: LoginPageComponent }];
       provide: AuthRepository,
       useClass: FirebaseAuthDatasourceService,
     },
-    {
-      provide: UserRepository,
-      useClass: FirebaseUserDatasourceService,
-    },
+    AuthService,
   ],
 })
 export class AuthModule {}

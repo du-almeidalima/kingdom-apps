@@ -1,16 +1,9 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Routes } from '@angular/router';
-
-const CORE_ROUTES: Routes = [
-  {
-    path: 'login',
-    loadChildren: () => import('./features/auth/auth.module').then(m => m.AuthModule),
-  },
-];
+import { AuthModule } from './features/auth/auth.module';
 
 @NgModule({
   declarations: [],
-  imports: [CommonModule, RouterModule.forChild(CORE_ROUTES)],
+  imports: [CommonModule, AuthModule],
 })
 export class CoreModule {}

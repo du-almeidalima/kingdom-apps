@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import { AuthRepository } from '../../repository/auth.repository';
-import { FIREBASE_PROVIDERS } from '../../repository/firebase/firebase-auth-datasource.service';
+import { FIREBASE_PROVIDERS } from '../../repositories/firebase/firebase-auth-datasource.service';
+import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'kingdom-apps-login-page',
@@ -8,11 +9,11 @@ import { FIREBASE_PROVIDERS } from '../../repository/firebase/firebase-auth-data
   styleUrls: ['./login-page.component.scss'],
 })
 export class LoginPageComponent {
-  constructor(private readonly authRepository: AuthRepository) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   onGoogleClick() {
-    this.authRepository.signInWithProvider(FIREBASE_PROVIDERS.GOOGLE).subscribe(userRes => {
-      console.log(userRes);
+    this.authService.signInWithProvider(FIREBASE_PROVIDERS.GOOGLE).subscribe(() => {
+      this.router.navigate(['']);
     });
   }
 }

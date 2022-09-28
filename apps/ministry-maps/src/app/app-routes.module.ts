@@ -1,6 +1,9 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AuthGuard, redirectUnauthorizedTo } from '@angular/fire/auth-guard';
+import { redirectUnauthorizedTo } from '@angular/fire/auth-guard';
+
+import { AuthGuard } from './core/services/auth.guard';
+import { Role } from '../models/enums/role';
 
 const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['/login']);
 
@@ -9,7 +12,7 @@ const APP_ROUTES: Routes = [
     path: 'territories',
     loadChildren: () => import('./features/territory/territory.module').then(m => m.TerritoryModule),
     canActivate: [AuthGuard],
-    data: { authGuardPipe: redirectUnauthorizedToLogin },
+    data: { roles: [Role.ELDER, Role.ORGANIZER], authGuardPipe: redirectUnauthorizedToLogin },
   },
 ];
 

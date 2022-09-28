@@ -1,26 +1,40 @@
 import { Injectable } from '@angular/core';
-import { Auth, GoogleAuthProvider, OAuthProvider, signInWithPopup, UserCredential } from '@angular/fire/auth';
+import {
+  Auth,
+  authState,
+  GoogleAuthProvider,
+  OAuthProvider,
+  signInWithPopup,
+  UserCredential,
+} from '@angular/fire/auth';
 import { from, Observable, of, switchMap, take } from 'rxjs';
 
 import { AuthRepository } from '../auth.repository';
 import { User } from '../../../../../../models/user';
 import { Role } from '../../../../../../models/enums/role';
-import { UserRepository } from '../user.repository';
+import { UserRepository } from '../../../../../repositories/user.repository';
+import { doc, Firestore } from '@angular/fire/firestore';
 
 export enum FIREBASE_PROVIDERS {
   'GOOGLE' = 'GOOGLE',
   'MICROSOFT' = 'MICROSOFT',
 }
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class FirebaseAuthDatasourceService implements AuthRepository {
-  constructor(private readonly auth: Auth, private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly auth: Auth,
+    private readonly userRepository: UserRepository,
+    private readonly firestore: Firestore
+  ) {}
 
   private createUser(partialUser: Pick<User, 'id' | 'name' | 'email' | 'photoUrl'>): Observable<User> {
     const user: User = {
       ...partialUser,
       role: Role.PUBLISHER,
-      congregationId: 'NONE',
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      congregationId: doc(this.firestore, '/congregations/cclEP8ueg2vd2JoG7OOl'),
     };
 
     return this.userRepository.put(user);
@@ -65,5 +79,21 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
     const providerRes = signInWithPopup(this.auth, authProviderInstance);
 
     return from(providerRes).pipe(switchMap(providerUser => this.handleUserAuthentication(providerUser)));
+  }
+
+  /**
+   * Specific for initializing a User from Firebase Authentication
+   */
+  getUserFromAuthentication() {
+    return authState(this.auth).pipe(
+      take(1),
+      switchMap(providerUser => {
+        if (providerUser) {
+          return this.userRepository.getById(providerUser.uid);
+        }
+
+        return of(undefined);
+      })
+    );
   }
 }

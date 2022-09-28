@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { environment } from '../environments/environment';
 import { primaryGreen } from '@kingdom-apps/common';
+import { UserStateService } from './state/user.state.service';
+import { FirebaseAuthDatasourceService } from './core/features/auth/repositories/firebase/firebase-auth-datasource.service';
 
 @Component({
   selector: 'kingdom-apps-root',
@@ -10,7 +11,16 @@ import { primaryGreen } from '@kingdom-apps/common';
 export class AppComponent implements OnInit {
   public headerLogoBackgroundColor = primaryGreen;
 
+  constructor(
+    private readonly firebaseAuthDatasourceService: FirebaseAuthDatasourceService,
+    private readonly userState: UserStateService
+  ) {}
+
   ngOnInit(): void {
-    console.log(environment);
+    this.firebaseAuthDatasourceService.getUserFromAuthentication().subscribe(user => {
+      if (user) {
+        this.userState.setUser(user);
+      }
+    });
   }
 }
