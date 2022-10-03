@@ -16,6 +16,7 @@ import { AppRoutesModule } from './app-routes.module';
 import { CoreModule } from './core/core.module';
 import { RepositoriesModule } from './repositories/repositories.module';
 import { environment } from '../environments/environment';
+import { SharedModule } from './shared/shared.module';
 
 @NgModule({
   declarations: [AppComponent],
@@ -33,6 +34,7 @@ import { environment } from '../environments/environment';
     RepositoriesModule,
     CoreModule,
     CommonComponentsModule,
+    SharedModule,
   ],
   providers: [ScreenTrackingService, UserTrackingService],
   bootstrap: [AppComponent],

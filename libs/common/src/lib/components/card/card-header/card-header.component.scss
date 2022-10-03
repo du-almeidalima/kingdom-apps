@@ -1,0 +1,49 @@
+@use '../../../styles/abstract/variables';
+@use '../../../styles/base/typography';
+
+.card-header {
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 2rem;
+  min-height: 10rem;
+
+  background-color: variables.$grey-200;
+  color: variables.$white-200;
+
+  &__icon-container {
+    flex: 0 10rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: variables.$grey-100;
+  }
+
+  &__icon {
+    $size: 8rem;
+
+    display: block;
+    width: $size;
+    height: $size;
+    fill: variables.$white-100;
+  }
+
+  &__title-container {
+    flex: 1;
+
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    gap: .5rem;
+  }
+
+  &__title {
+    @extend .t-headline6;
+    font-weight: bold;
+  }
+
+  &__subtitle {
+    @extend .t-body2;
+    color: variables.$white-300;
+  }
+}

@@ -2,7 +2,15 @@ import { Injectable } from '@angular/core';
 import { from, map, Observable, of, switchMap } from 'rxjs';
 import { UserRepository } from '../user.repository';
 import { User } from '../../../models/user';
-import { collection, CollectionReference, doc, docData, Firestore, setDoc } from '@angular/fire/firestore';
+import {
+  collection,
+  CollectionReference,
+  doc,
+  DocumentReference,
+  Firestore,
+  getDocFromServer,
+  setDoc,
+} from '@angular/fire/firestore';
 import { Role } from '../../../models/enums/role';
 import { FirebaseUserModel } from '../../../models/firebase/firebase-user-model';
 import { Congregation } from '../../../models/congregation';
@@ -18,37 +26,42 @@ export class FirebaseUserDatasourceService implements UserRepository {
   }
 
   getById(id: string): Observable<User | undefined> {
-    const userReference = doc(this.firestore, `users/${id}`);
+    const userReference = doc(this.firestore, `users/${id}`) as DocumentReference<FirebaseUserModel>;
 
-    const userRes = docData(userReference, {
-      idField: 'id',
-    }) as Observable<FirebaseUserModel | undefined>;
+    const userRes = from(getDocFromServer<FirebaseUserModel>(userReference)).pipe(
+      map(userDocSnapshot => {
+        return userDocSnapshot.data();
+      })
+    );
 
     return userRes.pipe(
       switchMap(user => {
+        const EMPTY_CONGREGATION: Congregation = {
+          id: '',
+          name: '',
+          locatedOn: '',
+          cities: [],
+        };
+
         if (!user) {
           return of(undefined);
         }
 
         if (!user?.congregation) {
-          const userWithNoCongregation: User = {
-            ...user,
-            congregation: {
-              id: '',
-              name: '',
-              locatedOn: '',
-              cities: [],
-              territories: [],
-            },
-          };
+          const userWithNoCongregation: User = { ...user, congregation: EMPTY_CONGREGATION };
 
           return of(userWithNoCongregation);
         }
 
         // Resolving FireBase Congregation Reference
-        return docData<Congregation>(user.congregation, { idField: 'id' }).pipe(
-          map(congregation => {
-            return { ...user, congregation };
+        return from(getDocFromServer<Congregation>(user.congregation)).pipe(
+          map(congregationDocSnapshot => {
+            if (!congregationDocSnapshot.exists()) {
+              // User with congregation deleted
+              return { ...user, congregation: EMPTY_CONGREGATION };
+            }
+
+            return { ...user, congregation: { ...congregationDocSnapshot.data(), id: congregationDocSnapshot.id } };
           })
         );
       })

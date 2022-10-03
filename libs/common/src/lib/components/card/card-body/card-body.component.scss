@@ -1,0 +1,24 @@
+@use '../../../styles/base/typography';
+
+:host {
+  ::ng-deep {
+    .card-body__link-list {
+      list-style: none;
+    }
+
+    .card-body__link-list-item {
+      margin-bottom: 1rem;
+    }
+
+    .card-body__link {
+      display: block;
+
+      @extend .t-body1;
+      text-decoration: none;
+    }
+  }
+}
+
+.card-body {
+  padding: 1.6rem;
+}

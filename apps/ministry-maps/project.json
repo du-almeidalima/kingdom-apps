@@ -17,7 +17,12 @@
         "inlineStyleLanguage": "scss",
         "assets": [
           "apps/ministry-maps/src/favicon.ico",
-          "apps/ministry-maps/src/assets"
+          "apps/ministry-maps/src/assets",
+          {
+            "input": "libs/common/src/assets",
+            "glob": "**/*",
+            "output": "assets/common"
+          }
         ],
         "styles": [
           "apps/ministry-maps/src/styles/main.scss"

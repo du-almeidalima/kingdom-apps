@@ -1,1 +1,19 @@
-<p>territories-page works!</p>
+<div class='container'>
+  <lib-card [customStyle]="{'padding': 0}">
+    <lib-card-header
+      icon='task-list-lined'
+      title='Designar Territórios'
+      subtitle='Crie listas com territórios e compartilhe para os publicadores'
+    ></lib-card-header>
+    <lib-card-body>
+      <ul class='card-body__link-list'>
+        <li class='card-body__link-list-item'>
+          <a class='card-body__link' routerLink='./create-list'>Designar Territórios</a>
+        </li>
+        <li class='card-body__link-list-item'>
+          <a class='card-body__link' routerLink='./territories'>Administrar Territórios</a>
+        </li>
+      </ul>
+    </lib-card-body>
+  </lib-card>
+</div>

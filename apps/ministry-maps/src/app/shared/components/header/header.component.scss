@@ -1,0 +1,22 @@
+.header-container {
+  display: flex;
+  justify-content: space-between;
+
+
+  &__link-container {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+  }
+
+  &__link {
+    display: inline-block;
+    padding: 1rem 2rem;
+
+    font-size: 1.6rem;
+
+    &--active {
+      color: blue;
+    }
+  }
+}

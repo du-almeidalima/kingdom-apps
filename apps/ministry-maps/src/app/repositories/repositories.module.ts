@@ -5,6 +5,8 @@ import { UserRepository } from './user.repository';
 import { FirebaseUserDatasourceService } from './firebase/firebase-user-datasource.service';
 import { CongregationRepository } from './congregation.repository';
 import { FirebaseCongregationDatasourceService } from './firebase/firebase-congregation-datasource.service';
+import { TerritoryRepository } from './territories.repository';
+import { FirebaseTerritoryDatasourceService } from './firebase/firebase-territory-datasource.service';
 
 @NgModule({
   declarations: [],
@@ -17,6 +19,10 @@ import { FirebaseCongregationDatasourceService } from './firebase/firebase-congr
     {
       provide: CongregationRepository,
       useClass: FirebaseCongregationDatasourceService,
+    },
+    {
+      provide: TerritoryRepository,
+      useClass: FirebaseTerritoryDatasourceService,
     },
   ],
 })

@@ -10,7 +10,9 @@ export class UserStateService {
 
   public $user = this.userSubject.asObservable();
 
-  public currentUser = this.userSubject.getValue();
+  public get currentUser() {
+    return this.userSubject.getValue();
+  }
 
   setUser(user: User) {
     this.userSubject.next(user);
