@@ -1,4 +1,5 @@
 @use '../../../styles/base/typography';
+@use '../../../styles/abstract/variables';
 
 :host {
   ::ng-deep {
@@ -15,6 +16,11 @@
 
       @extend .t-body1;
       text-decoration: none;
+      color: variables.$link;
+
+      &:focus, &:active, &:hover {
+        color: variables.$link-dark;
+      }
     }
   }
 }

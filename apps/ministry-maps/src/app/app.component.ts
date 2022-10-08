@@ -6,7 +6,6 @@ import { FirebaseAuthDatasourceService } from './core/features/auth/repositories
 @Component({
   selector: 'kingdom-apps-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
   constructor(
