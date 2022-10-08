@@ -1,5 +1,9 @@
 @use '../../styles/abstract/variables';
 
+:host {
+  display: block;
+}
+
 .card {
   padding: 2.4rem;
   border-radius: 3px;

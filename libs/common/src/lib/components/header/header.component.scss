@@ -4,11 +4,16 @@
 
   background-color: var(--backgroundColor, black);
 
+  &__logo-link-container {
+    text-decoration: none;
+  }
+
   &__logo {
     padding: 2rem;
+
     font-size: 2rem;
     font-weight: bold;
-
+    color: var(--logoColor);
     background-color: var(--logoBackgroundColor, darkgrey);
   }
 }

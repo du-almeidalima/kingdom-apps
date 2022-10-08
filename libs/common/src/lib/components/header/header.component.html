@@ -1,4 +1,22 @@
 <header class='header' [style.--backgroundColor]='backgroundColorVar'>
-  <div class='header__logo' [style.--logoBackgroundColor]='logoBackgroundColor'>{{initials}}</div>
+
+  <!-- With Link -->
+  <a class='header__logo-link-container' *ngIf='headerLink' [routerLink]='headerLink'>
+    <ng-container [ngTemplateOutlet]='headerLogo'></ng-container>
+  </a>
+
+  <!-- Just Text -->
+  <ng-container *ngIf='!headerLink' [ngTemplateOutlet]='headerLogo'></ng-container>
+
+  <!-- Content Projection -->
   <ng-content></ng-content>
 </header>
+
+<!-- Template -->
+<ng-template #headerLogo>
+  <div class='header__logo'
+       [ngStyle]="{'--logoBackgroundColor': logoBackgroundColor, '--logoColor': logoColor}"
+  >
+    <span>{{initials}}</span>
+  </div>
+</ng-template>

@@ -1,22 +1,17 @@
+@use '@kingdom-apps/styles/abstract/variables';
+
 .header-container {
+  flex: 1;
+
   display: flex;
-  justify-content: space-between;
+  flex-flow: row;
+  justify-content: center;
+  align-items: center;
 
 
-  &__link-container {
-    display: flex;
-    flex-flow: row nowrap;
-    align-items: center;
-  }
-
-  &__link {
-    display: inline-block;
-    padding: 1rem 2rem;
-
-    font-size: 1.6rem;
-
-    &--active {
-      color: blue;
-    }
+  &__app-name {
+    font-size: 2.25rem;
+    font-weight: 500;
+    color: variables.$white-100;
   }
 }
