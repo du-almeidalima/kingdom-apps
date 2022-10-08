@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FIREBASE_PROVIDERS } from '../../repositories/firebase/firebase-auth-datasource.service';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
+import { FeatureRoutesEnum } from '../../../../../app-routes.module';
 
 @Component({
   selector: 'kingdom-apps-login-page',
@@ -13,7 +14,7 @@ export class LoginPageComponent {
 
   onGoogleClick() {
     this.authService.signInWithProvider(FIREBASE_PROVIDERS.GOOGLE).subscribe(() => {
-      this.router.navigate(['']);
+      this.router.navigate([FeatureRoutesEnum.HOME]);
     });
   }
 }

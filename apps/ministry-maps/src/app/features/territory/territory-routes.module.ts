@@ -3,6 +3,11 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { TerritoriesPageComponent } from './pages/territories-page/territories-page.component';
 
+export enum TerritoryRoutesEnum {
+  LIST = '',
+  CREATE_LIST = 'create-list',
+}
+
 const TERRITORY_ROUTES: Routes = [
   {
     path: '',
