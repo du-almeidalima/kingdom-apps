@@ -1,0 +1,40 @@
+@use '../../styles/abstract/variables';
+
+$size: 5rem;
+
+:host {
+  position: absolute;
+  bottom: 10rem;
+  right: 10rem;
+  display: block;
+  width: $size;
+}
+
+.floating-action-btn {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+
+  height: $size;
+  width: $size;
+  padding: 1rem;
+  border: none;
+  border-radius: 999rem;
+
+  cursor: pointer;
+  transition: 100ms linear box-shadow, 100ms linear filter;
+  background-color: var(--backgroundColor);
+  box-shadow: 0 3px 5px -1px rgb(0 0 0 / 20%),
+  0px 6px 10px 0px rgb(0 0 0 / 14%),
+  0px 1px 18px 0px rgb(0 0 0 / 12%);
+
+  &:active, &:hover, &:focus {
+    filter: brightness(110%);
+  }
+
+  &:active {
+    box-shadow: 0 7px 8px -4px rgb(0 0 0 / 20%),
+    0px 12px 17px 2px rgb(0 0 0 / 14%),
+    0px 5px 22px 4px rgb(0 0 0 / 12%);
+  }
+}
