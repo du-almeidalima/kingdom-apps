@@ -20,12 +20,10 @@
   }
 
   &__icon {
-    $size: 8rem;
+    $size: 6.5rem;
 
-    display: block;
     width: $size;
     height: $size;
-    fill: variables.$white-100;
   }
 
   &__title-container {

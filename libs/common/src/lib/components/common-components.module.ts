@@ -6,10 +6,26 @@ import { CardHeaderComponent } from './card/card-header/card-header.component';
 import { CardBodyComponent } from './card/card-body/card-body.component';
 import { CardComponent } from './card/card.component';
 import { HeaderComponent } from './header/header.component';
+import { FloatingActionBtnComponent } from './floating-action-btn/floating-action-btn.component';
+import { IconComponent } from './icon/icon.component';
 
 @NgModule({
-  declarations: [HeaderComponent, CardComponent, CardHeaderComponent, CardBodyComponent],
   imports: [CommonModule, RouterLinkActive, RouterLinkWithHref],
-  exports: [HeaderComponent, CardComponent, CardHeaderComponent, CardBodyComponent],
+  declarations: [
+    HeaderComponent,
+    CardComponent,
+    CardHeaderComponent,
+    CardBodyComponent,
+    FloatingActionBtnComponent,
+    IconComponent,
+  ],
+  exports: [
+    HeaderComponent,
+    CardComponent,
+    CardHeaderComponent,
+    CardBodyComponent,
+    FloatingActionBtnComponent,
+    IconComponent,
+  ],
 })
 export class CommonComponentsModule {}
