@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FloatingActionBtnComponent } from './floating-action-btn.component';
+import { FloatingActionButtonComponent } from './floating-action-button.component';
 
 describe('FloatingActionBtnComponent', () => {
-  let component: FloatingActionBtnComponent;
-  let fixture: ComponentFixture<FloatingActionBtnComponent>;
+  let component: FloatingActionButtonComponent;
+  let fixture: ComponentFixture<FloatingActionButtonComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [FloatingActionBtnComponent],
+      declarations: [FloatingActionButtonComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(FloatingActionBtnComponent);
+    fixture = TestBed.createComponent(FloatingActionButtonComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
