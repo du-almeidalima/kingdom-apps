@@ -1,0 +1,9 @@
+:host {
+  display: block;
+}
+
+.form-field {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: .2rem;
+}

@@ -8,6 +8,11 @@ import { CardComponent } from './card/card.component';
 import { HeaderComponent } from './header/header.component';
 import { FloatingActionButtonComponent } from './floating-action-btn/floating-action-button.component';
 import { IconComponent } from './icon/icon.component';
+import { ButtonComponent } from './button/button.component';
+import { FormFieldComponent } from './form-field/form-field.component';
+import { InputComponent } from './form-field/input/input.component';
+import { LabelComponent } from './form-field/label/label.component';
+import { SelectComponent } from './form-field/select/select.component';
 
 @NgModule({
   imports: [CommonModule, RouterLinkActive, RouterLinkWithHref],
@@ -18,6 +23,11 @@ import { IconComponent } from './icon/icon.component';
     CardBodyComponent,
     FloatingActionButtonComponent,
     IconComponent,
+    ButtonComponent,
+    InputComponent,
+    FormFieldComponent,
+    LabelComponent,
+    SelectComponent,
   ],
   exports: [
     HeaderComponent,
@@ -26,6 +36,11 @@ import { IconComponent } from './icon/icon.component';
     CardBodyComponent,
     FloatingActionButtonComponent,
     IconComponent,
+    ButtonComponent,
+    InputComponent,
+    FormFieldComponent,
+    LabelComponent,
+    SelectComponent,
   ],
 })
 export class CommonComponentsModule {}

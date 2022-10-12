@@ -1,0 +1,11 @@
+@use '../abstract/variables';
+@use '../base/typography';
+
+// This class is used in all form controls components as a base styling
+.form-control {
+  padding: variables.$control-padding;
+  border: 1px solid variables.$light-grey-100;
+
+  transition: all .2s ease-in-out;
+  @extend .t-control;
+}

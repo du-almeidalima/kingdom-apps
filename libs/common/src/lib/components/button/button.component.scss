@@ -1,0 +1,29 @@
+@use '../../styles/abstract/variables';
+
+:host {
+  display: inline-block;
+  min-height: 4.2rem;
+  padding: 1.2rem 1.6rem;
+  border-radius: 2px;
+  border: 1px solid darken(variables.$white-300, 20%);
+
+  transition: background-color 100ms linear;
+  background-color: variables.$white-300;
+  text-align: center;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    background-color: darken(variables.$white-300, 10%);
+  }
+
+  &.button--primary {
+    color: variables.$white-100;
+    background-color: variables.$blue-100;
+    border-color: darken(variables.$blue-100, 20%);
+
+    &:hover {
+      background-color: darken(variables.$blue-100, 10%);
+    }
+  }
+}

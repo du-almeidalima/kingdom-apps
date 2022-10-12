@@ -5,13 +5,17 @@ $green-100: #83D59D;
 $green-200: #45C06C;
 $green-300: #07AB3BFF;
 
+$blue-100: #2A4970;
+
 $white-100: #FDFDFD;
 $white-200: #F8F8F8;
 $white-300: #E7E6E4;
 
-$grey-100: #615d5c;
-$grey-200: #4d4947;
+$grey-100: #615D5C;
+$grey-200: #4D4947;
 $grey-300: #363332;
+
+$light-grey-100: #BAB7B5;
 
 $link: #4171AEFF;
 $link-dark: #2A4970FF;
@@ -23,3 +27,6 @@ $shadow-z3: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
 $shadow-z4: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
 $shadow-z5: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
 $shadow-z6: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
+
+// SIZES
+$control-padding: .8rem;

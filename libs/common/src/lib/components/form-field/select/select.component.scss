@@ -1,0 +1,5 @@
+@use '../../../styles/components/form-control';
+
+:host {
+  @extend .form-control;
+}
