@@ -1,19 +1,16 @@
 <div class='container'>
-  <lib-card [customStyle]="{'padding': 0}">
-    <lib-card-header
-      icon='task-list-lined'
-      title='Designar Territórios'
-      subtitle='Crie listas com territórios e compartilhe para os publicadores'
-    ></lib-card-header>
+  <h2 class='t-headline2 mb-8'>Territórios</h2>
+
+  <lib-card class='mb-3' *ngFor='let territory of $territories | async'>
     <lib-card-body>
-      <ul class='card-body__link-list'>
-        <li class='card-body__link-list-item'>
-          <a class='card-body__link' routerLink='./create-list'>Designar Territórios</a>
-        </li>
-        <li class='card-body__link-list-item'>
-          <a class='card-body__link' routerLink='./territories'>Administrar Territórios</a>
-        </li>
-      </ul>
+      <h3 class='t-headline3'>{{territory.address}}</h3>
+      <p class='t-body1'>{{territory.city}}</p>
+
+      <button lib-button (click)='handleOpenDialog(territory)'>Editar</button>
     </lib-card-body>
   </lib-card>
+
+  <lib-floating-action-button [backgroundColor]='green200' (btnClick)='handleOpenDialog()'>
+    <lib-icon icon='plus-lined' [fillColor]='white200'></lib-icon>
+  </lib-floating-action-button>
 </div>

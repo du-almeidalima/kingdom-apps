@@ -1,6 +1,15 @@
 import { Injectable } from '@angular/core';
-import { collection, CollectionReference, Firestore, getDocs, query, where } from '@angular/fire/firestore';
-import { from, map, Observable } from 'rxjs';
+import {
+  addDoc,
+  collection,
+  collectionData,
+  CollectionReference,
+  Firestore,
+  getDoc,
+  query,
+  where,
+} from '@angular/fire/firestore';
+import { from, map, Observable, switchMap } from 'rxjs';
 
 import { firebaseEntityConverterFactory } from '../../shared/utils/firebase-entity-converter';
 import { TerritoryRepository } from '../territories.repository';
@@ -22,6 +31,14 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
   getAllByCongregation(congregationId: string): Observable<Territory[]> {
     const q = query(this.congregationCollection, where('congregationId', '==', congregationId));
 
-    return from(getDocs(q)).pipe(map(territoriesDocSnapshot => territoriesDocSnapshot.docs.map(t => t.data())));
+    return from(collectionData(q));
+  }
+
+  add(territory: Territory) {
+    return from(addDoc(this.congregationCollection, territory)).pipe(
+      switchMap(territoryDocRef =>
+        from(getDoc(territoryDocRef)).pipe(map(territorySnapshot => territorySnapshot.data() as Territory))
+      )
+    );
   }
 }

@@ -6,10 +6,11 @@ import { CommonComponentsModule } from '@kingdom-apps/common';
 
 import { HeaderComponent } from './components/header/header.component';
 import { MaterialCdkModule } from './modules/material/material-cdk.module';
+import { TerritoryIconTranslatorPipe } from './pipes/territory-icon-translator.pipe';
 
 @NgModule({
-  declarations: [HeaderComponent],
+  declarations: [HeaderComponent, TerritoryIconTranslatorPipe],
   imports: [CommonModule, CommonComponentsModule, RouterLinkWithHref, RouterLinkActive, MaterialCdkModule],
-  exports: [HeaderComponent, CommonComponentsModule],
+  exports: [HeaderComponent, CommonComponentsModule, TerritoryIconTranslatorPipe],
 })
 export class SharedModule {}
