@@ -1,0 +1,58 @@
+@use 'sass:math';
+@use '../../styles/abstract/variables';
+@use '../../styles/base/typography';
+
+:host {
+  display: block;
+}
+
+.dialog {
+  display: flex;
+  flex-flow: column nowrap;
+
+  position: relative;
+  width: auto;
+  border: none;
+  box-shadow: variables.$shadow-z6;
+
+  &__header {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: .8rem;
+
+    background-color: variables.$grey-100;
+  }
+
+  &__header-title {
+    height: fit-content;
+
+    @extend .t-headline4;
+    font-weight: normal;
+    color: variables.$white-100;
+  }
+
+  &__header-close-btn {
+    $size: 4rem;
+
+    width: $size;
+    height: $size;
+    padding: .75rem;
+    border: none;
+    border-radius: 50%;
+
+    fill: variables.$white-100;
+    background-color: transparent;
+    cursor: pointer;
+
+    &:hover {
+      background-color: lighten(variables.$grey-100, 10%);
+    }
+  }
+
+  &__content {
+    padding: 1.5rem;
+  }
+}

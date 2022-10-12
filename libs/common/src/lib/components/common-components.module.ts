@@ -13,6 +13,8 @@ import { FormFieldComponent } from './form-field/form-field.component';
 import { InputComponent } from './form-field/input/input.component';
 import { LabelComponent } from './form-field/label/label.component';
 import { SelectComponent } from './form-field/select/select.component';
+import { DialogComponent } from './dialog/dialog.component';
+import { DialogFooterComponent } from './dialog/dialog-footer/dialog-footer.component';
 
 @NgModule({
   imports: [CommonModule, RouterLinkActive, RouterLinkWithHref],
@@ -28,6 +30,8 @@ import { SelectComponent } from './form-field/select/select.component';
     FormFieldComponent,
     LabelComponent,
     SelectComponent,
+    DialogComponent,
+    DialogFooterComponent,
   ],
   exports: [
     HeaderComponent,
@@ -41,6 +45,8 @@ import { SelectComponent } from './form-field/select/select.component';
     FormFieldComponent,
     LabelComponent,
     SelectComponent,
+    DialogComponent,
+    DialogFooterComponent,
   ],
 })
 export class CommonComponentsModule {}
