@@ -7,17 +7,17 @@ import { FirebaseAuthDatasourceService } from './core/features/auth/repositories
   selector: 'kingdom-apps-root',
   templateUrl: './app.component.html',
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
   constructor(
     private readonly firebaseAuthDatasourceService: FirebaseAuthDatasourceService,
     private readonly userState: UserStateService
   ) {}
 
-  ngOnInit(): void {
-    this.firebaseAuthDatasourceService.getUserFromAuthentication().subscribe(user => {
-      if (user) {
-        this.userState.setUser(user);
-      }
-    });
-  }
+  // ngOnInit(): void {
+  //   this.firebaseAuthDatasourceService.getUserFromAuthentication().subscribe(user => {
+  //     if (user) {
+  //       this.userState.setUser(user);
+  //     }
+  //   });
+  // }
 }
