@@ -1,20 +1,22 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, Renderer2 } from '@angular/core';
 import { white100 } from '../../../';
 
 @Component({
-  selector: 'lib-floating-action-button',
+  // eslint-disable-next-line @angular-eslint/component-selector
+  selector: 'button[lib-floating-action-button]',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./floating-action-button.component.scss'],
-  template: `
-    <button class="floating-action-btn" [style.--backgroundColor]="backgroundColor" (click)="btnClick.emit($event)">
-      <ng-content></ng-content>
-    </button>
-  `,
+  template: ` <ng-content></ng-content> `,
 })
-export class FloatingActionButtonComponent {
+export class FloatingActionButtonComponent implements OnInit {
   @Input()
   backgroundColor = white100;
 
-  @Output()
-  btnClick = new EventEmitter<MouseEvent>();
+  constructor(private readonly renderer: Renderer2, private readonly elRef: ElementRef<HTMLButtonElement>) { }
+
+  ngOnInit() {
+    this.renderer.addClass(this.elRef.nativeElement, `floating-action-btn`);
+    this.renderer.setStyle(this.elRef.nativeElement, 'backgroundColor', this.backgroundColor,);
+  }
 }
+
