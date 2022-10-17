@@ -34,7 +34,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
     return from(collectionData(q));
   }
 
-  add(territory: Territory) {
+  add(territory: Omit<Territory, 'id'>) {
     return from(addDoc(this.congregationCollection, territory)).pipe(
       switchMap(territoryDocRef =>
         from(getDoc(territoryDocRef)).pipe(map(territorySnapshot => territorySnapshot.data() as Territory))

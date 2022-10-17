@@ -7,6 +7,7 @@ export enum TerritoryIcon {
   OTHER = 'o',
 }
 export type Territory = {
+  id: string;
   city: string;
   address: string;
   congregationId: string;
