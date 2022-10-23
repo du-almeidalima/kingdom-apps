@@ -1,0 +1,58 @@
+@use '@kingdom-apps/styles/abstract/variables';
+
+:host {
+  display: block;
+}
+
+.territory-checkbox {
+  $border-size: 1px;
+
+  display: flex;
+
+  width: 100%;
+  height: 7.5rem;
+  border: $border-size solid variables.$light-grey-100;
+
+  background-color: variables.$white-100;
+  cursor: pointer;
+
+  &--disabled {
+    cursor: initial;
+  }
+
+  &__control-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+
+    padding: 1.5rem 2rem;
+  }
+
+  &__input {
+    width: 2rem;
+    height: 2rem;
+
+    accent-color: variables.$primary-green;
+  }
+
+  &__description {
+    flex: 1;
+
+    display: block;
+
+    font-size: 1.6rem;
+  }
+
+  &__indicator {
+    justify-self: flex-end;
+
+    display: block;
+    width: 1rem;
+    margin: $border-size * -1;
+
+    &--blue {
+      background-color: variables.$blue-100;
+    }
+  }
+}
