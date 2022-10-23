@@ -1,0 +1,29 @@
+<div class="container">
+  <h2 class="t-headline2 mb-8">Designar Território</h2>
+  <select lib-select [ngModel]="selectedCity" (ngModelChange)="handleSelectedCityChange($event)">
+    <option [value]="city" *ngFor="let city of cities">{{ city }}</option>
+    <option [value]="ALL_OPTION">Todas</option>
+  </select>
+
+  <!-- Territories -->
+  <form id="territory-form" (submit)="handleTerritoryFormSubmit()">
+    <div class="flex flex-col gap-5 mt-8">
+      <kingdom-apps-territory-checkbox
+        *ngFor="let territory of territories; trackBy: trackByRepositoryId"
+        [territory]="territory"
+        [name]="territory.id"
+        [ngModel]="territoriesModel.has(territory.id)"
+        (ngModelChange)="handleTerritoryCheck($event, territory.id)">
+      </kingdom-apps-territory-checkbox>
+    </div>
+  </form>
+
+  <button
+    lib-floating-action-button
+    [backgroundColor]="green200"
+    type="submit"
+    form="territory-form"
+    title="Enviar Designação">
+    <lib-icon icon="paper-plane-2" [fillColor]="white200"></lib-icon>
+  </button>
+</div>

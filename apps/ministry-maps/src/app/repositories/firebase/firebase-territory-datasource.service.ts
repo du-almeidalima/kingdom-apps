@@ -34,6 +34,12 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
     return from(collectionData(q));
   }
 
+  getAllByCongregationAndCity(congregationId: string, city: string): Observable<Territory[]> {
+    const q = query(this.congregationCollection, where('congregationId', '==', congregationId), where('city', '==', city));
+
+    return from(collectionData(q));
+  }
+
   add(territory: Omit<Territory, 'id'>) {
     return from(addDoc(this.congregationCollection, territory)).pipe(
       switchMap(territoryDocRef =>

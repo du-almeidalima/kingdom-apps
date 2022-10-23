@@ -86,7 +86,7 @@ export class TerritoryManageDialogComponent implements OnInit {
   }
 
   handleSubmission() {
-    let territory: Territory;
+    let territory: Omit<Territory, 'id'>;
 
     if (this.data.territory) {
       territory = {
