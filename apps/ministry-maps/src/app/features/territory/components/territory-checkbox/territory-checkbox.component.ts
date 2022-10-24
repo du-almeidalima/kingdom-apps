@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, forwardRef, Input } from '@angular/core';
 import { Territory } from '../../../../../models/territory';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
@@ -8,21 +8,31 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: TerritoryCheckboxComponent,
+      useExisting: forwardRef(() => TerritoryCheckboxComponent),
       multi: true,
     },
   ],
   template: `
-    <label class="territory-checkbox" [for]="territory.id">
+    <label
+      class="territory-checkbox"
+      [ngClass]="{ 'territory-checkbox--disabled': disabled }"
+      [for]="territory.id">
       <div class="territory-checkbox__control-container">
         <input
           type="checkbox"
           class="territory-checkbox__input"
           [name]="territory.id"
           [id]="territory.id"
+          [checked]="value"
           [ngModel]="value"
+          [disabled]="disabled"
+          (click)="handleClick($event)"
           (ngModelChange)="setValue($event)" />
-        <span class="territory-checkbox__description">{{ territory.address }}</span>
+        <span
+          class="territory-checkbox__description"
+          [ngClass]="{ 'territory-checkbox__description--disabled': disabled }">
+          {{ territory.address }}
+        </span>
       </div>
       <span class="territory-checkbox__indicator territory-checkbox__indicator--blue"></span>
     </label>
@@ -33,7 +43,7 @@ export class TerritoryCheckboxComponent implements ControlValueAccessor {
   territory!: Territory;
 
   // Control Value Accessor
-  private disabled = false;
+  disabled = false;
   value = false;
 
   onTouched!: () => void;
@@ -66,5 +76,13 @@ export class TerritoryCheckboxComponent implements ControlValueAccessor {
 
     this.onChange(value);
     this.onTouched();
+  }
+
+  // This method only exists to prevent default check/uncheck behavior of browsers
+  // They tend to ignore the [value] and [checked] properties
+  handleClick(e: MouseEvent) {
+    if (this.disabled) {
+      e.preventDefault();
+    }
   }
 }

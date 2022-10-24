@@ -17,6 +17,7 @@
   cursor: pointer;
 
   &--disabled {
+    background-color: variables.$light-grey-100;
     cursor: initial;
   }
 
@@ -42,6 +43,10 @@
     display: block;
 
     font-size: 1.6rem;
+
+    &--disabled {
+      color: variables.$grey-300;
+    }
   }
 
   &__indicator {

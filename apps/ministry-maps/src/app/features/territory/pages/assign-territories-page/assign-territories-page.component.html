@@ -1,6 +1,11 @@
 <div class="container">
   <h2 class="t-headline2 mb-8">Designar Território</h2>
-  <select lib-select class="w-full" [ngModel]="selectedCity" (ngModelChange)="handleSelectedCityChange($event)" name="Cidade">
+  <select
+    lib-select
+    class="w-full"
+    name="Cidade"
+    [ngModel]="selectedCity"
+    (ngModelChange)="handleSelectedCityChange($event)">
     <option [value]="city" *ngFor="let city of cities">{{ city }}</option>
     <option [value]="ALL_OPTION">Todas</option>
   </select>
@@ -13,7 +18,8 @@
         [territory]="territory"
         [name]="territory.id"
         [ngModel]="territoriesModel.has(territory.id)"
-        (ngModelChange)="handleTerritoryCheck($event, territory.id)">
+        (ngModelChange)="handleTerritoryCheck($event, territory.id)"
+        [disabled]="assignedTerritories.has(territory.id)">
       </kingdom-apps-territory-checkbox>
     </div>
   </form>
