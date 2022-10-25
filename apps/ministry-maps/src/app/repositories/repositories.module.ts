@@ -1,12 +1,14 @@
-import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { NgModule } from '@angular/core';
 
-import { UserRepository } from './user.repository';
-import { FirebaseUserDatasourceService } from './firebase/firebase-user-datasource.service';
 import { CongregationRepository } from './congregation.repository';
+import { DesignationRepository } from './designation.repository';
 import { FirebaseCongregationDatasourceService } from './firebase/firebase-congregation-datasource.service';
-import { TerritoryRepository } from './territories.repository';
+import { FirebaseDesignationDatasourceService } from './firebase/firebase-designation-datasource.service';
 import { FirebaseTerritoryDatasourceService } from './firebase/firebase-territory-datasource.service';
+import { FirebaseUserDatasourceService } from './firebase/firebase-user-datasource.service';
+import { TerritoryRepository } from './territories.repository';
+import { UserRepository } from './user.repository';
 
 @NgModule({
   declarations: [],
@@ -23,6 +25,10 @@ import { FirebaseTerritoryDatasourceService } from './firebase/firebase-territor
     {
       provide: TerritoryRepository,
       useClass: FirebaseTerritoryDatasourceService,
+    },
+    {
+      provide: DesignationRepository,
+      useClass: FirebaseDesignationDatasourceService,
     },
   ],
 })
