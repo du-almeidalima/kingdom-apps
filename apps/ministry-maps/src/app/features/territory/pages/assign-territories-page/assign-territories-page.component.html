@@ -14,10 +14,10 @@
   <form id="territory-form" (submit)="handleTerritoryFormSubmit()">
     <div class="flex flex-col gap-5 mt-8">
       <kingdom-apps-territory-checkbox
-        *ngFor="let territory of territories; trackBy: trackByRepositoryId"
+        *ngFor="let territory of territories | async; trackBy: trackByRepositoryId"
         [territory]="territory"
         [name]="territory.id"
-        [ngModel]="territoriesModel.has(territory.id)"
+        [ngModel]="selectedTerritoriesModel.has(territory.id)"
         (ngModelChange)="handleTerritoryCheck($event, territory.id)"
         [disabled]="assignedTerritories.has(territory.id)">
       </kingdom-apps-territory-checkbox>
@@ -27,6 +27,7 @@
   <button
     lib-floating-action-button
     [backgroundColor]="green200"
+    [disabled]='selectedTerritoriesModel.size === 0'
     type="submit"
     form="territory-form"
     title="Enviar Designação">

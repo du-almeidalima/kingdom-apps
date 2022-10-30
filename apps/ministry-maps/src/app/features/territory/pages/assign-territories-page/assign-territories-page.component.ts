@@ -1,12 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Observable, of, switchMap } from 'rxjs';
+
 import { green200, white200 } from '@kingdom-apps/common';
-import { Designation, DesignationTerritory } from '../../../../../models/designation';
-import { DesignationStatusEnum } from '../../../../../models/enums/designation-status';
 
 import { Territory } from '../../../../../models/territory';
+import { Designation, DesignationTerritory } from '../../../../../models/designation';
+import { DesignationStatusEnum } from '../../../../../models/enums/designation-status';
 import { DesignationRepository } from '../../../../repositories/designation.repository';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { UserStateService } from '../../../../state/user.state.service';
+import { FeatureRoutesEnum } from '../../../../app-routes.module';
 
 @Component({
   selector: 'kingdom-apps-assign-territories-page',
@@ -20,9 +23,12 @@ export class AssignTerritoriesPageComponent implements OnInit {
 
   cities: string[] = [];
   selectedCity = '';
-  territories: Territory[] = [];
-  territoriesModel = new Set<string>();
+  territories: Observable<Territory[]> = of([]);
+  selectedTerritoriesModel = new Set<string>();
   assignedTerritories = new Set<string>();
+
+  @ViewChild('hiddenSharedLink')
+  private hiddenShareAnchorElement!: ElementRef<HTMLAnchorElement>;
 
   constructor(
     private readonly territoryRepository: TerritoryRepository,
@@ -41,33 +47,36 @@ export class AssignTerritoriesPageComponent implements OnInit {
   }
 
   private fetchTerritories(congregationId: string, city: string) {
-    const territories$ =
+    // This is the object that will be iterated, since we can't iterate through formGroup.controls...
+    this.territories =
       city === this.ALL_OPTION
         ? this.territoryRepository.getAllByCongregation(congregationId)
         : this.territoryRepository.getAllByCongregationAndCity(congregationId, city);
-
-    territories$.subscribe(territories => {
-      // This is the object that will be iterated, since we can't iterate through formGroup.controls...
-      this.territories = territories;
-    });
   }
 
   handleTerritoryFormSubmit() {
-    this.assignedTerritories = new Set([...this.territoriesModel, ...this.assignedTerritories]);
+    this.assignedTerritories = new Set([...this.selectedTerritoriesModel, ...this.assignedTerritories]);
 
     // FIXME: This whole flow should not be responsibility of a component. It should be extracted to a service
-    this.territoryRepository.getAllInIds([...this.assignedTerritories.values()]).subscribe(territories => {
-      const designationTerritories: DesignationTerritory[] = territories.map(t => ({
-        ...t,
-        status: DesignationStatusEnum.PENDING,
-      }));
+    this.territoryRepository
+      .getAllInIds([...this.assignedTerritories.values()])
+      .pipe(
+        switchMap(territories => {
+          const designationTerritories: DesignationTerritory[] = territories.map(t => ({
+            ...t,
+            status: DesignationStatusEnum.PENDING,
+          }));
 
-      const newDesignation: Omit<Designation, 'id'> = {
-        territories: designationTerritories,
-      };
+          const newDesignation: Omit<Designation, 'id'> = {
+            territories: designationTerritories,
+          };
 
-      this.designationRepository.add(newDesignation);
-    });
+          return this.designationRepository.add(newDesignation);
+        })
+      )
+      .subscribe(designation => {
+        this.shareDesignation(designation.id);
+      });
   }
 
   handleSelectedCityChange(city: string) {
@@ -75,10 +84,24 @@ export class AssignTerritoriesPageComponent implements OnInit {
   }
 
   handleTerritoryCheck(value: boolean, territoryId: string) {
-    value ? this.territoriesModel.add(territoryId) : this.territoriesModel.delete(territoryId);
+    value ? this.selectedTerritoriesModel.add(territoryId) : this.selectedTerritoriesModel.delete(territoryId);
   }
 
   trackByRepositoryId(_: number, item: Territory) {
     return item.id;
+  }
+
+  shareDesignation(designationId: string) {
+    const isMobileDevice = /mobi/i.test(window.navigator.userAgent);
+    const workUrl = `${location.origin}/${FeatureRoutesEnum.WORK}/${designationId}`;
+    const whatsAppUrl = `https://api.whatsapp.com/send?text=`;
+
+    const builtUrl = `${whatsAppUrl}${workUrl}`;
+
+    if (isMobileDevice) {
+      window.location.href = builtUrl;
+    } else {
+      window.open(builtUrl);
+    }
   }
 }

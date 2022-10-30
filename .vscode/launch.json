@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "msedge",
+      "type": "chrome",
       "request": "launch",
       "name": "Angular Debugger",
       "url": "http://localhost:4200",

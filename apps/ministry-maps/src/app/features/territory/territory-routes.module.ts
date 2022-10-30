@@ -1,21 +1,21 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AssignTerritoriesPageComponent } from './pages/assign-territories-page/assign-territories-page.component';
 
+import { AssignTerritoriesPageComponent } from './pages/assign-territories-page/assign-territories-page.component';
 import { TerritoriesPageComponent } from './pages/territories-page/territories-page.component';
 
 export enum TerritoryRoutesEnum {
   LIST = '',
-  ASSIGN_TERRITORIES = 'assign-territories',
+  ASSIGN_TERRITORIES = 'assign',
 }
 
 const TERRITORY_ROUTES: Routes = [
   {
-    path: '',
+    path: TerritoryRoutesEnum.LIST,
     component: TerritoriesPageComponent,
   },
   {
-    path: 'assign-territories',
+    path: TerritoryRoutesEnum.ASSIGN_TERRITORIES,
     component: AssignTerritoriesPageComponent,
   },
 ];
