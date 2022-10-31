@@ -8,11 +8,16 @@ import { Role } from '../models/enums/role';
 export enum FeatureRoutesEnum {
   HOME = 'home',
   TERRITORIES = 'territories',
+  WORK = 'work',
 }
 
 const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['/login']);
 
 const APP_ROUTES: Routes = [
+  {
+    path: FeatureRoutesEnum.WORK,
+    loadChildren: () => import('./features/work/work.module').then(m => m.WorkModule),
+  },
   {
     path: FeatureRoutesEnum.TERRITORIES,
     loadChildren: () => import('./features/territory/territory.module').then(m => m.TerritoryModule),

@@ -1,0 +1,11 @@
+<main class='container'>
+  <span *ngIf='isLoading'>Loading...</span>
+  <div *ngIf='designation'>
+
+    <kingdom-apps-work-item
+      class='mt-5'
+      *ngFor='let territory of designation.territories'
+      [territory]='territory'>
+    </kingdom-apps-work-item>
+  </div>
+</main>
