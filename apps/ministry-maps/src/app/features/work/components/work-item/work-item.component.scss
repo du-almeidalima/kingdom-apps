@@ -1,0 +1,114 @@
+@use '@kingdom-apps/styles/abstract/variables';
+@use '@kingdom-apps/styles/base/typography';
+
+:host {
+  display: block;
+}
+
+.work-item {
+  $flex-checkbox: 1;
+  $flex-container: 6;
+
+  $flex-container-icon: 1;
+  $flex-container-address: 4;
+
+  display: flex;
+
+  height: 10rem;
+
+
+  &__container {
+    flex: $flex-container;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+
+    padding: 2rem 1rem 2rem 0;
+
+    background-color: variables.$white-100;
+  }
+
+  &__checkbox-container {
+    flex: $flex-checkbox;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: variables.$primary-green;
+    cursor: pointer;
+  }
+
+  &__checkbox {
+    $size: 2rem;
+
+    height: 2rem;
+    width: 2rem;
+    border-radius: 50%;
+
+    cursor: inherit;
+  }
+
+  &__icon-container {
+    flex: $flex-container-icon;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;;
+  }
+
+  &__icon {
+    $size: 3rem;
+
+    height: $size;
+    width: $size;
+  }
+
+  &__address-container {
+    flex: $flex-container-address;
+
+    display: flex;
+    justify-content: center;
+    flex-flow: column nowrap;
+    gap: 1rem;
+  }
+
+  &__address-street {
+    @extend .t-body2;
+    font-weight: 500;
+  }
+
+  &__address-city {
+    @extend .t-caption;
+    color: variables.$grey-100;
+  }
+
+  &__buttons-container {
+    align-self: flex-start;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  &__button {
+    $size: 3rem;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: $size;
+    height: $size;
+    padding: .5rem;
+    border: none;
+    border-radius: 50%;
+
+    background-color: transparent;
+
+    &:hover, &:active, &:focus {
+      background-color: lighten(variables.$grey-100, 50%);
+    }
+  }
+}
