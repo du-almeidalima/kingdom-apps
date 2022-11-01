@@ -1,0 +1,51 @@
+@use '@kingdom-apps/styles/components' as *;
+@use '@kingdom-apps/styles/abstract/variables';
+
+kingdom-apps-visit-outcome-option {
+  display: block;
+}
+
+.visit-outcome-option {
+  @extend .form-control;
+
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  height: 5rem;
+
+  cursor: pointer;
+  background-color: variables.$white-200;
+
+  // Active state
+  &:is(:hover,:focus), &--active {
+    color: variables.$link;
+    border-color: currentColor;
+
+    svg.icon {
+      fill: currentColor;
+    }
+  }
+
+  &__icon {
+    $size: 2.5rem;
+
+    height: $size;
+    width: $size;
+
+    svg.icon {
+      transition: fill .2s ease-in-out;
+    }
+  }
+
+  &__description {
+    @extend .t-body1;
+
+    color: inherit;
+  }
+
+  &__input {
+    display: none;
+    visibility: hidden;
+  }
+}
