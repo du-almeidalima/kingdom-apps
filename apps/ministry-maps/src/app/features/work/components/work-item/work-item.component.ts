@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core
 import { grey400, Icons, primaryGreen } from '@kingdom-apps/common';
 
 import { Territory, TerritoryIcon } from '../../../../../models/territory';
+import { Dialog } from '@angular/cdk/dialog';
+import { WorkItemCompleteDialogComponent } from '../work-item-complete-dialog/work-item-complete-dialog.component';
 
 @Component({
   selector: 'kingdom-apps-work-item',
@@ -11,7 +13,7 @@ import { Territory, TerritoryIcon } from '../../../../../models/territory';
     <div class="work-item">
       <!-- Checkbox -->
       <label class="work-item__checkbox-container" title="Concluir visita" [for]="territory.id">
-        <input class="work-item__checkbox" type="checkbox" [id]="territory.id" />
+        <input class="work-item__checkbox" type="checkbox" [id]="territory.id" (change)="handleCheck()" />
       </label>
       <!-- Content -->
       <div class="work-item__container">
@@ -39,6 +41,8 @@ export class WorkItemComponent implements OnInit {
   public iconColor = grey400;
   public icon: Icons = 'generation-3';
 
+  constructor(private readonly dialog: Dialog) {}
+
   @Input()
   territory!: Territory;
 
@@ -55,5 +59,11 @@ export class WorkItemComponent implements OnInit {
       default:
         return 'generation-3';
     }
+  }
+
+  handleCheck() {
+    this.dialog.open(WorkItemCompleteDialogComponent).closed.subscribe(data => {
+      console.log(data);
+    });
   }
 }
