@@ -1,12 +1,17 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { DialogRef } from '@angular/cdk/dialog';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, Inject, OnInit, Optional } from '@angular/core';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
+import { ControlsOf } from '../../../../shared/utils/controls-of';
 
-type WorkItemCompleteForm = {
-  visitOutcome: FormControl<VisitOutcomeEnum>;
+export type WorkItemCompleteDialogData = {
+  visitOutcome: VisitOutcomeEnum;
+  isRevisit: boolean;
+  notes: string;
 };
+
+type WorkItemCompleteForm = ControlsOf<WorkItemCompleteDialogData>;
 
 @Component({
   selector: 'kingdom-apps-work-item-complete-dialog',
@@ -16,7 +21,7 @@ type WorkItemCompleteForm = {
     <lib-dialog title="Concluir Visita">
       <form id="work-item-complete" [formGroup]="form" (ngSubmit)="handleFormSubmit()">
         <!-- Visit Outcome -->
-        <h3 class="mb-4">Resultado da visita</h3>
+        <h3 class="mb-4 t-headline4">Resultado da visita</h3>
         <kingdom-apps-visit-outcome-option formControlName="visitOutcome" [value]="VisitOutcome.SPOKE"
           >Morador contatado
         </kingdom-apps-visit-outcome-option>
@@ -39,14 +44,14 @@ type WorkItemCompleteForm = {
         <!-- Revisita -->
         <lib-form-field class="mt-4" orientation="horizontal">
           <label lib-label for="revisit-checkbox">Aceitou revisita</label>
-          <input type="checkbox" id="revisit-checkbox" />
+          <input formControlName="isRevisit" type="checkbox" id="revisit-checkbox" />
         </lib-form-field>
 
         <!-- Notas -->
-        <h3 class="my-4">Notas</h3>
+        <h3 class="my-4 t-headline4">Notas</h3>
         <lib-form-field>
           <label lib-label for="congregation-icon">Conte como foi o contato</label>
-          <textarea lib-input rows="4" formControlName="address" class="resize-y" type="text" id="congregation-address">
+          <textarea lib-input rows="4" formControlName="notes" class="resize-y" type="text" id="congregation-address">
           </textarea>
         </lib-form-field>
       </form>
@@ -64,14 +69,24 @@ export class WorkItemCompleteDialogComponent implements OnInit {
 
   form!: FormGroup<WorkItemCompleteForm>;
 
-  constructor(private readonly dialogRef: DialogRef) {}
+  constructor(
+    private readonly dialogRef: DialogRef,
+    @Optional() @Inject(DIALOG_DATA) public readonly data: WorkItemCompleteDialogData
+  ) {}
 
   ngOnInit(): void {
     const fb = new FormBuilder().nonNullable;
 
     this.form = fb.group({
       visitOutcome: fb.control(VisitOutcomeEnum.SPOKE, { validators: [Validators.required] }),
+      isRevisit: fb.control(false),
+      notes: fb.control(''),
     });
+
+    // Edit
+    if (this.data) {
+      this.form.patchValue(this.data);
+    }
   }
 
   handleCancel() {
@@ -79,6 +94,6 @@ export class WorkItemCompleteDialogComponent implements OnInit {
   }
 
   handleFormSubmit() {
-    console.log(this.form.getRawValue());
+    this.dialogRef.close(this.form.value);
   }
 }
