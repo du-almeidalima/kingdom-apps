@@ -1,4 +1,5 @@
 @use '@kingdom-apps/styles/abstract/variables';
+@use '@kingdom-apps/styles/base/typography';
 
 :host {
   display: block;
@@ -40,13 +41,20 @@
   &__description {
     flex: 1;
 
-    display: block;
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 1rem;
 
     font-size: 1.6rem;
 
     &--disabled {
       color: variables.$grey-300;
     }
+  }
+
+  &__description-last-visit {
+    @extend .t-caption;
+    color: variables.$grey-300;
   }
 
   &__indicator {

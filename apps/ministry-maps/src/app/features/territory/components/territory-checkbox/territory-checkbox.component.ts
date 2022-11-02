@@ -13,10 +13,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
     },
   ],
   template: `
-    <label
-      class="territory-checkbox"
-      [ngClass]="{ 'territory-checkbox--disabled': disabled }"
-      [for]="territory.id">
+    <label class="territory-checkbox" [ngClass]="{ 'territory-checkbox--disabled': disabled }" [for]="territory.id">
       <div class="territory-checkbox__control-container">
         <input
           type="checkbox"
@@ -28,11 +25,14 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
           [disabled]="disabled"
           (click)="handleClick($event)"
           (ngModelChange)="setValue($event)" />
-        <span
+        <div
           class="territory-checkbox__description"
           [ngClass]="{ 'territory-checkbox__description--disabled': disabled }">
-          {{ territory.address }}
-        </span>
+          <p>{{ territory.address }}</p>
+          <span class="territory-checkbox__description-last-visit" *ngIf="territory.lastVisit">
+            Última visita: {{ territory.lastVisit | date: 'dd/MM/yyyy' }}</span
+          >
+        </div>
       </div>
       <span class="territory-checkbox__indicator territory-checkbox__indicator--blue"></span>
     </label>

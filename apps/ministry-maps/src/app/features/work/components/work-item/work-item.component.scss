@@ -37,6 +37,11 @@
 
     background-color: variables.$primary-green;
     cursor: pointer;
+
+    &--disabled {
+      background-color: variables.$grey-100;
+      cursor: initial;
+    }
   }
 
   &__checkbox {

@@ -6,12 +6,13 @@ export enum TerritoryIcon {
   CHILD = 'c',
   OTHER = 'o',
 }
+
 export type Territory = {
   id: string;
   city: string;
   address: string;
   congregationId: string;
   icon: TerritoryIcon;
-  location: { latitude: number; longitude: number };
+  lastVisit?: Date;
   history: TerritoryVisitHistory[];
 };

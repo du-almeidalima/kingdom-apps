@@ -2,10 +2,34 @@
   <span *ngIf='isLoading'>Loading...</span>
   <div *ngIf='designation'>
 
-    <kingdom-apps-work-item
-      class='mt-5'
-      *ngFor='let territory of designation.territories'
-      [territory]='territory'>
-    </kingdom-apps-work-item>
+    <ng-container *ngIf='territories.length > 0; then territoriesTemplate; else congratulationsTemplate'></ng-container>
+
+    <ng-template #territoriesTemplate>
+      <kingdom-apps-work-item
+        class='mt-5'
+        *ngFor='let territory of territories'
+        [territory]='territory'
+        (territoryUpdated)='updateWorkItem($event)'
+      >
+      </kingdom-apps-work-item>
+    </ng-template>
+
+    <ng-template #congratulationsTemplate>
+      <h2 class='t-headline2 mb-3'>Parabéns!</h2>
+      <p class='t-body1'>Todos os territórios foram concluidos, que Jeová abençoe seu trabalho!</p>
+    </ng-template>
+    <!-- Done Territories -->
+    <ng-template [ngIf]='doneTerritories.length > 0'>
+      <h2 class='t-headline4 my-5'>Concluídos</h2>
+
+      <kingdom-apps-work-item
+        class='mt-5'
+        *ngFor='let territory of doneTerritories'
+        [territory]='territory'
+        [done]='true'
+        (territoryUpdated)='updateWorkItem($event)'
+      >
+      </kingdom-apps-work-item>
+    </ng-template>
   </div>
 </main>

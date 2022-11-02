@@ -4,29 +4,37 @@ import {
   collection,
   collectionData,
   CollectionReference,
+  doc,
   documentId,
   Firestore,
   getDoc,
   getDocsFromServer,
   query,
+  setDoc,
+  updateDoc,
   where,
 } from '@angular/fire/firestore';
-import { from, map, Observable, switchMap } from 'rxjs';
+import { combineLatest, from, map, Observable, switchMap } from 'rxjs';
 
-import { firebaseEntityConverterFactory } from '../../shared/utils/firebase-entity-converter';
+import {
+  convertFirebaseTimestampToDateFactory,
+  firebaseEntityConverterFactory,
+} from '../../shared/utils/firebase-entity-converter';
 import { TerritoryRepository } from '../territories.repository';
 import { Territory } from '../../../models/territory';
+import { TerritoryVisitHistory } from '../../../models/territory-visit-history';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
   private readonly collectionName = 'territories';
+  private readonly historySubCollectionName = 'history';
   private readonly territoriesCollection: CollectionReference<Territory>;
 
   constructor(private readonly firestore: Firestore) {
     this.territoriesCollection = collection(this.firestore, this.collectionName).withConverter(
-      firebaseEntityConverterFactory<Territory>()
+      firebaseEntityConverterFactory<Territory>(convertFirebaseTimestampToDateFactory('lastVisit'))
     ) as CollectionReference<Territory>;
   }
 
@@ -50,17 +58,63 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
     const q = query(this.territoriesCollection, where(documentId(), 'in', ids));
 
     return from(getDocsFromServer(q)).pipe(
-      map(territoriesSnapshot => {
-        return territoriesSnapshot.docs.map(ts => ts.data());
+      switchMap(territoriesSnapshot => {
+        // Looping through each territory and resolving the history sub collection documents
+        const territoriesObservables = territoriesSnapshot.docs.map(ts => {
+          const territory = ts.data();
+
+          const path = `${this.collectionName}/${territory.id}/${this.historySubCollectionName}`;
+          const territoryVisitHistoryCollection = collection(
+            this.firestore,
+            path
+          ) as CollectionReference<TerritoryVisitHistory>;
+
+          return from(getDocsFromServer(territoryVisitHistoryCollection)).pipe(
+            map(territoryVisitHistorySnapshots => {
+              return {
+                ...territory,
+                history: territoryVisitHistorySnapshots.docs.map(visitHistorySnapshot => visitHistorySnapshot.data()),
+              };
+            })
+          );
+        });
+
+        // Combining all territoriesObservables into one array
+        return combineLatest(territoriesObservables);
       })
     );
   }
 
   add(territory: Omit<Territory, 'id'>) {
-    return from(addDoc(this.territoriesCollection, territory)).pipe(
+    // History will be a collection in FireStore
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { history, ...territoryWithoutHistory } = {
+      ...territory,
+    };
+
+    return from(addDoc(this.territoriesCollection, territoryWithoutHistory)).pipe(
       switchMap(territoryDocRef =>
         from(getDoc(territoryDocRef)).pipe(map(territorySnapshot => territorySnapshot.data() as Territory))
       )
     );
+  }
+
+  update(territory: Territory): Observable<void> {
+    const territoryDocRef = doc(this.territoriesCollection, `${territory.id}`);
+    // History will be a collection in FireStore
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { history, ...territoryWithoutHistory } = {
+      ...territory,
+    };
+
+    return from(updateDoc(territoryDocRef, { ...territoryWithoutHistory }));
+  }
+
+  addVisitHistory(territoryId: string, visitHistory: TerritoryVisitHistory): Observable<void> {
+    const path = `${this.collectionName}/${territoryId}/${this.historySubCollectionName}`;
+    const territoryVisitHistoryCollection = collection(this.firestore, path);
+    const visitHistoryDocRef = doc(territoryVisitHistoryCollection, visitHistory.id);
+
+    return from(setDoc(visitHistoryDocRef, visitHistory));
   }
 }

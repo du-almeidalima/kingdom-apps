@@ -97,11 +97,6 @@ export class TerritoryManageDialogComponent implements OnInit {
       territory = {
         ...this.form.getRawValue(),
         history: [],
-        // TODO: Implement this with Google Maps
-        location: {
-          latitude: 0,
-          longitude: 0,
-        },
         congregationId: this.data.congregationId,
       };
     }

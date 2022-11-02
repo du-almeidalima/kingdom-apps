@@ -4,12 +4,9 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 import { ControlsOf } from '../../../../shared/utils/controls-of';
+import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
 
-export type WorkItemCompleteDialogData = {
-  visitOutcome: VisitOutcomeEnum;
-  isRevisit: boolean;
-  notes: string;
-};
+export type WorkItemCompleteDialogData = Pick<TerritoryVisitHistory, 'visitOutcome' | 'isRevisit' | 'notes'>;
 
 type WorkItemCompleteForm = ControlsOf<WorkItemCompleteDialogData>;
 
@@ -77,7 +74,7 @@ export class WorkItemCompleteDialogComponent implements OnInit {
   ngOnInit(): void {
     const fb = new FormBuilder().nonNullable;
 
-    this.form = fb.group({
+    this.form = fb.group<WorkItemCompleteForm>({
       visitOutcome: fb.control(VisitOutcomeEnum.SPOKE, { validators: [Validators.required] }),
       isRevisit: fb.control(false),
       notes: fb.control(''),

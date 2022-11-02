@@ -1,11 +1,16 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Dialog } from '@angular/cdk/dialog';
+
 import { grey400, Icons, primaryGreen } from '@kingdom-apps/common';
 
 import { TerritoryIcon } from '../../../../../models/territory';
-import { Dialog } from '@angular/cdk/dialog';
-import { WorkItemCompleteDialogComponent } from '../work-item-complete-dialog/work-item-complete-dialog.component';
+import {
+  WorkItemCompleteDialogComponent,
+  WorkItemCompleteDialogData,
+} from '../work-item-complete-dialog/work-item-complete-dialog.component';
 import { DesignationTerritory } from '../../../../../models/designation';
 import { DesignationStatusEnum } from '../../../../../models/enums/designation-status';
+import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
 
 @Component({
   selector: 'kingdom-apps-work-item',
@@ -14,12 +19,17 @@ import { DesignationStatusEnum } from '../../../../../models/enums/designation-s
   template: `
     <div class="work-item">
       <!-- Checkbox -->
-      <label class="work-item__checkbox-container" title="Concluir visita" [for]="territory.id">
+      <label
+        class="work-item__checkbox-container"
+        title="Concluir visita"
+        [ngClass]="{ 'work-item__checkbox-container--disabled': done }"
+        [for]="territory.id">
         <input
           class="work-item__checkbox"
           type="checkbox"
           [id]="territory.id"
           [checked]="territory.status === DesignationStatusEnum.DONE"
+          [disabled]="done"
           (click)="handleCheck($event)" />
       </label>
       <!-- Content -->
@@ -54,6 +64,12 @@ export class WorkItemComponent implements OnInit {
   @Input()
   territory!: DesignationTerritory;
 
+  @Input()
+  done = false;
+
+  @Output()
+  territoryUpdated = new EventEmitter<DesignationTerritory>();
+
   ngOnInit(): void {
     this.icon = this.territoryIconToIcon(this.territory.icon);
   }
@@ -72,8 +88,26 @@ export class WorkItemComponent implements OnInit {
   handleCheck(e: MouseEvent) {
     e.preventDefault();
 
-    this.dialog.open(WorkItemCompleteDialogComponent).closed.subscribe(data => {
-      console.log(data);
+    if (this.done) {
+      return;
+    }
+
+    this.dialog.open<WorkItemCompleteDialogData>(WorkItemCompleteDialogComponent).closed.subscribe(data => {
+      if (data) {
+        const historyEntry: TerritoryVisitHistory = {
+          ...data,
+          date: new Date(),
+          id: new Date().getTime().toString(),
+        };
+
+        const updateDesignationTerritory: DesignationTerritory = {
+          ...this.territory,
+          status: DesignationStatusEnum.DONE,
+          history: [...(this.territory.history ?? []), historyEntry],
+        };
+
+        this.territoryUpdated.emit(updateDesignationTerritory);
+      }
     });
   }
 }
