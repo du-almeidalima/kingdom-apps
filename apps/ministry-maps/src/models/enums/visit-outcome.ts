@@ -1,4 +1,4 @@
-export enum VisitOutcome {
+export enum VisitOutcomeEnum {
   SPOKE,
   NOT_ANSWERED,
   MOVED,

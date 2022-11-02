@@ -11,7 +11,7 @@ import { from, Observable, of, switchMap, take } from 'rxjs';
 
 import { AuthRepository } from '../auth.repository';
 import { User } from '../../../../../../models/user';
-import { Role } from '../../../../../../models/enums/role';
+import { RoleEnum } from '../../../../../../models/enums/role';
 import { UserRepository } from '../../../../../repositories/user.repository';
 import { doc, Firestore } from '@angular/fire/firestore';
 
@@ -31,7 +31,7 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
   private createUser(partialUser: Pick<User, 'id' | 'name' | 'email' | 'photoUrl'>): Observable<User> {
     const user: User = {
       ...partialUser,
-      role: Role.PUBLISHER,
+      role: RoleEnum.PUBLISHER,
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       congregationId: doc(this.firestore, '/congregations/cclEP8ueg2vd2JoG7OOl'),

@@ -1,7 +1,7 @@
-import { VisitOutcome } from './enums/visit-outcome';
+import { VisitOutcomeEnum } from './enums/visit-outcome';
 
 export type TerritoryVisitHistory = {
   date: Date;
-  outcome: VisitOutcome;
+  outcome: VisitOutcomeEnum;
   comments?: string;
 };

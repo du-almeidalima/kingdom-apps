@@ -3,7 +3,7 @@ import { ActivatedRouteSnapshot, CanActivate, UrlTree } from '@angular/router';
 
 import { map, Observable } from 'rxjs';
 import { UserStateService } from '../../state/user.state.service';
-import { Role } from '../../../models/enums/role';
+import { RoleEnum } from '../../../models/enums/role';
 import { FirebaseAuthDatasourceService } from '../features/auth/repositories/firebase/firebase-auth-datasource.service';
 
 @Injectable({
@@ -22,12 +22,12 @@ export class AuthGuard implements CanActivate {
     const { roles } = route.data;
 
     if (currentUser) {
-      return currentUser?.role === Role.ADMIN || roles.includes(currentUser?.role);
+      return currentUser?.role === RoleEnum.ADMIN || roles.includes(currentUser?.role);
     }
 
     return this.firebaseAuthDatasourceService.getUserFromAuthentication().pipe(
       map(user => {
-        return user?.role === Role.ADMIN || roles.includes(user?.role);
+        return user?.role === RoleEnum.ADMIN || roles.includes(user?.role);
       })
     );
   }

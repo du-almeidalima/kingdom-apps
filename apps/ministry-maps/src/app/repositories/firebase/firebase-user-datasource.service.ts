@@ -11,7 +11,7 @@ import {
   getDocFromServer,
   setDoc,
 } from '@angular/fire/firestore';
-import { Role } from '../../../models/enums/role';
+import { RoleEnum } from '../../../models/enums/role';
 import { FirebaseUserModel } from '../../../models/firebase/firebase-user-model';
 import { Congregation } from '../../../models/congregation';
 
@@ -71,7 +71,7 @@ export class FirebaseUserDatasourceService implements UserRepository {
   put(partialUser: User): Observable<User> {
     const user: User = {
       ...partialUser,
-      role: Role.PUBLISHER,
+      role: RoleEnum.PUBLISHER,
       congregation: undefined,
     };
 

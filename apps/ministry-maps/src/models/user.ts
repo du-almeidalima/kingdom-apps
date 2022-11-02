@@ -1,4 +1,4 @@
-import { Role } from './enums/role';
+import { RoleEnum } from './enums/role';
 import { Congregation } from './congregation';
 
 export type User = {
@@ -7,5 +7,5 @@ export type User = {
   email: string;
   photoUrl?: string;
   congregation: Congregation | undefined;
-  role: Role;
+  role: RoleEnum;
 };
