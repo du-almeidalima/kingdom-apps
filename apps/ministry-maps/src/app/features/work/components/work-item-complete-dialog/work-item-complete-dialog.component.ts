@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { DialogRef } from '@angular/cdk/dialog';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { VisitOutcome } from '../../../../../models/enums/visit-outcome';
+
+import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 
 type WorkItemCompleteForm = {
-  visitOutcome: FormControl<VisitOutcome>;
+  visitOutcome: FormControl<VisitOutcomeEnum>;
 };
 
 @Component({
@@ -14,25 +15,40 @@ type WorkItemCompleteForm = {
   template: `
     <lib-dialog title="Concluir Visita">
       <form id="work-item-complete" [formGroup]="form" (ngSubmit)="handleFormSubmit()">
-        <h2 class="mb-4">Resultado da visita</h2>
-        <kingdom-apps-visit-outcome-option formControlName="visitOutcome" [value]="visitOutcomeEnum.SPOKE"
+        <!-- Visit Outcome -->
+        <h3 class="mb-4">Resultado da visita</h3>
+        <kingdom-apps-visit-outcome-option formControlName="visitOutcome" [value]="VisitOutcome.SPOKE"
           >Morador contatado
         </kingdom-apps-visit-outcome-option>
         <kingdom-apps-visit-outcome-option
           formControlName="visitOutcome"
-          [value]="visitOutcomeEnum.NOT_ANSWERED"
+          [value]="VisitOutcome.NOT_ANSWERED"
           class="mt-3"
           >Ninguém atendeu
         </kingdom-apps-visit-outcome-option>
-        <kingdom-apps-visit-outcome-option formControlName="visitOutcome" [value]="visitOutcomeEnum.MOVED" class="mt-3"
+        <kingdom-apps-visit-outcome-option formControlName="visitOutcome" [value]="VisitOutcome.MOVED" class="mt-3"
           >Morador mudou de endereço
         </kingdom-apps-visit-outcome-option>
         <kingdom-apps-visit-outcome-option
           formControlName="visitOutcome"
-          [value]="visitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN"
+          [value]="VisitOutcome.ASKED_TO_NOT_VISIT_AGAIN"
           class="mt-3"
           >Morador pediu para não ser visitado
         </kingdom-apps-visit-outcome-option>
+
+        <!-- Revisita -->
+        <lib-form-field class="mt-4" orientation="horizontal">
+          <label lib-label for="revisit-checkbox">Aceitou revisita</label>
+          <input type="checkbox" id="revisit-checkbox" />
+        </lib-form-field>
+
+        <!-- Notas -->
+        <h3 class="my-4">Notas</h3>
+        <lib-form-field>
+          <label lib-label for="congregation-icon">Conte como foi o contato</label>
+          <textarea lib-input rows="4" formControlName="address" class="resize-y" type="text" id="congregation-address">
+          </textarea>
+        </lib-form-field>
       </form>
       <lib-dialog-footer>
         <div class="flex justify-end gap-4">
@@ -44,7 +60,7 @@ type WorkItemCompleteForm = {
   `,
 })
 export class WorkItemCompleteDialogComponent implements OnInit {
-  visitOutcomeEnum = VisitOutcome;
+  public readonly VisitOutcome = VisitOutcomeEnum;
 
   form!: FormGroup<WorkItemCompleteForm>;
 
@@ -54,7 +70,7 @@ export class WorkItemCompleteDialogComponent implements OnInit {
     const fb = new FormBuilder().nonNullable;
 
     this.form = fb.group({
-      visitOutcome: fb.control(VisitOutcome.SPOKE, { validators: [Validators.required] }),
+      visitOutcome: fb.control(VisitOutcomeEnum.SPOKE, { validators: [Validators.required] }),
     });
   }
 

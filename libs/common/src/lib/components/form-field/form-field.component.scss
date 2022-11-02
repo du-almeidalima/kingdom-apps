@@ -6,4 +6,9 @@
   display: flex;
   flex-flow: column nowrap;
   gap: .2rem;
+
+  &--horizontal {
+    flex-direction: row;
+    gap: 1.25rem;
+  }
 }

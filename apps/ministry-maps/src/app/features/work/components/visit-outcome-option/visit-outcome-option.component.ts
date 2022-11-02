@@ -3,7 +3,7 @@ import { ControlValueAccessor, NgControl } from '@angular/forms';
 
 import { grey400, Icons } from '@kingdom-apps/common';
 
-import { VisitOutcome } from '../../../../../models/enums/visit-outcome';
+import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 
 @Component({
   selector: 'kingdom-apps-visit-outcome-option',
@@ -35,13 +35,13 @@ export class VisitOutcomeOptionComponent implements OnInit, ControlValueAccessor
   optionIcon: Icons = 'thumb-10';
   disabled = false;
 
-  modelValue!: VisitOutcome;
+  modelValue!: VisitOutcomeEnum;
 
   @Input()
   name = 'visit-outcome-option';
 
   @Input()
-  value!: VisitOutcome;
+  value!: VisitOutcomeEnum;
 
   constructor(@Self() private ngControl: NgControl) {
     ngControl.valueAccessor = this;
@@ -49,7 +49,7 @@ export class VisitOutcomeOptionComponent implements OnInit, ControlValueAccessor
 
   // Control Value Accessor
   onTouched!: () => void;
-  onChange: (value: VisitOutcome) => void = () => {
+  onChange: (value: VisitOutcomeEnum) => void = () => {
     return;
   };
 
@@ -81,20 +81,20 @@ export class VisitOutcomeOptionComponent implements OnInit, ControlValueAccessor
     this.disabled = isDisabled;
   }
 
-  writeValue(value: VisitOutcome): void {
+  writeValue(value: VisitOutcomeEnum): void {
     this.modelValue = value;
   }
 
   // Methods
-  visitOutcomeToIcon(visitOutcome: VisitOutcome): Icons {
+  visitOutcomeToIcon(visitOutcome: VisitOutcomeEnum): Icons {
     switch (visitOutcome) {
-      case VisitOutcome.SPOKE:
+      case VisitOutcomeEnum.SPOKE:
         return 'thumb-10';
-      case VisitOutcome.NOT_ANSWERED:
+      case VisitOutcomeEnum.NOT_ANSWERED:
         return 'thumb-12';
-      case VisitOutcome.MOVED:
+      case VisitOutcomeEnum.MOVED:
         return 'building-8';
-      case VisitOutcome.ASKED_TO_NOT_VISIT_AGAIN:
+      case VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN:
         return 'stop-2';
     }
   }
@@ -104,7 +104,7 @@ export class VisitOutcomeOptionComponent implements OnInit, ControlValueAccessor
    * @param value - Used when not two-way bound. In this case, when the label
    * is pressed.
    */
-  valueChanged(value?: VisitOutcome) {
+  valueChanged(value?: VisitOutcomeEnum) {
     // Manually updating the input state
     if (value !== undefined) {
       this.modelValue = value;

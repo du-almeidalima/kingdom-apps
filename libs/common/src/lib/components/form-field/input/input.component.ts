@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, OnInit, Renderer2 } fro
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
-  selector: 'input[lib-input]',
+  selector: 'input[lib-input], textarea[lib-input]',
   template: ``,
   styleUrls: ['./input.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

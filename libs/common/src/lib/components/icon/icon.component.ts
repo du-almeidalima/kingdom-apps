@@ -8,7 +8,7 @@ import { white200 } from '../../styles/abstract/variables';
   encapsulation: ViewEncapsulation.None,
   styles: [
     `
-      :host {
+      lib-icon {
         display: block;
         height: 100%;
         width: 100%;

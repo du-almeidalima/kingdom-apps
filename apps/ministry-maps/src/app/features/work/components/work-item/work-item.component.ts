@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 import { grey400, Icons, primaryGreen } from '@kingdom-apps/common';
 
-import { Territory, TerritoryIcon } from '../../../../../models/territory';
+import { TerritoryIcon } from '../../../../../models/territory';
 import { Dialog } from '@angular/cdk/dialog';
 import { WorkItemCompleteDialogComponent } from '../work-item-complete-dialog/work-item-complete-dialog.component';
+import { DesignationTerritory } from '../../../../../models/designation';
+import { DesignationStatusEnum } from '../../../../../models/enums/designation-status';
 
 @Component({
   selector: 'kingdom-apps-work-item',
@@ -13,7 +15,12 @@ import { WorkItemCompleteDialogComponent } from '../work-item-complete-dialog/wo
     <div class="work-item">
       <!-- Checkbox -->
       <label class="work-item__checkbox-container" title="Concluir visita" [for]="territory.id">
-        <input class="work-item__checkbox" type="checkbox" [id]="territory.id" (change)="handleCheck()" />
+        <input
+          class="work-item__checkbox"
+          type="checkbox"
+          [id]="territory.id"
+          [checked]="territory.status === DesignationStatusEnum.DONE"
+          (click)="handleCheck($event)" />
       </label>
       <!-- Content -->
       <div class="work-item__container">
@@ -37,6 +44,7 @@ import { WorkItemCompleteDialogComponent } from '../work-item-complete-dialog/wo
   `,
 })
 export class WorkItemComponent implements OnInit {
+  public readonly DesignationStatusEnum = DesignationStatusEnum;
   public buttonIconColor = primaryGreen;
   public iconColor = grey400;
   public icon: Icons = 'generation-3';
@@ -44,7 +52,7 @@ export class WorkItemComponent implements OnInit {
   constructor(private readonly dialog: Dialog) {}
 
   @Input()
-  territory!: Territory;
+  territory!: DesignationTerritory;
 
   ngOnInit(): void {
     this.icon = this.territoryIconToIcon(this.territory.icon);
@@ -61,7 +69,9 @@ export class WorkItemComponent implements OnInit {
     }
   }
 
-  handleCheck() {
+  handleCheck(e: MouseEvent) {
+    e.preventDefault();
+
     this.dialog.open(WorkItemCompleteDialogComponent).closed.subscribe(data => {
       console.log(data);
     });
