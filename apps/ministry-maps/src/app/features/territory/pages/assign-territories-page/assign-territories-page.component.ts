@@ -10,6 +10,7 @@ import { DesignationRepository } from '../../../../repositories/designation.repo
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { UserStateService } from '../../../../state/user.state.service';
 import { FeatureRoutesEnum } from '../../../../app-routes.module';
+import { isMobileDevice } from '../../../../shared/utils/user-agent';
 
 @Component({
   selector: 'kingdom-apps-assign-territories-page',
@@ -92,13 +93,12 @@ export class AssignTerritoriesPageComponent implements OnInit {
   }
 
   shareDesignation(designationId: string) {
-    const isMobileDevice = /mobi/i.test(window.navigator.userAgent);
     const workUrl = `${location.origin}/${FeatureRoutesEnum.WORK}/${designationId}`;
     const whatsAppUrl = `https://api.whatsapp.com/send?text=`;
 
     const builtUrl = `${whatsAppUrl}${workUrl}`;
 
-    if (isMobileDevice) {
+    if (isMobileDevice()) {
       window.location.href = builtUrl;
     } else {
       window.open(builtUrl);
