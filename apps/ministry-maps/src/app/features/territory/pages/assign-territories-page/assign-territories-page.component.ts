@@ -94,7 +94,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
 
   shareDesignation(designationId: string) {
     const workUrl = `${location.origin}/${FeatureRoutesEnum.WORK}/${designationId}`;
-    const whatsAppUrl = `https://api.whatsapp.com/send?text=`;
+    const whatsAppUrl = `whatsapp://send?text=`;
 
     const builtUrl = `${whatsAppUrl}${workUrl}`;
 
