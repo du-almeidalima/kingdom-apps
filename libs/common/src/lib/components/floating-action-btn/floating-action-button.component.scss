@@ -1,6 +1,6 @@
 @use '../../styles/abstract/variables';
 
-$size: 5rem;
+$size: 6rem;
 
 :host {
   position: fixed;
@@ -13,7 +13,7 @@ $size: 5rem;
 
   height: $size;
   width: $size;
-  padding: 1rem;
+  padding: 1.5rem;
   border: none;
   border-radius: 999rem;
 

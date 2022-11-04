@@ -5,8 +5,10 @@
 
   display: flex;
   flex-flow: row;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
+
+  padding-left: 2rem;
 
 
   &__app-name {

@@ -14,4 +14,10 @@ export class HomePageComponent {
   public readonly FeatureRoutes = FeatureRoutesEnum;
 
   constructor(public readonly userState: UserStateService) {}
+
+  get userName(): string {
+    const userNames = this.userState.currentUser!.name.split(' ');
+
+    return userNames ? userNames[0] : this.userState.currentUser?.name ?? '';
+  }
 }

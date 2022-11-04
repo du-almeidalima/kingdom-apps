@@ -1,21 +1,22 @@
-<div class="container">
-  <h2 class="t-headline2 mb-8">Bem-Vindo {{ userState.currentUser?.name }}!</h2>
-  <lib-card [customStyle]="{ padding: 0 }">
+<div class='container'>
+  <h2 class='t-headline2 mb-8'>Bem-Vindo {{ userName }}
+    !</h2>
+  <lib-card [customStyle]='{ padding: 0 }'>
     <lib-card-header
-      icon="task-list-lined"
-      title="Designar Territórios"
-      subtitle="Crie listas com territórios e compartilhe para os publicadores"></lib-card-header>
+      icon='task-list-lined'
+      title='Designar Territórios'
+      subtitle='Crie listas com territórios e compartilhe para os publicadores'></lib-card-header>
     <lib-card-body>
-      <ul class="card-body__link-list">
-        <li class="card-body__link-list-item">
+      <ul class='card-body__link-list'>
+        <li class='card-body__link-list-item'>
           <a
-            class="card-body__link"
-            routerLink="/{{ FeatureRoutes.TERRITORIES }}/{{ TerritoryRoutes.ASSIGN_TERRITORIES }}">
+            class='card-body__link'
+            routerLink='/{{ FeatureRoutes.TERRITORIES }}/{{ TerritoryRoutes.ASSIGN_TERRITORIES }}'>
             Designar Territórios
           </a>
         </li>
-        <li class="card-body__link-list-item">
-          <a class="card-body__link" routerLink="/{{ FeatureRoutes.TERRITORIES }}/{{ TerritoryRoutes.LIST }}">
+        <li class='card-body__link-list-item'>
+          <a class='card-body__link' routerLink='/{{ FeatureRoutes.TERRITORIES }}/{{ TerritoryRoutes.LIST }}'>
             Administrar Territórios
           </a>
         </li>
