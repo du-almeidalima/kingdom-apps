@@ -11,6 +11,7 @@ import {
 import { DesignationTerritory } from '../../../../../models/designation';
 import { DesignationStatusEnum } from '../../../../../models/enums/designation-status';
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
+import { BrowserEnum, getAgentBrowser } from '../../../../shared/utils/user-agent';
 
 @Component({
   selector: 'kingdom-apps-work-item',
@@ -45,7 +46,7 @@ import { TerritoryVisitHistory } from '../../../../../models/territory-visit-his
           <button class="work-item__button">
             <lib-icon [fillColor]="buttonIconColor" icon="time-17"></lib-icon>
           </button>
-          <button class="work-item__button">
+          <button class="work-item__button" *ngIf="territory.mapsLink" (click)="handleOpenMaps(territory.mapsLink)">
             <lib-icon [fillColor]="buttonIconColor" icon="map-5"></lib-icon>
           </button>
         </div>
@@ -109,5 +110,24 @@ export class WorkItemComponent implements OnInit {
         this.territoryUpdated.emit(updateDesignationTerritory);
       }
     });
+  }
+
+  handleOpenMaps(mapsLink: string) {
+    const agentBrowser = getAgentBrowser();
+
+    if (agentBrowser === BrowserEnum.CHROME) {
+      window.open(mapsLink);
+    } else if (agentBrowser === BrowserEnum.SAMSUNG) {
+      const mapsUrl = new URL(mapsLink);
+      const mapsHostAndPathname = mapsUrl.host + mapsUrl.pathname;
+      const mapsAndroidPackage = 'com.google.android.apps.maps';
+      window.open(
+        `intent://${mapsHostAndPathname}?entry=s&sa=X#Intent;scheme=http;package=${mapsAndroidPackage};` +
+          `S.browser_fallback_url=${mapsLink}%3Fentry%3Ds&sa%3DX;` +
+          `S.intent_description=${this.territory.address};end`
+      );
+    } else if (BrowserEnum.FIREFOX || BrowserEnum.SAFARI || BrowserEnum.UNKNOWN) {
+      window.open(mapsLink, '_blank');
+    }
   }
 }

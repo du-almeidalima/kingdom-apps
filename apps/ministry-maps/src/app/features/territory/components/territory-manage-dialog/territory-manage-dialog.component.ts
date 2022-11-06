@@ -15,6 +15,7 @@ export type TerritoryDialogData = {
 type TerritoryForm = {
   city: FormControl<string>;
   address: FormControl<string>;
+  mapsLink: FormControl<string | undefined>;
   icon: FormControl<TerritoryIcon>;
 };
 
@@ -45,6 +46,10 @@ type TerritoryForm = {
           <label lib-label for="congregation-address">Endereço</label>
           <input lib-input formControlName="address" type="text" id="congregation-address" />
         </lib-form-field>
+        <lib-form-field class="mt-5">
+          <label lib-label for="congregation-maps-link">Link do Maps</label>
+          <input lib-input formControlName="mapsLink" type="text" id="congregation-maps-link" autocomplete="off" />
+        </lib-form-field>
       </form>
       <lib-dialog-footer>
         <div class="flex justify-end gap-4">
@@ -72,12 +77,13 @@ export class TerritoryManageDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const fb = new FormBuilder().nonNullable;
+    const fb = new FormBuilder();
 
     this.form = fb.group({
-      city: fb.control(this.data.cities[0], { validators: [Validators.required] }),
-      address: fb.control('', { validators: [Validators.required] }),
-      icon: fb.control(this.territoryIcons[0], { validators: [Validators.required] }),
+      city: fb.control(this.data.cities[0], { validators: [Validators.required], nonNullable: true }),
+      icon: fb.control(this.territoryIcons[0], { validators: [Validators.required], nonNullable: true }),
+      address: fb.control('', { validators: [Validators.required], nonNullable: true }),
+      mapsLink: fb.control<string | undefined>(undefined, { nonNullable: true }),
     });
 
     if (this.data.territory) {

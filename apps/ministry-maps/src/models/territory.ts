@@ -11,6 +11,7 @@ export type Territory = {
   id: string;
   city: string;
   address: string;
+  mapsLink?: string;
   congregationId: string;
   icon: TerritoryIcon;
   lastVisit?: Date;
