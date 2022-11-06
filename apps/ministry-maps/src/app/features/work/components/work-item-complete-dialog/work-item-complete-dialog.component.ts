@@ -52,7 +52,7 @@ type WorkItemCompleteForm = ControlsOf<WorkItemCompleteDialogData>;
           </textarea>
         </lib-form-field>
       </form>
-      <lib-dialog-footer>
+      <lib-dialog-footer class="sticky bottom-0 left-0 right-0">
         <div class="flex justify-end gap-4">
           <button lib-button (click)="handleCancel()">Cancelar</button>
           <button lib-button btnType="primary" type="submit" form="work-item-complete">Concluir</button>
