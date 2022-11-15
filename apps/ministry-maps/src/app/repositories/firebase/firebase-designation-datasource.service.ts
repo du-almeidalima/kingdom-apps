@@ -3,8 +3,24 @@ import { addDoc, collection, CollectionReference, doc, docData, Firestore, updat
 import { from, Observable, switchMap, take } from 'rxjs';
 
 import { Designation } from '../../../models/designation';
+import {
+  FirebaseDesignationModel
+} from '../../../models/firebase/firebase-designation-territory-model';
 import { firebaseEntityConverterFactory } from '../../shared/utils/firebase-entity-converter';
 import { DesignationRepository } from '../designation.repository';
+
+const convertHistoryDateFirebaseTimestampToDate = (data: FirebaseDesignationModel): Designation => {
+  return {
+    ...data,
+    territories: data.territories.map(t => ({
+      ...t,
+      history: t.history.map(h => ({
+        ...h,
+        date: h.date.toDate(),
+      })),
+    })),
+  };
+};
 
 @Injectable({
   providedIn: 'root',
@@ -15,12 +31,12 @@ export class FirebaseDesignationDatasourceService implements DesignationReposito
 
   constructor(private readonly firestore: Firestore) {
     this.designationCollection = collection(this.firestore, this.collectionName).withConverter<Designation>(
-      firebaseEntityConverterFactory<Designation>()
+      firebaseEntityConverterFactory<Designation>(convertHistoryDateFirebaseTimestampToDate)
     );
   }
 
   getById(id: string): Observable<Designation | undefined> {
-    const designationDocReference = doc(this.firestore, `${this.collectionName}/${id}`);
+    const designationDocReference = doc(this.designationCollection, `${id}`);
 
     return docData(designationDocReference, {
       idField: 'id',

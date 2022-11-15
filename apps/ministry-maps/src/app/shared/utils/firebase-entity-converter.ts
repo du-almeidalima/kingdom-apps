@@ -1,7 +1,7 @@
 import { FirestoreDataConverter } from '@firebase/firestore';
 import { DocumentData, QueryDocumentSnapshot, SnapshotOptions } from '@angular/fire/firestore';
 
-type CustomConverterFunction<T> = (data: T) => object;
+type CustomConverterFunction<T> = (data: any) => T | Partial<T>;
 
 export const convertFirebaseTimestampToDateFactory = (field: string) => {
   return (data: any) => ({
