@@ -4,6 +4,7 @@ import { ControlValueAccessor, NgControl } from '@angular/forms';
 import { grey400, Icons } from '@kingdom-apps/common';
 
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
+import { VisitOutcomeToIconPipe } from '../../../../shared/pipes/visit-outcome-to-icon/visit-outcome-to-icon.pipe';
 
 @Component({
   selector: 'kingdom-apps-visit-outcome-option',
@@ -43,7 +44,7 @@ export class VisitOutcomeOptionComponent implements OnInit, ControlValueAccessor
   @Input()
   value!: VisitOutcomeEnum;
 
-  constructor(@Self() private ngControl: NgControl) {
+  constructor(@Self() private ngControl: NgControl, private readonly visitOutcomeToIcon: VisitOutcomeToIconPipe) {
     ngControl.valueAccessor = this;
   }
 
@@ -54,7 +55,7 @@ export class VisitOutcomeOptionComponent implements OnInit, ControlValueAccessor
   };
 
   ngOnInit(): void {
-    this.optionIcon = this.visitOutcomeToIcon(this.value);
+    this.optionIcon = this.visitOutcomeToIcon.transform(this.value);
 
     // Looks like Reactive Forms doesn't call writeValue on model changes.
     // Doing this work manually here.
@@ -83,20 +84,6 @@ export class VisitOutcomeOptionComponent implements OnInit, ControlValueAccessor
 
   writeValue(value: VisitOutcomeEnum): void {
     this.modelValue = value;
-  }
-
-  // Methods
-  visitOutcomeToIcon(visitOutcome: VisitOutcomeEnum): Icons {
-    switch (visitOutcome) {
-      case VisitOutcomeEnum.SPOKE:
-        return 'thumb-10';
-      case VisitOutcomeEnum.NOT_ANSWERED:
-        return 'thumb-12';
-      case VisitOutcomeEnum.MOVED:
-        return 'building-8';
-      case VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN:
-        return 'stop-2';
-    }
   }
 
   /**

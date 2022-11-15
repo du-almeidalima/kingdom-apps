@@ -13,5 +13,6 @@ import { VisitOutcomeToIconPipe } from './pipes/visit-outcome-to-icon/visit-outc
   declarations: [HeaderComponent, TerritoryIconTranslatorPipe, VisitOutcomeToIconPipe],
   imports: [CommonModule, CommonComponentsModule, RouterLinkWithHref, RouterLinkActive, MaterialCdkModule],
   exports: [HeaderComponent, CommonComponentsModule, TerritoryIconTranslatorPipe, VisitOutcomeToIconPipe],
+  providers: [VisitOutcomeToIconPipe]
 })
 export class SharedModule {}
