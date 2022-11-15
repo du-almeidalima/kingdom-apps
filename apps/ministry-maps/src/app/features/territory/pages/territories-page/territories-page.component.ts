@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { UserStateService } from '../../../../state/user.state.service';
-import { Observable, of } from 'rxjs';
+import { map, Observable, of, tap } from 'rxjs';
 import { Territory } from '../../../../../models/territory';
 import { green200, white200 } from '@kingdom-apps/common';
 import { Dialog } from '@angular/cdk/dialog';
@@ -18,9 +18,13 @@ import {
 export class TerritoriesPageComponent implements OnInit {
   public readonly green200 = green200;
   public readonly white200 = white200;
+  public readonly ALL_OPTION = 'ALL';
 
+  private $territories: Observable<Territory[]> = of([]);
+  public cities: string[] = [];
+  public selectedCity = this.ALL_OPTION;
   public isLoading = false;
-  public $territories: Observable<Territory[]> = of([]);
+  public $filteredTerritories: Observable<Territory[]> = of([]);
 
   constructor(
     private readonly territoryRepository: TerritoryRepository,
@@ -30,8 +34,15 @@ export class TerritoriesPageComponent implements OnInit {
 
   ngOnInit(): void {
     const userCongregationId = this.userState.currentUser?.congregation?.id;
+    this.cities = this.userState.currentUser?.congregation?.cities ?? [];
+    this.isLoading = true;
 
-    this.$territories = this.territoryRepository.getAllByCongregation(userCongregationId ?? '');
+    this.$territories = this.territoryRepository.getAllByCongregation(userCongregationId ?? '').pipe(
+      tap(() => {
+        this.isLoading = false;
+      })
+    );
+    this.$filteredTerritories = this.$territories.pipe(map(tArr => tArr));
   }
 
   handleOpenDialog(territory?: Territory) {
@@ -42,5 +53,17 @@ export class TerritoriesPageComponent implements OnInit {
         congregationId: this.userState.currentUser?.congregation?.id ?? '',
       },
     });
+  }
+
+  handleSelectedCityChange(city: string) {
+    this.$filteredTerritories = this.$territories.pipe(
+      map(tArr => {
+        if (city === this.ALL_OPTION) {
+          return [...tArr];
+        }
+
+        return tArr.filter(t => t.city === city);
+      })
+    );
   }
 }

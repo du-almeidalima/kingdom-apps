@@ -1,14 +1,25 @@
 <div class='container'>
   <h2 class='t-headline2 mb-8'>Territórios</h2>
+  <select
+    lib-select
+    class='w-full'
+    name='Cidade'
+    [ngModel]='selectedCity'
+    (ngModelChange)='handleSelectedCityChange($event)'>
+    <option [value]='city' *ngFor='let city of cities'>{{ city }}</option>
+    <option [value]='ALL_OPTION'>Todas</option>
+  </select>
 
-  <lib-card class='mb-3' *ngFor='let territory of $territories | async'>
-    <lib-card-body>
-      <h3 class='t-headline3'>{{territory.address}}</h3>
-      <p class='t-body1'>{{territory.city}}</p>
+  <section class='mt-8'>
+    <lib-card class='mb-3' *ngFor='let territory of $filteredTerritories | async'>
+      <lib-card-body>
+        <h3 class='t-headline3'>{{territory.address}}</h3>
+        <p class='t-body1'>{{territory.city}}</p>
 
-      <button lib-button (click)='handleOpenDialog(territory)'>Editar</button>
-    </lib-card-body>
-  </lib-card>
+        <button lib-button (click)='handleOpenDialog(territory)'>Editar</button>
+      </lib-card-body>
+    </lib-card>
+  </section>
 
   <button lib-floating-action-button [backgroundColor]="green200" title="Adicionar Território" (click)='handleOpenDialog()'>
     <lib-icon icon='plus-lined' [fillColor]='white200'></lib-icon>
