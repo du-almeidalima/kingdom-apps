@@ -11,6 +11,8 @@ export class TerritoryIconTranslatorPipe implements PipeTransform {
         return 'Homem';
       case TerritoryIcon.WOMAN:
         return 'Mulher';
+      case TerritoryIcon.COUPLE:
+        return 'Casal';
       case TerritoryIcon.CHILD:
         return 'Criança/Jovem';
       case TerritoryIcon.OTHER:

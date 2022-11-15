@@ -5,6 +5,7 @@ import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { Congregation } from '../../../../../models/congregation';
 import { Territory, TerritoryIcon } from '../../../../../models/territory';
+import { lastValueFrom, Observable } from 'rxjs';
 
 export type TerritoryDialogData = {
   territory?: Territory;
@@ -15,6 +16,7 @@ export type TerritoryDialogData = {
 type TerritoryForm = {
   city: FormControl<string>;
   address: FormControl<string>;
+  note: FormControl<string>;
   mapsLink: FormControl<string | undefined>;
   icon: FormControl<TerritoryIcon>;
 };
@@ -47,6 +49,16 @@ type TerritoryForm = {
           <input lib-input formControlName="address" type="text" id="congregation-address" />
         </lib-form-field>
         <lib-form-field class="mt-5">
+          <label lib-label for="note">Observação</label>
+          <textarea
+            lib-input
+            formControlName="note"
+            type="text"
+            id="note"
+            class="resize-y"
+            autocomplete="off"></textarea>
+        </lib-form-field>
+        <lib-form-field class="mt-5">
           <label lib-label for="congregation-maps-link">Link do Maps</label>
           <input lib-input formControlName="mapsLink" type="text" id="congregation-maps-link" autocomplete="off" />
         </lib-form-field>
@@ -54,7 +66,12 @@ type TerritoryForm = {
       <lib-dialog-footer>
         <div class="flex justify-end gap-4">
           <button lib-button (click)="handleCancel()">Cancelar</button>
-          <button lib-button btnType="primary" type="submit" form="territory-form" [disabled]="!this.form.valid">
+          <button
+            lib-button
+            btnType="primary"
+            type="submit"
+            form="territory-form"
+            [disabled]="!this.form.valid || isSubmitting">
             {{ isEdit ? 'Salvar' : 'Adicionar' }}
           </button>
         </div>
@@ -64,6 +81,7 @@ type TerritoryForm = {
 })
 export class TerritoryManageDialogComponent implements OnInit {
   public readonly territoryIcons: TerritoryIcon[] = Object.values(TerritoryIcon);
+  public isSubmitting = false;
 
   isEdit: boolean;
   form!: FormGroup<TerritoryForm>;
@@ -83,6 +101,7 @@ export class TerritoryManageDialogComponent implements OnInit {
       city: fb.control(this.data.cities[0], { validators: [Validators.required], nonNullable: true }),
       icon: fb.control(this.territoryIcons[0], { validators: [Validators.required], nonNullable: true }),
       address: fb.control('', { validators: [Validators.required], nonNullable: true }),
+      note: fb.control('', { nonNullable: true }),
       mapsLink: fb.control<string | undefined>(undefined, { nonNullable: true }),
     });
 
@@ -91,7 +110,7 @@ export class TerritoryManageDialogComponent implements OnInit {
     }
   }
 
-  handleSubmission() {
+  async handleSubmission() {
     let territory: Omit<Territory, 'id'>;
 
     if (this.data.territory) {
@@ -107,7 +126,19 @@ export class TerritoryManageDialogComponent implements OnInit {
       };
     }
 
-    this.territoriesRepository.add(territory);
+    this.isSubmitting = true;
+
+    const requestPromise: Observable<unknown> = this.data.territory
+      ? this.territoriesRepository.update({ ...territory, id: this.data.territory.id })
+      : this.territoriesRepository.add(territory);
+
+    lastValueFrom(requestPromise)
+      .then(() => {
+        this.dialogRef.close();
+      })
+      .finally(() => {
+        this.isSubmitting = false;
+      });
   }
 
   // TODO: Refactor the basic dialog logic into a base class
