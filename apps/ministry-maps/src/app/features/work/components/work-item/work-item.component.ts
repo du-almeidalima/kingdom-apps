@@ -12,6 +12,7 @@ import { DesignationTerritory } from '../../../../../models/designation';
 import { DesignationStatusEnum } from '../../../../../models/enums/designation-status';
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
 import { BrowserEnum, getAgentBrowser } from '../../../../shared/utils/user-agent';
+import { WorkItemHistoryDialogComponent } from '../work-item-history-dialog/work-item-history-dialog.component';
 
 @Component({
   selector: 'kingdom-apps-work-item',
@@ -43,11 +44,11 @@ import { BrowserEnum, getAgentBrowser } from '../../../../shared/utils/user-agen
           <span class="work-item__address-city">{{ territory.city }}</span>
         </div>
         <div class="work-item__buttons-container">
-          <button class="work-item__button">
-            <lib-icon [fillColor]="buttonIconColor" icon="time-17"></lib-icon>
-          </button>
           <button class="work-item__button" *ngIf="territory.mapsLink" (click)="handleOpenMaps(territory.mapsLink)">
             <lib-icon [fillColor]="buttonIconColor" icon="map-5"></lib-icon>
+          </button>
+          <button class="work-item__button" *ngIf="territory.history && territory.history.length > 0">
+            <lib-icon [fillColor]="buttonIconColor" icon="time-17" (click)="handleOpenHistory()"></lib-icon>
           </button>
         </div>
       </div>
@@ -129,5 +130,11 @@ export class WorkItemComponent implements OnInit {
     } else if (BrowserEnum.FIREFOX || BrowserEnum.SAFARI || BrowserEnum.UNKNOWN) {
       window.open(mapsLink, '_blank');
     }
+  }
+
+  handleOpenHistory() {
+    this.dialog.open<WorkItemHistoryDialogComponent, TerritoryVisitHistory[]>(WorkItemHistoryDialogComponent, {
+      data: this.territory.history ?? [],
+    });
   }
 }

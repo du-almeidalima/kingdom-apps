@@ -28,9 +28,6 @@ export class AssignTerritoriesPageComponent implements OnInit {
   selectedTerritoriesModel = new Set<string>();
   assignedTerritories = new Set<string>();
 
-  @ViewChild('hiddenSharedLink')
-  private hiddenShareAnchorElement!: ElementRef<HTMLAnchorElement>;
-
   constructor(
     private readonly territoryRepository: TerritoryRepository,
     private readonly designationRepository: DesignationRepository,

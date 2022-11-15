@@ -1,0 +1,39 @@
+@use '@kingdom-apps/styles/abstract/variables';
+@use '@kingdom-apps/styles/base/typography';
+
+:host {
+  display: block;
+  max-width: 90vw;
+}
+
+.work-item-history {
+  $icon-size: 2rem;
+  $header-gap: 1rem;
+
+  display: flex;
+  flex-flow: column;
+  gap: 1rem;
+
+  padding: 1rem;
+
+  &:not(:first-of-type) {
+    border-top: 1px solid variables.$light-grey-100;
+  }
+
+  &__header {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: $header-gap;
+  }
+
+  &__icon {
+    height: $icon-size;
+    width: $icon-size;
+  }
+
+  &__note {
+    @extend .t-caption;
+    margin-left: $icon-size + $header-gap;
+  }
+}

@@ -110,6 +110,7 @@ export class TerritoryManageDialogComponent implements OnInit {
     this.territoriesRepository.add(territory);
   }
 
+  // TODO: Refactor the basic dialog logic into a base class
   handleCancel() {
     this.dialogRef.close();
   }

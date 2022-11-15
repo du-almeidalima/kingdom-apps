@@ -85,7 +85,7 @@ export class WorkItemCompleteDialogComponent implements OnInit {
       this.form.patchValue(this.data);
     }
   }
-
+  // TODO: Refactor the basic dialog logic into a base class
   handleCancel() {
     this.dialogRef.close();
   }

@@ -91,7 +91,7 @@
   &__buttons-container {
     align-self: flex-start;
     display: flex;
-    flex-flow: row nowrap;
+    flex-flow: column nowrap;
     justify-content: center;
     align-items: center;
     gap: .5rem;
@@ -111,6 +111,7 @@
     border-radius: 50%;
 
     background-color: transparent;
+    cursor: pointer;
 
     &:hover, &:active, &:focus {
       background-color: lighten(variables.$grey-100, 50%);
