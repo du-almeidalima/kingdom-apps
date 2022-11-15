@@ -64,9 +64,15 @@
 
   &__icon {
     $size: 3rem;
+    $large-size: 5rem;
 
     height: $size;
     width: $size;
+
+    &--large {
+      height: $large-size;
+      width: $large-size;
+    }
   }
 
   &__address-container {

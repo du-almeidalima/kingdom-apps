@@ -37,7 +37,11 @@ import { WorkItemHistoryDialogComponent } from '../work-item-history-dialog/work
       <!-- Content -->
       <div class="work-item__container">
         <div class="work-item__icon-container">
-          <lib-icon class="work-item__icon" [fillColor]="iconColor" [icon]="icon"></lib-icon>
+          <lib-icon
+            class="work-item__icon"
+            [ngClass]="{ 'work-item__icon--large': isIconLarge(icon) }"
+            [fillColor]="iconColor"
+            [icon]="icon"></lib-icon>
         </div>
         <div class="work-item__address-container">
           <h3 class="work-item__address-street">{{ territory.address }}</h3>
@@ -82,6 +86,10 @@ export class WorkItemComponent implements OnInit {
         return 'generation-3';
       case TerritoryIcon.WOMAN:
         return 'generation-12';
+      case TerritoryIcon.COUPLE:
+        return 'generation-couple';
+      case TerritoryIcon.CHILD:
+        return 'generation-7';
       default:
         return 'generation-3';
     }
@@ -140,5 +148,9 @@ export class WorkItemComponent implements OnInit {
     this.dialog.open<WorkItemHistoryDialogComponent, TerritoryVisitHistory[]>(WorkItemHistoryDialogComponent, {
       data: this.territory.history ?? [],
     });
+  }
+
+  isIconLarge(icon: Icons) {
+    return icon === 'generation-couple';
   }
 }
