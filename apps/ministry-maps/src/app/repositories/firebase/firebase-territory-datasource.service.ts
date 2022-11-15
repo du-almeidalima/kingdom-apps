@@ -23,6 +23,7 @@ import {
 import { TerritoryRepository } from '../territories.repository';
 import { Territory } from '../../../models/territory';
 import { TerritoryVisitHistory } from '../../../models/territory-visit-history';
+import { removeUndefinedKeys } from '../../shared/utils/remove-undefined-keys';
 
 @Injectable({
   providedIn: 'root',
@@ -103,9 +104,11 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
     const territoryDocRef = doc(this.territoriesCollection, `${territory.id}`);
     // History will be a collection in FireStore
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { history, ...territoryWithoutHistory } = {
+    const { history, lastVisit, ...territoryWithoutHistory } = {
       ...territory,
     };
+
+    removeUndefinedKeys(territoryWithoutHistory);
 
     return from(updateDoc(territoryDocRef, { ...territoryWithoutHistory }));
   }
