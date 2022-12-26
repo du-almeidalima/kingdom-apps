@@ -1,5 +1,5 @@
-@use '@kingdom-apps/styles/abstract/variables';
-@use '@kingdom-apps/styles/base/typography';
+@use 'libs/common/src/lib/styles/abstract/variables';
+@use 'libs/common/src/lib/styles/base/typography';
 
 :host {
   display: block;

@@ -1,5 +1,5 @@
-@use '@kingdom-apps/styles/components' as *;
-@use '@kingdom-apps/styles/abstract/variables';
+@use 'libs/common/src/lib/styles/components' as *;
+@use 'libs/common/src/lib/styles/abstract/variables';
 
 kingdom-apps-visit-outcome-option {
   display: block;
