@@ -1,22 +1,13 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { CardComponent } from './card.component';
+import { render, screen } from '@testing-library/angular';
 
 describe('CardComponent', () => {
-  let component: CardComponent;
-  let fixture: ComponentFixture<CardComponent>;
+  test('should render card', async () => {
+    const text = `<h1>This text should be projected</h1>`;
+    await render(`<lib-card>${text}</lib-card>`, { declarations: [CardComponent] });
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [CardComponent],
-    }).compileComponents();
+    const textHeading = screen.getByRole('heading');
 
-    fixture = TestBed.createComponent(CardComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
+    expect(textHeading).toBeInTheDocument();
   });
 });
