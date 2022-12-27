@@ -1,4 +1,5 @@
 {
+  "name": "ministry-maps-e2e",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/ministry-maps-e2e/src",
   "projectType": "application",
@@ -18,18 +19,12 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "apps/ministry-maps-e2e/**/*.{js,ts}"
-        ]
+        "lintFilePatterns": ["apps/ministry-maps-e2e/**/*.{js,ts}"]
       }
     }
   },
   "tags": [],
-  "implicitDependencies": [
-    "ministry-maps"
-  ]
+  "implicitDependencies": ["ministry-maps"]
 }

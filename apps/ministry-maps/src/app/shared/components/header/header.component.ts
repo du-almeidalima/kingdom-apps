@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { primaryGreen } from '@kingdom-apps/common';
+import { primaryGreen } from '@kingdom-apps/common-ui';
 import { FeatureRoutesEnum } from '../../../app-routes.module';
 
 @Component({

@@ -9,7 +9,7 @@ import { getRemoteConfig, provideRemoteConfig } from '@angular/fire/remote-confi
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterOutlet } from '@angular/router';
 
-import { CommonComponentsModule } from '@kingdom-apps/common';
+import { CommonComponentsModule } from '@kingdom-apps/common-ui';
 
 import { environment } from '../environments/environment';
 import { AppRoutesModule } from './app-routes.module';

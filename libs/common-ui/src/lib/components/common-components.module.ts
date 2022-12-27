@@ -49,4 +49,5 @@ import { DialogFooterComponent } from './dialog/dialog-footer/dialog-footer.comp
     DialogFooterComponent,
   ],
 })
-export class CommonComponentsModule {}
+export class CommonComponentsModule {
+}

@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, Self, ViewEncapsulation } from '@angular/core';
 import { ControlValueAccessor, NgControl } from '@angular/forms';
 
-import { grey400, Icons } from '@kingdom-apps/common';
+import { grey400, Icons } from '@kingdom-apps/common-ui';
 
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 import { VisitOutcomeToIconPipe } from '../../../../shared/pipes/visit-outcome-to-icon/visit-outcome-to-icon.pipe';

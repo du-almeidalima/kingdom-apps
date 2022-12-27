@@ -3,7 +3,7 @@ import { TerritoryRepository } from '../../../../repositories/territories.reposi
 import { UserStateService } from '../../../../state/user.state.service';
 import { map, Observable, of, tap } from 'rxjs';
 import { Territory } from '../../../../../models/territory';
-import { green200, white200 } from '@kingdom-apps/common';
+import { green200, white200 } from '@kingdom-apps/common-ui';
 import { Dialog } from '@angular/cdk/dialog';
 import {
   TerritoryDialogData,

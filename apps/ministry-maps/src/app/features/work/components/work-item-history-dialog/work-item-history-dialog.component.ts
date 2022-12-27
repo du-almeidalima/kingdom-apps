@@ -1,7 +1,7 @@
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 
-import { grey400 } from '@kingdom-apps/common';
+import { grey400 } from '@kingdom-apps/common-ui';
 
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
 

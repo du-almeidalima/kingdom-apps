@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 
-import { CommonComponentsModule } from '@kingdom-apps/common';
+import { CommonComponentsModule } from '@kingdom-apps/common-ui';
 
 import { LoginPageComponent } from './pages/login-page/login-page.component';
 import { AuthRepository } from './repositories/auth.repository';

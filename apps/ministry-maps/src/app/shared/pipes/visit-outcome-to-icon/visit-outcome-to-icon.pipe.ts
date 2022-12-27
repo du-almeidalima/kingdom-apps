@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-import { Icons } from '@kingdom-apps/common';
+import { Icons } from '@kingdom-apps/common-ui';
 
 import { VisitOutcomeEnum } from '../../../../models/enums/visit-outcome';
 

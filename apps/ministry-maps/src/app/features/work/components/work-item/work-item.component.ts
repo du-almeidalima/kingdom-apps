@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 
-import { grey400, Icons, primaryGreen } from '@kingdom-apps/common';
+import { grey400, Icons, primaryGreen } from '@kingdom-apps/common-ui';
 
 import { TerritoryIcon } from '../../../../../models/territory';
 import {

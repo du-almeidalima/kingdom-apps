@@ -30,7 +30,7 @@ import { white200 } from '../../styles/abstract/variables';
   `,
 })
 export class IconComponent {
-  private readonly assetsFolderPath = '/assets/common/icons/sprite.svg';
+  private readonly assetsFolderPath = '/assets/common-ui/icons/sprite.svg';
 
   iconUrl = `${this.assetsFolderPath}#iconmonstr-task-list-lined`;
 

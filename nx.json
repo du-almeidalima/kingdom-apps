@@ -1,9 +1,6 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "npmScope": "kingdom-apps",
-  "affected": {
-    "defaultBase": "main"
-  },
   "tasksRunnerOptions": {
     "default": {
       "runner": "@nrwl/nx-cloud",
@@ -14,7 +11,7 @@
           "test",
           "e2e"
         ],
-        "accessToken": "MTMwZjZiMzQtZWEyYS00MGQxLTljNjgtOWY3OGJhMDc3NTJhfHJlYWQtd3JpdGU="
+        "accessToken": "Mjc4MzE5MGQtNTMwYS00MTJhLTlkZjUtN2ExNjJjNDg1ZjBmfHJlYWQtd3JpdGU="
       }
     }
   },

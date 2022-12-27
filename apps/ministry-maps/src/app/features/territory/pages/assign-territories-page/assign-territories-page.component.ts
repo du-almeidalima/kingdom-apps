@@ -1,7 +1,7 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Observable, of, switchMap } from 'rxjs';
 
-import { green200, white200 } from '@kingdom-apps/common';
+import { green200, white200 } from '@kingdom-apps/common-ui';
 
 import { Territory } from '../../../../../models/territory';
 import { Designation, DesignationTerritory } from '../../../../../models/designation';
