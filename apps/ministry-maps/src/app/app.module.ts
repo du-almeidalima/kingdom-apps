@@ -1,4 +1,4 @@
-import { APP_INITIALIZER, NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule, isDevMode } from '@angular/core';
 import { getAnalytics, provideAnalytics, ScreenTrackingService, UserTrackingService } from '@angular/fire/analytics';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
@@ -18,6 +18,7 @@ import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
 import { RepositoriesModule } from './repositories/repositories.module';
 import { SharedModule } from './shared/shared.module';
+import { ServiceWorkerModule } from '@angular/service-worker';
 
 @NgModule({
   declarations: [AppComponent],
@@ -36,6 +37,11 @@ import { SharedModule } from './shared/shared.module';
     CoreModule,
     CommonComponentsModule,
     SharedModule,
+    ServiceWorkerModule.register('ngsw-worker.js', {
+      // Register the ServiceWorker as soon as the application is stable
+      // or after 30 seconds (whichever comes first).
+      registrationStrategy: 'registerWhenStable:30000'
+    }),
   ],
   providers: [
     ScreenTrackingService,
