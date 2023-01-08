@@ -1,10 +1,12 @@
-<div class='container' style='width: 50vw; margin: 10rem auto auto auto'>
+<div class='container'>
   <lib-card>
-    <h1>Login</h1>
+    <h1 class='mb-10'>Login</h1>
 
-    <div style='display: flex; justify-content: space-between; flex-flow: column; gap: 1rem'>
-      <button (click)='onGoogleClick()'>Google</button>
-      <button>Facebook</button>
+    <div class='flex justify-between flex-col gap-5'>
+      <button class='login-button' (click)='onGoogleClick()'>
+        <img src='https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg' alt='Google' />
+        <span class='login-button__text t-body2'>Entrar com uma conta do Google</span>
+      </button>
     </div>
   </lib-card>
 </div>

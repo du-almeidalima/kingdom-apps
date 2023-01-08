@@ -1,0 +1,16 @@
+@use "libs/common-ui/src/lib/styles/abstract/variables";
+
+.login-button {
+  display: grid;
+  grid-template-columns: 4rem 1fr;
+  align-items: center;
+
+  border: 1px solid variables.$light-grey-100;
+  padding: 1rem 2rem;
+
+  cursor: pointer;
+
+  &__text {
+    text-align: start;
+  }
+}
