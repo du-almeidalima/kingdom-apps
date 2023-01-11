@@ -22,6 +22,7 @@
         "assets": [
           "apps/ministry-maps/src/favicon.ico",
           "apps/ministry-maps/src/assets",
+          "apps/ministry-maps/src/manifest.webmanifest",
           {
             "input": "libs/common-ui/src/assets",
             "glob": "**/*",
