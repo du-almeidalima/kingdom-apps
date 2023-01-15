@@ -84,9 +84,20 @@
     gap: 1rem;
   }
 
+  &__address-street-container {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    gap: .5rem;
+  }
+
   &__address-street {
     @extend .t-body2;
     font-weight: 500;
+  }
+
+  &__address-street-note {
+    @extend .t-caption;
   }
 
   &__address-city {

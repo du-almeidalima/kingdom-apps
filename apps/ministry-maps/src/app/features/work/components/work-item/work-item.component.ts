@@ -44,7 +44,10 @@ import { WorkItemHistoryDialogComponent } from '../work-item-history-dialog/work
             [icon]="icon"></lib-icon>
         </div>
         <div class="work-item__address-container">
-          <h3 class="work-item__address-street">{{ territory.address }}</h3>
+          <div class='work-item__address-street-container'>
+            <h3 class="work-item__address-street">{{ territory.address }}</h3>
+            - <span class='work-item__address-street-note'>{{ territory.note }}</span>
+          </div>
           <span class="work-item__address-city">{{ territory.city }}</span>
         </div>
         <div class="work-item__buttons-container">
