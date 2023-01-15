@@ -4,6 +4,7 @@ import {
   collection,
   collectionData,
   CollectionReference,
+  deleteDoc,
   doc,
   documentId,
   Firestore,
@@ -111,6 +112,11 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
     removeUndefinedKeys(territoryWithoutHistory);
 
     return from(updateDoc(territoryDocRef, { ...territoryWithoutHistory }));
+  }
+
+  delete(id: string): Observable<void> {
+    const deletePromise = deleteDoc(doc(this.territoriesCollection, id));
+    return from(deletePromise);
   }
 
   addVisitHistory(territoryId: string, visitHistory: TerritoryVisitHistory): Observable<void> {

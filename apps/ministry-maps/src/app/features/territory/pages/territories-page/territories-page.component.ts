@@ -9,6 +9,7 @@ import {
   TerritoryDialogData,
   TerritoryManageDialogComponent,
 } from '../../components/territory-manage-dialog/territory-manage-dialog.component';
+import { TerritoryDeleteDialogComponent } from '../../components/territory-delete-dialog/territory-delete-dialog.component';
 
 @Component({
   selector: 'kingdom-apps-territories-page',
@@ -65,5 +66,11 @@ export class TerritoriesPageComponent implements OnInit {
         return tArr.filter(t => t.city === city);
       })
     );
+  }
+
+  handleRemoveTerritory(territoryId: string) {
+    this.dialog.open<object, TerritoryDialogData>(TerritoryDeleteDialogComponent).closed.subscribe(result => {
+      if (result) this.territoryRepository.delete(territoryId);
+    });
   }
 }

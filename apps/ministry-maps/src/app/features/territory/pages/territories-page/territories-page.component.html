@@ -11,17 +11,19 @@
   </select>
 
   <section class='mt-8'>
-    <lib-card class='mb-3' *ngFor='let territory of $filteredTerritories | async'>
-      <lib-card-body>
-        <h3 class='t-headline3'>{{territory.address}}</h3>
-        <p class='t-body1'>{{territory.city}}</p>
-
-        <button lib-button (click)='handleOpenDialog(territory)'>Editar</button>
-      </lib-card-body>
-    </lib-card>
+    <kingdom-apps-territory-list-item
+      class='mb-3'
+      *ngFor='let territory of $filteredTerritories | async'
+      [territory]='territory'
+      (edit)='handleOpenDialog($event)'
+      (remove)='handleRemoveTerritory($event)'
+    >
+    </kingdom-apps-territory-list-item>
   </section>
 
-  <button lib-floating-action-button [backgroundColor]="green200" title="Adicionar Território" (click)='handleOpenDialog()'>
+  <button lib-floating-action-button title='Adicionar Território'
+          [backgroundColor]='green200'
+          (click)='handleOpenDialog()'>
     <lib-icon icon='plus-lined' [fillColor]='white200'></lib-icon>
   </button>
 </div>

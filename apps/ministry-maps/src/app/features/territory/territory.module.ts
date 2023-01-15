@@ -8,6 +8,8 @@ import { AssignTerritoriesPageComponent } from './pages/assign-territories-page/
 import { TerritoriesPageComponent } from './pages/territories-page/territories-page.component';
 import { TerritoryRoutesModule } from './territory-routes.module';
 import { TerritoryCheckboxComponent } from './components/territory-checkbox/territory-checkbox.component';
+import { TerritoryListItemComponent } from './components/territory-list-item/territory-list-item.component';
+import { TerritoryDeleteDialogComponent } from './components/territory-delete-dialog/territory-delete-dialog.component';
 
 @NgModule({
   declarations: [
@@ -15,6 +17,8 @@ import { TerritoryCheckboxComponent } from './components/territory-checkbox/terr
     TerritoriesPageComponent,
     TerritoryCheckboxComponent,
     TerritoryManageDialogComponent,
+    TerritoryListItemComponent,
+    TerritoryDeleteDialogComponent,
   ],
   imports: [CommonModule, TerritoryRoutesModule, SharedModule, ReactiveFormsModule, FormsModule],
 })

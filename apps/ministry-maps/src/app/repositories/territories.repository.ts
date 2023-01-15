@@ -13,5 +13,7 @@ export abstract class TerritoryRepository {
 
   abstract update(territory: Territory): Observable<void>;
 
+  abstract delete(id: string): Observable<void>;
+
   abstract addVisitHistory(territoryId: string, visitHistory: TerritoryVisitHistory): Observable<void>;
 }
