@@ -2,9 +2,10 @@
 
 .login-button {
   display: grid;
-  grid-template-columns: 4rem 1fr;
+  grid-template-columns: 4rem 1fr 1.5rem;
   align-items: center;
 
+  height: 5rem;
   border: 1px solid variables.$light-grey-100;
   padding: 1rem 2rem;
 
