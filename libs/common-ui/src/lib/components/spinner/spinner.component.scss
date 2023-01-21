@@ -1,0 +1,31 @@
+@use "libs/common-ui/src/lib/styles/abstract/variables";
+
+:host {
+  --width: 2rem;
+  --height: 2rem;
+
+  display: block;
+}
+
+.spinner {
+  width: var(--width);
+  height: var(--height);
+}
+
+.spinner__inner-block {
+  height: 100%;
+  border-radius: 100%;
+  border: 3px solid variables.$primary-green;
+  border-bottom-color: transparent;
+
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

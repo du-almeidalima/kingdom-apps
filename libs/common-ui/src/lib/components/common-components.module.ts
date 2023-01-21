@@ -15,6 +15,7 @@ import { LabelComponent } from './form-field/label/label.component';
 import { SelectComponent } from './form-field/select/select.component';
 import { DialogComponent } from './dialog/dialog.component';
 import { DialogFooterComponent } from './dialog/dialog-footer/dialog-footer.component';
+import { SpinnerComponent } from './spinner/spinner.component';
 
 @NgModule({
   imports: [CommonModule, RouterLinkActive, RouterLinkWithHref],
@@ -32,6 +33,7 @@ import { DialogFooterComponent } from './dialog/dialog-footer/dialog-footer.comp
     SelectComponent,
     DialogComponent,
     DialogFooterComponent,
+    SpinnerComponent,
   ],
   exports: [
     HeaderComponent,
@@ -47,7 +49,7 @@ import { DialogFooterComponent } from './dialog/dialog-footer/dialog-footer.comp
     SelectComponent,
     DialogComponent,
     DialogFooterComponent,
+    SpinnerComponent,
   ],
 })
-export class CommonComponentsModule {
-}
+export class CommonComponentsModule {}
