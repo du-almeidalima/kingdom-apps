@@ -8,7 +8,7 @@ if (environment.production) {
   enableProdMode();
 }
 
-console.log('>>> NX_API_URL', process.env['NX_API_URL']);
+console.log('>>> IS PRODUCTION', process.env['environment.production']);
 
 platformBrowserDynamic()
   .bootstrapModule(AppModule)

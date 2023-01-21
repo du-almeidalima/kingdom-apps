@@ -22,7 +22,10 @@
       ],
       "inputs": [
         "production",
-        "^production"
+        "^production",
+        {
+          "env": "NX_ENV"
+        }
       ]
     },
     "test": {
