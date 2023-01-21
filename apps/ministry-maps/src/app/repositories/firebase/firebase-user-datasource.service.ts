@@ -72,7 +72,6 @@ export class FirebaseUserDatasourceService implements UserRepository {
     const user: User = {
       ...partialUser,
       role: RoleEnum.PUBLISHER,
-      congregation: undefined,
     };
 
     const setPromise = setDoc(doc(this.usersCollection, user.id), user);
