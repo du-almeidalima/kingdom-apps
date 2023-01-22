@@ -61,6 +61,7 @@ export class FirebaseUserDatasourceService implements UserRepository {
               return { ...user, congregation: EMPTY_CONGREGATION };
             }
 
+            // Overriding congregation reference with congregation data
             return { ...user, congregation: { ...congregationDocSnapshot.data(), id: congregationDocSnapshot.id } };
           })
         );

@@ -13,7 +13,9 @@ import { AuthRepository } from '../auth.repository';
 import { User } from '../../../../../../models/user';
 import { RoleEnum } from '../../../../../../models/enums/role';
 import { UserRepository } from '../../../../../repositories/user.repository';
-import { doc, Firestore } from '@angular/fire/firestore';
+import { doc, DocumentReference, Firestore } from '@angular/fire/firestore';
+import { Congregation } from '../../../../../../models/congregation';
+import { FirebaseUserModel } from '../../../../../../models/firebase/firebase-user-model';
 
 export enum FIREBASE_PROVIDERS {
   'GOOGLE' = 'GOOGLE',
@@ -29,14 +31,15 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
   ) {}
 
   private createUser(partialUser: Pick<User, 'id' | 'name' | 'email' | 'photoUrl'>): Observable<User> {
-    const user: User = {
+    const user: FirebaseUserModel = {
       ...partialUser,
       role: RoleEnum.PUBLISHER,
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      congregationId: doc(this.firestore, '/congregations/cclEP8ueg2vd2JoG7OOl'),
+      congregation: doc(this.firestore, '/congregations/cclEP8ueg2vd2JoG7OOl') as DocumentReference<Congregation>,
     };
 
+    // Had to ignore due to incompatibility userRepository.put() and FirebaseUserModel
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     return this.userRepository.put(user);
   }
 
