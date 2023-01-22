@@ -12,10 +12,10 @@ import { from, Observable, of, switchMap, take } from 'rxjs';
 import { AuthRepository } from '../auth.repository';
 import { User } from '../../../../../../models/user';
 import { RoleEnum } from '../../../../../../models/enums/role';
-import { UserRepository } from '../../../../../repositories/user.repository';
 import { doc, DocumentReference, Firestore } from '@angular/fire/firestore';
 import { Congregation } from '../../../../../../models/congregation';
 import { FirebaseUserModel } from '../../../../../../models/firebase/firebase-user-model';
+import { FirebaseUserDatasourceService } from '../../../../../repositories/firebase/firebase-user-datasource.service';
 
 export enum FIREBASE_PROVIDERS {
   'GOOGLE' = 'GOOGLE',
@@ -26,7 +26,7 @@ export enum FIREBASE_PROVIDERS {
 export class FirebaseAuthDatasourceService implements AuthRepository {
   constructor(
     private readonly auth: Auth,
-    private readonly userRepository: UserRepository,
+    private readonly userRepository: FirebaseUserDatasourceService,
     private readonly firestore: Firestore
   ) {}
 
@@ -37,9 +37,6 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
       congregation: doc(this.firestore, '/congregations/cclEP8ueg2vd2JoG7OOl') as DocumentReference<Congregation>,
     };
 
-    // Had to ignore due to incompatibility userRepository.put() and FirebaseUserModel
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     return this.userRepository.put(user);
   }
 
