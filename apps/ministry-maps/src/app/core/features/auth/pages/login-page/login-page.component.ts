@@ -4,6 +4,8 @@ import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { FeatureRoutesEnum } from '../../../../../app-routes.module';
 import { finalize } from 'rxjs';
+import { RoleEnum } from '../../../../../../models/enums/role';
+import { AuthRoutesEnum } from '../../auth.module';
 
 @Component({
   selector: 'kingdom-apps-login-page',
@@ -20,8 +22,12 @@ export class LoginPageComponent {
     this.authService
       .signInWithProvider(FIREBASE_PROVIDERS.GOOGLE)
       .pipe(finalize(() => (this.loading = false)))
-      .subscribe(() => {
-        this.router.navigate([FeatureRoutesEnum.HOME]);
+      .subscribe(user => {
+        if (user.role === RoleEnum.PUBLISHER) {
+          this.router.navigate([AuthRoutesEnum.WELCOME]);
+        } else {
+          this.router.navigate([FeatureRoutesEnum.HOME]);
+        }
       });
   }
 }

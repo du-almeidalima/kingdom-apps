@@ -24,14 +24,29 @@ export class AuthGuard implements CanActivate {
     const { roles } = route.data;
 
     if (currentUser) {
+      // User with Publisher role can't access to any other guarded route
+      if (currentUser.role === RoleEnum.PUBLISHER && route.routeConfig?.path !== 'welcome') {
+        return this.router.createUrlTree(['welcome']);
+      }
+
+      // Maybe we need to take those special routes treatment to a different place, app initializer maybe?
+      // When the user was on the welcome page and a role was assigned to him, he will be redirected to the home page
+      if (route.routeConfig?.path === 'welcome' && currentUser.role !== RoleEnum.PUBLISHER) {
+        return this.router.createUrlTree(['home']);
+      }
+
       return currentUser?.role === RoleEnum.ADMIN || roles.includes(currentUser?.role);
     }
 
     return this.firebaseAuthDatasourceService.getUserFromAuthentication().pipe(
       map(user => {
         // User hasn't authenticated yet to this application
-        if (!currentUser) {
-          return this.router.createUrlTree(['/login'])
+        if (!user) {
+          return this.router.createUrlTree(['login']);
+        }
+
+        if (user.role === RoleEnum.PUBLISHER) {
+          return this.router.createUrlTree(['welcome']);
         }
 
         return user?.role === RoleEnum.ADMIN || roles.includes(user?.role);
