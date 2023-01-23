@@ -35,7 +35,11 @@ export class FirebaseUserDatasourceService implements UserRepository {
   ): Observable<Congregation | undefined> {
     return from(getDoc<Congregation>(congregation)).pipe(
       map(congregationDocSnapshot => {
-        return congregationDocSnapshot.data();
+        if (!congregationDocSnapshot.exists()) {
+          return undefined;
+        }
+
+        return { ...congregationDocSnapshot.data(), id: congregationDocSnapshot.id };
       })
     );
   }
