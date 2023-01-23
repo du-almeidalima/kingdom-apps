@@ -9,7 +9,7 @@ import {
   documentId,
   Firestore,
   getDoc,
-  getDocsFromServer,
+  getDocs,
   query,
   setDoc,
   updateDoc,
@@ -59,7 +59,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
   getAllInIds(ids: string[]) {
     const q = query(this.territoriesCollection, where(documentId(), 'in', ids));
 
-    return from(getDocsFromServer(q)).pipe(
+    return from(getDocs(q)).pipe(
       switchMap(territoriesSnapshot => {
         // Looping through each territory and resolving the history sub collection documents
         const territoriesObservables = territoriesSnapshot.docs.map(ts => {
@@ -71,7 +71,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
             path
           ) as CollectionReference<TerritoryVisitHistory>;
 
-          return from(getDocsFromServer(territoryVisitHistoryCollection)).pipe(
+          return from(getDocs(territoryVisitHistoryCollection)).pipe(
             map(territoryVisitHistorySnapshots => {
               return {
                 ...territory,

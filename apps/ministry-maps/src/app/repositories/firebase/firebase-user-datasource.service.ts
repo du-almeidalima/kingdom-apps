@@ -8,7 +8,7 @@ import {
   doc,
   DocumentReference,
   Firestore,
-  getDocFromServer,
+  getDoc,
   setDoc,
 } from '@angular/fire/firestore';
 import { RoleEnum } from '../../../models/enums/role';
@@ -33,7 +33,7 @@ export class FirebaseUserDatasourceService implements UserRepository {
   private resolveUserCongregationReference(
     congregation: DocumentReference<Congregation>
   ): Observable<Congregation | undefined> {
-    return from(getDocFromServer<Congregation>(congregation)).pipe(
+    return from(getDoc<Congregation>(congregation)).pipe(
       map(congregationDocSnapshot => {
         return congregationDocSnapshot.data();
       })
@@ -43,7 +43,7 @@ export class FirebaseUserDatasourceService implements UserRepository {
   getById(id: string): Observable<User | undefined> {
     const userReference = doc(this.usersCollection, id);
 
-    const userRes = from(getDocFromServer<FirebaseUserModel>(userReference)).pipe(
+    const userRes = from(getDoc<FirebaseUserModel>(userReference)).pipe(
       map(userDocSnapshot => {
         return userDocSnapshot.data();
       })
