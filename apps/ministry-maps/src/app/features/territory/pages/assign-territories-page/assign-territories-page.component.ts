@@ -31,8 +31,9 @@ export class AssignTerritoriesPageComponent implements OnInit {
   constructor(
     private readonly territoryRepository: TerritoryRepository,
     private readonly designationRepository: DesignationRepository,
-    private readonly userState: UserStateService
-  ) {}
+    private readonly userState: UserStateService,
+  ) {
+  }
 
   ngOnInit(): void {
     const { id, cities } = this.userState.currentUser!.congregation!;
@@ -42,6 +43,16 @@ export class AssignTerritoriesPageComponent implements OnInit {
     this.cities = cities;
 
     this.fetchTerritories(id, firstCity);
+  }
+
+  /**
+   * Returns true if the territory has already been selected (checks the checkbox).
+   * It checks both the currently selected list or if it was already assigned to a designation.
+   * i.e. it's in the assignedTerritories Set.
+   * @param territoryId
+   */
+  hasAlreadyBeenSelected(territoryId: string): boolean {
+    return this.selectedTerritoriesModel.has(territoryId) || this.assignedTerritories.has(territoryId);
   }
 
   private fetchTerritories(congregationId: string, city: string) {
@@ -54,10 +65,12 @@ export class AssignTerritoriesPageComponent implements OnInit {
 
   handleTerritoryFormSubmit() {
     this.assignedTerritories = new Set([...this.selectedTerritoriesModel, ...this.assignedTerritories]);
+    const selectedTerritories = [...this.selectedTerritoriesModel.values()];
+    this.selectedTerritoriesModel.clear();
 
     // FIXME: This whole flow should not be responsibility of a component. It should be extracted to a service
     this.territoryRepository
-      .getAllInIds([...this.assignedTerritories.values()])
+      .getAllInIds(selectedTerritories)
       .pipe(
         switchMap(territories => {
           const designationTerritories: DesignationTerritory[] = territories.map(t => ({
@@ -70,7 +83,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
           };
 
           return this.designationRepository.add(newDesignation);
-        })
+        }),
       )
       .subscribe(designation => {
         this.shareDesignation(designation.id);

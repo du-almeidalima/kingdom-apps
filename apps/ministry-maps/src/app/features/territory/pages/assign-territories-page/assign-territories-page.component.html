@@ -17,7 +17,7 @@
         *ngFor='let territory of territories | async; trackBy: trackByRepositoryId'
         [territory]='territory'
         [name]='territory.id'
-        [ngModel]='selectedTerritoriesModel.has(territory.id)'
+        [ngModel]='hasAlreadyBeenSelected(territory.id)'
         [disabled]='assignedTerritories.has(territory.id)'
         (ngModelChange)='handleTerritoryCheck($event, territory.id)'>
       </kingdom-apps-territory-checkbox>
