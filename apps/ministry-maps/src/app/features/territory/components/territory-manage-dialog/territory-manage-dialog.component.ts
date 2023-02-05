@@ -133,11 +133,11 @@ export class TerritoryManageDialogComponent implements OnInit {
 
     this.isSubmitting = true;
 
-    const requestPromise: Observable<unknown> = this.data.territory
+    const territoryRequest$: Observable<unknown> = this.data.territory
       ? this.territoriesRepository.update({ ...territory, id: this.data.territory.id })
       : this.territoriesRepository.add(territory);
 
-    lastValueFrom(requestPromise)
+    lastValueFrom(territoryRequest$)
       .then(() => {
         this.dialogRef.close();
       })

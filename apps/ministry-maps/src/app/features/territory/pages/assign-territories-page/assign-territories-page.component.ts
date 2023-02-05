@@ -24,7 +24,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
 
   cities: string[] = [];
   selectedCity = '';
-  territories: Observable<Territory[]> = of([]);
+  territories$: Observable<Territory[]> = of([]);
   selectedTerritoriesModel = new Set<string>();
   assignedTerritories = new Set<string>();
 
@@ -57,7 +57,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
 
   private fetchTerritories(congregationId: string, city: string) {
     // This is the object that will be iterated, since we can't iterate through formGroup.controls...
-    this.territories =
+    this.territories$ =
       city === this.ALL_OPTION
         ? this.territoryRepository.getAllByCongregation(congregationId)
         : this.territoryRepository.getAllByCongregationAndCity(congregationId, city);

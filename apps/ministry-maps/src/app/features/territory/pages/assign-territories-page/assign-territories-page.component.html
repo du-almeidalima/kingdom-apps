@@ -14,7 +14,7 @@
   <form id='territory-form' (submit)='handleTerritoryFormSubmit()'>
     <div class='flex flex-col gap-5 mt-8'>
       <kingdom-apps-territory-checkbox
-        *ngFor='let territory of territories | async; trackBy: trackByRepositoryId'
+        *ngFor='let territory of territories$ | async; trackBy: trackByRepositoryId'
         [territory]='territory'
         [name]='territory.id'
         [ngModel]='hasAlreadyBeenSelected(territory.id)'

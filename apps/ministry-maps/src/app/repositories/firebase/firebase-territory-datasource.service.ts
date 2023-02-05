@@ -62,7 +62,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
     return from(getDocs(q)).pipe(
       switchMap(territoriesSnapshot => {
         // Looping through each territory and resolving the history sub collection documents
-        const territoriesObservables = territoriesSnapshot.docs.map(ts => {
+        const territories$ = territoriesSnapshot.docs.map(ts => {
           const territory = ts.data();
 
           const path = `${this.collectionName}/${territory.id}/${this.historySubCollectionName}`;
@@ -82,7 +82,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
         });
 
         // Combining all territoriesObservables into one array
-        return combineLatest(territoriesObservables);
+        return combineLatest(territories$);
       })
     );
   }
