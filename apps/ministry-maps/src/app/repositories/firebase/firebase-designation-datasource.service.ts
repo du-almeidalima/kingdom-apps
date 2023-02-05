@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
-import { addDoc, collection, CollectionReference, doc, docData, Firestore, updateDoc } from '@angular/fire/firestore';
+import { collection, CollectionReference, doc, docData, Firestore, setDoc, updateDoc } from '@angular/fire/firestore';
 import { from, Observable, switchMap, take } from 'rxjs';
 
 import { Designation } from '../../../models/designation';
-import {
-  FirebaseDesignationModel
-} from '../../../models/firebase/firebase-designation-territory-model';
+import { FirebaseDesignationModel } from '../../../models/firebase/firebase-designation-territory-model';
 import { firebaseEntityConverterFactory } from '../../shared/utils/firebase-entity-converter';
 import { DesignationRepository } from '../designation.repository';
 
@@ -44,9 +42,13 @@ export class FirebaseDesignationDatasourceService implements DesignationReposito
   }
 
   add(designation: Designation): Observable<Designation> {
-    return from(addDoc(this.designationCollection, designation)).pipe(
-      switchMap(designationDocReference => {
-        return docData(designationDocReference, { idField: 'id' }) as Observable<Designation>;
+    // Creating a reference to the new document, so we can get the id
+    const newDesignationDocRef = doc(this.designationCollection);
+    const newDesignation$ = from(setDoc(newDesignationDocRef, { ...designation, id: newDesignationDocRef.id }));
+
+    return newDesignation$.pipe(
+      switchMap(() => {
+        return docData(newDesignationDocRef, { idField: 'id' }) as Observable<Designation>;
       }),
       take(1)
     );

@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import {
-  addDoc,
   collection,
   collectionData,
   CollectionReference,
@@ -24,7 +23,6 @@ import {
 import { TerritoryRepository } from '../territories.repository';
 import { Territory } from '../../../models/territory';
 import { TerritoryVisitHistory } from '../../../models/territory-visit-history';
-import { removeUndefinedKeys } from '../../shared/utils/remove-undefined-keys';
 
 @Injectable({
   providedIn: 'root',
@@ -36,7 +34,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
 
   constructor(private readonly firestore: Firestore) {
     this.territoriesCollection = collection(this.firestore, this.collectionName).withConverter(
-      firebaseEntityConverterFactory<Territory>(convertFirebaseTimestampToDateFactory('lastVisit'))
+      firebaseEntityConverterFactory<Territory>(convertFirebaseTimestampToDateFactory('lastVisit')),
     ) as CollectionReference<Territory>;
   }
 
@@ -50,7 +48,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
     const q = query(
       this.territoriesCollection,
       where('congregationId', '==', congregationId),
-      where('city', '==', city)
+      where('city', '==', city),
     );
 
     return from(collectionData(q));
@@ -68,7 +66,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
           const path = `${this.collectionName}/${territory.id}/${this.historySubCollectionName}`;
           const territoryVisitHistoryCollection = collection(
             this.firestore,
-            path
+            path,
           ) as CollectionReference<TerritoryVisitHistory>;
 
           return from(getDocs(territoryVisitHistoryCollection)).pipe(
@@ -77,13 +75,13 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
                 ...territory,
                 history: territoryVisitHistorySnapshots.docs.map(visitHistorySnapshot => visitHistorySnapshot.data()),
               };
-            })
+            }),
           );
         });
 
         // Combining all territoriesObservables into one array
         return combineLatest(territories$);
-      })
+      }),
     );
   }
 
@@ -94,10 +92,16 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
       ...territory,
     };
 
-    return from(addDoc(this.territoriesCollection, territoryWithoutHistory)).pipe(
-      switchMap(territoryDocRef =>
-        from(getDoc(territoryDocRef)).pipe(map(territorySnapshot => territorySnapshot.data() as Territory))
-      )
+    const newTerritoryDocRef = doc(this.territoriesCollection);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    // Creating a reference to the new document, so we can get the id
+    const newTerritory$ = from(setDoc(newTerritoryDocRef, { ...territoryWithoutHistory, id: newTerritoryDocRef.id }));
+
+    return newTerritory$.pipe(
+      switchMap(() =>
+        from(getDoc(newTerritoryDocRef)).pipe(map(territorySnapshot => territorySnapshot.data() as Territory)),
+      ),
     );
   }
 
@@ -108,8 +112,6 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
     const { history, ...territoryWithoutHistory } = {
       ...territory,
     };
-
-    removeUndefinedKeys(territoryWithoutHistory);
 
     return from(updateDoc(territoryDocRef, { ...territoryWithoutHistory }));
   }

@@ -8,4 +8,6 @@ export type DesignationTerritory = Territory & {
 export type Designation = {
   id: string;
   territories: DesignationTerritory[];
+  createdAt: Date;
+  createdBy: string;
 };

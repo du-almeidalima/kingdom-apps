@@ -80,6 +80,8 @@ export class AssignTerritoriesPageComponent implements OnInit {
 
           const newDesignation: Omit<Designation, 'id'> = {
             territories: designationTerritories,
+            createdAt: new Date(),
+            createdBy: this.userState.currentUser!.id,
           };
 
           return this.designationRepository.add(newDesignation);
