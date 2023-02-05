@@ -105,7 +105,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
     const territoryDocRef = doc(this.territoriesCollection, `${territory.id}`);
     // History will be a collection in FireStore
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { history, lastVisit, ...territoryWithoutHistory } = {
+    const { history, ...territoryWithoutHistory } = {
       ...territory,
     };
 
