@@ -69,7 +69,9 @@ export class WorkItemCompleteDialogComponent implements OnInit {
   constructor(
     private readonly dialogRef: DialogRef,
     @Optional() @Inject(DIALOG_DATA) public readonly data: WorkItemCompleteDialogData
-  ) {}
+  ) {
+    this.dialogRef.disableClose = true;
+  }
 
   ngOnInit(): void {
     const fb = new FormBuilder().nonNullable;
