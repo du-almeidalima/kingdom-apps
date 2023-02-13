@@ -11,8 +11,8 @@ import {
 import { DesignationTerritory } from '../../../../../models/designation';
 import { DesignationStatusEnum } from '../../../../../models/enums/designation-status';
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
-import { BrowserEnum, getAgentBrowser } from '../../../../shared/utils/user-agent';
 import { WorkItemHistoryDialogComponent } from '../work-item-history-dialog/work-item-history-dialog.component';
+import openGoogleMapsHandler from '../../../../shared/utils/open-google-maps';
 
 @Component({
   selector: 'kingdom-apps-work-item',
@@ -126,26 +126,7 @@ export class WorkItemComponent implements OnInit {
   }
 
   handleOpenMaps(mapsLink: string) {
-    const agentBrowser = getAgentBrowser();
-
-    if (agentBrowser === BrowserEnum.CHROME) {
-      window.open(mapsLink, '_self');
-    } else if (agentBrowser === BrowserEnum.SAMSUNG) {
-      const mapAddress = `${this.territory.address}, ${this.territory.city}`;
-      const mapsUrl = new URL('https://www.google.com/maps/search/?api=1');
-      mapsUrl.searchParams.set('query', mapAddress);
-      const mapsAndroidPackage = 'com.google.android.apps.maps';
-
-      const mapsHostAndPathname = mapsUrl.host + mapsUrl.pathname + mapsUrl.search;
-
-      window.open(
-        `intent://${mapsHostAndPathname}#Intent;scheme=http;package=${mapsAndroidPackage};` +
-          `S.browser_fallback_url=${mapsLink}%3Fentry%3Ds&sa%3DX;` +
-          `S.intent_description=${this.territory.address};end`
-      );
-    } else if (BrowserEnum.FIREFOX || BrowserEnum.SAFARI || BrowserEnum.UNKNOWN) {
-      window.open(mapsLink, '_blank');
-    }
+    openGoogleMapsHandler(mapsLink, this.territory);
   }
 
   handleOpenHistory() {
