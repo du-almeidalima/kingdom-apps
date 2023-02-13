@@ -19,43 +19,43 @@ import { WorkItemHistoryDialogComponent } from '../work-item-history-dialog/work
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./work-item.component.scss'],
   template: `
-    <div class="work-item">
+    <div class='work-item'>
       <!-- Checkbox -->
       <label
-        class="work-item__checkbox-container"
-        title="Concluir visita"
+        class='work-item__checkbox-container'
+        title='Concluir visita'
         [ngClass]="{ 'work-item__checkbox-container--disabled': done }"
-        [for]="territory.id">
+        [for]='territory.id'>
         <input
-          class="work-item__checkbox"
-          type="checkbox"
-          [id]="territory.id"
-          [checked]="territory.status === DesignationStatusEnum.DONE"
-          [disabled]="done"
-          (click)="handleCheck($event)" />
+          class='work-item__checkbox'
+          type='checkbox'
+          [id]='territory.id'
+          [checked]='territory.status === DesignationStatusEnum.DONE'
+          [disabled]='done'
+          (click)='handleCheck($event)' />
       </label>
       <!-- Content -->
-      <div class="work-item__container">
-        <div class="work-item__icon-container">
+      <div class='work-item__container'>
+        <div class='work-item__icon-container'>
           <lib-icon
-            class="work-item__icon"
+            class='work-item__icon'
             [ngClass]="{ 'work-item__icon--large': isIconLarge(icon) }"
-            [fillColor]="iconColor"
-            [icon]="icon"></lib-icon>
+            [fillColor]='iconColor'
+            [icon]='icon'></lib-icon>
         </div>
-        <div class="work-item__address-container">
+        <div class='work-item__address-container'>
           <div class='work-item__address-street-container'>
-            <h3 class="work-item__address-street">{{ territory.address }}</h3>
+            <h3 class='work-item__address-street'>{{ territory.address }}</h3>
             - <span class='work-item__address-street-note'>{{ territory.note }}</span>
           </div>
-          <span class="work-item__address-city">{{ territory.city }}</span>
+          <span class='work-item__address-city'>{{ territory.city }}</span>
         </div>
-        <div class="work-item__buttons-container">
-          <button class="work-item__button" *ngIf="territory.mapsLink" (click)="handleOpenMaps(territory.mapsLink)">
-            <lib-icon [fillColor]="buttonIconColor" icon="map-5"></lib-icon>
+        <div class='work-item__buttons-container'>
+          <button class='list-item-button' *ngIf='territory.mapsLink' (click)='handleOpenMaps(territory.mapsLink)'>
+            <lib-icon [fillColor]='buttonIconColor' icon='map-5'></lib-icon>
           </button>
-          <button class="work-item__button" *ngIf="territory.history && territory.history.length > 0">
-            <lib-icon [fillColor]="buttonIconColor" icon="time-17" (click)="handleOpenHistory()"></lib-icon>
+          <button class='list-item-button' *ngIf='territory.history && territory.history.length > 0'>
+            <lib-icon [fillColor]='buttonIconColor' icon='time-17' (click)='handleOpenHistory()'></lib-icon>
           </button>
         </div>
       </div>
@@ -68,7 +68,8 @@ export class WorkItemComponent implements OnInit {
   public iconColor = grey400;
   public icon: Icons = 'generation-3';
 
-  constructor(private readonly dialog: Dialog) {}
+  constructor(private readonly dialog: Dialog) {
+  }
 
   @Input()
   territory!: DesignationTerritory;

@@ -1,0 +1,22 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+
+.list-item-button {
+  $size: 3rem;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: $size;
+  height: $size;
+  padding: .5rem;
+  border: none;
+  border-radius: 50%;
+
+  background-color: transparent;
+  cursor: pointer;
+
+  &:hover, &:active, &:focus {
+    background-color: lighten(variables.$grey-100, 50%);
+  }
+}
