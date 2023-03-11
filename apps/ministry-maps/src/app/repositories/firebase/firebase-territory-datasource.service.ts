@@ -16,13 +16,23 @@ import {
 } from '@angular/fire/firestore';
 import { combineLatest, from, map, Observable, switchMap } from 'rxjs';
 
-import {
-  convertFirebaseTimestampToDateFactory,
-  firebaseEntityConverterFactory,
-} from '../../shared/utils/firebase-entity-converter';
+import { firebaseEntityConverterFactory } from '../../shared/utils/firebase-entity-converter';
 import { TerritoryRepository } from '../territories.repository';
 import { Territory } from '../../../models/territory';
 import { TerritoryVisitHistory } from '../../../models/territory-visit-history';
+import { FirebaseTerritoryModel } from '../../../models/firebase/firebase-territory-model';
+
+/** Converts the Firebase Timestamps to Date objects */
+const convertTerritoryFirebaseTimestampsToDate = (data: FirebaseTerritoryModel): Territory => {
+  return {
+    ...data,
+    lastVisit: data.lastVisit?.toDate(),
+    recentHistory: data.recentHistory?.map(h => ({
+      ...h,
+      date: h.date.toDate(),
+    })),
+  };
+};
 
 @Injectable({
   providedIn: 'root',
@@ -33,9 +43,9 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
   private readonly territoriesCollection: CollectionReference<Territory>;
 
   constructor(private readonly firestore: Firestore) {
-    this.territoriesCollection = collection(this.firestore, this.collectionName).withConverter(
-      firebaseEntityConverterFactory<Territory>(convertFirebaseTimestampToDateFactory('lastVisit')),
-    ) as CollectionReference<Territory>;
+    this.territoriesCollection = collection(this.firestore, this.collectionName).withConverter<Territory>(
+      firebaseEntityConverterFactory(convertTerritoryFirebaseTimestampsToDate)
+    );
   }
 
   getAllByCongregation(congregationId: string): Observable<Territory[]> {
@@ -48,7 +58,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
     const q = query(
       this.territoriesCollection,
       where('congregationId', '==', congregationId),
-      where('city', '==', city),
+      where('city', '==', city)
     );
 
     return from(collectionData(q));
@@ -66,7 +76,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
           const path = `${this.collectionName}/${territory.id}/${this.historySubCollectionName}`;
           const territoryVisitHistoryCollection = collection(
             this.firestore,
-            path,
+            path
           ) as CollectionReference<TerritoryVisitHistory>;
 
           return from(getDocs(territoryVisitHistoryCollection)).pipe(
@@ -75,13 +85,13 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
                 ...territory,
                 history: territoryVisitHistorySnapshots.docs.map(visitHistorySnapshot => visitHistorySnapshot.data()),
               };
-            }),
+            })
           );
         });
 
         // Combining all territoriesObservables into one array
         return combineLatest(territories$);
-      }),
+      })
     );
   }
 
@@ -100,8 +110,8 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
 
     return newTerritory$.pipe(
       switchMap(() =>
-        from(getDoc(newTerritoryDocRef)).pipe(map(territorySnapshot => territorySnapshot.data() as Territory)),
-      ),
+        from(getDoc(newTerritoryDocRef)).pipe(map(territorySnapshot => territorySnapshot.data() as Territory))
+      )
     );
   }
 

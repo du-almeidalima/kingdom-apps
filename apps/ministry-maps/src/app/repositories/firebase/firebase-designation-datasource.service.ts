@@ -29,7 +29,7 @@ export class FirebaseDesignationDatasourceService implements DesignationReposito
 
   constructor(private readonly firestore: Firestore) {
     this.designationCollection = collection(this.firestore, this.collectionName).withConverter<Designation>(
-      firebaseEntityConverterFactory<Designation>(convertHistoryDateFirebaseTimestampToDate)
+      firebaseEntityConverterFactory(convertHistoryDateFirebaseTimestampToDate)
     );
   }
 
