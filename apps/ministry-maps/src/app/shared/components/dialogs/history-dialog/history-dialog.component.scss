@@ -29,12 +29,14 @@
   }
 
   &__icon {
-    height: $icon-size;
-    width: $icon-size;
+    flex: 2rem;
+    height: 2rem;
+    max-width: 2rem;
+    width: 2rem;
   }
 
   &__note {
     @extend .t-caption;
-    margin-left: $icon-size + $header-gap;
+    flex: 1;
   }
 }
