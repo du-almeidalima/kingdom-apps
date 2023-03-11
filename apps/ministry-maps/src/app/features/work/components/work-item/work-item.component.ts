@@ -11,7 +11,7 @@ import {
 import { DesignationTerritory } from '../../../../../models/designation';
 import { DesignationStatusEnum } from '../../../../../models/enums/designation-status';
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
-import { WorkItemHistoryDialogComponent } from '../work-item-history-dialog/work-item-history-dialog.component';
+import { HistoryDialogComponent } from '../../../../shared/components/dialogs';
 import openGoogleMapsHandler from '../../../../shared/utils/open-google-maps';
 
 @Component({
@@ -130,7 +130,7 @@ export class WorkItemComponent implements OnInit {
   }
 
   handleOpenHistory() {
-    this.dialog.open<WorkItemHistoryDialogComponent, TerritoryVisitHistory[]>(WorkItemHistoryDialogComponent, {
+    this.dialog.open<HistoryDialogComponent, TerritoryVisitHistory[]>(HistoryDialogComponent, {
       data: this.territory.history ?? [],
     });
   }

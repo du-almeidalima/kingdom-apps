@@ -6,8 +6,8 @@ import { grey400 } from '@kingdom-apps/common-ui';
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
 
 @Component({
-  selector: 'kingdom-apps-work-item-history-dialog',
-  styleUrls: ['./work-item-history-dialog.component.scss'],
+  selector: 'kingdom-apps-history-dialog',
+  styleUrls: ['./history-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <lib-dialog title="Histórico de Visitas">
@@ -33,7 +33,7 @@ import { TerritoryVisitHistory } from '../../../../../models/territory-visit-his
     </lib-dialog>
   `,
 })
-export class WorkItemHistoryDialogComponent {
+export class HistoryDialogComponent {
   public iconColor = grey400;
 
   constructor(

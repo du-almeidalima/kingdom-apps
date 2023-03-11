@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { WorkItemHistoryDialogComponent } from './work-item-history-dialog.component';
+import { HistoryDialogComponent } from './history-dialog.component';
 
 describe('WorkItemHistoryDialogComponent', () => {
-  let component: WorkItemHistoryDialogComponent;
-  let fixture: ComponentFixture<WorkItemHistoryDialogComponent>;
+  let component: HistoryDialogComponent;
+  let fixture: ComponentFixture<HistoryDialogComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [WorkItemHistoryDialogComponent],
+      declarations: [HistoryDialogComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(WorkItemHistoryDialogComponent);
+    fixture = TestBed.createComponent(HistoryDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

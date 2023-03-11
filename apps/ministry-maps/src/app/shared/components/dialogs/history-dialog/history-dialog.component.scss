@@ -4,6 +4,7 @@
 :host {
   display: block;
   max-width: 90vw;
+  min-width: min(90vw, 600px);
 }
 
 .work-item-history {
