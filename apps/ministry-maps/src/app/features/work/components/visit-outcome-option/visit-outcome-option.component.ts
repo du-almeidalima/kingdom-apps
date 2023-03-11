@@ -70,11 +70,11 @@ export class VisitOutcomeOptionComponent implements OnInit, ControlValueAccessor
   }
 
   // Control Value Accessor
-  registerOnChange(fn: typeof this.onChange): void {
+  registerOnChange(fn: VisitOutcomeOptionComponent['onChange'] ): void {
     this.onChange = fn;
   }
 
-  registerOnTouched(fn: typeof this.onTouched): void {
+  registerOnTouched(fn: VisitOutcomeOptionComponent['onTouched']): void {
     this.onTouched = fn;
   }
 
