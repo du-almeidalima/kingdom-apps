@@ -17,5 +17,6 @@ export type Territory = {
   congregationId: string;
   icon: TerritoryIcon;
   lastVisit?: Date;
-  history: TerritoryVisitHistory[];
+  history?: TerritoryVisitHistory[];
+  recentHistory?: TerritoryVisitHistory[];
 };

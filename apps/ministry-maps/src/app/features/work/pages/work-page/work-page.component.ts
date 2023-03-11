@@ -72,11 +72,15 @@ export class WorkPageComponent implements OnInit {
     territory.lastVisit = new Date();
 
     this.designationRepository.update(updatedDesignation);
+
     // Updating also the territory with the new history entry
-    this.territoryRepository.addVisitHistory(
-      designationTerritory.id,
-      designationTerritory.history[designationTerritory.history.length - 1]
-    );
+    if (designationTerritory.history) {
+      this.territoryRepository.addVisitHistory(
+        designationTerritory.id,
+        designationTerritory.history[designationTerritory.history.length - 1]
+      );
+    }
+
     this.territoryRepository.update(territory);
   }
 }

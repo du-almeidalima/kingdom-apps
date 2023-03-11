@@ -108,10 +108,13 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
   update(territory: Territory): Observable<void> {
     const territoryDocRef = doc(this.territoriesCollection, `${territory.id}`);
     // History will be a collection in FireStore
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { history, ...territoryWithoutHistory } = {
       ...territory,
     };
+
+    if (history) {
+      territoryWithoutHistory.recentHistory = history.slice(0, 5);
+    }
 
     return from(updateDoc(territoryDocRef, { ...territoryWithoutHistory }));
   }
