@@ -7,6 +7,7 @@
 
 .territory-checkbox {
   $border-size: 1px;
+  $accent: variables.$green-200;
 
   display: flex;
 
@@ -22,20 +23,19 @@
     cursor: initial;
   }
 
+  &--selected {
+    border-color: $accent;
+  }
+
   &__control-container {
     flex: 1;
     display: flex;
-    align-items: center;
+    flex-flow: row nowrap;
+    justify-content: flex-start;
+    align-items: flex-start;
     gap: 2rem;
 
-    padding: 1.5rem 2rem;
-  }
-
-  &__input {
-    width: 2rem;
-    height: 2rem;
-
-    accent-color: variables.$primary-green;
+    padding: .75rem .5rem .75rem .75rem;
   }
 
   &__description {
@@ -43,18 +43,44 @@
 
     display: flex;
     flex-flow: column nowrap;
-    gap: 1rem;
+    justify-content: space-between;
+    align-items: flex-start;
 
-    font-size: 1.6rem;
+    height: 100%;
+
+    font-size: 1.4rem;
 
     &--disabled {
       color: variables.$grey-300;
     }
   }
 
-  &__description-last-visit {
+  &__visit-container {
+    display: flex;
+    align-items: baseline;
+    gap: .75rem;
+  }
+
+  &__last-visit {
     @extend .t-caption;
     color: variables.$grey-300;
+  }
+
+  &__visit-badge {
+    padding: .25rem .5rem;
+    border-radius: 100rem;
+    border: 1px solid currentColor;
+
+    color: variables.$grey-200;
+    @extend .t-caption;
+  }
+
+  &__visit-badge--revisit {
+    color: $accent;
+  }
+
+  &__visit-badge--moved {
+    color: variables.$deep-purple-900;
   }
 
   &__indicator {
@@ -64,8 +90,24 @@
     width: 1rem;
     margin: $border-size * -1;
 
-    &--blue {
-      background-color: variables.$blue-100;
+    transition: background-color 75ms linear;
+
+    &--default {
+      background-color: lighten(variables.$light-grey-100, 10);
+      border: $border-size solid variables.$light-grey-100;
     }
+
+    &--selected {
+      background-color: $accent;
+    }
+
+    &--disabled {
+      background-color: variables.$grey-100;
+    }
+  }
+
+  &__buttons-container {
+    display: flex;
+    flex-flow: column nowrap;
   }
 }
