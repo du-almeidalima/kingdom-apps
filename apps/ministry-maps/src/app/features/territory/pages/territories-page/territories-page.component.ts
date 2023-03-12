@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { UserStateService } from '../../../../state/user.state.service';
-import { map, Observable, of, tap } from 'rxjs';
+import { finalize, map, Observable, of, shareReplay } from 'rxjs';
 import { Territory } from '../../../../../models/territory';
 import { green200, white200 } from '@kingdom-apps/common-ui';
 import { Dialog } from '@angular/cdk/dialog';
@@ -39,25 +39,17 @@ export class TerritoriesPageComponent implements OnInit {
     this.isLoading = true;
 
     this.$territories = this.territoryRepository.getAllByCongregation(userCongregationId ?? '').pipe(
-      tap(() => {
+      finalize(() => {
         this.isLoading = false;
-      })
+      }),
+      shareReplay(1)
     );
-    this.$filteredTerritories = this.$territories.pipe(map(tArr => tArr));
+
+    this.$filteredTerritories = this.filterTerritoriesByCity(this.selectedCity);
   }
 
-  handleOpenDialog(territory?: Territory) {
-    this.dialog.open<object, TerritoryDialogData>(TerritoryManageDialogComponent, {
-      data: {
-        territory,
-        cities: this.userState.currentUser?.congregation?.cities ?? [],
-        congregationId: this.userState.currentUser?.congregation?.id ?? '',
-      },
-    });
-  }
-
-  handleSelectedCityChange(city: string) {
-    this.$filteredTerritories = this.$territories.pipe(
+  private filterTerritoriesByCity(city: string) {
+    return this.$territories.pipe(
       map(tArr => {
         if (city === this.ALL_OPTION) {
           const allTerritories = [...tArr];
@@ -71,6 +63,20 @@ export class TerritoriesPageComponent implements OnInit {
         return tArr.filter(t => t.city === city);
       })
     );
+  }
+
+  handleOpenDialog(territory?: Territory) {
+    this.dialog.open<object, TerritoryDialogData>(TerritoryManageDialogComponent, {
+      data: {
+        territory,
+        cities: this.userState.currentUser?.congregation?.cities ?? [],
+        congregationId: this.userState.currentUser?.congregation?.id ?? '',
+      },
+    });
+  }
+
+  handleSelectedCityChange(city: string) {
+    this.$filteredTerritories = this.filterTerritoriesByCity(city);
   }
 
   handleRemoveTerritory(territoryId: string) {
