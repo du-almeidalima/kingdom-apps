@@ -154,7 +154,7 @@ export class TerritoryCheckboxComponent implements ControlValueAccessor {
 
   handleOpenHistory() {
     this.dialog.open<HistoryDialogComponent, TerritoryVisitHistory[]>(HistoryDialogComponent, {
-      data: this.territory.recentHistory
+      data: this.territory.recentHistory?.slice().reverse()
     })
   }
 }

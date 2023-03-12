@@ -116,7 +116,7 @@ export class WorkItemComponent implements OnInit {
 
   handleOpenHistory() {
     this.dialog.open<HistoryDialogComponent, TerritoryVisitHistory[]>(HistoryDialogComponent, {
-      data: this.territory.history ?? [],
+      data: this.territory.history?.slice().reverse() ?? [],
     });
   }
 }
