@@ -1,17 +1,30 @@
 @use "libs/common-ui/src/lib/styles/abstract/variables";
 
 .login-button {
+  $logo-width: 2.5rem;
+  $logo-height: 2.5rem;
+
   display: grid;
-  grid-template-columns: 4rem 1fr 1.5rem;
+  grid-template-columns: $logo-width 1fr 2.5rem;
   align-items: center;
 
   height: 5rem;
   border: 1px solid variables.$light-grey-100;
-  padding: 1rem 2rem;
+  padding: 1rem;
 
   cursor: pointer;
 
+  &__logo {
+    width: $logo-width;
+    height: $logo-height;
+
+    place-self: center;
+
+    object-fit: contain;
+  }
+
   &__text {
     text-align: start;
+    margin-left: 1rem;
   }
 }
