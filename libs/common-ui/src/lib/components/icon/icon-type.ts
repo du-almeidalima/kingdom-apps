@@ -13,4 +13,6 @@ export type Icons =
   | 'thumb-12'
   | 'thumb-10'
   | 'stop-2'
-  | 'building-8';
+  | 'building-8'
+  | 'trash-can-lined'
+  | 'pencil-lined';

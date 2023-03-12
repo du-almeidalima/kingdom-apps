@@ -2,7 +2,11 @@ import { APP_INITIALIZER, isDevMode, NgModule } from '@angular/core';
 import { getAnalytics, provideAnalytics, ScreenTrackingService, UserTrackingService } from '@angular/fire/analytics';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
-import { enableIndexedDbPersistence, getFirestore, provideFirestore } from '@angular/fire/firestore';
+import {
+  enableIndexedDbPersistence,
+  getFirestore,
+  provideFirestore,
+} from '@angular/fire/firestore';
 import { getPerformance, providePerformance } from '@angular/fire/performance';
 import { getRemoteConfig, provideRemoteConfig } from '@angular/fire/remote-config';
 import { BrowserModule } from '@angular/platform-browser';

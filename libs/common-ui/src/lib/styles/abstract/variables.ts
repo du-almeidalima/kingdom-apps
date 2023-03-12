@@ -1,6 +1,7 @@
 export const green100 = '#83D59D';
 export const green200 = '#45C06C';
 export const green300 = '#07AB3BFF';
+export const primaryGreen = green300;
 export const white100 = '#FDFDFD';
 export const white200 = '#F8F8F8';
 export const white300 = '#E7E6E4';
@@ -8,4 +9,6 @@ export const grey100 = '#615D5C';
 export const grey200 = '#4D4947';
 export const grey300 = '#363332';
 export const grey400 = '#202020';
-export const primaryGreen = green300;
+export const red100 = '#F9A5A5';
+export const red200 = '#F76C6C';
+export const red300 = '#F22E2EFF';

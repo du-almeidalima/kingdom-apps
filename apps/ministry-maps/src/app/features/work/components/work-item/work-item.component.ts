@@ -2,8 +2,6 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output
 import { Dialog } from '@angular/cdk/dialog';
 
 import { grey400, Icons, primaryGreen } from '@kingdom-apps/common-ui';
-
-import { TerritoryIcon } from '../../../../../models/territory';
 import {
   WorkItemCompleteDialogComponent,
   WorkItemCompleteDialogData,
@@ -13,6 +11,7 @@ import { DesignationStatusEnum } from '../../../../../models/enums/designation-s
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
 import { HistoryDialogComponent } from '../../../../shared/components/dialogs';
 import openGoogleMapsHandler from '../../../../shared/utils/open-google-maps';
+import mapTerritoryIcon, {isIconLarge} from '../../../../shared/utils/territory-icon-mapper';
 
 @Component({
   selector: 'kingdom-apps-work-item',
@@ -39,7 +38,7 @@ import openGoogleMapsHandler from '../../../../shared/utils/open-google-maps';
         <div class='work-item__icon-container'>
           <lib-icon
             class='work-item__icon'
-            [ngClass]="{ 'work-item__icon--large': isIconLarge(icon) }"
+            [ngClass]="{ 'work-item__icon--large': isIconLarge }"
             [fillColor]='iconColor'
             [icon]='icon'></lib-icon>
         </div>
@@ -67,9 +66,9 @@ export class WorkItemComponent implements OnInit {
   public buttonIconColor = primaryGreen;
   public iconColor = grey400;
   public icon: Icons = 'generation-3';
+  public isIconLarge = false;
 
-  constructor(private readonly dialog: Dialog) {
-  }
+  constructor(private readonly dialog: Dialog) {}
 
   @Input()
   territory!: DesignationTerritory;
@@ -81,22 +80,8 @@ export class WorkItemComponent implements OnInit {
   territoryUpdated = new EventEmitter<DesignationTerritory>();
 
   ngOnInit(): void {
-    this.icon = this.territoryIconToIcon(this.territory.icon);
-  }
-
-  territoryIconToIcon(territoryIcon: TerritoryIcon): Icons {
-    switch (territoryIcon) {
-      case TerritoryIcon.MAN:
-        return 'generation-3';
-      case TerritoryIcon.WOMAN:
-        return 'generation-12';
-      case TerritoryIcon.COUPLE:
-        return 'generation-couple';
-      case TerritoryIcon.CHILD:
-        return 'generation-7';
-      default:
-        return 'generation-3';
-    }
+    this.icon = mapTerritoryIcon(this.territory.icon);
+    this.isIconLarge = isIconLarge(this.icon);
   }
 
   handleCheck(e: MouseEvent) {
@@ -133,9 +118,5 @@ export class WorkItemComponent implements OnInit {
     this.dialog.open<HistoryDialogComponent, TerritoryVisitHistory[]>(HistoryDialogComponent, {
       data: this.territory.history ?? [],
     });
-  }
-
-  isIconLarge(icon: Icons) {
-    return icon === 'generation-couple';
   }
 }

@@ -1,3 +1,66 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+@use '../../../../../styles/components/list-item-button';
+
 :host {
   display: block;
+}
+
+.territory-list-item {
+  display: grid;
+  grid-template-columns: 5rem 1fr 3rem;
+  grid-template-rows: 1fr;
+  grid-auto-rows: minmax(0, max-content);
+  grid-template-areas:
+    'icon address buttons-container'
+    'icon notes buttons-container';
+
+  padding: 1rem .5rem;
+  border: 1px solid variables.$light-grey-100;
+  background-color: variables.$white-100;
+
+  &--row-gap {
+    grid-row-gap: 1rem;
+  }
+
+  &__icon {
+    $size: 3rem;
+    $large-size: 4rem;
+
+    grid-area: icon;
+    place-self: start center;
+
+    height: $size;
+    width: $size;
+    // This makes the icon looks centered with the first 2 address lines
+    margin-top: .15rem;
+
+    &--large {
+      height: $large-size;
+      width: $large-size;
+    }
+  }
+
+  &__address {
+    grid-area: address;
+    display: flex;
+    flex-flow: column nowrap;
+
+    font-size: unset;
+    font-weight: unset;
+    margin: unset;
+  }
+
+  &__notes {
+    grid-area: notes;
+  }
+
+  &__buttons-container {
+    grid-area: buttons-container;
+    place-self: center;
+    display: flex;
+    flex-flow: column nowrap;
+    gap: .5rem;
+
+    transform: translateY(list-item-button.$list-item-button-padding * -1);
+  }
 }

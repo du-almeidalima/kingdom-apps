@@ -1,4 +1,5 @@
 @use 'libs/common-ui/src/lib/styles/abstract/variables';
+$list-item-button-padding: .5rem;
 
 .list-item-button {
   $size: 3rem;
@@ -9,7 +10,7 @@
 
   width: $size;
   height: $size;
-  padding: .5rem;
+  padding: $list-item-button-padding;
   border: none;
   border-radius: 50%;
 

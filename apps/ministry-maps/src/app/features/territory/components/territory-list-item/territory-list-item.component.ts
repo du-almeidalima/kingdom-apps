@@ -1,23 +1,44 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Territory } from '../../../../../models/territory';
+import { grey400, Icons, red300 } from '@kingdom-apps/common-ui';
+import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territory-icon-mapper';
 
 @Component({
   selector: 'kingdom-apps-territory-list-item',
   styleUrls: ['./territory-list-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <lib-card>
-      <lib-card-body>
-        <h3 class="t-headline3">{{ territory.address }}</h3>
-        <p class="t-body1">{{ territory.city }}</p>
-
-        <button lib-button (click)="edit.emit(territory)">Editar</button>
-        <button lib-button (click)="remove.emit(territory.id)">Excluir</button>
-      </lib-card-body>
-    </lib-card>
+    <div class="territory-list-item" [ngClass]="{ 'territory-list-item--row-gap': !!territory.note }">
+      <lib-icon
+        class="territory-list-item__icon"
+        [ngClass]="{ 'territory-list-item__icon--large': isIconLarge }"
+        [fillColor]="iconColor"
+        [icon]="icon" />
+      <h3 class="territory-list-item__address">
+        <span class="t-body2">{{ territory.address }}</span>
+        <span class="t-caption">{{ territory.city }}</span>
+      </h3>
+      <div class="territory-list-item__notes" *ngIf="territory.note">
+        <span class="t-caption">Notas: {{ territory.note }}</span>
+      </div>
+      <div class="territory-list-item__buttons-container">
+        <button class="list-item-button" type="button" (click)="edit.emit(territory)">
+          <lib-icon [fillColor]="editButtonColor" icon="pencil-lined"></lib-icon>
+        </button>
+        <button class="list-item-button" type="button" (click)="remove.emit(territory.id)">
+          <lib-icon [fillColor]="deleteButtonColor" icon="trash-can-lined"></lib-icon>
+        </button>
+      </div>
+    </div>
   `,
 })
-export class TerritoryListItemComponent {
+export class TerritoryListItemComponent implements OnInit {
+  public editButtonColor = grey400;
+  public deleteButtonColor = red300;
+  public iconColor = grey400;
+  public isIconLarge = false;
+  public icon: Icons = 'generation-3';
+
   @Input()
   territory!: Territory;
 
@@ -26,4 +47,9 @@ export class TerritoryListItemComponent {
 
   @Output()
   remove = new EventEmitter<string>();
+
+  ngOnInit(): void {
+    this.icon = mapTerritoryIcon(this.territory.icon);
+    this.isIconLarge = isIconLarge(this.icon);
+  }
 }

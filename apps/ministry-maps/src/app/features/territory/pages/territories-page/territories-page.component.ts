@@ -60,7 +60,12 @@ export class TerritoriesPageComponent implements OnInit {
     this.$filteredTerritories = this.$territories.pipe(
       map(tArr => {
         if (city === this.ALL_OPTION) {
-          return [...tArr];
+          const allTerritories = [...tArr];
+
+          // Sorting per city when ALL is selected
+          return allTerritories.sort((a, b) => {
+            return a.city.localeCompare(b.city);
+          });
         }
 
         return tArr.filter(t => t.city === city);
