@@ -15,7 +15,7 @@ type WorkItemCompleteForm = ControlsOf<WorkItemCompleteDialogData>;
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./work-item-complete-dialog.component.scss'],
   template: `
-    <lib-dialog title="Concluir Visita">
+    <lib-dialog [title]="isEdit ? 'Editar Visita' : 'Concluir Visita'">
       <form id="work-item-complete" [formGroup]="form" (ngSubmit)="handleFormSubmit()">
         <!-- Visit Outcome -->
         <h3 class="mb-4 t-headline4">Resultado da visita</h3>
@@ -55,7 +55,7 @@ type WorkItemCompleteForm = ControlsOf<WorkItemCompleteDialogData>;
       <lib-dialog-footer class="sticky bottom-0 left-0 right-0">
         <div class="flex justify-end gap-4">
           <button lib-button (click)="handleCancel()">Cancelar</button>
-          <button lib-button btnType="primary" type="submit" form="work-item-complete">Concluir</button>
+          <button lib-button btnType="primary" type="submit" form="work-item-complete">{{isEdit ? 'Atualizar' : 'Concluir'}}</button>
         </div>
       </lib-dialog-footer>
     </lib-dialog>
@@ -63,6 +63,7 @@ type WorkItemCompleteForm = ControlsOf<WorkItemCompleteDialogData>;
 })
 export class WorkItemCompleteDialogComponent implements OnInit {
   public readonly VisitOutcome = VisitOutcomeEnum;
+  isEdit = false;
 
   form!: FormGroup<WorkItemCompleteForm>;
 
@@ -84,6 +85,7 @@ export class WorkItemCompleteDialogComponent implements OnInit {
 
     // Edit
     if (this.data) {
+      this.isEdit = true;
       this.form.patchValue(this.data);
     }
   }

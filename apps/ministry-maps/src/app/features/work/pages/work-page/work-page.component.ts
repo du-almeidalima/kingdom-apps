@@ -55,7 +55,7 @@ export class WorkPageComponent implements OnInit {
   updateWorkItem(designationTerritory: DesignationTerritory) {
     // Manually mutating the designations territories so order is preserved. Maybe it should be collection?
     const designationTerritories = [...this.designation!.territories];
-    const updatedDesignationsTerritory = designationTerritories.map(t => {
+    const updatedDesignationTerritories = designationTerritories.map(t => {
       return t.id === designationTerritory.id
         ? {
             ...designationTerritory,
@@ -64,23 +64,25 @@ export class WorkPageComponent implements OnInit {
     });
     const updatedDesignation: Designation = {
       ...this.designation!,
-      territories: updatedDesignationsTerritory,
+      territories: updatedDesignationTerritories,
     };
 
+    this.designationRepository.update(updatedDesignation);
+
+    // Update Territory lastVisit and history
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { status, ...territory } = designationTerritory;
     territory.lastVisit = new Date();
 
-    this.designationRepository.update(updatedDesignation);
+    this.territoryRepository.update(territory);
 
     // Updating also the territory with the new history entry
     if (designationTerritory.history) {
-      this.territoryRepository.addVisitHistory(
+      // TODO: At some point we should limit the amount of history per territory
+      this.territoryRepository.setVisitHistory(
         designationTerritory.id,
         designationTerritory.history[designationTerritory.history.length - 1]
       );
     }
-
-    this.territoryRepository.update(territory);
   }
 }

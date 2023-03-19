@@ -134,7 +134,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
     return from(deletePromise);
   }
 
-  addVisitHistory(territoryId: string, visitHistory: TerritoryVisitHistory): Observable<void> {
+  setVisitHistory(territoryId: string, visitHistory: TerritoryVisitHistory): Observable<void> {
     const path = `${this.collectionName}/${territoryId}/${this.historySubCollectionName}`;
     const territoryVisitHistoryCollection = collection(this.firestore, path);
     const visitHistoryDocRef = doc(territoryVisitHistoryCollection, visitHistory.id);

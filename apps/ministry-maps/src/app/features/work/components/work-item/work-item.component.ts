@@ -11,7 +11,7 @@ import { DesignationStatusEnum } from '../../../../../models/enums/designation-s
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
 import { HistoryDialogComponent } from '../../../../shared/components/dialogs';
 import openGoogleMapsHandler from '../../../../shared/utils/open-google-maps';
-import mapTerritoryIcon, {isIconLarge} from '../../../../shared/utils/territory-icon-mapper';
+import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territory-icon-mapper';
 
 @Component({
   selector: 'kingdom-apps-work-item',
@@ -53,6 +53,9 @@ import mapTerritoryIcon, {isIconLarge} from '../../../../shared/utils/territory-
         <div class='work-item__footer'>
           <span class='work-item__city'>{{ territory.city }}</span>
           <div class='work-item__buttons-container'>
+            <button class='list-item-button' *ngIf='territory.status === DesignationStatusEnum.DONE'>
+              <lib-icon [fillColor]='buttonIconColor' icon='pencil-lined' (click)='handleEdit()'></lib-icon>
+            </button>
             <button class='list-item-button' *ngIf='territory.mapsLink' (click)='handleOpenMaps(territory.mapsLink)'>
               <lib-icon [fillColor]='buttonIconColor' icon='map-5'></lib-icon>
             </button>
@@ -122,5 +125,35 @@ export class WorkItemComponent implements OnInit {
     this.dialog.open<HistoryDialogComponent, TerritoryVisitHistory[]>(HistoryDialogComponent, {
       data: this.territory.history?.slice().reverse() ?? [],
     });
+  }
+
+  handleEdit() {
+    const lastHistoryEntry = this.territory.history?.slice().reverse()[0];
+
+    this.dialog
+      .open<WorkItemCompleteDialogData>(WorkItemCompleteDialogComponent, {
+        data: { ...lastHistoryEntry },
+      })
+      .closed.subscribe(data => {
+        if (data) {
+          const historyEntry: TerritoryVisitHistory = {
+            ...data,
+            // When editing, those values should be the same as the last history entry
+            // Even though it checks for null values, it should not be possible to have a null value in the last history entry
+            date: lastHistoryEntry?.date ?? new Date(),
+            id: lastHistoryEntry?.id ?? new Date().getTime().toString(),
+          };
+
+          // Update last history entry
+          const historyWithoutLastEntry = this.territory.history?.slice(0, -1) ?? [];
+
+          const updatedDesignationTerritory: DesignationTerritory = {
+            ...this.territory,
+            history: [...historyWithoutLastEntry, historyEntry],
+          };
+
+          this.territoryUpdated.emit(updatedDesignationTerritory);
+        }
+      });
   }
 }

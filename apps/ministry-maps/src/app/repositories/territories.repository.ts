@@ -15,5 +15,8 @@ export abstract class TerritoryRepository {
 
   abstract delete(id: string): Observable<void>;
 
-  abstract addVisitHistory(territoryId: string, visitHistory: TerritoryVisitHistory): Observable<void>;
+  /**
+   * Writes the History for a Territory. If the History has an id, it will be updated. If not, it will be added.
+   */
+  abstract setVisitHistory(territoryId: string, visitHistory: TerritoryVisitHistory): Observable<void>;
 }
