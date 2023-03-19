@@ -34,28 +34,32 @@ import mapTerritoryIcon, {isIconLarge} from '../../../../shared/utils/territory-
           (click)='handleCheck($event)' />
       </label>
       <!-- Content -->
-      <div class='work-item__container'>
-        <div class='work-item__icon-container'>
+      <div class='work-item__content-container'>
+        <!-- List Tile -->
+        <div class='work-item__list-tile'>
+          <!-- Icon -->
           <lib-icon
             class='work-item__icon'
             [ngClass]="{ 'work-item__icon--large': isIconLarge }"
             [fillColor]='iconColor'
-            [icon]='icon'></lib-icon>
-        </div>
-        <div class='work-item__address-container'>
-          <div class='work-item__address-street-container'>
-            <h3 class='work-item__address-street'>{{ territory.address }}</h3>
-            - <span class='work-item__address-street-note'>{{ territory.note }}</span>
+            [icon]='icon' />
+          <!-- Title and Subtitle -->
+          <div class='work-item__title-subtitle-container'>
+            <h3 class='work-item__title'>{{ territory.address }}</h3>
+            <span class='work-item__subtitle'>{{ territory.note }}</span>
           </div>
-          <span class='work-item__address-city'>{{ territory.city }}</span>
         </div>
-        <div class='work-item__buttons-container'>
-          <button class='list-item-button' *ngIf='territory.mapsLink' (click)='handleOpenMaps(territory.mapsLink)'>
-            <lib-icon [fillColor]='buttonIconColor' icon='map-5'></lib-icon>
-          </button>
-          <button class='list-item-button' *ngIf='territory.history && territory.history.length > 0'>
-            <lib-icon [fillColor]='buttonIconColor' icon='time-17' (click)='handleOpenHistory()'></lib-icon>
-          </button>
+        <!-- Footer -->
+        <div class='work-item__footer'>
+          <span class='work-item__city'>{{ territory.city }}</span>
+          <div class='work-item__buttons-container'>
+            <button class='list-item-button' *ngIf='territory.mapsLink' (click)='handleOpenMaps(territory.mapsLink)'>
+              <lib-icon [fillColor]='buttonIconColor' icon='map-5'></lib-icon>
+            </button>
+            <button class='list-item-button' *ngIf='territory.history && territory.history.length > 0'>
+              <lib-icon [fillColor]='buttonIconColor' icon='time-17' (click)='handleOpenHistory()'></lib-icon>
+            </button>
+          </div>
         </div>
       </div>
     </div>

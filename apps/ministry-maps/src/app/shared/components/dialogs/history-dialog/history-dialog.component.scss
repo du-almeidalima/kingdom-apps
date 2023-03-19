@@ -38,5 +38,6 @@
   &__note {
     @extend .t-caption;
     flex: 1;
+    word-break: break-word;
   }
 }

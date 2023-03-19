@@ -1,5 +1,6 @@
 @use 'libs/common-ui/src/lib/styles/abstract/variables';
 @use 'libs/common-ui/src/lib/styles/base/typography';
+@use "apps/ministry-maps/src/styles/components/list-item-button";
 
 :host {
   display: block;
@@ -9,21 +10,23 @@
   $flex-checkbox: 1;
   $flex-container: 6;
 
-  $flex-container-icon: 1;
-  $flex-container-address: 4;
+  // List Tile
+  $flex-icon: 1;
+  $flex-title-subtitle: 4;
 
   display: flex;
 
-  height: 10rem;
+  min-height: 10rem;
 
-
-  &__container {
+  &__content-container {
     flex: $flex-container;
-    display: flex;
-    flex-flow: row nowrap;
-    align-items: center;
 
-    padding: 2rem 1rem 2rem 0;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-between;
+    gap: .5rem;
+
+    padding: 1rem .5rem .5rem 1.5rem;
 
     background-color: variables.$white-100;
   }
@@ -54,17 +57,9 @@
     cursor: inherit;
   }
 
-  &__icon-container {
-    flex: $flex-container-icon;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;;
-  }
-
   &__icon {
-    $size: 3rem;
-    $large-size: 5rem;
+    $size: 2.5rem;
+    $large-size: 4rem;
 
     height: $size;
     width: $size;
@@ -75,42 +70,50 @@
     }
   }
 
-  &__address-container {
-    flex: $flex-container-address;
+  &__list-tile {
 
     display: flex;
-    justify-content: center;
-    flex-flow: column nowrap;
+    flex-flow: row nowrap;
+    align-items: center;
     gap: 1rem;
   }
 
-  &__address-street-container {
+  &__title-subtitle-container {
+    flex: $flex-title-subtitle;
+
     display: flex;
-    flex-flow: row wrap;
-    align-items: center;
+    flex-flow: column nowrap;
     gap: .5rem;
   }
 
-  &__address-street {
+  &__title {
     @extend .t-body2;
     font-weight: 500;
   }
 
-  &__address-street-note {
+  &__subtitle {
     @extend .t-caption;
   }
 
-  &__address-city {
+  &__footer {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  &__city {
     @extend .t-caption;
+
+    // This margin makes the text align with the buttons due to their "invisible" padding
+    margin-bottom: list-item-button.$list-item-button-padding;
     color: variables.$grey-100;
   }
 
   &__buttons-container {
     align-self: flex-start;
     display: flex;
-    flex-flow: column nowrap;
-    justify-content: center;
-    align-items: center;
-    gap: .5rem;
+    flex-flow: row nowrap;
+    gap: 1rem;
   }
 }
