@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { Observable, of, switchMap } from 'rxjs';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { map, Observable, of, shareReplay, switchMap } from 'rxjs';
 
-import { green200, white200 } from '@kingdom-apps/common-ui';
+import { green200, SearchInputComponent, white200 } from '@kingdom-apps/common-ui';
 
 import { Territory } from '../../../../../models/territory';
 import { Designation, DesignationTerritory } from '../../../../../models/designation';
@@ -22,18 +22,22 @@ export class AssignTerritoriesPageComponent implements OnInit {
   public readonly white200 = white200;
   public readonly ALL_OPTION = 'ALL';
 
+  private territories$: Observable<Territory[]> = of([]);
+
   cities: string[] = [];
   selectedCity = '';
-  territories$: Observable<Territory[]> = of([]);
+  $filteredTerritories: Observable<Territory[]> = of([]);
   selectedTerritoriesModel = new Set<string>();
   assignedTerritories = new Set<string>();
+
+  @ViewChild(SearchInputComponent)
+  searchInputComponent!: SearchInputComponent;
 
   constructor(
     private readonly territoryRepository: TerritoryRepository,
     private readonly designationRepository: DesignationRepository,
-    private readonly userState: UserStateService,
-  ) {
-  }
+    private readonly userState: UserStateService
+  ) {}
 
   ngOnInit(): void {
     const { id, cities } = this.userState.currentUser!.congregation!;
@@ -45,6 +49,34 @@ export class AssignTerritoriesPageComponent implements OnInit {
     this.fetchTerritories(id, firstCity);
   }
 
+  private filterTerritoriesByText(searchTerm: string | null) {
+    return this.territories$.pipe(
+      map(tArr => {
+        if (!searchTerm) {
+          return tArr;
+        }
+
+        const searchWords = searchTerm.split(' ');
+
+        return tArr.filter(t => {
+          const territorySearchableText = (t.address + t.note).toLowerCase();
+
+          return searchWords.every(word => territorySearchableText.includes(word.toLowerCase()));
+        });
+      })
+    );
+  }
+
+  private fetchTerritories(congregationId: string, city: string) {
+    // This is the object that will be iterated, since we can't iterate through formGroup.controls...
+    this.territories$ =
+      city === this.ALL_OPTION
+        ? this.territoryRepository.getAllByCongregation(congregationId).pipe(shareReplay(1))
+        : this.territoryRepository.getAllByCongregationAndCity(congregationId, city).pipe(shareReplay(1));
+
+    this.$filteredTerritories = this.filterTerritoriesByText('');
+  }
+
   /**
    * Returns true if the territory has already been selected (checks the checkbox).
    * It checks both the currently selected list or if it was already assigned to a designation.
@@ -53,14 +85,6 @@ export class AssignTerritoriesPageComponent implements OnInit {
    */
   hasAlreadyBeenSelected(territoryId: string): boolean {
     return this.selectedTerritoriesModel.has(territoryId) || this.assignedTerritories.has(territoryId);
-  }
-
-  private fetchTerritories(congregationId: string, city: string) {
-    // This is the object that will be iterated, since we can't iterate through formGroup.controls...
-    this.territories$ =
-      city === this.ALL_OPTION
-        ? this.territoryRepository.getAllByCongregation(congregationId)
-        : this.territoryRepository.getAllByCongregationAndCity(congregationId, city);
   }
 
   handleTerritoryFormSubmit() {
@@ -85,15 +109,20 @@ export class AssignTerritoriesPageComponent implements OnInit {
           };
 
           return this.designationRepository.add(newDesignation);
-        }),
+        })
       )
       .subscribe(designation => {
         this.shareDesignation(designation.id);
       });
   }
 
+  handleTerritorySearch(searchTerm: string | null) {
+    this.$filteredTerritories = this.filterTerritoriesByText(searchTerm);
+  }
+
   handleSelectedCityChange(city: string) {
     this.fetchTerritories(this.userState.currentUser!.congregation!.id, city);
+    this.searchInputComponent.resetSearch();
   }
 
   handleTerritoryCheck(value: boolean, territoryId: string) {

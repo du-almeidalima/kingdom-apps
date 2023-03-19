@@ -21,11 +21,11 @@ export class TerritoriesPageComponent implements OnInit {
   public readonly white200 = white200;
   public readonly ALL_OPTION = 'ALL';
 
-  private $territories: Observable<Territory[]> = of([]);
+  private territories$: Observable<Territory[]> = of([]);
   public cities: string[] = [];
   public selectedCity = this.ALL_OPTION;
   public isLoading = false;
-  public $filteredTerritories: Observable<Territory[]> = of([]);
+  public filteredTerritories$: Observable<Territory[]> = of([]);
 
   constructor(
     private readonly territoryRepository: TerritoryRepository,
@@ -38,18 +38,18 @@ export class TerritoriesPageComponent implements OnInit {
     this.cities = this.userState.currentUser?.congregation?.cities ?? [];
     this.isLoading = true;
 
-    this.$territories = this.territoryRepository.getAllByCongregation(userCongregationId ?? '').pipe(
+    this.territories$ = this.territoryRepository.getAllByCongregation(userCongregationId ?? '').pipe(
       finalize(() => {
         this.isLoading = false;
       }),
       shareReplay(1)
     );
 
-    this.$filteredTerritories = this.filterTerritoriesByCity(this.selectedCity);
+    this.filteredTerritories$ = this.filterTerritoriesByCity(this.selectedCity);
   }
 
   private filterTerritoriesByCity(city: string) {
-    return this.$territories.pipe(
+    return this.territories$.pipe(
       map(tArr => {
         if (city === this.ALL_OPTION) {
           const allTerritories = [...tArr];
@@ -76,7 +76,7 @@ export class TerritoriesPageComponent implements OnInit {
   }
 
   handleSelectedCityChange(city: string) {
-    this.$filteredTerritories = this.filterTerritoriesByCity(city);
+    this.filteredTerritories$ = this.filterTerritoriesByCity(city);
   }
 
   handleRemoveTerritory(territoryId: string) {
