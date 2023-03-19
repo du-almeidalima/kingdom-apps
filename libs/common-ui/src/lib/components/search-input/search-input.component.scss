@@ -1,5 +1,6 @@
 @use '../../styles/components/form-control';
 @use '../../styles/abstract/variables';
+@use '../../styles/base/typography';
 
 :host {
   display: block;
@@ -24,13 +25,15 @@
   }
 
   .search-input__icon {
-    $size: 2.5rem;
+    $size: 2rem;
 
     width: 1.5 * $size;
     height: $size;
   }
 
   .search-input__input {
+    @extend .t-control;
+
     flex: 1 1 auto;
     height: 100%;
 

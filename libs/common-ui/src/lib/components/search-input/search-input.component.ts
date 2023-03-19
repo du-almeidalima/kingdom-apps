@@ -13,19 +13,22 @@ import { IconComponent } from '../icon/icon.component';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, IconComponent],
   template: `
-    <div class="search-input">
+    <div class='search-input'>
       <input
-        class="search-input__input"
-        type="search"
-        placeholder="Pesquisar Território"
-        aria-labelledby="search-icon"
-        [formControl]="searchControl" />
+        class='search-input__input'
+        type='search'
+        placeholder='Pesquisar Território'
+        aria-labelledby='search-icon'
+        [formControl]='searchControl'
+        #searchControlTemplate
+      />
       <lib-icon
-        icon="magnifier-lined"
-        class="search-input__icon"
-        id="search-icon"
-        aria-label="Pesquisar Território"
-        [fillColor]="black" />
+        icon='magnifier-lined'
+        class='search-input__icon'
+        id='search-icon'
+        aria-label='Pesquisar Território'
+        (click)='searchControlTemplate.focus()'
+        [fillColor]='black' />
     </div>
   `,
 })
