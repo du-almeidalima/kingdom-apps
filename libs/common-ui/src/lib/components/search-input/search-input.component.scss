@@ -1,0 +1,53 @@
+@use '../../styles/components/form-control';
+@use '../../styles/abstract/variables';
+
+:host {
+  display: block;
+}
+
+
+.search-input {
+  @extend .form-control;
+
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+
+  padding: 0;
+
+  background-color: #FFFFFF;
+
+  // Browser default focus styles
+  &:focus-within {
+    outline: 5px auto Highlight;
+    outline: 5px auto -webkit-focus-ring-color;
+  }
+
+  .search-input__icon {
+    $size: 2.5rem;
+
+    width: 1.5 * $size;
+    height: $size;
+  }
+
+  .search-input__input {
+    flex: 1 1 auto;
+    height: 100%;
+
+    padding: variables.$control-padding;
+    border: none;
+
+    background-color: transparent;
+
+    &::-webkit-search-decoration,
+    &::-webkit-search-cancel-button,
+    &::-webkit-search-results-button,
+    &::-webkit-search-results-decoration {
+      -webkit-appearance: none;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+}

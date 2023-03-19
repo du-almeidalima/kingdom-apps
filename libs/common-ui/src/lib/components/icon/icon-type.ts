@@ -15,4 +15,5 @@ export type Icons =
   | 'stop-2'
   | 'building-8'
   | 'trash-can-lined'
-  | 'pencil-lined';
+  | 'pencil-lined'
+  | 'magnifier-lined';

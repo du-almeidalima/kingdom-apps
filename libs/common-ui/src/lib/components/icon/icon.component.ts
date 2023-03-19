@@ -6,6 +6,7 @@ import { white200 } from '../../styles/abstract/variables';
   selector: 'lib-icon',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  standalone: true,
   styles: [
     `
       lib-icon {

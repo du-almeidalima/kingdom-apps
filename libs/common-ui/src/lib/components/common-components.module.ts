@@ -16,16 +16,16 @@ import { SelectComponent } from './form-field/select/select.component';
 import { DialogComponent } from './dialog/dialog.component';
 import { DialogFooterComponent } from './dialog/dialog-footer/dialog-footer.component';
 import { SpinnerComponent } from './spinner/spinner.component';
+import { SearchInputComponent } from './search-input/search-input.component';
 
 @NgModule({
-  imports: [CommonModule, RouterLinkActive, RouterLinkWithHref],
+  imports: [CommonModule, RouterLinkActive, RouterLinkWithHref, SearchInputComponent, IconComponent],
   declarations: [
     HeaderComponent,
     CardComponent,
     CardHeaderComponent,
     CardBodyComponent,
     FloatingActionButtonComponent,
-    IconComponent,
     ButtonComponent,
     InputComponent,
     FormFieldComponent,
@@ -50,6 +50,7 @@ import { SpinnerComponent } from './spinner/spinner.component';
     DialogComponent,
     DialogFooterComponent,
     SpinnerComponent,
+    SearchInputComponent
   ],
 })
 export class CommonComponentsModule {}

@@ -5,3 +5,5 @@ export * from './lib/styles/abstract/variables';
 
 // Icons
 export * from './lib/components/icon/icon-type';
+
+export * from './lib/components/search-input/search-input.component';
