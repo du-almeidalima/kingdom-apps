@@ -7,3 +7,5 @@ export * from './lib/styles/abstract/variables';
 export * from './lib/components/icon/icon-type';
 
 export * from './lib/components/search-input/search-input.component';
+
+export * from './lib/components/confirm-dialog/confirm-dialog.component';

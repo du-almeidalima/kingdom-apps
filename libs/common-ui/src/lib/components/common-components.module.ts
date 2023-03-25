@@ -17,6 +17,7 @@ import { DialogComponent } from './dialog/dialog.component';
 import { DialogFooterComponent } from './dialog/dialog-footer/dialog-footer.component';
 import { SpinnerComponent } from './spinner/spinner.component';
 import { SearchInputComponent } from './search-input/search-input.component';
+import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 
 @NgModule({
   imports: [CommonModule, RouterLinkActive, RouterLinkWithHref, SearchInputComponent, IconComponent],
@@ -34,6 +35,7 @@ import { SearchInputComponent } from './search-input/search-input.component';
     DialogComponent,
     DialogFooterComponent,
     SpinnerComponent,
+    ConfirmDialogComponent,
   ],
   exports: [
     HeaderComponent,
@@ -50,7 +52,8 @@ import { SearchInputComponent } from './search-input/search-input.component';
     DialogComponent,
     DialogFooterComponent,
     SpinnerComponent,
-    SearchInputComponent
+    SearchInputComponent,
+    ConfirmDialogComponent,
   ],
 })
 export class CommonComponentsModule {}

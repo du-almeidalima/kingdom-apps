@@ -9,7 +9,7 @@ import { DialogRef } from '@angular/cdk/dialog';
     <dialog class="dialog" open>
       <header class="dialog__header">
         <h2 class="dialog__header-title">{{ title }}</h2>
-        <button class="dialog__header-close-btn" (click)="handleCloseDialog()">
+        <button class="dialog__header-close-btn" (click)="handleCloseDialog()" [tabIndex]='-1'>
           <lib-icon icon="x-mark-lined"></lib-icon>
         </button>
       </header>
