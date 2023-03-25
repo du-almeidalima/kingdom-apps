@@ -40,7 +40,11 @@ import { hasRecentlyAskedToStopVisiting, hasRecentlyMoved, hasRecentRevisit } fr
         <div
           class='territory-checkbox__description'
           [ngClass]="{ 'territory-checkbox__description--disabled': disabled }">
-          <p>{{ territory.address }}</p>
+          <!-- Title and Subtitle -->
+          <div class='territory-checkbox__title-subtitle-container'>
+            <h3 class='territory-checkbox__title'>{{ territory.address }}</h3>
+            <span class='territory-checkbox__subtitle'>{{ territory.note }}</span>
+          </div>
           <!-- VISIT CONTAINER -->
           <div class='territory-checkbox__visit-container'>
             <span class='territory-checkbox__last-visit' *ngIf='territory.lastVisit'>
