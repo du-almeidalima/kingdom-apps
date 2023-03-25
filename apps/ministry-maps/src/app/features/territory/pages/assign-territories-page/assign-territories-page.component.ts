@@ -1,7 +1,13 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { map, Observable, of, shareReplay, switchMap } from 'rxjs';
 
-import { green200, SearchInputComponent, white200 } from '@kingdom-apps/common-ui';
+import {
+  ConfirmDialogComponent,
+  ConfirmDialogData,
+  green200,
+  SearchInputComponent,
+  white200,
+} from '@kingdom-apps/common-ui';
 
 import { Territory } from '../../../../../models/territory';
 import { Designation, DesignationTerritory } from '../../../../../models/designation';
@@ -11,6 +17,9 @@ import { TerritoryRepository } from '../../../../repositories/territories.reposi
 import { UserStateService } from '../../../../state/user.state.service';
 import { FeatureRoutesEnum } from '../../../../app-routes.module';
 import { isMobileDevice } from '../../../../shared/utils/user-agent';
+import { alertMessaging, findImportantAlert } from '../../bo/territory-alerts.bo';
+import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
+import { Dialog } from '@angular/cdk/dialog';
 
 @Component({
   selector: 'kingdom-apps-assign-territories-page',
@@ -18,11 +27,11 @@ import { isMobileDevice } from '../../../../shared/utils/user-agent';
   styleUrls: ['./assign-territories-page.component.scss'],
 })
 export class AssignTerritoriesPageComponent implements OnInit {
+  private territories$: Observable<Territory[]> = of([]);
+
   public readonly green200 = green200;
   public readonly white200 = white200;
   public readonly ALL_OPTION = 'ALL';
-
-  private territories$: Observable<Territory[]> = of([]);
 
   cities: string[] = [];
   selectedCity = '';
@@ -36,7 +45,8 @@ export class AssignTerritoriesPageComponent implements OnInit {
   constructor(
     private readonly territoryRepository: TerritoryRepository,
     private readonly designationRepository: DesignationRepository,
-    private readonly userState: UserStateService
+    private readonly userState: UserStateService,
+    private readonly dialog: Dialog
   ) {}
 
   ngOnInit(): void {
@@ -47,34 +57,6 @@ export class AssignTerritoriesPageComponent implements OnInit {
     this.cities = cities;
 
     this.fetchTerritories(id, firstCity);
-  }
-
-  private filterTerritoriesByText(searchTerm: string | null) {
-    return this.territories$.pipe(
-      map(tArr => {
-        if (!searchTerm) {
-          return tArr;
-        }
-
-        const searchWords = searchTerm.split(' ');
-
-        return tArr.filter(t => {
-          const territorySearchableText = (t.address + t.note).toLowerCase();
-
-          return searchWords.every(word => territorySearchableText.includes(word.toLowerCase()));
-        });
-      })
-    );
-  }
-
-  private fetchTerritories(congregationId: string, city: string) {
-    // This is the object that will be iterated, since we can't iterate through formGroup.controls...
-    this.territories$ =
-      city === this.ALL_OPTION
-        ? this.territoryRepository.getAllByCongregation(congregationId).pipe(shareReplay(1))
-        : this.territoryRepository.getAllByCongregationAndCity(congregationId, city).pipe(shareReplay(1));
-
-    this.$filteredTerritories = this.filterTerritoriesByText('');
   }
 
   /**
@@ -125,8 +107,23 @@ export class AssignTerritoriesPageComponent implements OnInit {
     this.searchInputComponent.resetSearch();
   }
 
-  handleTerritoryCheck(value: boolean, territoryId: string) {
+  handleTerritoryCheck(value: boolean, territory: Territory) {
+    const territoryId = territory.id;
+
+    const importantAlert = findImportantAlert(territory);
+
+    // Adding the value here regardless of the alert because we need to tell Angular that something has changed
+    // In order for the TerritoryCheckBox component to render correctly
+    // Otherwise, even by not adding this, the TerritoryCheckBox would display as selected
     value ? this.selectedTerritoriesModel.add(territoryId) : this.selectedTerritoriesModel.delete(territoryId);
+
+    if (value && importantAlert) {
+      this.openConfirmAssignmentDialog(importantAlert).subscribe(result => {
+        if (!result) {
+          this.selectedTerritoriesModel.delete(territoryId);
+        }
+      });
+    }
   }
 
   trackByRepositoryId(_: number, item: Territory) {
@@ -144,5 +141,41 @@ export class AssignTerritoriesPageComponent implements OnInit {
     } else {
       window.open(builtUrl);
     }
+  }
+
+  private filterTerritoriesByText(searchTerm: string | null) {
+    return this.territories$.pipe(
+      map(tArr => {
+        if (!searchTerm) {
+          return tArr;
+        }
+
+        const searchWords = searchTerm.split(' ');
+
+        return tArr.filter(t => {
+          const territorySearchableText = (t.address + t.note).toLowerCase();
+
+          return searchWords.every(word => territorySearchableText.includes(word.toLowerCase()));
+        });
+      })
+    );
+  }
+
+  private fetchTerritories(congregationId: string, city: string) {
+    // This is the object that will be iterated, since we can't iterate through formGroup.controls...
+    this.territories$ =
+      city === this.ALL_OPTION
+        ? this.territoryRepository.getAllByCongregation(congregationId).pipe(shareReplay(1))
+        : this.territoryRepository.getAllByCongregationAndCity(congregationId, city).pipe(shareReplay(1));
+
+    this.$filteredTerritories = this.filterTerritoriesByText('');
+  }
+
+  private openConfirmAssignmentDialog(importantAlert: VisitOutcomeEnum) {
+    const { title, bodyText } = alertMessaging(importantAlert);
+
+    return this.dialog.open<ConfirmDialogComponent, ConfirmDialogData>(ConfirmDialogComponent, {
+      data: { title, bodyText },
+    }).closed;
   }
 }

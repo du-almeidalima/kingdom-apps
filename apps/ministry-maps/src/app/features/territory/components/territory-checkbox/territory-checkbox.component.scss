@@ -83,6 +83,10 @@
     color: variables.$deep-purple-900;
   }
 
+  &__visit-badge--stop-visiting {
+    color: variables.$red-300;
+  }
+
   &__indicator {
     justify-self: flex-end;
 

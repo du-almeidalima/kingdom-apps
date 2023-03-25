@@ -20,7 +20,7 @@
         [name]='territory.id'
         [ngModel]='hasAlreadyBeenSelected(territory.id)'
         [disabled]='assignedTerritories.has(territory.id)'
-        (ngModelChange)='handleTerritoryCheck($event, territory.id)'>
+        (ngModelChange)='handleTerritoryCheck($event, territory)'>
       </kingdom-apps-territory-checkbox>
     </div>
   </form>
