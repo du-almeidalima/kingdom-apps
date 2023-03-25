@@ -1,0 +1,42 @@
+{
+  "overrides": [
+    {
+      "files": [
+        "*.ts"
+      ],
+      "rules": {
+        "@angular-eslint/no-empty-lifecycle-method": "error",
+        "@angular-eslint/no-host-metadata-property": "warn",
+        "@typescript-eslint/member-ordering": [
+          "error",
+          {
+            "default": [
+              // Fields
+              "private-field",
+              "protected-field",
+              "public-field",
+              "private-static-field",
+              "protected-static-field",
+              "public-static-field",
+              "private-decorated-field",
+              "protected-decorated-field",
+              "public-decorated-field",
+              // Getters
+              "private-get",
+              "public-get",
+              "protected-get",
+              // Constructor
+              "constructor",
+              // Methods
+              "abstract-method",
+              "protected-method",
+              "public-method",
+              "static-method",
+              "private-method"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

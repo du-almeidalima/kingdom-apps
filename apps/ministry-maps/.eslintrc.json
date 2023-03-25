@@ -4,6 +4,11 @@
   "overrides": [
     {
       "files": ["*.ts"],
+      "extends": [
+        "plugin:@nrwl/nx/angular",
+        "plugin:@angular-eslint/template/process-inline-templates",
+        "../../eslintrc-custom-overrides.json"
+      ],
       "rules": {
         "@angular-eslint/directive-selector": [
           "error",
@@ -22,11 +27,7 @@
           }
         ],
         "@typescript-eslint/no-non-null-assertion": "off"
-      },
-      "extends": [
-        "plugin:@nrwl/nx/angular",
-        "plugin:@angular-eslint/template/process-inline-templates"
-      ]
+      }
     },
     {
       "files": ["*.html"],

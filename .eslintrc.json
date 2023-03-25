@@ -32,7 +32,8 @@
             "hoist": "functions",
             "ignoreOnInitialization": false
           }
-        ]
+        ],
+        "@typescript-eslint/no-unused-vars": [2, {"argsIgnorePattern": "^_", "varsIgnorePattern": "^_"}]
       }
     },
     {
