@@ -7,7 +7,7 @@
   border-radius: 2px;
   border: 1px solid darken(variables.$white-300, 20%);
 
-  transition: background-color 100ms linear;
+  transition: background-color 100ms linear, width 200ms ease-out;
   background-color: variables.$white-300;
   text-align: center;
   line-height: 1;
