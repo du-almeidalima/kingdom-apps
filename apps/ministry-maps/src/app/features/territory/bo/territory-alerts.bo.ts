@@ -29,7 +29,7 @@ export const hasRecentlyAskedToStopVisiting = (territory: Territory) => {
       const currentDate = new Date();
       const difference = differenceInMonths(history.date, currentDate);
 
-      return difference > 1;
+      return difference < 1;
     }
 
     return false;
