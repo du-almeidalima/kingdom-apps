@@ -6,17 +6,26 @@ import { white100 } from '../../../';
   selector: 'button[lib-floating-action-button]',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./floating-action-button.component.scss'],
-  template: ` <ng-content></ng-content> `,
+  template: `
+    <lib-spinner [color]='spinnerColor' [hide]='!loading' width='3rem' height='3rem' />
+    <ng-container *ngIf='!loading'>
+      <ng-content />
+    </ng-container>
+  `,
 })
 export class FloatingActionButtonComponent implements OnInit {
+  spinnerColor = white100;
+
   @Input()
   backgroundColor = white100;
 
-  constructor(private readonly renderer: Renderer2, private readonly elRef: ElementRef<HTMLButtonElement>) { }
+  @Input()
+  loading = false;
+
+  constructor(private readonly renderer: Renderer2, private readonly elRef: ElementRef<HTMLButtonElement>) {}
 
   ngOnInit() {
     this.renderer.addClass(this.elRef.nativeElement, `floating-action-btn`);
-    this.renderer.setStyle(this.elRef.nativeElement, 'backgroundColor', this.backgroundColor,);
+    this.renderer.setStyle(this.elRef.nativeElement, '--backgroundColor', this.backgroundColor);
   }
 }
-

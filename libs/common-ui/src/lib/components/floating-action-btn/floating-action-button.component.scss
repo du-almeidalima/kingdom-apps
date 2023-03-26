@@ -4,12 +4,12 @@ $size: 6rem;
 
 :host {
   position: fixed;
-  bottom: 4rem;
-  right: 5rem;
+  bottom: 3rem;
+  right: 4rem;
 
   display: flex;
   justify-content: center;
-  align-content: center;
+  align-items: center;
 
   height: $size;
   width: $size;
@@ -17,9 +17,13 @@ $size: 6rem;
   border: none;
   border-radius: 999rem;
 
+  background-color: var(--backgroundColor, variables.$primary-green);
   cursor: pointer;
-  transition: 100ms linear box-shadow, 100ms linear filter;
-  // background-color: var(--backgroundColor);
+  transition:
+    100ms linear box-shadow,
+    100ms linear filter,
+    variables.$background-transition;
+
   box-shadow: 0 3px 5px -1px rgb(0 0 0 / 20%),
     0px 6px 10px 0px rgb(0 0 0 / 14%),
     0px 1px 18px 0px rgb(0 0 0 / 12%);
@@ -34,5 +38,9 @@ $size: 6rem;
     box-shadow: 0 7px 8px -4px rgb(0 0 0 / 20%),
       0px 12px 17px 2px rgb(0 0 0 / 14%),
       0px 5px 22px 4px rgb(0 0 0 / 12%);
+  }
+
+  &:disabled {
+    background-color: variables.$grey-100;
   }
 }
