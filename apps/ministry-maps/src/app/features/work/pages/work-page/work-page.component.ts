@@ -85,7 +85,7 @@ export class WorkPageComponent implements OnInit, OnDestroy {
     let visitHistoryUpdate$ = of(undefined) as Observable<void>;
 
     // Updating also the territory with the new history entry
-    if (designationTerritory?.history?.length && designationTerritory?.history?.length > 1) {
+    if (designationTerritory?.history?.length && designationTerritory?.history?.length >= 1) {
       // TODO: At some point we should limit the amount of history per territory
       visitHistoryUpdate$ = this.territoryRepository.setVisitHistory(
         designationTerritory.id,
