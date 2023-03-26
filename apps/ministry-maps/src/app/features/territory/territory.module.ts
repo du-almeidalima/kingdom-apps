@@ -10,6 +10,7 @@ import { TerritoryRoutesModule } from './territory-routes.module';
 import { TerritoryCheckboxComponent } from './components/territory-checkbox/territory-checkbox.component';
 import { TerritoryListItemComponent } from './components/territory-list-item/territory-list-item.component';
 import { TerritoryDeleteDialogComponent } from './components/territory-delete-dialog/territory-delete-dialog.component';
+import { TerritoryBO } from './bo/territory.bo';
 
 @NgModule({
   declarations: [
@@ -21,5 +22,6 @@ import { TerritoryDeleteDialogComponent } from './components/territory-delete-di
     TerritoryDeleteDialogComponent,
   ],
   imports: [CommonModule, TerritoryRoutesModule, SharedModule, ReactiveFormsModule, FormsModule],
+  providers: [TerritoryBO]
 })
 export class TerritoryModule {}

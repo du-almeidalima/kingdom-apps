@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { map, Observable, of, shareReplay, switchMap } from 'rxjs';
+import { finalize, map, Observable, of, shareReplay } from 'rxjs';
 
 import {
   ConfirmDialogComponent,
@@ -10,9 +10,6 @@ import {
 } from '@kingdom-apps/common-ui';
 
 import { Territory } from '../../../../../models/territory';
-import { Designation, DesignationTerritory } from '../../../../../models/designation';
-import { DesignationStatusEnum } from '../../../../../models/enums/designation-status';
-import { DesignationRepository } from '../../../../repositories/designation.repository';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { UserStateService } from '../../../../state/user.state.service';
 import { FeatureRoutesEnum } from '../../../../app-routes.module';
@@ -20,6 +17,7 @@ import { isMobileDevice } from '../../../../shared/utils/user-agent';
 import { alertMessaging, findImportantAlert } from '../../bo/territory-alerts.bo';
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 import { Dialog } from '@angular/cdk/dialog';
+import { TerritoryBO } from '../../bo/territory.bo';
 
 @Component({
   selector: 'kingdom-apps-assign-territories-page',
@@ -33,6 +31,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
   public readonly white200 = white200;
   public readonly ALL_OPTION = 'ALL';
 
+  isCreatingAssignment = false;
   cities: string[] = [];
   selectedCity = '';
   $filteredTerritories: Observable<Territory[]> = of([]);
@@ -44,8 +43,8 @@ export class AssignTerritoriesPageComponent implements OnInit {
 
   constructor(
     private readonly territoryRepository: TerritoryRepository,
-    private readonly designationRepository: DesignationRepository,
     private readonly userState: UserStateService,
+    private readonly territoryBO: TerritoryBO,
     private readonly dialog: Dialog
   ) {}
 
@@ -74,23 +73,14 @@ export class AssignTerritoriesPageComponent implements OnInit {
     const selectedTerritories = [...this.selectedTerritoriesModel.values()];
     this.selectedTerritoriesModel.clear();
 
-    // FIXME: This whole flow should not be responsibility of a component. It should be extracted to a service
-    this.territoryRepository
-      .getAllInIds(selectedTerritories)
+    // Loading Spinner on Button
+    this.isCreatingAssignment = true;
+
+    this.territoryBO
+      .createDesignationForTerritories(selectedTerritories)
       .pipe(
-        switchMap(territories => {
-          const designationTerritories: DesignationTerritory[] = territories.map(t => ({
-            ...t,
-            status: DesignationStatusEnum.PENDING,
-          }));
-
-          const newDesignation: Omit<Designation, 'id'> = {
-            territories: designationTerritories,
-            createdAt: new Date(),
-            createdBy: this.userState.currentUser!.id,
-          };
-
-          return this.designationRepository.add(newDesignation);
+        finalize(() => {
+          this.isCreatingAssignment = false;
         })
       )
       .subscribe(designation => {

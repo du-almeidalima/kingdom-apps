@@ -29,6 +29,7 @@
     lib-floating-action-button
     [backgroundColor]='green200'
     [disabled]='selectedTerritoriesModel.size === 0'
+    [loading]='isCreatingAssignment'
     type='submit'
     form='territory-form'
     title='Enviar Designação'>
