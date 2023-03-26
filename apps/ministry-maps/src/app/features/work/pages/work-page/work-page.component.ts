@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { tap } from 'rxjs';
+import { concat, Observable, of, retry, Subscription, tap } from 'rxjs';
 
 import { DesignationRepository } from '../../../../repositories/designation.repository';
 import { Designation, DesignationTerritory } from '../../../../../models/designation';
@@ -12,7 +12,8 @@ import { DesignationStatusEnum } from '../../../../../models/enums/designation-s
   templateUrl: './work-page.component.html',
   styleUrls: ['./work-page.component.scss'],
 })
-export class WorkPageComponent implements OnInit {
+export class WorkPageComponent implements OnInit, OnDestroy {
+  private designationTerritorySubscription: Subscription | undefined;
   isLoading = false;
   designation: Designation | undefined;
   territories: Designation['territories'] = [];
@@ -28,7 +29,7 @@ export class WorkPageComponent implements OnInit {
     this.isLoading = true;
     const designationId = this.route.snapshot.paramMap.get('id') ?? '';
 
-    this.designationRepository
+    this.designationTerritorySubscription = this.designationRepository
       .getById(designationId)
       .pipe(
         tap(() => {
@@ -52,6 +53,12 @@ export class WorkPageComponent implements OnInit {
       });
   }
 
+  ngOnDestroy(): void {
+    if (this.designationTerritorySubscription) {
+      this.designationTerritorySubscription.unsubscribe();
+    }
+  }
+
   updateWorkItem(designationTerritory: DesignationTerritory) {
     // Manually mutating the designations territories so order is preserved. Maybe it should be collection?
     const designationTerritories = [...this.designation!.territories];
@@ -67,22 +74,25 @@ export class WorkPageComponent implements OnInit {
       territories: updatedDesignationTerritories,
     };
 
-    this.designationRepository.update(updatedDesignation);
+    const designationTerritoryUpdate$ = this.designationRepository.update(updatedDesignation);
 
     // Update Territory lastVisit and history
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { status, ...territory } = designationTerritory;
     territory.lastVisit = new Date();
 
-    this.territoryRepository.update(territory);
+    const territoryUpdate$ = this.territoryRepository.update(territory);
+    let visitHistoryUpdate$ = of(undefined) as Observable<void>;
 
     // Updating also the territory with the new history entry
-    if (designationTerritory.history) {
+    if (designationTerritory?.history?.length && designationTerritory?.history?.length > 1) {
       // TODO: At some point we should limit the amount of history per territory
-      this.territoryRepository.setVisitHistory(
+      visitHistoryUpdate$ = this.territoryRepository.setVisitHistory(
         designationTerritory.id,
         designationTerritory.history[designationTerritory.history.length - 1]
       );
     }
+
+    concat([designationTerritoryUpdate$, territoryUpdate$, visitHistoryUpdate$]).pipe(retry(2));
   }
 }
