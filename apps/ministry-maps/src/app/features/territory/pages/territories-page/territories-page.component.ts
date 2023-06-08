@@ -10,6 +10,7 @@ import {
   TerritoryManageDialogComponent,
 } from '../../components/territory-manage-dialog/territory-manage-dialog.component';
 import { TerritoryDeleteDialogComponent } from '../../components/territory-delete-dialog/territory-delete-dialog.component';
+import { territoryFilterPipe } from '../../../../shared/utils/territory-filter-pipe';
 
 @Component({
   selector: 'kingdom-apps-territories-page',
@@ -48,23 +49,6 @@ export class TerritoriesPageComponent implements OnInit {
     this.filteredTerritories$ = this.filterTerritoriesByCity(this.selectedCity);
   }
 
-  private filterTerritoriesByCity(city: string) {
-    return this.territories$.pipe(
-      map(tArr => {
-        if (city === this.ALL_OPTION) {
-          const allTerritories = [...tArr];
-
-          // Sorting per city when ALL is selected
-          return allTerritories.sort((a, b) => {
-            return a.city.localeCompare(b.city);
-          });
-        }
-
-        return tArr.filter(t => t.city === city);
-      })
-    );
-  }
-
   handleOpenDialog(territory?: Territory) {
     this.dialog.open<object, TerritoryDialogData>(TerritoryManageDialogComponent, {
       data: {
@@ -83,5 +67,26 @@ export class TerritoriesPageComponent implements OnInit {
     this.dialog.open<object, TerritoryDialogData>(TerritoryDeleteDialogComponent).closed.subscribe(result => {
       if (result) this.territoryRepository.delete(territoryId);
     });
+  }
+
+  handleTerritorySearch($event: string | null) {
+    this.filteredTerritories$ = territoryFilterPipe(this.territories$, $event ?? '');
+  }
+
+  private filterTerritoriesByCity(city: string) {
+    return this.territories$.pipe(
+      map(tArr => {
+        if (city === this.ALL_OPTION) {
+          const allTerritories = [...tArr];
+
+          // Sorting per city when ALL is selected
+          return allTerritories.sort((a, b) => {
+            return a.city.localeCompare(b.city);
+          });
+        }
+
+        return tArr.filter(t => t.city === city);
+      })
+    );
   }
 }
