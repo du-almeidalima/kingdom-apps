@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { finalize, map, Observable, of, shareReplay } from 'rxjs';
+import { finalize, Observable, of, shareReplay } from 'rxjs';
 
 import {
   ConfirmDialogComponent,
@@ -18,6 +18,7 @@ import { alertMessaging, findImportantAlert } from '../../bo/territory-alerts.bo
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 import { Dialog } from '@angular/cdk/dialog';
 import { TerritoryBO } from '../../bo/territory.bo';
+import { territoryFilterPipe } from '../../../../shared/utils/territory-filter-pipe';
 
 @Component({
   selector: 'kingdom-apps-assign-territories-page',
@@ -134,21 +135,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
   }
 
   private filterTerritoriesByText(searchTerm: string | null) {
-    return this.territories$.pipe(
-      map(tArr => {
-        if (!searchTerm) {
-          return tArr;
-        }
-
-        const searchWords = searchTerm.split(' ');
-
-        return tArr.filter(t => {
-          const territorySearchableText = (t.address + t.note).toLowerCase();
-
-          return searchWords.every(word => territorySearchableText.includes(word.toLowerCase()));
-        });
-      })
-    );
+    return territoryFilterPipe(this.territories$, searchTerm ?? '');
   }
 
   private fetchTerritories(congregationId: string, city: string) {
