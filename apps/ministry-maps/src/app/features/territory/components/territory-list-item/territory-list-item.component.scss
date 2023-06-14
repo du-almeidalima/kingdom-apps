@@ -1,5 +1,5 @@
 @use 'libs/common-ui/src/lib/styles/abstract/variables';
-@use '../../../../../styles/components/list-item-button';
+@use 'libs/common-ui/src/lib/components/icon-button/icon-button.component';
 
 :host {
   display: block;
@@ -61,6 +61,6 @@
     flex-flow: column nowrap;
     gap: .5rem;
 
-    transform: translateY(list-item-button.$list-item-button-padding * -1);
+    transform: translateY(icon-button.$icon-button-padding * -1);
   }
 }

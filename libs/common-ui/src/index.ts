@@ -9,3 +9,5 @@ export * from './lib/components/icon/icon-type';
 export * from './lib/components/search-input/search-input.component';
 
 export * from './lib/components/confirm-dialog/confirm-dialog.component';
+
+export * from './lib/components/icon-button/icon-button.component';

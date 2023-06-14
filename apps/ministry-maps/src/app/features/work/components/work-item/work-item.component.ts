@@ -53,17 +53,13 @@ import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territor
         <div class='work-item__footer'>
           <span class='work-item__city'>{{ territory.city }}</span>
           <div class='work-item__buttons-container'>
-            <button class='list-item-button'
-                    *ngIf='territory.status === DesignationStatusEnum.DONE'
-                    (click)='handleEdit()'
-            >
+            <button lib-icon-button *ngIf='territory.status === DesignationStatusEnum.DONE' (click)='handleEdit()'>
               <lib-icon [fillColor]='buttonIconColor' icon='pencil-lined' />
             </button>
-            <button class='list-item-button' *ngIf='territory.mapsLink' (click)='handleOpenMaps(territory.mapsLink)'>
+            <button lib-icon-button *ngIf='territory.mapsLink' (click)='handleOpenMaps(territory.mapsLink)'>
               <lib-icon [fillColor]='buttonIconColor' icon='map-5' />
             </button>
-            <button class='list-item-button'
-                    *ngIf='territory.history && territory.history.length > 0'
+            <button lib-icon-button *ngIf='territory.history && territory.history.length > 0'
                     (click)='handleOpenHistory()'>
               <lib-icon [fillColor]='buttonIconColor' icon='time-17' />
             </button>

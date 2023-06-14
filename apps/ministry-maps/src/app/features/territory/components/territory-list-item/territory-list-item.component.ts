@@ -22,10 +22,10 @@ import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territor
         <span class="t-caption">Notas: {{ territory.note }}</span>
       </div>
       <div class="territory-list-item__buttons-container">
-        <button class="list-item-button" type="button" (click)="edit.emit(territory)">
+        <button lib-icon-button type="button" (click)="edit.emit(territory)">
           <lib-icon [fillColor]="editButtonColor" icon="pencil-lined"></lib-icon>
         </button>
-        <button class="list-item-button" type="button" (click)="remove.emit(territory.id)">
+        <button lib-icon-button type="button" (click)="remove.emit(territory.id)">
           <lib-icon [fillColor]="deleteButtonColor" icon="trash-can-lined"></lib-icon>
         </button>
       </div>

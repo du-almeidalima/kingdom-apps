@@ -75,12 +75,12 @@ import { hasRecentlyAskedToStopVisiting, hasRecentlyMoved, hasRecentRevisit } fr
         <div class='territory-checkbox__buttons-container'>
           <button
             *ngIf='territory.mapsLink'
-            class='list-item-button'
+            lib-icon-button
             type='button'
             (click)='handleOpenMaps(territory.mapsLink)'>
             <lib-icon [fillColor]='buttonIconColor' icon='map-5'></lib-icon>
           </button>
-          <button *ngIf='territory.recentHistory' class='list-item-button' type='button' (click)='handleOpenHistory()'>
+          <button *ngIf='territory.recentHistory' lib-icon-button type='button' (click)='handleOpenHistory()'>
             <lib-icon [fillColor]='buttonIconColor' icon='time-17'></lib-icon>
           </button>
         </div>

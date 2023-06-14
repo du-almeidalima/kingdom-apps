@@ -1,7 +1,9 @@
-@use 'libs/common-ui/src/lib/styles/abstract/variables';
-$list-item-button-padding: .5rem;
+@use '../../styles/abstract/variables';
 
-.list-item-button {
+$icon-button-padding: .5rem;
+
+// The .icon-button needs to be specified to avoid the :host selector to conflict, when importing this file
+:host.icon-button {
   $size: 3rem;
 
   display: flex;
@@ -10,7 +12,7 @@ $list-item-button-padding: .5rem;
 
   width: $size;
   height: $size;
-  padding: $list-item-button-padding;
+  padding: $icon-button-padding;
   border: none;
   border-radius: 50%;
 
