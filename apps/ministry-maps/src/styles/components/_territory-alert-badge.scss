@@ -1,0 +1,23 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+@use 'libs/common-ui/src/lib/styles/base/typography';
+
+.territory-alert-badge {
+  padding: .25rem .5rem;
+  border-radius: 100rem;
+  border: 1px solid currentColor;
+
+  color: variables.$grey-200;
+  @extend .t-caption;
+
+  &--revisit {
+    color: variables.$green-200;
+  }
+
+  &--moved {
+    color: variables.$deep-purple-900;
+  }
+
+  &--stop-visiting {
+    color: variables.$red-300;
+  }
+}

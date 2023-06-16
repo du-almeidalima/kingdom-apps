@@ -52,19 +52,19 @@ import { hasRecentlyAskedToStopVisiting, hasRecentlyMoved, hasRecentRevisit } fr
             </span>
             <!-- VISIT STATUS BADGE -->
             <span
-              class='territory-checkbox__visit-badge territory-checkbox__visit-badge--revisit'
+              class='territory-alert-badge territory-alert-badge--revisit'
               title='Essa pessoa foi revisitada recentemente'
               *ngIf='hasRecentRevisit'>
               Revisita
             </span>
             <span
-              class='territory-checkbox__visit-badge territory-checkbox__visit-badge--moved'
+              class='territory-alert-badge territory-alert-badge--moved'
               title='Essa pessoa se mudou'
               *ngIf='hasRecentlyMoved'>
               Mudou
             </span>
             <span
-              class='territory-checkbox__visit-badge territory-checkbox__visit-badge--stop-visiting'
+              class='territory-alert-badge territory-alert-badge--stop-visiting'
               title='Essa pessoa não quer ser visitada por uma Testeminha de Jeová'
               *ngIf='hasRecentlyAskedToStopVisiting'>
               Não quer visitas

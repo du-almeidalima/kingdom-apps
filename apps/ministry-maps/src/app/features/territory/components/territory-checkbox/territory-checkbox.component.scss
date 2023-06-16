@@ -82,27 +82,6 @@
     color: variables.$grey-100;
   }
 
-  &__visit-badge {
-    padding: .25rem .5rem;
-    border-radius: 100rem;
-    border: 1px solid currentColor;
-
-    color: variables.$grey-200;
-    @extend .t-caption;
-  }
-
-  &__visit-badge--revisit {
-    color: $accent;
-  }
-
-  &__visit-badge--moved {
-    color: variables.$deep-purple-900;
-  }
-
-  &__visit-badge--stop-visiting {
-    color: variables.$red-300;
-  }
-
   &__indicator {
     justify-self: flex-end;
 
