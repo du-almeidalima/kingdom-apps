@@ -76,16 +76,14 @@ export class WorkItemComponent implements OnInit {
   public icon: Icons = 'generation-3';
   public isIconLarge = false;
 
-  constructor(private readonly dialog: Dialog) {}
-
   @Input()
   territory!: DesignationTerritory;
-
   @Input()
   done = false;
-
   @Output()
   territoryUpdated = new EventEmitter<DesignationTerritory>();
+
+  constructor(private readonly dialog: Dialog) {}
 
   ngOnInit(): void {
     this.icon = mapTerritoryIcon(this.territory.icon);

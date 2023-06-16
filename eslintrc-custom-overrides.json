@@ -12,12 +12,12 @@
           {
             "default": [
               // Fields
-              "private-field",
-              "protected-field",
-              "public-field",
               "private-static-field",
               "protected-static-field",
               "public-static-field",
+              "private-field",
+              "protected-field",
+              "public-field",
               "private-decorated-field",
               "protected-decorated-field",
               "public-decorated-field",
@@ -30,8 +30,8 @@
               // Methods
               "abstract-method",
               "protected-method",
-              "public-method",
               "static-method",
+              "public-method",
               "private-method"
             ]
           }
