@@ -1,5 +1,5 @@
 export { CommonComponentsModule } from './lib/components/common-components.module';
-
+export { CommonDirectivesModule } from './lib/directives/common-directives.module';
 // Styles
 export * from './lib/styles/abstract/variables';
 
