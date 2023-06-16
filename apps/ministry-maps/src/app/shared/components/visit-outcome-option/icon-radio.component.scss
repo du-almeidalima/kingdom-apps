@@ -1,11 +1,11 @@
-@use 'libs/common-ui/src/lib/styles/components' as *;
+@use 'libs/common-ui/src/lib/styles/components/form-control' as *;
 @use 'libs/common-ui/src/lib/styles/abstract/variables';
 
-kingdom-apps-visit-outcome-option {
+kingdom-apps-icon-radio {
   display: block;
 }
 
-.visit-outcome-option {
+.icon-radio {
   @extend .form-control;
 
   display: flex;
@@ -28,7 +28,7 @@ kingdom-apps-visit-outcome-option {
   }
 
   &__icon {
-    $size: 2.5rem;
+    $size: 2rem;
 
     height: $size;
     width: $size;

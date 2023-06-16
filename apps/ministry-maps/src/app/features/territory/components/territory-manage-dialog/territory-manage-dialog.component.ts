@@ -80,7 +80,7 @@ type TerritoryForm = {
             form="territory-form"
             [disabled]="!this.form.valid || isSubmitting">
             <ng-container *ngIf="!isSubmitting">{{ isEdit ? 'Salvar' : 'Adicionar' }}</ng-container>
-            <lib-spinner *ngIf="isSubmitting" class="login-button__spinner" height="1.75rem" width="1.75rem" [color]="white" />
+            <lib-spinner *ngIf="isSubmitting" height="1.75rem" width="1.75rem" [color]="white" />
           </button>
         </div>
       </lib-dialog-footer>

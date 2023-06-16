@@ -1,6 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CdkMenuModule } from '@angular/cdk/menu';
+
+import { CommonDirectivesModule } from '@kingdom-apps/common-ui';
 
 import { SharedModule } from '../../shared/shared.module';
 import { TerritoryManageDialogComponent } from './components/territory-manage-dialog/territory-manage-dialog.component';
@@ -10,8 +13,8 @@ import { TerritoryRoutesModule } from './territory-routes.module';
 import { TerritoryCheckboxComponent } from './components/territory-checkbox/territory-checkbox.component';
 import { TerritoryListItemComponent } from './components/territory-list-item/territory-list-item.component';
 import { TerritoryDeleteDialogComponent } from './components/territory-delete-dialog/territory-delete-dialog.component';
+import { TerritoryMoveAlertDialogComponent } from './components/territory-move-alert-dialog/territory-move-alert-dialog.component';
 import { TerritoryBO } from './bo/territory.bo';
-import { CdkMenuModule } from '@angular/cdk/menu';
 
 @NgModule({
   declarations: [
@@ -21,8 +24,17 @@ import { CdkMenuModule } from '@angular/cdk/menu';
     TerritoryManageDialogComponent,
     TerritoryListItemComponent,
     TerritoryDeleteDialogComponent,
+    TerritoryMoveAlertDialogComponent,
   ],
-  imports: [CommonModule, TerritoryRoutesModule, SharedModule, ReactiveFormsModule, FormsModule, CdkMenuModule],
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    CdkMenuModule,
+    CommonModule,
+    CommonDirectivesModule,
+    SharedModule,
+    TerritoryRoutesModule,
+  ],
   providers: [TerritoryBO],
 })
 export class TerritoryModule {}
