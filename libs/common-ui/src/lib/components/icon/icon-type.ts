@@ -16,4 +16,5 @@ export type Icons =
   | 'building-8'
   | 'trash-can-lined'
   | 'pencil-lined'
-  | 'magnifier-lined';
+  | 'magnifier-lined'
+  | 'menu-dot-vertical-filled';
