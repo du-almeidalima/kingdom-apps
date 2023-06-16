@@ -16,7 +16,7 @@ type WorkItemCompleteForm = ControlsOf<WorkItemCompleteDialogData>;
   styleUrls: ['./work-item-complete-dialog.component.scss'],
   template: `
     <lib-dialog [title]="isEdit ? 'Editar Visita' : 'Concluir Visita'">
-      <form id="work-item-complete" [formGroup]="form" (ngSubmit)="handleFormSubmit()">
+      <form id="work-item-complete" [formGroup]="form" (ngSubmit)="handleFormSubmit()" tabindex='0'>
         <!-- Visit Outcome -->
         <h3 class="mb-4 t-headline4">Resultado da visita</h3>
         <kingdom-apps-visit-outcome-option formControlName="visitOutcome" [value]="VisitOutcome.SPOKE"
