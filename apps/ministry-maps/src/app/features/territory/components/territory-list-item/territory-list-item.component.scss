@@ -11,8 +11,8 @@
   grid-template-rows: 1fr;
   grid-auto-rows: minmax(0, max-content);
   grid-template-areas:
-    'icon address buttons-container'
-    'icon notes buttons-container';
+    'icon address menu-button'
+    'icon notes menu-button';
 
   padding: 1rem .5rem;
   border: 1px solid variables.$light-grey-100;
@@ -52,15 +52,16 @@
 
   &__notes {
     grid-area: notes;
+
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: baseline;
+    gap: .75rem;
   }
 
-  &__buttons-container {
-    grid-area: buttons-container;
-    place-self: center;
-    display: flex;
-    flex-flow: column nowrap;
-    gap: .5rem;
-
+  &__menu-button {
+    grid-area: menu-button;
+    place-self: self-start;
     transform: translateY(icon-button.$icon-button-padding * -1);
   }
 }

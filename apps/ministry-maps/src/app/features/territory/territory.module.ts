@@ -11,6 +11,7 @@ import { TerritoryCheckboxComponent } from './components/territory-checkbox/terr
 import { TerritoryListItemComponent } from './components/territory-list-item/territory-list-item.component';
 import { TerritoryDeleteDialogComponent } from './components/territory-delete-dialog/territory-delete-dialog.component';
 import { TerritoryBO } from './bo/territory.bo';
+import { CdkMenuModule } from '@angular/cdk/menu';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,7 @@ import { TerritoryBO } from './bo/territory.bo';
     TerritoryListItemComponent,
     TerritoryDeleteDialogComponent,
   ],
-  imports: [CommonModule, TerritoryRoutesModule, SharedModule, ReactiveFormsModule, FormsModule],
-  providers: [TerritoryBO]
+  imports: [CommonModule, TerritoryRoutesModule, SharedModule, ReactiveFormsModule, FormsModule, CdkMenuModule],
+  providers: [TerritoryBO],
 })
 export class TerritoryModule {}
