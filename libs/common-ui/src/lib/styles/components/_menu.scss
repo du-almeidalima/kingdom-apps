@@ -1,0 +1,44 @@
+@use '../abstract/variables';
+@use "../base/typography";
+
+.menu {
+  display: flex;
+  flex-flow: column nowrap;
+
+  min-width: 20rem;
+
+  background-color: variables.$white-200;
+  box-shadow: variables.$shadow-z4;
+
+  &__item {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: .5rem;
+
+    padding: .75rem .25rem;
+
+    list-style: none;
+    cursor: pointer;
+
+    @extend .t-body2;
+
+    &:hover {
+      background-color: variables.$white-300;
+    }
+
+    button {
+      $size: 2.75rem;
+
+      height: $size;
+      width: $size;
+    }
+  }
+
+  &__separator {
+    border: none;
+    border-bottom: 1px solid variables.$light-grey-100;
+    margin-block: .5rem;
+  }
+}
