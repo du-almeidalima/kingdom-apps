@@ -37,6 +37,9 @@ export class TerritoriesPageComponent implements OnInit {
   ngOnInit(): void {
     const userCongregationId = this.userState.currentUser?.congregation?.id;
     this.cities = this.userState.currentUser?.congregation?.cities ?? [];
+    // Select First City
+    this.selectedCity = this.cities.length >= 0 ? this.cities[0] : this.ALL_OPTION;
+
     this.isLoading = true;
 
     this.territories$ = this.territoryRepository.getAllByCongregation(userCongregationId ?? '').pipe(

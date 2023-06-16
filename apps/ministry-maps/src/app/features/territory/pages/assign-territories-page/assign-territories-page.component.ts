@@ -51,7 +51,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
 
   ngOnInit(): void {
     const { id, cities } = this.userState.currentUser!.congregation!;
-    const firstCity = cities.length >= 0 ? cities[0] : '';
+    const firstCity = cities.length >= 0 ? cities[0] : this.ALL_OPTION;
 
     this.selectedCity = firstCity;
     this.cities = cities;

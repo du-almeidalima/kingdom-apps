@@ -29,7 +29,7 @@ const convertTerritoryFirebaseTimestampsToDate = (data: FirebaseTerritoryModel):
     lastVisit: data.lastVisit?.toDate(),
     recentHistory: data.recentHistory?.map(h => ({
       ...h,
-      date: h.date.toDate(),
+      date: h?.date?.toDate(),
     })),
   };
 };
