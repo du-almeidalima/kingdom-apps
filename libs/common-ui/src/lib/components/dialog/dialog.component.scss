@@ -3,8 +3,11 @@
 @use '../../styles/base/typography';
 
 :host {
-  display: block;
+  display: flex;
+  flex-flow: row;
+
   max-width: 85dvw;
+  max-height: 95dvh;
 }
 
 .dialog {
@@ -13,6 +16,8 @@
 
   position: relative;
   width: auto;
+  height: auto;
+  max-height: 100%;
   border: none;
   box-shadow: variables.$shadow-z6;
   background-color: variables.$white-200;
@@ -56,5 +61,6 @@
 
   &__content {
     padding: 1.5rem;
+    overflow-y: auto;
   }
 }

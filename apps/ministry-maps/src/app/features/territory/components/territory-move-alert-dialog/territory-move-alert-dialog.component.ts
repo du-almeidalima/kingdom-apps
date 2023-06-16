@@ -26,12 +26,14 @@ export enum MoveResolutionActionsEnum {
     <lib-dialog title="Morador Mudou">
       <p class="t-body2 mb-5">Recentemente um publicador reportou que esse morador não está mais nesse endereço:</p>
       <!-- REPORTS -->
-      <figure class="quote-report" *ngFor="let report of historyReports">
-        <blockquote class="quote-report__quote">
-          {{ report.notes }}
-        </blockquote>
-        <figcaption class="quote-report__caption text-gray-600 t-caption">{{ report.date | date }}</figcaption>
-      </figure>
+      <div class='overflow-y-auto' style='max-height: 30dvh'>
+        <figure class="quote-report" *ngFor="let report of historyReports">
+          <blockquote class="quote-report__quote">
+            {{ report.notes }}
+          </blockquote>
+          <figcaption class="quote-report__caption text-gray-600 t-caption">{{ report.date | date }}</figcaption>
+        </figure>
+      </div>
 
       <!-- ACTION -->
       <p class="t-body2 my-5">O que você quer fazer?</p>
