@@ -42,7 +42,11 @@ import { hasRecentlyMoved } from '../../bo/territory-alerts.bo';
               <span>Editar</span>
             </li>
             <!-- ALERTS -->
-            <li class='menu__item' cdkMenuItem (cdkMenuItemTriggered)='edit.emit(territory)' *ngIf='hasRecentlyMoved'>
+            <li class='menu__item'
+                cdkMenuItem
+                (cdkMenuItemTriggered)='resolveMove.emit(territory)'
+                *ngIf='hasRecentlyMoved'
+            >
               <button lib-icon-button type='button'>
                 <lib-icon [fillColor]='editButtonColor' icon='building-8'></lib-icon>
               </button>
@@ -78,6 +82,9 @@ export class TerritoryListItemComponent implements OnInit {
 
   @Output()
   remove = new EventEmitter<string>();
+
+  @Output()
+  resolveMove = new EventEmitter<Territory>();
 
   ngOnInit(): void {
     this.icon = mapTerritoryIcon(this.territory.icon);

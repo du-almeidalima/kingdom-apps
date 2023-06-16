@@ -16,15 +16,16 @@
       class='mb-3'
       *ngFor='let territory of filteredTerritories$ | async'
       [territory]='territory'
-      (edit)='handleOpenDialog($event)'
+      (edit)='handleOpenManageTerritoryDialog($event)'
       (remove)='handleRemoveTerritory($event)'
+      (resolveMove)='handleResolveMoveAlert($event)'
     >
     </kingdom-apps-territory-list-item>
   </section>
 
   <button lib-floating-action-button title='Adicionar Território'
           [backgroundColor]='green200'
-          (click)='handleOpenDialog()'>
+          (click)='handleOpenManageTerritoryDialog()'>
     <lib-icon icon='plus-lined' [fillColor]='white200'></lib-icon>
   </button>
 </div>

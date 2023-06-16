@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { UserStateService } from '../../../../state/user.state.service';
-import { finalize, map, Observable, of, shareReplay } from 'rxjs';
+import { delay, finalize, map, Observable, of, shareReplay } from 'rxjs';
 import { Territory } from '../../../../../models/territory';
 import { green200, white200 } from '@kingdom-apps/common-ui';
 import { Dialog } from '@angular/cdk/dialog';
@@ -11,6 +11,11 @@ import {
 } from '../../components/territory-manage-dialog/territory-manage-dialog.component';
 import { TerritoryDeleteDialogComponent } from '../../components/territory-delete-dialog/territory-delete-dialog.component';
 import { territoryFilterPipe } from '../../../../shared/utils/territory-filter-pipe';
+import {
+  MoveResolutionActionsEnum,
+  TerritoryMoveAlertDialogComponent,
+  TerritoryMoveAlertDialogData,
+} from '../../components/territory-move-alert-dialog/territory-move-alert-dialog.component';
 
 @Component({
   selector: 'kingdom-apps-territories-page',
@@ -52,7 +57,7 @@ export class TerritoriesPageComponent implements OnInit {
     this.filteredTerritories$ = this.filterTerritoriesByCity(this.selectedCity);
   }
 
-  handleOpenDialog(territory?: Territory) {
+  handleOpenManageTerritoryDialog(territory?: Territory) {
     this.dialog.open<object, TerritoryDialogData>(TerritoryManageDialogComponent, {
       data: {
         territory,
@@ -70,6 +75,32 @@ export class TerritoriesPageComponent implements OnInit {
     this.dialog.open<object, TerritoryDialogData>(TerritoryDeleteDialogComponent).closed.subscribe(result => {
       if (result) this.territoryRepository.delete(territoryId);
     });
+  }
+
+  handleResolveMoveAlert(territory: Territory) {
+    this.dialog
+      .open<MoveResolutionActionsEnum, TerritoryMoveAlertDialogData>(TerritoryMoveAlertDialogComponent, {
+        data: {
+          history: territory.recentHistory ?? [],
+          markAsResolvedCallback: histories => {
+            return of(histories).pipe(delay(1000));
+          },
+        },
+      })
+      .closed.subscribe(action => {
+        if (!action) {
+          return;
+        }
+
+        switch (action) {
+          case MoveResolutionActionsEnum.EDIT_TERRITORY:
+            this.handleOpenManageTerritoryDialog(territory);
+            break;
+          case MoveResolutionActionsEnum.DELETE_TERRITORY:
+            this.handleRemoveTerritory(territory.id);
+            break;
+        }
+      });
   }
 
   handleTerritorySearch($event: string | null) {
