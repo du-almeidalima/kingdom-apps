@@ -1,14 +1,8 @@
 import { APP_INITIALIZER, isDevMode, NgModule } from '@angular/core';
-import { getAnalytics, provideAnalytics, ScreenTrackingService, UserTrackingService } from '@angular/fire/analytics';
+import { ScreenTrackingService, UserTrackingService } from '@angular/fire/analytics';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
-import {
-  enableIndexedDbPersistence,
-  getFirestore,
-  provideFirestore,
-} from '@angular/fire/firestore';
-import { getPerformance, providePerformance } from '@angular/fire/performance';
-import { getRemoteConfig, provideRemoteConfig } from '@angular/fire/remote-config';
+import { enableIndexedDbPersistence, getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterOutlet } from '@angular/router';
 
@@ -28,20 +22,22 @@ import { ServiceWorkerModule } from '@angular/service-worker';
   imports: [
     BrowserModule,
     provideFirebaseApp(() => initializeApp(environment.firebase)),
-    provideAnalytics(() => getAnalytics()),
     provideAuth(() => getAuth()),
     provideFirestore(() => {
       const firestore = getFirestore();
-      enableIndexedDbPersistence(firestore).then(() => {
-        console.log('Persistence enabled');
-      }).catch((err) => {
-        console.log('Persistence failed', err);
-      });
+      // TODO: Upgrade this
+      enableIndexedDbPersistence(firestore)
+        .then(() => {
+          console.log('Persistence enabled');
+        })
+        .catch(err => {
+          console.log('Persistence failed', err);
+        });
       return firestore;
     }),
     // provideFunctions(() => getFunctions()),
-    providePerformance(() => getPerformance()),
-    provideRemoteConfig(() => getRemoteConfig()),
+    // providePerformance(() => getPerformance()),
+    // provideRemoteConfig(() => getRemoteConfig()),
     AppRoutesModule,
     RouterOutlet,
     RepositoriesModule,
@@ -66,5 +62,4 @@ import { ServiceWorkerModule } from '@angular/service-worker';
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {
-}
+export class AppModule {}
