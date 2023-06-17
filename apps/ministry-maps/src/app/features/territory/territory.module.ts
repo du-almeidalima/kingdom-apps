@@ -15,6 +15,7 @@ import { TerritoryListItemComponent } from './components/territory-list-item/ter
 import { TerritoryDeleteDialogComponent } from './components/territory-delete-dialog/territory-delete-dialog.component';
 import { TerritoryMoveAlertDialogComponent } from './components/territory-move-alert-dialog/territory-move-alert-dialog.component';
 import { TerritoryBO } from './bo/territory.bo';
+import { TerritoryAlertsBO } from './bo/territory-alerts.bo';
 
 @NgModule({
   declarations: [
@@ -35,6 +36,6 @@ import { TerritoryBO } from './bo/territory.bo';
     SharedModule,
     TerritoryRoutesModule,
   ],
-  providers: [TerritoryBO],
+  providers: [TerritoryBO, TerritoryAlertsBO],
 })
 export class TerritoryModule {}

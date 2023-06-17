@@ -6,7 +6,7 @@ import { primaryGreen } from '@kingdom-apps/common-ui';
 import { Dialog } from '@angular/cdk/dialog';
 import { HistoryDialogComponent } from '../../../../shared/components/dialogs';
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
-import { hasRecentlyAskedToStopVisiting, hasRecentlyMoved, hasRecentRevisit } from '../../bo/territory-alerts.bo';
+import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
 
 @Component({
   selector: 'kingdom-apps-territory-checkbox',
@@ -115,9 +115,9 @@ export class TerritoryCheckboxComponent implements ControlValueAccessor, OnInit 
   constructor(private readonly dialog: Dialog) {}
 
   ngOnInit(): void {
-    this.hasRecentRevisit = hasRecentRevisit(this.territory);
-    this.hasRecentlyMoved = hasRecentlyMoved(this.territory);
-    this.hasRecentlyAskedToStopVisiting = hasRecentlyAskedToStopVisiting(this.territory);
+    this.hasRecentRevisit = TerritoryAlertsBO.hasRecentRevisit(this.territory);
+    this.hasRecentlyMoved = TerritoryAlertsBO.hasRecentlyMoved(this.territory);
+    this.hasRecentlyAskedToStopVisiting = TerritoryAlertsBO.hasRecentlyAskedToStopVisiting(this.territory);
   }
 
   // Resolve style indicator

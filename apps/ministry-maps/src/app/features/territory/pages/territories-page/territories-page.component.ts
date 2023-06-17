@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { UserStateService } from '../../../../state/user.state.service';
-import { delay, finalize, map, Observable, of, shareReplay, switchMap } from 'rxjs';
+import { finalize, map, Observable, of, shareReplay } from 'rxjs';
 import { Territory } from '../../../../../models/territory';
 import { green200, SearchInputComponent, white200 } from '@kingdom-apps/common-ui';
 import { Dialog } from '@angular/cdk/dialog';
@@ -18,6 +18,8 @@ import {
 } from '../../components/territory-move-alert-dialog/territory-move-alert-dialog.component';
 import { HistoryDialogComponent } from '../../../../shared/components/dialogs';
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
+import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
+import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 
 @Component({
   selector: 'kingdom-apps-territories-page',
@@ -41,6 +43,7 @@ export class TerritoriesPageComponent implements OnInit {
   constructor(
     private readonly territoryRepository: TerritoryRepository,
     private readonly userState: UserStateService,
+    private readonly territoryAlertsBO: TerritoryAlertsBO,
     public dialog: Dialog
   ) {}
 
@@ -73,6 +76,7 @@ export class TerritoriesPageComponent implements OnInit {
   }
 
   handleSelectedCityChange(city: string) {
+    this.selectedCity = city;
     this.filteredTerritories$ = this.filterTerritoriesByCity(city);
   }
 
@@ -88,7 +92,7 @@ export class TerritoriesPageComponent implements OnInit {
         data: {
           history: territory.recentHistory ?? [],
           markAsResolvedCallback: histories => {
-            return of(histories).pipe(delay(1000));
+            return this.territoryAlertsBO.resolveTerritoryHistoryAlert(territory, histories, VisitOutcomeEnum.MOVED)
           },
         },
       })
@@ -114,7 +118,7 @@ export class TerritoriesPageComponent implements OnInit {
   }
 
   handleOpenHistory(territory: Territory) {
-    this.territoryRepository.getTerritoryVisitHistory(territory.id).subscribe((data) => {
+    this.territoryRepository.getTerritoryVisitHistory(territory.id).subscribe(data => {
       this.dialog.open<HistoryDialogComponent, TerritoryVisitHistory[]>(HistoryDialogComponent, {
         data: data.reverse() ?? [],
       });

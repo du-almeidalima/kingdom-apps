@@ -14,7 +14,7 @@ import { TerritoryRepository } from '../../../../repositories/territories.reposi
 import { UserStateService } from '../../../../state/user.state.service';
 import { FeatureRoutesEnum } from '../../../../app-routes.module';
 import { isMobileDevice } from '../../../../shared/utils/user-agent';
-import { alertMessaging, findImportantAlert } from '../../bo/territory-alerts.bo';
+import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 import { Dialog } from '@angular/cdk/dialog';
 import { TerritoryBO } from '../../bo/territory.bo';
@@ -101,7 +101,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
   handleTerritoryCheck(value: boolean, territory: Territory) {
     const territoryId = territory.id;
 
-    const importantAlert = findImportantAlert(territory);
+    const importantAlert = TerritoryAlertsBO.findImportantAlert(territory);
 
     // Adding the value here regardless of the alert because we need to tell Angular that something has changed
     // In order for the TerritoryCheckBox component to render correctly
@@ -149,7 +149,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
   }
 
   private openConfirmAssignmentDialog(importantAlert: VisitOutcomeEnum) {
-    const { title, bodyText } = alertMessaging(importantAlert);
+    const { title, bodyText } = TerritoryAlertsBO.alertMessaging(importantAlert);
 
     return this.dialog.open<ConfirmDialogComponent, ConfirmDialogData>(ConfirmDialogComponent, {
       data: { title, bodyText },

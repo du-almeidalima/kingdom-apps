@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Territory } from '../../../../../models/territory';
 import { grey400, Icons, red300 } from '@kingdom-apps/common-ui';
+import { Territory } from '../../../../../models/territory';
 import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territory-icon-mapper';
-import { hasRecentlyMoved } from '../../bo/territory-alerts.bo';
+import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
 
 @Component({
   selector: 'kingdom-apps-territory-list-item',
@@ -47,6 +47,8 @@ import { hasRecentlyMoved } from '../../bo/territory-alerts.bo';
               </button>
               <span>Histórico</span>
             </li>
+            <!-- SEPARATOR -->
+            <hr class='menu__separator' *ngIf='hasRecentlyMoved'>
             <!-- ALERTS -->
             <li class='menu__item'
                 cdkMenuItem
@@ -99,6 +101,6 @@ export class TerritoryListItemComponent implements OnInit {
     this.icon = mapTerritoryIcon(this.territory.icon);
     this.isIconLarge = isIconLarge(this.icon);
 
-    this.hasRecentlyMoved = hasRecentlyMoved(this.territory);
+    this.hasRecentlyMoved = TerritoryAlertsBO.hasRecentlyMoved(this.territory);
   }
 }
