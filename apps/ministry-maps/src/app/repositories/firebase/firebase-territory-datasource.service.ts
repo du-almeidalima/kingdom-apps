@@ -10,6 +10,7 @@ import {
   getDoc,
   getDocs,
   query,
+  runTransaction,
   setDoc,
   updateDoc,
   where,
@@ -131,6 +132,23 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
     removeUndefined(territoryCopy);
 
     return from(updateDoc(territoryDocRef, territoryCopy));
+  }
+
+  batchUpdate(territories: Territory[]): Observable<void> {
+    if (!territories || territories.length === 0) {
+      console.warn('Aborting batch update, ,o territories to update');
+    }
+
+    const transactionPromise = runTransaction(this.firestore, async (transaction) => {
+
+      return territories.map(territory => {
+        const territoryDocRef = doc(this.territoriesCollection, `${territory.id}`);
+
+        return transaction.update(territoryDocRef, territory);
+      })
+    })
+
+    return from((transactionPromise as unknown) as Promise<void>);
   }
 
   delete(id: string): Observable<void> {
