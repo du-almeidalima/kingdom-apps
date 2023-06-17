@@ -109,6 +109,4 @@ export class WorkItemCompleteDialogComponent implements OnInit {
   handleFormSubmit() {
     this.dialogRef.close(this.form.value);
   }
-
-  protected readonly grey400 = grey400;
 }

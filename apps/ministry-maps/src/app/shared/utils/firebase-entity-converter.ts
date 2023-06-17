@@ -10,7 +10,7 @@ export const convertFirebaseTimestampToDateFactory = (field: string) => {
 };
 
 // This function ensures that no undefined property is sent to FireStore causing a runtime error;
-const removeUndefined = (obj: any) => {
+export const removeUndefined = (obj: any) => {
   for (const prop in obj) {
     if (obj[prop] === undefined || obj[prop] === null) {
       console.warn(`Property '${prop}' is undefined or null, removing it from the payload object to firestore.`);

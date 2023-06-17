@@ -16,7 +16,7 @@ import {
 } from '@angular/fire/firestore';
 import { combineLatest, from, map, Observable, switchMap } from 'rxjs';
 
-import { firebaseEntityConverterFactory } from '../../shared/utils/firebase-entity-converter';
+import { firebaseEntityConverterFactory, removeUndefined } from '../../shared/utils/firebase-entity-converter';
 import { TerritoryRepository } from '../territories.repository';
 import { Territory } from '../../../models/territory';
 import { TerritoryVisitHistory } from '../../../models/territory-visit-history';
@@ -126,7 +126,11 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
       territoryWithoutHistory.recentHistory = history.slice(0, 5);
     }
 
-    return from(updateDoc(territoryDocRef, { ...territoryWithoutHistory }));
+    const territoryCopy = structuredClone(territoryWithoutHistory);
+    // FIXME: I don't know why the converter is not getting this on the 'toFirestore'
+    removeUndefined(territoryCopy);
+
+    return from(updateDoc(territoryDocRef, territoryCopy));
   }
 
   delete(id: string): Observable<void> {
