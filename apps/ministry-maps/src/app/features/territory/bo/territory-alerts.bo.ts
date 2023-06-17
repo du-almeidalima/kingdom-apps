@@ -4,7 +4,7 @@ import { differenceInMonths } from '../../../shared/utils/date';
 import { TerritoryVisitHistory } from '../../../../models/territory-visit-history';
 import { Injectable } from '@angular/core';
 import { TerritoryRepository } from '../../../repositories/territories.repository';
-import { Observable } from 'rxjs';
+import { concat, Observable, retry } from 'rxjs';
 
 @Injectable()
 export class TerritoryAlertsBO {
@@ -116,7 +116,13 @@ export class TerritoryAlertsBO {
 
     // This will be used to update recentHistory in repository
     copiedTerritory.history = updatedHistories;
+    const updateRecentHistoryArray$ = this.territoryRepository.update(copiedTerritory);
 
-    return this.territoryRepository.update(copiedTerritory);
+    // Updating the history collection
+    const updateHistoryCollection$ = updatedHistories.map(history => {
+      return this.territoryRepository.setVisitHistory(territory.id, history);
+    });
+
+    return concat(updateRecentHistoryArray$, ...updateHistoryCollection$).pipe(retry(2));
   }
 }
