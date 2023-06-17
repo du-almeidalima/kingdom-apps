@@ -17,6 +17,7 @@
       *ngFor='let territory of filteredTerritories$ | async'
       [territory]='territory'
       (edit)='handleOpenManageTerritoryDialog($event)'
+      (history)='handleOpenHistory($event)'
       (remove)='handleRemoveTerritory($event)'
       (resolveMove)='handleResolveMoveAlert($event)'
     >

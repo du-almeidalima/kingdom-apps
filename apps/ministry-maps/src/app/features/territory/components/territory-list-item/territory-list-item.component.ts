@@ -30,16 +30,22 @@ import { hasRecentlyMoved } from '../../bo/territory-alerts.bo';
       </div>
       <div class='territory-list-item__menu-button'>
         <button lib-icon-button [cdkMenuTriggerFor]='menu' type='button'>
-          <lib-icon [fillColor]='editButtonColor' icon='menu-dot-vertical-filled'></lib-icon>
+          <lib-icon [fillColor]='greyButtonColor' icon='menu-dot-vertical-filled'></lib-icon>
         </button>
 
         <ng-template #menu>
           <menu class='menu' cdkMenu>
             <li class='menu__item' cdkMenuItem (cdkMenuItemTriggered)='edit.emit(territory)'>
               <button lib-icon-button type='button'>
-                <lib-icon [fillColor]='editButtonColor' icon='pencil-lined'></lib-icon>
+                <lib-icon [fillColor]='greyButtonColor' icon='pencil-lined'></lib-icon>
               </button>
               <span>Editar</span>
+            </li>
+            <li class='menu__item' cdkMenuItem (cdkMenuItemTriggered)='history.emit(territory)'>
+              <button lib-icon-button type='button'>
+                <lib-icon [fillColor]='greyButtonColor' icon='time-17'></lib-icon>
+              </button>
+              <span>Histórico</span>
             </li>
             <!-- ALERTS -->
             <li class='menu__item'
@@ -48,7 +54,7 @@ import { hasRecentlyMoved } from '../../bo/territory-alerts.bo';
                 *ngIf='hasRecentlyMoved'
             >
               <button lib-icon-button type='button'>
-                <lib-icon [fillColor]='editButtonColor' icon='building-8'></lib-icon>
+                <lib-icon [fillColor]='greyButtonColor' icon='building-8'></lib-icon>
               </button>
               <span>Mudou</span>
             </li>
@@ -67,7 +73,7 @@ import { hasRecentlyMoved } from '../../bo/territory-alerts.bo';
   `,
 })
 export class TerritoryListItemComponent implements OnInit {
-  public editButtonColor = grey400;
+  public greyButtonColor = grey400;
   public deleteButtonColor = red300;
   public iconColor = grey400;
   public isIconLarge = false;
@@ -79,6 +85,9 @@ export class TerritoryListItemComponent implements OnInit {
 
   @Output()
   edit = new EventEmitter<Territory>();
+
+  @Output()
+  history = new EventEmitter<Territory>();
 
   @Output()
   remove = new EventEmitter<string>();

@@ -134,6 +134,23 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
     return from(deletePromise);
   }
 
+  getTerritoryVisitHistory(id: string): Observable<TerritoryVisitHistory[]> {
+    const territoryHistoryCollection = collection(this.territoriesCollection, `${id}/history`);
+
+    return from(getDocs(territoryHistoryCollection)).pipe(
+      map(snapshot => {
+        return snapshot.docs.map(historySnapshot => {
+          const firebaseHistory = historySnapshot.data();
+
+          return {
+            ...firebaseHistory,
+            date: firebaseHistory['date']?.toDate(),
+          } as TerritoryVisitHistory;
+        });
+      })
+    );
+  }
+
   setVisitHistory(territoryId: string, visitHistory: TerritoryVisitHistory): Observable<void> {
     const path = `${this.collectionName}/${territoryId}/${this.historySubCollectionName}`;
     const territoryVisitHistoryCollection = collection(this.firestore, path);

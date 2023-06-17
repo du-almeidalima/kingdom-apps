@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { UserStateService } from '../../../../state/user.state.service';
-import { delay, finalize, map, Observable, of, shareReplay } from 'rxjs';
+import { delay, finalize, map, Observable, of, shareReplay, switchMap } from 'rxjs';
 import { Territory } from '../../../../../models/territory';
-import { green200, white200 } from '@kingdom-apps/common-ui';
+import { green200, SearchInputComponent, white200 } from '@kingdom-apps/common-ui';
 import { Dialog } from '@angular/cdk/dialog';
 import {
   TerritoryDialogData,
@@ -16,6 +16,8 @@ import {
   TerritoryMoveAlertDialogComponent,
   TerritoryMoveAlertDialogData,
 } from '../../components/territory-move-alert-dialog/territory-move-alert-dialog.component';
+import { HistoryDialogComponent } from '../../../../shared/components/dialogs';
+import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
 
 @Component({
   selector: 'kingdom-apps-territories-page',
@@ -32,6 +34,9 @@ export class TerritoriesPageComponent implements OnInit {
   public selectedCity = this.ALL_OPTION;
   public isLoading = false;
   public filteredTerritories$: Observable<Territory[]> = of([]);
+
+  @ViewChild(SearchInputComponent)
+  searchInputComponent?: SearchInputComponent;
 
   constructor(
     private readonly territoryRepository: TerritoryRepository,
@@ -104,10 +109,24 @@ export class TerritoriesPageComponent implements OnInit {
   }
 
   handleTerritorySearch($event: string | null) {
-    this.filteredTerritories$ = territoryFilterPipe(this.territories$, $event ?? '');
+    const cityFilteredTerritories$ = this.filterTerritoriesByCity(this.selectedCity);
+    this.filteredTerritories$ = territoryFilterPipe(cityFilteredTerritories$, $event ?? '');
+  }
+
+  handleOpenHistory(territory: Territory) {
+    this.territoryRepository.getTerritoryVisitHistory(territory.id).subscribe((data) => {
+      this.dialog.open<HistoryDialogComponent, TerritoryVisitHistory[]>(HistoryDialogComponent, {
+        data: data.reverse() ?? [],
+      });
+    });
   }
 
   private filterTerritoriesByCity(city: string) {
+    // Don't reset search input for same city
+    if (city !== this.selectedCity) {
+      this.searchInputComponent?.resetSearch();
+    }
+
     return this.territories$.pipe(
       map(tArr => {
         if (city === this.ALL_OPTION) {
