@@ -20,8 +20,7 @@ import { IconComponent } from '../icon/icon.component';
         placeholder='Pesquisar Território'
         aria-labelledby='search-icon'
         [formControl]='searchControl'
-        #searchControlTemplate
-      />
+        #searchControlTemplate />
       <lib-icon
         icon='magnifier-lined'
         class='search-input__icon'
@@ -44,7 +43,7 @@ export class SearchInputComponent implements OnInit, OnDestroy {
     this.searchControlSubscription = this.searchControl.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged())
       .subscribe(search => {
-        this.searched.emit(search)
+        this.searched.emit(search);
       });
   }
 
@@ -54,7 +53,7 @@ export class SearchInputComponent implements OnInit, OnDestroy {
 
   // TODO: This is not a very good approach, but I didn't have time to implement ControlValueAccessor
   // FIXME: Implement this with ControlValueAccessor
-  resetSearch() {
-    this.searchControl.reset();
+  resetSearch(emitEvent = false) {
+    this.searchControl.reset('', { emitEvent });
   }
 }
