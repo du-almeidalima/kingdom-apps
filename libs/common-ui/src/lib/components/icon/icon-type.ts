@@ -17,4 +17,5 @@ export type Icons =
   | 'trash-can-lined'
   | 'pencil-lined'
   | 'magnifier-lined'
-  | 'menu-dot-vertical-filled';
+  | 'menu-dot-vertical-filled'
+  | 'check-mark-circle-lined'

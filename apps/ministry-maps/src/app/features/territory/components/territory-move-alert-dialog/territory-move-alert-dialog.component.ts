@@ -37,18 +37,18 @@ export enum MoveResolutionActionsEnum {
 
       <!-- ACTION -->
       <p class="t-body2 my-5">O que você quer fazer?</p>
-      <form id="move-alert-resolution-form" [formGroup]="form" (ngSubmit)="handleFormSubmit()" tabindex="0">
+      <form id="move-alert-resolution-form" [formGroup]="form" (ngSubmit)="handleFormSubmit()">
         <kingdom-apps-icon-radio formControlName="action" [value]="MoveResolutionActions.MARK_AS_RESOLVED" class="mt-3">
-          <lib-icon class="icon-radio__icon" icon="thumb-10" [fillColor]="iconColor" />
+          <lib-icon class="icon-radio__icon" icon="check-mark-circle-lined" [fillColor]="iconColor" />
           Remover Marcação
         </kingdom-apps-icon-radio>
         <kingdom-apps-icon-radio formControlName="action" [value]="MoveResolutionActions.DELETE_TERRITORY" class="mt-3">
           <lib-icon class="icon-radio__icon" icon="trash-can-lined" [fillColor]="iconColor" />
-          Apagar Território
+          Apagar Endereço
         </kingdom-apps-icon-radio>
         <kingdom-apps-icon-radio formControlName="action" [value]="MoveResolutionActions.EDIT_TERRITORY" class="mt-3">
           <lib-icon class="icon-radio__icon" icon="pencil-lined" [fillColor]="iconColor" />
-          Editar Território
+          Editar Endereço
         </kingdom-apps-icon-radio>
       </form>
 
