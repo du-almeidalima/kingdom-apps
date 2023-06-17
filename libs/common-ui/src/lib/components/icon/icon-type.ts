@@ -19,3 +19,4 @@ export type Icons =
   | 'magnifier-lined'
   | 'menu-dot-vertical-filled'
   | 'check-mark-circle-lined'
+  | 'cursor-23'
