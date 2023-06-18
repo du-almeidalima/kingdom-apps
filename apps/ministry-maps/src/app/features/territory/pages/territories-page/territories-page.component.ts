@@ -20,7 +20,7 @@ import { HistoryDialogComponent } from '../../../../shared/components/dialogs';
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
 import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'kingdom-apps-territories-page',
@@ -76,18 +76,30 @@ export class TerritoriesPageComponent implements OnInit {
     }
 
     try {
-      const draggedTerritory = territories[event.previousIndex];
-      const destinationTerritory = territories[event.currentIndex];
+      const territoriesCopy: Territory[] = structuredClone(territories);
 
-      draggedTerritory.positionIndex = event.currentIndex;
-      destinationTerritory.positionIndex = event.previousIndex;
+      moveItemInArray(territoriesCopy, event.previousIndex, event.currentIndex);
 
-      this.territoryRepository.batchUpdate([draggedTerritory, destinationTerritory]);
+      // Updating all Territories positionIndexes according to their index in the array
+      const updatedTerritories: Territory[] = territoriesCopy.map((tCopy, i) => {
+        tCopy.positionIndex = i;
+
+        return tCopy;
+      });
+
+      // Find all territories that had their positionIndex updated
+      const changedTerritories = updatedTerritories.filter(tUpdated => {
+        const originalTerritory = territories.find(t => t.id === tUpdated.id);
+
+        return originalTerritory && originalTerritory.positionIndex !== tUpdated.positionIndex;
+      });
+
+      this.territoryRepository.batchUpdate(changedTerritories);
 
       // This is for updating the UI instantly, not necessary though
       this.filteredTerritories$ = this.filteredTerritories$.pipe(
-        map(filteredTerritories => {
-          return filteredTerritories.map(t => t);
+        map(() => {
+          return updatedTerritories.map(t => t);
         })
       );
     } catch (e) {
