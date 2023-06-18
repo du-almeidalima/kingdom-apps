@@ -9,6 +9,8 @@ import {
   Firestore,
   getDoc,
   getDocs,
+  limit,
+  orderBy,
   query,
   runTransaction,
   setDoc,
@@ -139,16 +141,15 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
       console.warn('Aborting batch update, ,o territories to update');
     }
 
-    const transactionPromise = runTransaction(this.firestore, async (transaction) => {
-
+    const transactionPromise = runTransaction(this.firestore, async transaction => {
       return territories.map(territory => {
         const territoryDocRef = doc(this.territoriesCollection, `${territory.id}`);
 
         return transaction.update(territoryDocRef, territory);
-      })
-    })
+      });
+    });
 
-    return from((transactionPromise as unknown) as Promise<void>);
+    return from(transactionPromise as unknown as Promise<void>);
   }
 
   delete(id: string): Observable<void> {
@@ -179,5 +180,26 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
     const visitHistoryDocRef = doc(territoryVisitHistoryCollection, visitHistory.id);
 
     return from(setDoc(visitHistoryDocRef, visitHistory));
+  }
+
+  getNextPositionIndexForCity(city: string): Observable<number> {
+    const lastPositionIndexQuery = query(
+      this.territoriesCollection,
+      where('city', '==', city),
+      orderBy('positionIndex', 'desc'),
+      limit(1)
+    );
+
+    return from(getDocs(lastPositionIndexQuery)).pipe(
+      map(territories => {
+        if (territories.empty) {
+          return 0;
+        }
+
+        const lastTerritory = territories.docs[0].data();
+
+        return (lastTerritory.positionIndex ?? 0) + 1;
+      })
+    );
   }
 }

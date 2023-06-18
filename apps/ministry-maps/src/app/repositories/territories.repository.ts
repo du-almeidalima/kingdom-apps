@@ -23,4 +23,6 @@ export abstract class TerritoryRepository {
    * Writes the History for a Territory. If the History has an id, it will be updated. If not, it will be added.
    */
   abstract setVisitHistory(territoryId: string, visitHistory: TerritoryVisitHistory): Observable<void>;
+
+  abstract getNextPositionIndexForCity(city: string): Observable<number>;
 }

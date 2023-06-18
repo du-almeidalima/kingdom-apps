@@ -15,6 +15,8 @@ export type Territory = {
   note: string;
   mapsLink?: string;
   congregationId: string;
+  // Order in which it will be sorted.
+  positionIndex?: number;
   icon: TerritoryIcon;
   lastVisit?: Date;
   history?: TerritoryVisitHistory[];
