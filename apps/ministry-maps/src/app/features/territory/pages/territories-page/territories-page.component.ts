@@ -67,6 +67,10 @@ export class TerritoriesPageComponent implements OnInit {
     this.filteredTerritories$ = this.filterTerritoriesByCity(this.selectedCity);
   }
 
+  trackByRepositoryId(_: number, item: Territory) {
+    return item.id;
+  }
+
   /**
    * Handle updating the {@link Territory.positionIndex}. It swaps the indexes of both items
    */
