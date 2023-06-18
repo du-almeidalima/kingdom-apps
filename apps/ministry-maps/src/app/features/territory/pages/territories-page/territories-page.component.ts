@@ -3,7 +3,7 @@ import { TerritoryRepository } from '../../../../repositories/territories.reposi
 import { UserStateService } from '../../../../state/user.state.service';
 import { finalize, map, Observable, of, shareReplay } from 'rxjs';
 import { Territory } from '../../../../../models/territory';
-import { green200, SearchInputComponent, white200 } from '@kingdom-apps/common-ui';
+import { green200, grey400, SearchInputComponent, white200 } from '@kingdom-apps/common-ui';
 import { Dialog } from '@angular/cdk/dialog';
 import {
   TerritoryDialogData,
@@ -20,6 +20,7 @@ import { HistoryDialogComponent } from '../../../../shared/components/dialogs';
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
 import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'kingdom-apps-territories-page',
@@ -29,6 +30,7 @@ import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 export class TerritoriesPageComponent implements OnInit {
   public readonly green200 = green200;
   public readonly white200 = white200;
+  public readonly greyButtonColor = grey400;
   public readonly ALL_OPTION = 'ALL';
 
   private territories$: Observable<Territory[]> = of([]);
@@ -65,6 +67,36 @@ export class TerritoriesPageComponent implements OnInit {
     this.filteredTerritories$ = this.filterTerritoriesByCity(this.selectedCity);
   }
 
+  /**
+   * Handle updating the {@link Territory.positionIndex}. It swaps the indexes of both items
+   */
+  handleTerritoryDrop(event: CdkDragDrop<object>, territories: Territory[]) {
+    if (event.previousIndex === event.currentIndex) {
+      return;
+    }
+
+    try {
+      const draggedTerritory = territories[event.previousIndex];
+      const destinationTerritory = territories[event.currentIndex];
+
+      draggedTerritory.positionIndex = event.currentIndex;
+      destinationTerritory.positionIndex = event.previousIndex;
+
+      this.territoryRepository.batchUpdate([draggedTerritory, destinationTerritory]);
+
+      // This is for updating the UI instantly, not necessary though
+      this.filteredTerritories$ = this.filteredTerritories$.pipe(
+        map(filteredTerritories => {
+          return filteredTerritories.map(t => t);
+        })
+      );
+    } catch (e) {
+      alert(
+        `Uma excessão ocorreu quando os territórios [${event.previousIndex} e ${event.previousIndex}] foram movidos!`
+      );
+    }
+  }
+
   handleOpenManageTerritoryDialog(territory?: Territory) {
     this.dialog.open<object, TerritoryDialogData>(TerritoryManageDialogComponent, {
       data: {
@@ -92,7 +124,7 @@ export class TerritoriesPageComponent implements OnInit {
         data: {
           history: territory.recentHistory ?? [],
           markAsResolvedCallback: histories => {
-            return this.territoryAlertsBO.resolveTerritoryHistoryAlert(territory, histories, VisitOutcomeEnum.MOVED)
+            return this.territoryAlertsBO.resolveTerritoryHistoryAlert(territory, histories, VisitOutcomeEnum.MOVED);
           },
         },
       })
@@ -142,7 +174,11 @@ export class TerritoriesPageComponent implements OnInit {
           });
         }
 
-        return tArr.filter(t => t.city === city);
+        return tArr
+          .filter(t => t.city === city)
+          .sort((t1, t2) => {
+            return (t1.positionIndex ?? 0) - (t2.positionIndex ?? 0);
+          });
       })
     );
   }

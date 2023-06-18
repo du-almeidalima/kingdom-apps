@@ -19,6 +19,7 @@ import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
         <span class='t-body2'>{{ territory.address }}</span>
         <span class='t-caption text-gray-600'>{{ territory.city }}</span>
       </h3>
+      <!-- BADGES -->
       <div class='territory-list-item__notes' *ngIf='territory.note'>
         <span class='t-caption'>Notas: {{ territory.note }}</span>
         <span
@@ -28,7 +29,9 @@ import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
               Mudou
         </span>
       </div>
+      <!-- RIGHT SIDE MENU -->
       <div class='territory-list-item__menu-button'>
+        <!-- VERTICAL MENU -->
         <button lib-icon-button [cdkMenuTriggerFor]='menu' type='button'>
           <lib-icon [fillColor]='greyButtonColor' icon='menu-dot-vertical-filled'></lib-icon>
         </button>
@@ -70,6 +73,8 @@ import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
             </li>
           </menu>
         </ng-template>
+        <!-- DRAG HANDLE -->
+        <ng-content></ng-content>
       </div>
     </div>
   `,

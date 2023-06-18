@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
-import { finalize, Observable, retry } from 'rxjs';
+import { finalize, Observable, retry, switchMap } from 'rxjs';
 
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { Congregation } from '../../../../../models/congregation';
@@ -72,7 +72,7 @@ type TerritoryForm = {
       </form>
       <lib-dialog-footer>
         <div class="flex justify-end gap-4">
-          <button lib-button (click)="handleCancel()">Cancelar</button>
+          <button lib-button lib-dialog-close>Cancelar</button>
           <button
             lib-button
             btnType="primary"
@@ -119,9 +119,10 @@ export class TerritoryManageDialogComponent implements OnInit {
     }
   }
 
-  async handleSubmission() {
+  handleSubmission() {
     let territory: Omit<Territory, 'id'>;
 
+    // Update if this.data.territory is true
     if (this.data.territory) {
       territory = {
         ...this.data.territory,
@@ -137,9 +138,21 @@ export class TerritoryManageDialogComponent implements OnInit {
 
     this.isSubmitting = true;
 
-    const territoryRequest$: Observable<unknown> = this.data.territory
-      ? this.territoriesRepository.update({ ...territory, id: this.data.territory.id })
-      : this.territoriesRepository.add(territory);
+    let territoryRequest$: Observable<unknown>;
+
+    // Update if this.data.territory is true
+    if (this.data.territory) {
+      territoryRequest$ = this.territoriesRepository.update({ ...territory, id: this.data.territory.id });
+    } else {
+      // Getting next positionIndex and creating the territory
+      territoryRequest$ = this.territoriesRepository.getNextPositionIndexForCity(territory.city).pipe(
+        switchMap(positionIndex => {
+          territory.positionIndex = positionIndex;
+
+          return this.territoriesRepository.add(territory);
+        })
+      )
+    }
 
     territoryRequest$
       .pipe(
@@ -151,10 +164,5 @@ export class TerritoryManageDialogComponent implements OnInit {
       .subscribe(() => {
         this.dialogRef.close();
       });
-  }
-
-  // TODO: Refactor the basic dialog logic into a base class
-  handleCancel() {
-    this.dialogRef.close();
   }
 }

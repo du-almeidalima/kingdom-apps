@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CdkMenuModule } from '@angular/cdk/menu';
+import { CdkDrag, CdkDragHandle, CdkDropList } from '@angular/cdk/drag-drop';
 
 import { CommonDirectivesModule } from '@kingdom-apps/common-ui';
 
@@ -35,6 +36,9 @@ import { TerritoryAlertsBO } from './bo/territory-alerts.bo';
     CommonDirectivesModule,
     SharedModule,
     TerritoryRoutesModule,
+    CdkDropList,
+    CdkDrag,
+    CdkDragHandle,
   ],
   providers: [TerritoryBO, TerritoryAlertsBO],
 })

@@ -9,18 +9,27 @@
     <option [value]='city' *ngFor='let city of cities'>{{ city }}</option>
     <option [value]='ALL_OPTION'>Todas</option>
   </select>
-  <lib-search-input class='mt-5' (searched)='handleTerritorySearch($event)'/>
+  <lib-search-input class='mt-5' (searched)='handleTerritorySearch($event)' />
 
-  <section class='mt-8 pb-56'>
+  <section class='territories-list mt-8 pb-56'
+           *ngIf='filteredTerritories$ | async; let territories'
+           cdkDropList
+           (cdkDropListDropped)='handleTerritoryDrop($event, territories)'
+  >
     <kingdom-apps-territory-list-item
-      class='mb-3'
-      *ngFor='let territory of filteredTerritories$ | async'
+      class='territory-list-item mb-3'
+      cdkDrag
+      [cdkDragDisabled]='selectedCity === ALL_OPTION'
+      *ngFor='let territory of territories'
       [territory]='territory'
       (edit)='handleOpenManageTerritoryDialog($event)'
       (history)='handleOpenHistory($event)'
       (remove)='handleRemoveTerritory($event)'
       (resolveMove)='handleResolveMoveAlert($event)'
     >
+      <button lib-icon-button type='button' cdkDragHandle style='cursor: grab' *ngIf='selectedCity !== ALL_OPTION'>
+        <lib-icon icon='cursor-23' [fillColor]='greyButtonColor'/>
+      </button>
     </kingdom-apps-territory-list-item>
   </section>
 
