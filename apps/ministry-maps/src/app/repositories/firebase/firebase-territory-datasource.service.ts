@@ -145,7 +145,11 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
       return territories.map(territory => {
         const territoryDocRef = doc(this.territoriesCollection, `${territory.id}`);
 
-        return transaction.update(territoryDocRef, territory);
+        // FIXME: I don't know why the converter is not getting this on the 'toFirestore'
+        const territoryCopy = structuredClone(territory);
+        removeUndefined(territoryCopy);
+
+        return transaction.update(territoryDocRef, territoryCopy);
       });
     });
 

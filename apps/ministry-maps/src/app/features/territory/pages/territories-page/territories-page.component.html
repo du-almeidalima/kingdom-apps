@@ -20,7 +20,7 @@
       class='territory-list-item mb-3'
       cdkDrag
       [cdkDragDisabled]='selectedCity === ALL_OPTION'
-      *ngFor='let territory of territories; trackBy: trackByRepositoryId'
+      *ngFor='let territory of territories'
       [territory]='territory'
       (edit)='handleOpenManageTerritoryDialog($event)'
       (history)='handleOpenHistory($event)'

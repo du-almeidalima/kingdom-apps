@@ -111,7 +111,6 @@ export class TerritoryMoveAlertDialogComponent {
             })
           )
           .subscribe(() => {
-            console.log('RESOLVED');
             this.dialogRef.close();
           });
         break;

@@ -67,10 +67,6 @@ export class TerritoriesPageComponent implements OnInit {
     this.filteredTerritories$ = this.filterTerritoriesByCity(this.selectedCity);
   }
 
-  trackByRepositoryId(_: number, item: Territory) {
-    return item.id;
-  }
-
   /**
    * Handle updating the {@link Territory.positionIndex}. It swaps the indexes of both items
    */
@@ -102,8 +98,13 @@ export class TerritoriesPageComponent implements OnInit {
 
       // This is for updating the UI instantly, not necessary though
       this.filteredTerritories$ = this.filteredTerritories$.pipe(
-        map(() => {
-          return updatedTerritories.map(t => t);
+        map((t, index) => {
+          // Only doing this operation for the first time, otherwise updatedTerritories would override repository emission
+          if (index === 0) {
+            return updatedTerritories.map(updatedT => updatedT);
+          }
+
+          return t;
         })
       );
     } catch (e) {
