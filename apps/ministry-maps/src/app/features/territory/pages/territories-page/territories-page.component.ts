@@ -67,6 +67,13 @@ export class TerritoriesPageComponent implements OnInit {
     this.filteredTerritories$ = this.filterTerritoriesByCity(this.selectedCity);
   }
 
+  trackByRepositoryId(_: number, item: Territory) {
+    // Had to create an identifier for recentHistory and isResolved changes so Angular can understand changes.
+    const recentVisitsId = item.recentHistory?.reduce((acc, cur) => acc + (cur.isResolved ? 1 : 0), 0);
+
+    return `${item.id}-rh${recentVisitsId}`;
+  }
+
   /**
    * Handle updating the {@link Territory.positionIndex}. It swaps the indexes of both items
    */
