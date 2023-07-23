@@ -125,8 +125,10 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
       ...territory,
     };
 
-    if (history) {
-      territoryWithoutHistory.recentHistory = history.slice(0, 5);
+    if (history && history.length) {
+      territoryWithoutHistory.recentHistory = history
+        .sort((a, b) => a.date.getTime() - b.date.getTime())
+        .slice(-5);
     }
 
     const territoryCopy = structuredClone(territoryWithoutHistory);
