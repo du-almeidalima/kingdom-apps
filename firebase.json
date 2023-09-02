@@ -31,5 +31,23 @@
         "destination": "/index.html"
       }
     ]
+  },
+  "emulators": {
+    "database": {
+      "port": 9000
+    },
+    "hosting": {
+      "port": 5000
+    },
+    "ui": {
+      "enabled": true
+    },
+    "singleProjectMode": true,
+    "firestore": {
+      "port": 8080
+    },
+    "auth": {
+      "port": 9099
+    }
   }
 }

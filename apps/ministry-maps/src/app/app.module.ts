@@ -1,8 +1,13 @@
 import { APP_INITIALIZER, isDevMode, NgModule } from '@angular/core';
 import { ScreenTrackingService, UserTrackingService } from '@angular/fire/analytics';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import { getAuth, provideAuth } from '@angular/fire/auth';
-import { enableIndexedDbPersistence, getFirestore, provideFirestore } from '@angular/fire/firestore';
+import { connectAuthEmulator, getAuth, provideAuth } from '@angular/fire/auth';
+import {
+  connectFirestoreEmulator,
+  enableIndexedDbPersistence,
+  getFirestore,
+  provideFirestore,
+} from '@angular/fire/firestore';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterOutlet } from '@angular/router';
 
@@ -22,9 +27,19 @@ import { ServiceWorkerModule } from '@angular/service-worker';
   imports: [
     BrowserModule,
     provideFirebaseApp(() => initializeApp(environment.firebase)),
-    provideAuth(() => getAuth()),
+    provideAuth(() => {
+      const auth = getAuth();
+      if (location.hostname === 'localhost' && !environment.useCloud)
+        connectAuthEmulator(auth, 'http://localhost:9099');
+      return auth;
+    }),
     provideFirestore(() => {
       const firestore = getFirestore();
+      if (location.hostname === 'localhost' && !environment.useCloud) {
+        console.log('emulador');
+        connectFirestoreEmulator(firestore, 'localhost', 8080);
+      }
+
       // TODO: Upgrade this
       enableIndexedDbPersistence(firestore)
         .then(() => {
