@@ -1,0 +1,11 @@
+{
+  "name": "firebase-emulator",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "tools/executors/firebase-emulator",
+  "targets": {
+    "serve": {
+      "command": "firebase emulators:start"
+    }
+  },
+  "tags": []
+}

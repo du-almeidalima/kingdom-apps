@@ -2,6 +2,7 @@
 
 # Sensible Information
 **/.env*
+!**/.env.sample
 
 # compiled output
 /dist

@@ -13,6 +13,7 @@ export const environment = {
     measurementId: process.env['NX_FIREBASE_MEASUREMENT_ID'],
   },
   production: process.env['NX_ENV'] === 'production',
+  useCloud: process.env['NX_USE_CLOUD'] === 'true',
 };
 
 /*

@@ -3,25 +3,25 @@
 Welcome to the Kingdom Apps monorepo!
 
 This monorepo contains projects aimed to help the ministry and congregation work.
-Although its purpose is related to Jehovah's Witnesses organization work, this is not associated by any means with the 
+Although its purpose is related to Jehovah's Witnesses organization work, this is not associated by any means with the
 Jehovah Witness and any of its trademarks.
 
 ## Structure
 
 This monorepo is divided in Apps and Libs.
 
-- __Apps__ are the deployable application that the end user is going to use; that includes the Ministry Maps project.
-- __Libs__ are shareable code that applications can import and use, those are not deployable and shouldn't contain application-specific logic.
+- **Apps** are the deployable application that the end user is going to use; that includes the Ministry Maps project.
+- **Libs** are shareable code that applications can import and use, those are not deployable and shouldn't contain application-specific logic.
 
 ## Prerequisites
 
 To run and deploy the Kingdom Apps monorepo, you will need:
+
 - Node.js - 18~
 - NPM - 9~
 - [Firebase Tools](https://github.com/firebase/firebase-tools)
 
 You will also need to set the environment variables. Reach out to a maintainer for those.
-
 
 ## Projects
 
@@ -29,10 +29,15 @@ You will also need to set the environment variables. Reach out to a maintainer f
 
 ## Development
 
-To run the application:
+To run the application using firebase emulator:
 
-Run `nx serve ministry-maps` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
+Install firebase emulator following the installation instructions: https://firebase.google.com/docs/emulator-suite/install_and_configure
 
+Run `nx run-many -t serve` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
+
+You can check firebase emulator ui navigating to http://127.0.0.1:4000/
+
+To not use the emulator and connect to firebase in the cloud, set NX_USE_CLOUD=true into your .env file and run `nx serve ministry-maps`. Be sure to clean any cached data from your browser when switching from local to cloud. This includes any value stored in localStorage.
 
 ## Understand this workspace
 

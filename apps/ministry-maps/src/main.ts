@@ -9,7 +9,8 @@ if (environment.production) {
 }
 
 console.log('>>> IS PRODUCTION', process.env['environment.production']);
+console.log('>>> Use Firebase on the cloud', environment.useCloud ?? false);
 
 platformBrowserDynamic()
   .bootstrapModule(AppModule)
-  .catch((err) => console.error(err));
+  .catch(err => console.error(err));
