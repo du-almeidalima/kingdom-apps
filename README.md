@@ -21,8 +21,6 @@ To run and deploy the Kingdom Apps monorepo, you will need:
 - NPM - 9~
 - [Firebase Tools](https://github.com/firebase/firebase-tools)
 
-You will also need to set the environment variables. Reach out to a maintainer for those.
-
 ## Projects
 
 - Ministry Maps: PWA application to manage territory and designations for the ministry service.
@@ -33,11 +31,28 @@ To run the application using firebase emulator:
 
 Install firebase emulator following the installation instructions: https://firebase.google.com/docs/emulator-suite/install_and_configure
 
-Run `nx run-many -t serve` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
+Run `npm start` to start the local dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
 
 You can check firebase emulator ui navigating to http://127.0.0.1:4000/
 
 To not use the emulator and connect to firebase in the cloud, set NX_USE_CLOUD=true into your .env file and run `nx serve ministry-maps`. Be sure to clean any cached data from your browser when switching from local to cloud. This includes any value stored in localStorage.
+
+### Seeding Data
+
+Firebase Emulator doesn't persist any data.
+Everytime it's served, it uses the backed-up data in:
+```
+tools 
+└───executors
+    └───firebase-emulators
+        └───seed
+```
+
+To update the **seed** data back-up, run the command: 
+
+`firebase emulators:export tools/executors/firebase-emulator/seed`
+
+> **_NOTE:_** Anytime a change that requires DB data to work is made, please, run the above command and add it to the Pull Request before merging your feature. 
 
 ## Understand this workspace
 
