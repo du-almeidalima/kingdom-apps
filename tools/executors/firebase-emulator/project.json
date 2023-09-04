@@ -4,7 +4,7 @@
   "sourceRoot": "tools/executors/firebase-emulator",
   "targets": {
     "serve": {
-      "command": "firebase emulators:start"
+      "command": "firebase emulators:start --import=tools/executors/firebase-emulator/seed"
     }
   },
   "tags": []
