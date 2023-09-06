@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
-import { forkJoin, from, map, Observable, of, switchMap } from 'rxjs';
-import { UserRepository } from '../user.repository';
-import { User } from '../../../models/user';
 import {
   collection,
+  collectionData,
   CollectionReference,
   doc,
   DocumentReference,
@@ -11,9 +9,12 @@ import {
   getDoc,
   setDoc,
 } from '@angular/fire/firestore';
+import { forkJoin, from, map, Observable, of, switchMap } from 'rxjs';
+import { Congregation } from '../../../models/congregation';
 import { RoleEnum } from '../../../models/enums/role';
 import { FirebaseUserModel } from '../../../models/firebase/firebase-user-model';
-import { Congregation } from '../../../models/congregation';
+import { User } from '../../../models/user';
+import { UserRepository } from '../user.repository';
 
 @Injectable({
   providedIn: 'root',
@@ -25,23 +26,8 @@ export class FirebaseUserDatasourceService implements UserRepository {
     this.usersCollection = collection(this.firestore, 'users') as CollectionReference<FirebaseUserModel>;
   }
 
-  /**
-   * Resolves a user congregation reference by id or by reference
-   * @param congregation
-   * @private
-   */
-  private resolveUserCongregationReference(
-    congregation: DocumentReference<Congregation>
-  ): Observable<Congregation | undefined> {
-    return from(getDoc<Congregation>(congregation)).pipe(
-      map(congregationDocSnapshot => {
-        if (!congregationDocSnapshot.exists()) {
-          return undefined;
-        }
-
-        return { ...congregationDocSnapshot.data(), id: congregationDocSnapshot.id };
-      })
-    );
+  getAll(): Observable<FirebaseUserModel[]> {
+    return collectionData(this.usersCollection);
   }
 
   getById(id: string): Observable<User | undefined> {
@@ -100,6 +86,25 @@ export class FirebaseUserDatasourceService implements UserRepository {
     return forkJoin([user$, this.resolveUserCongregationReference(user.congregation)]).pipe(
       map(([_, congregation]) => {
         return { ...user, congregation };
+      })
+    );
+  }
+
+  /**
+   * Resolves a user congregation reference by id or by reference
+   * @param congregation
+   * @private
+   */
+  private resolveUserCongregationReference(
+    congregation: DocumentReference<Congregation>
+  ): Observable<Congregation | undefined> {
+    return from(getDoc<Congregation>(congregation)).pipe(
+      map(congregationDocSnapshot => {
+        if (!congregationDocSnapshot.exists()) {
+          return undefined;
+        }
+
+        return { ...congregationDocSnapshot.data(), id: congregationDocSnapshot.id };
       })
     );
   }

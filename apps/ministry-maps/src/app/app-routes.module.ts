@@ -9,6 +9,7 @@ export enum FeatureRoutesEnum {
   HOME = 'home',
   TERRITORIES = 'territories',
   WORK = 'work',
+  USERS = 'users',
 }
 
 const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['/login']);
@@ -34,6 +35,10 @@ const APP_ROUTES: Routes = [
     path: '',
     redirectTo: FeatureRoutesEnum.HOME,
     pathMatch: 'full',
+  },
+  {
+    path: FeatureRoutesEnum.USERS,
+    loadChildren: () => import('./features/users/users.module').then(m => m.UsersModule),
   },
 ];
 
