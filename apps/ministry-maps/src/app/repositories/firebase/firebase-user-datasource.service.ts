@@ -1,19 +1,21 @@
 import { Injectable } from '@angular/core';
-import { forkJoin, from, map, Observable, of, switchMap } from 'rxjs';
-import { UserRepository } from '../user.repository';
-import { User } from '../../../models/user';
 import {
   collection,
   CollectionReference,
   doc,
   DocumentReference,
   Firestore,
-  getDoc,
+  getDocFromCache,
+  getDocFromServer,
   setDoc,
 } from '@angular/fire/firestore';
+import { catchError, forkJoin, from, map, Observable, of, switchMap } from 'rxjs';
+
+import { Congregation } from '../../../models/congregation';
 import { RoleEnum } from '../../../models/enums/role';
 import { FirebaseUserModel } from '../../../models/firebase/firebase-user-model';
-import { Congregation } from '../../../models/congregation';
+import { User } from '../../../models/user';
+import { UserRepository } from '../user.repository';
 
 @Injectable({
   providedIn: 'root',
@@ -25,35 +27,31 @@ export class FirebaseUserDatasourceService implements UserRepository {
     this.usersCollection = collection(this.firestore, 'users') as CollectionReference<FirebaseUserModel>;
   }
 
-  /**
-   * Resolves a user congregation reference by id or by reference
-   * @param congregation
-   * @private
-   */
-  private resolveUserCongregationReference(
-    congregation: DocumentReference<Congregation>
-  ): Observable<Congregation | undefined> {
-    return from(getDoc<Congregation>(congregation)).pipe(
-      map(congregationDocSnapshot => {
-        if (!congregationDocSnapshot.exists()) {
-          return undefined;
-        }
-
-        return { ...congregationDocSnapshot.data(), id: congregationDocSnapshot.id };
-      })
-    );
-  }
-
   getById(id: string): Observable<User | undefined> {
     const userReference = doc(this.usersCollection, id);
+    // Since the User isn't something that changes frequently, fetching from cache to increase Performance
+    const cachedUserDoc = from(getDocFromCache(userReference));
 
-    const userRes = from(getDoc<FirebaseUserModel>(userReference)).pipe(
-      map(userDocSnapshot => {
-        return userDocSnapshot.data();
+    const userSnapshot = cachedUserDoc.pipe(
+      catchError(err => {
+        console.warn(`Cache for User not found: `, err);
+        return of(null)
+      }),
+      switchMap(userDocSnapshot => {
+        // Cache user found, returning it
+        if (userDocSnapshot) {
+          return of(userDocSnapshot)
+        }
+
+        // Fetching from server
+        return from(getDocFromServer<FirebaseUserModel>(userReference));
       })
     );
 
-    return userRes.pipe(
+    return userSnapshot.pipe(
+      map(userDocSnapshot => {
+        return userDocSnapshot.data();
+      }),
       switchMap(user => {
         const EMPTY_CONGREGATION: Congregation = {
           id: '',
@@ -102,5 +100,42 @@ export class FirebaseUserDatasourceService implements UserRepository {
         return { ...user, congregation };
       })
     );
+  }
+
+  /**
+   * Resolves a user congregation reference by id or by reference
+   * @param congregation
+   * @private
+   */
+  private resolveUserCongregationReference(
+    congregation: DocumentReference<Congregation>
+  ): Observable<Congregation | undefined> {
+
+    // Since Congregation isn't something that changes frequently, fetching from cache to increase Performance
+    const cachedCongregationSnapshot = from(getDocFromCache(congregation));
+
+    return cachedCongregationSnapshot
+      .pipe(
+        catchError(err => {
+          console.warn(`Cache for Congregation not found: `, err);
+          return of(null)
+        }),
+        switchMap(cachedCongregationRes => {
+          // Cache user found, returning it
+          if (cachedCongregationRes) {
+            return of(cachedCongregationRes);
+          }
+
+          // Fetching from server
+          return from(getDocFromServer<Congregation>(congregation));
+        }),
+        map(congregationDocSnapshot => {
+          if (!congregationDocSnapshot.exists()) {
+            return undefined;
+          }
+
+          return { ...congregationDocSnapshot.data(), id: congregationDocSnapshot.id };
+        })
+      )
   }
 }
