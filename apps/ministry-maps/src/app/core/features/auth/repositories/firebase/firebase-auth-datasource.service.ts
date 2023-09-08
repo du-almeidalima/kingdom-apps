@@ -30,38 +30,6 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
     private readonly firestore: Firestore
   ) {}
 
-  private createUser(partialUser: Pick<User, 'id' | 'name' | 'email' | 'photoUrl'>): Observable<User> {
-    const user: FirebaseUserModel = {
-      ...partialUser,
-      role: RoleEnum.PUBLISHER,
-      congregation: doc(this.firestore, '/congregations/cclEP8ueg2vd2JoG7OOl') as DocumentReference<Congregation>,
-    };
-
-    return this.userRepository.put(user);
-  }
-
-  /**
-   * Checks if it's the first time a User signs in and if so creates an entry in Users Collection for signed-up users.
-   * @private
-   */
-  private handleUserAuthentication({ user: providerUser }: UserCredential): Observable<User> {
-    return this.userRepository.getById(providerUser.uid).pipe(
-      take(1),
-      switchMap(user => {
-        if (user) {
-          return of(user);
-        }
-
-        return this.createUser({
-          id: providerUser.uid,
-          email: providerUser.email ?? '',
-          name: providerUser.displayName ?? 'Unidentified',
-          photoUrl: providerUser.photoURL ?? '',
-        });
-      })
-    );
-  }
-
   signInWithProvider(provider?: FIREBASE_PROVIDERS) {
     let authProviderInstance: GoogleAuthProvider | OAuthProvider;
 
@@ -93,6 +61,40 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
         }
 
         return of(undefined);
+      })
+    );
+  }
+
+  private createUser(partialUser: Pick<User, 'id' | 'name' | 'email' | 'photoUrl'>): Observable<User> {
+    // FIXME: We need to find a better way to assign the newly created User to a congregation
+    const user: FirebaseUserModel = {
+      ...partialUser,
+      role: RoleEnum.PUBLISHER,
+      // Hard-codding to LS Artur Nogueira Congregation
+      congregation: doc(this.firestore, '/congregations/cclEP8ueg2vd2JoG7OOl') as DocumentReference<Congregation>,
+    };
+
+    return this.userRepository.put(user);
+  }
+
+  /**
+   * Checks if it's the first time a User signs in and if so creates an entry in Users Collection for signed-up users.
+   * @private
+   */
+  private handleUserAuthentication({ user: providerUser }: UserCredential): Observable<User> {
+    return this.userRepository.getById(providerUser.uid).pipe(
+      take(1),
+      switchMap(user => {
+        if (user) {
+          return of(user);
+        }
+
+        return this.createUser({
+          id: providerUser.uid,
+          email: providerUser.email ?? '',
+          name: providerUser.displayName ?? 'Unidentified',
+          photoUrl: providerUser.photoURL ?? '',
+        });
       })
     );
   }
