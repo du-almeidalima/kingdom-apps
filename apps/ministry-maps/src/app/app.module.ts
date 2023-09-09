@@ -29,13 +29,13 @@ import { ServiceWorkerModule } from '@angular/service-worker';
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => {
       const auth = getAuth();
-      if (location.hostname === 'localhost' && !environment.useCloud)
+      if (environment.env === 'development' && !environment.useCloud)
         connectAuthEmulator(auth, 'http://localhost:9099');
       return auth;
     }),
     provideFirestore(() => {
       const firestore = getFirestore();
-      if (location.hostname === 'localhost' && !environment.useCloud) {
+      if (environment.env === 'development' && !environment.useCloud) {
         console.log('emulador');
         connectFirestoreEmulator(firestore, 'localhost', 8080);
       }

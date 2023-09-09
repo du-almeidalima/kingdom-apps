@@ -3,6 +3,7 @@
 # Sensible Information
 **/.env*
 !**/.env.sample
+!**/.env.development
 
 # compiled output
 /dist

@@ -5,7 +5,7 @@
   "scripts": {
     "ng": "nx",
     "postinstall": "node ./decorate-angular-cli.js",
-    "start": "nx run-many -t serve",
+    "start": "nx run-many -t serve -p ministry-maps firebase-emulator",
     "build": "NX_ENV=production nx build",
     "test": "nx test"
   },
