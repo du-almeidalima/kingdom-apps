@@ -1,4 +1,5 @@
-import { APP_INITIALIZER, isDevMode, NgModule } from '@angular/core';
+import { APP_INITIALIZER, Injector, isDevMode, NgModule } from '@angular/core';
+import { createCustomElement } from '@angular/elements';
 import { ScreenTrackingService, UserTrackingService } from '@angular/fire/analytics';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { connectAuthEmulator, getAuth, provideAuth } from '@angular/fire/auth';
@@ -11,8 +12,9 @@ import {
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterOutlet } from '@angular/router';
 
-import { CommonComponentsModule } from '@kingdom-apps/common-ui';
+import { CommonComponentsModule, SpinnerComponent } from '@kingdom-apps/common-ui';
 
+import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import { AppRoutesModule } from './app-routes.module';
 import { appRunner } from './app-runnder';
@@ -20,7 +22,6 @@ import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
 import { RepositoriesModule } from './repositories/repositories.module';
 import { SharedModule } from './shared/shared.module';
-import { ServiceWorkerModule } from '@angular/service-worker';
 
 @NgModule({
   declarations: [AppComponent],
@@ -77,4 +78,13 @@ import { ServiceWorkerModule } from '@angular/service-worker';
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(private injector: Injector) {
+    // This component needs to be transformed into a WebComponent in order for it to be used in the index.html
+    const spinnerElement = createCustomElement(SpinnerComponent, {
+      injector: this.injector
+    });
+
+    customElements.define('web-lib-spinner', spinnerElement);
+  }
+}

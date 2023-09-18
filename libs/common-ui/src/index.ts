@@ -11,3 +11,5 @@ export * from './lib/components/search-input/search-input.component';
 export * from './lib/components/confirm-dialog/confirm-dialog.component';
 
 export * from './lib/components/icon-button/icon-button.component';
+
+export * from './lib/components/spinner/spinner.component';
