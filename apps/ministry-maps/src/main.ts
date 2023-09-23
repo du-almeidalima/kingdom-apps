@@ -8,7 +8,7 @@ if (environment.production) {
   enableProdMode();
 }
 
-console.log('>>> IS PRODUCTION', process.env['environment.production']);
+console.log('>>> Environment: ', environment.env);
 console.log('>>> Use Firebase on the cloud', environment.useCloud ?? false);
 
 platformBrowserDynamic()
