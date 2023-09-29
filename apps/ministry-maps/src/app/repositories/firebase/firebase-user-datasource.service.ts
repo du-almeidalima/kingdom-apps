@@ -4,7 +4,7 @@ import {
   CollectionReference,
   doc,
   DocumentReference,
-  Firestore,
+  Firestore, getDoc,
   getDocFromCache,
   getDocFromServer,
   setDoc,
@@ -30,7 +30,7 @@ export class FirebaseUserDatasourceService implements UserRepository {
   getById(id: string): Observable<User | undefined> {
     const userReference = doc(this.usersCollection, id);
     // Since the User isn't something that changes frequently, fetching from cache to increase Performance
-    const cachedUserDoc = from(getDocFromCache(userReference));
+    const cachedUserDoc = from(getDoc(userReference));
 
     const userSnapshot = cachedUserDoc.pipe(
       catchError(err => {
