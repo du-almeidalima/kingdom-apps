@@ -4,10 +4,10 @@ import {
   authState,
   GoogleAuthProvider,
   OAuthProvider,
-  signInWithPopup,
+  signInWithPopup, signOut,
   UserCredential,
 } from '@angular/fire/auth';
-import { from, Observable, of, switchMap, take } from 'rxjs';
+import { from, map, Observable, of, switchMap, take } from 'rxjs';
 
 import { AuthRepository } from '../auth.repository';
 import { User } from '../../../../../../models/user';
@@ -29,6 +29,12 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
     private readonly userRepository: FirebaseUserDatasourceService,
     private readonly firestore: Firestore
   ) {}
+
+  /** Triggered by FireBase during Log-In and Log-Out events*/
+  authStateChanged(): Observable<boolean> {
+    return authState(this.auth)
+      .pipe(map(firebaseUser => !!firebaseUser))
+  }
 
   signInWithProvider(provider?: FIREBASE_PROVIDERS) {
     let authProviderInstance: GoogleAuthProvider | OAuthProvider;
@@ -63,6 +69,10 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
         return of(undefined);
       })
     );
+  }
+
+  logOut() {
+    return from(signOut(this.auth));
   }
 
   private createUser(partialUser: Pick<User, 'id' | 'name' | 'email' | 'photoUrl'>): Observable<User> {
