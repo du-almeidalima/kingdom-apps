@@ -10,6 +10,8 @@
   background-color: variables.$white-200;
   box-shadow: variables.$shadow-z4;
 
+  animation: append-animate 200ms ease-out;
+
   &__item {
     display: flex;
     flex-flow: row nowrap;
@@ -40,5 +42,14 @@
     border: none;
     border-bottom: 1px solid variables.$light-grey-100;
     margin-block: .5rem;
+  }
+}
+
+@keyframes append-animate {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }

@@ -20,3 +20,7 @@ export type Icons =
   | 'menu-dot-vertical-filled'
   | 'check-mark-circle-lined'
   | 'cursor-23'
+  | 'user-20'
+  | 'user-5'
+  | 'gear-1'
+  | 'log-out-7'
