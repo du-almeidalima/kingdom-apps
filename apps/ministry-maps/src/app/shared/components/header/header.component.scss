@@ -5,15 +5,28 @@
 
   display: flex;
   flex-flow: row;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
 
   padding-left: 2rem;
+  padding-right: 1rem;
 
 
   &__app-name {
     font-size: 2.25rem;
     font-weight: 500;
     color: variables.$white-100;
+  }
+
+  &__user-btn {
+    $size: 3.5rem;
+    width: $size;
+    height: $size;
+
+    padding: .75rem;
+
+    &:is(:hover, :active, :focus) {
+      background-color: variables.$light-grey-100;
+    }
   }
 }

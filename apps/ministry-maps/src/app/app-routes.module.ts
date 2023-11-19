@@ -11,7 +11,7 @@ export enum FeatureRoutesEnum {
   WORK = 'work',
 }
 
-const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['/login']);
+export const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['/login']);
 
 const APP_ROUTES: Routes = [
   {

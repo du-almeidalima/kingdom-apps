@@ -13,7 +13,14 @@ import { IconRadioComponent } from './components/visit-outcome-option/icon-radio
 import { FormsModule } from '@angular/forms';
 
 @NgModule({
-  imports: [CommonModule, FormsModule, CommonComponentsModule, RouterLinkWithHref, RouterLinkActive, MaterialCdkModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    CommonComponentsModule,
+    RouterLinkWithHref,
+    RouterLinkActive,
+    MaterialCdkModule,
+  ],
   providers: [VisitOutcomeToIconPipe],
   exports: [
     HeaderComponent,
