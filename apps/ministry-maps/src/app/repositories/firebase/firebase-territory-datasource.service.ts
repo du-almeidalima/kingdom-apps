@@ -41,14 +41,15 @@ const convertTerritoryFirebaseTimestampsToDate = (data: FirebaseTerritoryModel):
   providedIn: 'root',
 })
 export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
-  private readonly collectionName = 'territories';
+  static readonly COLLECTION_NAME = 'territories';
   private readonly historySubCollectionName = 'history';
   private readonly territoriesCollection: CollectionReference<Territory>;
 
   constructor(private readonly firestore: Firestore) {
-    this.territoriesCollection = collection(this.firestore, this.collectionName).withConverter<Territory>(
-      firebaseEntityConverterFactory(convertTerritoryFirebaseTimestampsToDate)
-    );
+    this.territoriesCollection = collection(
+      this.firestore,
+      FirebaseTerritoryDatasourceService.COLLECTION_NAME
+    ).withConverter<Territory>(firebaseEntityConverterFactory(convertTerritoryFirebaseTimestampsToDate));
   }
 
   getAllByCongregation(congregationId: string): Observable<Territory[]> {
@@ -76,7 +77,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
         const territories$ = territoriesSnapshot.docs.map(ts => {
           const territory = ts.data();
 
-          const path = `${this.collectionName}/${territory.id}/${this.historySubCollectionName}`;
+          const path = `${FirebaseTerritoryDatasourceService.COLLECTION_NAME}/${territory.id}/${this.historySubCollectionName}`;
           const territoryVisitHistoryCollection = collection(
             this.firestore,
             path
@@ -126,9 +127,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
     };
 
     if (history && history.length) {
-      territoryWithoutHistory.recentHistory = history
-        .sort((a, b) => a.date.getTime() - b.date.getTime())
-        .slice(-5);
+      territoryWithoutHistory.recentHistory = history.sort((a, b) => a.date.getTime() - b.date.getTime()).slice(-5);
     }
 
     const territoryCopy = structuredClone(territoryWithoutHistory);
@@ -181,7 +180,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
   }
 
   setVisitHistory(territoryId: string, visitHistory: TerritoryVisitHistory): Observable<void> {
-    const path = `${this.collectionName}/${territoryId}/${this.historySubCollectionName}`;
+    const path = `${FirebaseTerritoryDatasourceService.COLLECTION_NAME}/${territoryId}/${this.historySubCollectionName}`;
     const territoryVisitHistoryCollection = collection(this.firestore, path);
     const visitHistoryDocRef = doc(territoryVisitHistoryCollection, visitHistory.id);
 

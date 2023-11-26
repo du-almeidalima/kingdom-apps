@@ -7,16 +7,12 @@
   "targets": {
     "build": {
       "executor": "@nrwl/angular:webpack-browser",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/ministry-maps",
         "index": "apps/ministry-maps/src/index.html",
         "main": "apps/ministry-maps/src/main.ts",
-        "polyfills": [
-          "zone.js"
-        ],
+        "polyfills": ["zone.js"],
         "tsConfig": "apps/ministry-maps/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
@@ -29,13 +25,9 @@
             "output": "assets/common-ui"
           }
         ],
-        "styles": [
-          "apps/ministry-maps/src/styles/main.scss"
-        ],
+        "styles": ["apps/ministry-maps/src/styles/main.scss"],
         "stylePreprocessorOptions": {
-          "includePaths": [
-            "libs/common-ui/src/lib/styles"
-          ]
+          "includePaths": ["libs/common-ui/src/lib/styles"]
         },
         "scripts": [],
         "customWebpackConfig": {
@@ -86,26 +78,19 @@
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
       "options": {
-        "browserTarget": "ministry-maps:build"
+        "buildTarget": "ministry-maps:build"
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "apps/ministry-maps/**/*.ts",
-          "apps/ministry-maps/**/*.html"
-        ]
+        "lintFilePatterns": ["apps/ministry-maps/**/*.ts", "apps/ministry-maps/**/*.html"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
         "jestConfig": "apps/ministry-maps/jest.config.ts",
         "passWithNoTests": true

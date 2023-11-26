@@ -10,15 +10,18 @@ import { congregationConverter } from '../../../models/firebase/firebase-congreg
   providedIn: 'root',
 })
 export class FirebaseCongregationDatasourceService implements CongregationRepository {
-  private readonly collectionName = 'congregations';
+  static readonly COLLECTION_NAME = 'congregations';
   private readonly congregationCollection: CollectionReference;
 
   constructor(private readonly firestore: Firestore) {
-    this.congregationCollection = collection(this.firestore, this.collectionName).withConverter(congregationConverter);
+    this.congregationCollection = collection(
+      this.firestore,
+      FirebaseCongregationDatasourceService.COLLECTION_NAME
+    ).withConverter(congregationConverter);
   }
 
   getById(id: string): Observable<Congregation | undefined> {
-    const congregationReference = doc(this.firestore, `${this.collectionName}/${id}`);
+    const congregationReference = doc(this.firestore, `${FirebaseCongregationDatasourceService.COLLECTION_NAME}/${id}`);
 
     return docData(congregationReference, {
       idField: 'id',

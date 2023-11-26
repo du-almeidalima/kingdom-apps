@@ -4,7 +4,8 @@ import {
   authState,
   GoogleAuthProvider,
   OAuthProvider,
-  signInWithPopup, signOut,
+  signInWithPopup,
+  signOut,
   UserCredential,
 } from '@angular/fire/auth';
 import { from, map, Observable, of, switchMap, take } from 'rxjs';
@@ -16,6 +17,7 @@ import { doc, DocumentReference, Firestore } from '@angular/fire/firestore';
 import { Congregation } from '../../../../../../models/congregation';
 import { FirebaseUserModel } from '../../../../../../models/firebase/firebase-user-model';
 import { FirebaseUserDatasourceService } from '../../../../../repositories/firebase/firebase-user-datasource.service';
+import { FirebaseCongregationModel } from '../../../../../../models/firebase/firebase-congregation-model';
 
 export enum FIREBASE_PROVIDERS {
   'GOOGLE' = 'GOOGLE',
@@ -81,7 +83,7 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
       ...partialUser,
       role: RoleEnum.PUBLISHER,
       // Hard-codding to LS Artur Nogueira Congregation
-      congregation: doc(this.firestore, '/congregations/cclEP8ueg2vd2JoG7OOl') as DocumentReference<Congregation>,
+      congregation: doc(this.firestore, '/congregations/cclEP8ueg2vd2JoG7OOl') as DocumentReference<Congregation, FirebaseCongregationModel>,
     };
 
     return this.userRepository.put(user);
