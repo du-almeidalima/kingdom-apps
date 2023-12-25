@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { redirectUnauthorizedTo } from '@angular/fire/auth-guard';
 
-import { AuthGuard } from './core/services/auth.guard';
+import { authGuard } from './core/services/auth.guard';
 import { RoleEnum } from '../models/enums/role';
 
 export enum FeatureRoutesEnum {
@@ -21,13 +21,13 @@ const APP_ROUTES: Routes = [
   {
     path: FeatureRoutesEnum.TERRITORIES,
     loadChildren: () => import('./features/territory/territory.module').then(m => m.TerritoryModule),
-    canActivate: [AuthGuard],
+    canActivate: [authGuard],
     data: { roles: [RoleEnum.ELDER, RoleEnum.ORGANIZER], authGuardPipe: redirectUnauthorizedToLogin },
   },
   {
     path: FeatureRoutesEnum.HOME,
     loadChildren: () => import('./features/home/home.module').then(m => m.HomeModule),
-    canActivate: [AuthGuard],
+    canActivate: [authGuard],
     data: { roles: [RoleEnum.ELDER, RoleEnum.ORGANIZER], authGuardPipe: redirectUnauthorizedToLogin },
   },
   {
