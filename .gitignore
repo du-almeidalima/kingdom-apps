@@ -50,4 +50,4 @@ Thumbs.db
 *-debug.log
 .runtimeconfig.json
 
-.nx/cache
+.nx/cache/*
