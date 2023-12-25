@@ -9,7 +9,19 @@
     <option [value]='city' *ngFor='let city of cities'>{{ city }}</option>
     <option [value]='ALL_OPTION'>Todas</option>
   </select>
-  <lib-search-input class='mt-5' (searched)='handleTerritorySearch($event)'/>
+  <!-- Filters -->
+  <div class='flex flex-row gap-3 mt-3'>
+    <lib-search-input (searched)='handleTerritorySearch($event)'/>
+    <select
+      lib-select
+      class='w-full'
+      name='Ordem'
+      [ngModel]='orderBy'
+      (ngModelChange)='handleTerritoryOrderByChange($event)'>
+      <option [value]='TerritoriesOrderBy.SAVED'>Cadastro</option>
+      <option [value]='TerritoriesOrderBy.LAST_VISIT'>Última Visita</option>
+    </select>
+  </div>
 
   <!-- Territories -->
   <form id='territory-form' (submit)='handleTerritoryFormSubmit()'>

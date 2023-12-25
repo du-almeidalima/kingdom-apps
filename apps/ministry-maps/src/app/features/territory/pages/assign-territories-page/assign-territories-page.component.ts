@@ -18,7 +18,8 @@ import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 import { Dialog } from '@angular/cdk/dialog';
 import { TerritoryBO } from '../../bo/territory.bo';
-import { territoryFilterPipe } from '../../../../shared/utils/territory-filter-pipe';
+import { TerritoriesOrderBy, territoryFilterPipe } from '../../../../shared/utils/territory-filter-pipe';
+
 
 @Component({
   selector: 'kingdom-apps-assign-territories-page',
@@ -31,10 +32,13 @@ export class AssignTerritoriesPageComponent implements OnInit {
   public readonly green200 = green200;
   public readonly white200 = white200;
   public readonly ALL_OPTION = 'ALL';
+  public readonly TerritoriesOrderBy = TerritoriesOrderBy;
 
   isCreatingAssignment = false;
   cities: string[] = [];
   selectedCity = '';
+  searchTerm?: string | null;
+  orderBy: TerritoriesOrderBy = TerritoriesOrderBy.SAVED;
   $filteredTerritories: Observable<Territory[]> = of([]);
   selectedTerritoriesModel = new Set<string>();
   assignedTerritories = new Set<string>();
@@ -90,11 +94,18 @@ export class AssignTerritoriesPageComponent implements OnInit {
   }
 
   handleTerritorySearch(searchTerm: string | null) {
-    this.$filteredTerritories = this.filterTerritoriesByText(searchTerm);
+    this.searchTerm = searchTerm;
+    this.$filteredTerritories = this.filterTerritoriesByText(this.searchTerm);
+  }
+
+  handleTerritoryOrderByChange(orderBy: TerritoriesOrderBy) {
+    this.orderBy = orderBy;
+    this.$filteredTerritories = territoryFilterPipe(this.territories$, this.searchTerm ?? '', this.orderBy);
   }
 
   handleSelectedCityChange(city: string) {
     this.fetchTerritories(this.userState.currentUser!.congregation!.id, city);
+    this.searchTerm = '';
     this.searchInputComponent.resetSearch();
   }
 
@@ -135,7 +146,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
   }
 
   private filterTerritoriesByText(searchTerm: string | null) {
-    return territoryFilterPipe(this.territories$, searchTerm ?? '');
+    return territoryFilterPipe(this.territories$, searchTerm ?? '', this.orderBy);
   }
 
   private fetchTerritories(congregationId: string, city: string) {

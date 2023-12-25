@@ -3,7 +3,8 @@
 @use '../../styles/base/typography';
 
 :host {
-  display: block;
+  display: flex;
+  align-items: stretch;
 }
 
 
