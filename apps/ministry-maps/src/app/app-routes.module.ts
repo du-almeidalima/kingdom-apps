@@ -9,6 +9,7 @@ export enum FeatureRoutesEnum {
   HOME = 'home',
   TERRITORIES = 'territories',
   WORK = 'work',
+  PROFILE = 'profile',
 }
 
 export const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['/login']);
@@ -29,6 +30,12 @@ const APP_ROUTES: Routes = [
     loadChildren: () => import('./features/home/home.module').then(m => m.HomeModule),
     canActivate: [authGuard],
     data: { roles: [RoleEnum.ELDER, RoleEnum.ORGANIZER], authGuardPipe: redirectUnauthorizedToLogin },
+  },
+  {
+    path: FeatureRoutesEnum.PROFILE,
+    loadChildren: () => import('./features/profile/profile-routes').then(m => m.PROFILE_ROUTES),
+    canActivate: [authGuard],
+    data: { roles: ['*'] },
   },
   {
     path: '',
