@@ -2,11 +2,12 @@ import { ChangeDetectionStrategy, Component, forwardRef, Input, OnInit } from '@
 import { Territory } from '../../../../../models/territory';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import openGoogleMapsHandler from '../../../../shared/utils/open-google-maps';
-import { primaryGreen } from '@kingdom-apps/common-ui';
+import { grey400, Icons, primaryGreen } from '@kingdom-apps/common-ui';
 import { Dialog } from '@angular/cdk/dialog';
 import { HistoryDialogComponent } from '../../../../shared/components/dialogs';
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
 import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
+import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territory-icon-mapper';
 
 @Component({
   selector: 'kingdom-apps-territory-checkbox',
@@ -42,8 +43,16 @@ import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
           [ngClass]="{ 'territory-checkbox__description--disabled': disabled }">
           <!-- Title and Subtitle -->
           <div class='territory-checkbox__title-subtitle-container'>
-            <h3 class='territory-checkbox__title'>{{ territory.address }}</h3>
-            <span class='territory-checkbox__subtitle'>{{ territory.note }}</span>
+            <lib-icon
+              class='territory-checkbox__icon'
+              [ngClass]="{ 'territory-checkbox__icon--large': isIconLarge }"
+              [fillColor]='iconColor'
+              [icon]='icon' />
+            <!-- Address and Note -->
+            <div class='flex flex-col gap-1'>
+              <h3 class='territory-checkbox__title'>{{ territory.address }}</h3>
+              <span class='territory-checkbox__subtitle'>{{ territory.note }}</span>
+            </div>
           </div>
           <!-- VISIT CONTAINER -->
           <div class='territory-checkbox__visit-container'>
@@ -94,6 +103,8 @@ export class TerritoryCheckboxComponent implements ControlValueAccessor, OnInit 
   hasRecentRevisit = false;
   hasRecentlyMoved = false;
   hasRecentlyAskedToStopVisiting = false;
+  icon: Icons = 'generation-3';
+  isIconLarge = false;
 
   // Control Value Accessor
   disabled = false;
@@ -118,6 +129,8 @@ export class TerritoryCheckboxComponent implements ControlValueAccessor, OnInit 
     this.hasRecentRevisit = TerritoryAlertsBO.hasRecentRevisit(this.territory);
     this.hasRecentlyMoved = TerritoryAlertsBO.hasRecentlyMoved(this.territory);
     this.hasRecentlyAskedToStopVisiting = TerritoryAlertsBO.hasRecentlyAskedToStopVisiting(this.territory);
+    this.icon = mapTerritoryIcon(this.territory.icon);
+    this.isIconLarge = isIconLarge(this.icon);
   }
 
   // Resolve style indicator
@@ -166,4 +179,6 @@ export class TerritoryCheckboxComponent implements ControlValueAccessor, OnInit 
       data: this.territory.recentHistory?.slice().reverse(),
     });
   }
+
+  protected readonly iconColor = grey400;
 }
