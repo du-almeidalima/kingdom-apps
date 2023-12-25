@@ -30,6 +30,12 @@ import { SharedModule } from './shared/shared.module';
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => {
       const auth = getAuth();
+      // This allows to run Angular in HMR
+      // @ts-ignore
+      if (auth['_isInitialized']) {
+        return auth;
+      }
+
       if (environment.env === 'development' && !environment.useCloud)
         connectAuthEmulator(auth, 'http://localhost:9099');
       return auth;
@@ -37,6 +43,11 @@ import { SharedModule } from './shared/shared.module';
     provideFirestore(() => {
       const firestore = getFirestore();
       if (environment.env === 'development' && !environment.useCloud) {
+        // This allows to run Angular in HMR
+        // @ts-ignore
+        if (firestore['_initialized']) {
+          return firestore;
+        }
         console.log('emulador');
         connectFirestoreEmulator(firestore, 'localhost', 8080);
       }
@@ -85,6 +96,6 @@ export class AppModule {
       injector: this.injector
     });
 
-    customElements.define('web-lib-spinner', spinnerElement);
+    !customElements.get('web-lib-spinner') && customElements.define('web-lib-spinner', spinnerElement);
   }
 }
