@@ -1,5 +1,6 @@
 :host {
   display: block;
   max-width: 85%;
+  min-width: min(90vw, 600px);
   margin: auto;
 }

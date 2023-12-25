@@ -1,3 +1,6 @@
+@use "../abstract/variables";
+
+// TYPOGRAPHY CLASSES
 .t-headline1 {
   font-size: 4.8rem;
 }
@@ -31,4 +34,33 @@
 
 .t-control {
   font-size: 1.6rem;
+}
+
+:where(.t-headline1, .t-headline2, .t-headline3, .t-headline4, .t-body1, .t-body2) {
+  color: variables.$text;
+}
+
+:is(.t-caption) {
+  color: variables.$text-medium;
+}
+
+// MODIFIERS
+.t-medium-emphasis {
+  color: variables.$text-medium;
+}
+
+.t-low-emphasis {
+  color: variables.$text-low;
+}
+
+.t-primary {
+  color: variables.$text-primary;
+}
+
+.t-secondary {
+  color: variables.$text-secondary;
+}
+
+.t-white {
+  color: variables.$white-100;
 }

@@ -40,3 +40,10 @@ $control-padding: .8rem;
 
 // ANIMATIONS TIMING
 $background-transition: 200ms linear background;
+
+// TYPOGRAPHY
+$text: rgba(0, 0, 0, 0.87);
+$text-medium: rgba(0, 0, 0, 0.60);
+$text-low: rgba(0, 0, 0, 0.38);
+$text-primary: $green-200;
+$text-secondary: $green-100;
