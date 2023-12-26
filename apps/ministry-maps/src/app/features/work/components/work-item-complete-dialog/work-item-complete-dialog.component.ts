@@ -57,7 +57,14 @@ type WorkItemCompleteForm = ControlsOf<WorkItemCompleteDialogData>;
         <h3 class='my-4 t-headline4'>Notas</h3>
         <lib-form-field>
           <label lib-label for='congregation-icon'>Conte como foi o contato</label>
-          <textarea lib-input rows='4' formControlName='notes' class='resize-y' type='text' id='congregation-address'>
+          <textarea lib-input
+                    id='congregation-address'
+                    rows='4'
+                    type='text'
+                    formControlName='notes'
+                    class='resize-y'
+                    style='font-size: 1.4rem'
+          >
           </textarea>
         </lib-form-field>
       </form>
