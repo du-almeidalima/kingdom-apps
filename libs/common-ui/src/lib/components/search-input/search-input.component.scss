@@ -15,6 +15,7 @@
   flex-flow: row nowrap;
   align-items: center;
 
+  width: 100%;
   padding: 0;
 
   background-color: #FFFFFF;
@@ -37,6 +38,7 @@
 
     flex: 1 1 auto;
     height: 100%;
+    width: 100%;
 
     padding: variables.$control-padding;
     border: none;

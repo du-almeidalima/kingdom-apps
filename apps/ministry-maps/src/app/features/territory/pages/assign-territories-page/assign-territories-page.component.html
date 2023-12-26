@@ -11,10 +11,10 @@
   </select>
   <!-- Filters -->
   <div class='flex flex-row gap-3 mt-3'>
-    <lib-search-input (searched)='handleTerritorySearch($event)'/>
+    <lib-search-input class='flex-1' (searched)='handleTerritorySearch($event)'/>
     <select
       lib-select
-      class='w-full'
+      class='w-44'
       name='Ordem'
       [ngModel]='orderBy'
       (ngModelChange)='handleTerritoryOrderByChange($event)'>
