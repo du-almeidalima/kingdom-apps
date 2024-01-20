@@ -12,7 +12,7 @@ import { Icons } from '../../icon/icon-type';
         <lib-icon class="card-header__icon" [icon]="icon" [fillColor]="white200"></lib-icon>
       </div>
       <div class="card-header__title-container">
-        <h3 class="card-header__title" *ngIf="title">{{ title }}</h3>
+        <h3 class="card-header__title t-white" *ngIf="title">{{ title }}</h3>
         <p class="card-header__subtitle" *ngIf="subtitle">{{ subtitle }}</p>
       </div>
     </div>

@@ -29,8 +29,8 @@
 
   &__title-subtitle-container {
     display: flex;
-    flex-flow: column nowrap;
-    gap: .5rem;
+    flex-flow: row nowrap;
+    gap: .75rem;
   }
 
   &__title {
@@ -40,6 +40,25 @@
 
   &__subtitle {
     @extend .t-caption;
+  }
+
+  &__icon {
+    $size: 3rem;
+    $large-size: 4rem;
+
+    grid-area: icon;
+    place-self: start center;
+    flex-shrink: 0;
+
+    height: $size;
+    width: $size;
+    // This makes the icon looks centered with the first 2 address lines
+    //margin-top: .15rem;
+
+    &--large {
+      height: $large-size;
+      width: $large-size;
+    }
   }
 
   &__control-container {

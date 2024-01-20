@@ -1,5 +1,5 @@
 @use '../../../styles/components/form-control';
 
-:host {
+:where(:host.input) {
   @extend .form-control;
 }

@@ -1,0 +1,69 @@
+@use '../../../../../../../../libs/common-ui/src/lib/styles/abstract/variables';
+@use '../../../../../../../../libs/common-ui/src/lib/styles/base/typography';
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+.user-card {
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 1rem;
+
+  &__initials-figure {
+    $size: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+
+    width: $size;
+    height: $size;
+    padding: 3rem;
+    border-radius: 100%;
+    background-color: darken(variables.$green-100, 10%);
+
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: white;
+  }
+
+  &__content {
+    flex: 1;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  &__title-content {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  &__privilege-badge {
+    display: flex;
+    align-items: center;
+    padding: .3em .5em;
+    border-radius: .4rem;
+    background-color: variables.$grey-100;
+    font-weight: bold;
+    @extend .t-white;
+  }
+}
+
+.logout-button {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  gap: .5rem;
+
+  color: variables.$red-200;
+  border-color: variables.$red-200;
+  background-color: variables.$white-100;
+}

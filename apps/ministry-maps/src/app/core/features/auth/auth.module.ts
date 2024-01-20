@@ -9,8 +9,8 @@ import { AuthRepository } from './repositories/auth.repository';
 import { FirebaseAuthDatasourceService } from './repositories/firebase/firebase-auth-datasource.service';
 import { AuthService } from './services/auth.service';
 import { WelcomePageComponent } from './pages/welcome-page/welcome-page.component';
-import { AuthGuard } from '../../services/auth.guard';
 import { RoleEnum } from '../../../../models/enums/role';
+import { authGuard } from '../../services/auth.guard';
 
 export enum AuthRoutesEnum {
   LOGIN = 'login',
@@ -22,7 +22,7 @@ const AUTH_ROUTES: Routes = [
   {
     path: AuthRoutesEnum.WELCOME,
     component: WelcomePageComponent,
-    canActivate: [AuthGuard],
+    canActivate: [authGuard],
     data: { roles: [RoleEnum.PUBLISHER] },
   },
 ];

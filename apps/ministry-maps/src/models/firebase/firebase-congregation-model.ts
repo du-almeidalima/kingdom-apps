@@ -3,6 +3,8 @@ import { DocumentData, QueryDocumentSnapshot, SnapshotOptions } from '@angular/f
 
 import { Congregation } from '../congregation';
 
+export type FirebaseCongregationModel = Congregation;
+
 export const congregationConverter: FirestoreDataConverter<Congregation> = {
   toFirestore(modelObject: Congregation): DocumentData {
     return modelObject;

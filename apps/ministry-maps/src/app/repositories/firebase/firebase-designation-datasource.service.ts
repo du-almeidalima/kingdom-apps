@@ -57,6 +57,6 @@ export class FirebaseDesignationDatasourceService implements DesignationReposito
   update(designationTerritory: Designation): Observable<void> {
     const designationDocReference = doc(this.designationCollection, `${designationTerritory.id}`);
 
-    return from(updateDoc<Designation>(designationDocReference, designationTerritory));
+    return from(updateDoc(designationDocReference, designationTerritory));
   }
 }

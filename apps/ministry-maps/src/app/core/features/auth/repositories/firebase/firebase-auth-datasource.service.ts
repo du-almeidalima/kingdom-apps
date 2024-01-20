@@ -5,9 +5,10 @@ import {
   GoogleAuthProvider,
   OAuthProvider,
   signInWithPopup,
+  signOut,
   UserCredential,
 } from '@angular/fire/auth';
-import { from, Observable, of, switchMap, take } from 'rxjs';
+import { from, map, Observable, of, switchMap, take } from 'rxjs';
 
 import { AuthRepository } from '../auth.repository';
 import { User } from '../../../../../../models/user';
@@ -16,6 +17,7 @@ import { doc, DocumentReference, Firestore } from '@angular/fire/firestore';
 import { Congregation } from '../../../../../../models/congregation';
 import { FirebaseUserModel } from '../../../../../../models/firebase/firebase-user-model';
 import { FirebaseUserDatasourceService } from '../../../../../repositories/firebase/firebase-user-datasource.service';
+import { FirebaseCongregationModel } from '../../../../../../models/firebase/firebase-congregation-model';
 
 export enum FIREBASE_PROVIDERS {
   'GOOGLE' = 'GOOGLE',
@@ -29,6 +31,12 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
     private readonly userRepository: FirebaseUserDatasourceService,
     private readonly firestore: Firestore
   ) {}
+
+  /** Triggered by FireBase during Log-In and Log-Out events*/
+  authStateChanged(): Observable<boolean> {
+    return authState(this.auth)
+      .pipe(map(firebaseUser => !!firebaseUser))
+  }
 
   signInWithProvider(provider?: FIREBASE_PROVIDERS) {
     let authProviderInstance: GoogleAuthProvider | OAuthProvider;
@@ -65,13 +73,17 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
     );
   }
 
+  logOut() {
+    return from(signOut(this.auth));
+  }
+
   private createUser(partialUser: Pick<User, 'id' | 'name' | 'email' | 'photoUrl'>): Observable<User> {
     // FIXME: We need to find a better way to assign the newly created User to a congregation
     const user: FirebaseUserModel = {
       ...partialUser,
       role: RoleEnum.PUBLISHER,
       // Hard-codding to LS Artur Nogueira Congregation
-      congregation: doc(this.firestore, '/congregations/cclEP8ueg2vd2JoG7OOl') as DocumentReference<Congregation>,
+      congregation: doc(this.firestore, '/congregations/cclEP8ueg2vd2JoG7OOl') as DocumentReference<Congregation, FirebaseCongregationModel>,
     };
 
     return this.userRepository.put(user);

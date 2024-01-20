@@ -14,7 +14,7 @@ export class UserStateService {
     return this.userSubject.getValue();
   }
 
-  setUser(user: User) {
+  setUser(user: User | null) {
     this.userSubject.next(user);
   }
 }
