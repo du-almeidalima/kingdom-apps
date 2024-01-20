@@ -9,6 +9,8 @@ import { FirebaseTerritoryDatasourceService } from './firebase/firebase-territor
 import { FirebaseUserDatasourceService } from './firebase/firebase-user-datasource.service';
 import { TerritoryRepository } from './territories.repository';
 import { UserRepository } from './user.repository';
+import { NoteRepository } from './note.repository';
+import { NoteDatasourceService } from './db/note-datasource.service';
 
 @NgModule({
   declarations: [],
@@ -30,6 +32,10 @@ import { UserRepository } from './user.repository';
       provide: DesignationRepository,
       useClass: FirebaseDesignationDatasourceService,
     },
+    {
+      provide: NoteRepository,
+      useClass: NoteDatasourceService,
+    },
   ],
 })
-export class RepositoriesModule {}
+export class RepositoryModule {}

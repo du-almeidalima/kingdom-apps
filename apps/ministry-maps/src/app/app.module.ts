@@ -20,7 +20,7 @@ import { AppRoutesModule } from './app-routes.module';
 import { appRunner } from './app-runnder';
 import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
-import { RepositoriesModule } from './repositories/repositories.module';
+import { RepositoryModule } from './repositories/repository.module';
 import { SharedModule } from './shared/shared.module';
 
 @NgModule({
@@ -67,7 +67,7 @@ import { SharedModule } from './shared/shared.module';
     // provideRemoteConfig(() => getRemoteConfig()),
     AppRoutesModule,
     RouterOutlet,
-    RepositoriesModule,
+    RepositoryModule,
     CoreModule,
     CommonComponentsModule,
     SharedModule,
