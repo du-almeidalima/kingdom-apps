@@ -62,6 +62,9 @@
   justify-content: center;
   align-items: center;
   gap: .5rem;
+  width: 95%;
+  margin-inline: auto;
+  margin-bottom: 2rem;
 
   color: variables.$red-200;
   border-color: variables.$red-200;
