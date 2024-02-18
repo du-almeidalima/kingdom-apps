@@ -1,21 +1,33 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TerritoryMoveAlertDialogComponent } from './territory-move-alert-dialog.component';
+import {
+  TerritoryMoveAlertDialogComponent,
+  TerritoryMoveAlertDialogData,
+} from './territory-move-alert-dialog.component';
+import { MockBuilder, MockRender } from 'ng-mocks';
+import { TerritoryModule } from '../../territory.module';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { EMPTY } from 'rxjs';
 
 describe('TerritoryMoveAlertDialogComponent', () => {
-  let component: TerritoryMoveAlertDialogComponent;
-  let fixture: ComponentFixture<TerritoryMoveAlertDialogComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [TerritoryMoveAlertDialogComponent],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(TerritoryMoveAlertDialogComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+  beforeEach(() =>
+    MockBuilder(TerritoryMoveAlertDialogComponent, TerritoryModule)
+      .provide({
+        provide: DialogRef,
+        useValue: {},
+      })
+      .provide({
+        provide: DIALOG_DATA,
+        useValue: {
+          history: [],
+          markAsResolvedCallback: () => {
+            return EMPTY;
+          },
+        } as TerritoryMoveAlertDialogData,
+      })
+  );
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    const fixture = MockRender(TerritoryMoveAlertDialogComponent);
+
+    expect(fixture.point.componentInstance).toBeTruthy();
   });
 });

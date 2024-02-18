@@ -10,8 +10,8 @@ import { DialogRef } from '@angular/cdk/dialog';
     <p class='t-body1 mt-5'>Essa ação não poderá ser desfeita</p>
     <lib-dialog-footer>
       <div class="flex justify-end gap-4">
-        <button lib-button (click)="handleCancel(false)">Cancelar</button>
-        <button lib-button btnType="primary" (click)="handleCancel(true)">Confirmar</button>
+        <button id='territory-delete-dialog-cancel-btn' lib-button (click)="handleCancel(false)">Cancelar</button>
+        <button id='territory-delete-dialog-confirm-btn' lib-button btnType="primary" (click)="handleCancel(true)">Confirmar</button>
       </div>
     </lib-dialog-footer>
   </lib-dialog>`,

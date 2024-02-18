@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { FeatureRoutesEnum } from '../../../../../app-routes.module';
 import { finalize } from 'rxjs';
 import { RoleEnum } from '../../../../../../models/enums/role';
-import { AuthRoutesEnum } from '../../auth.module';
+import { AuthRoutesEnum } from '../../models/enums/auth-routes';
 
 @Component({
   selector: 'kingdom-apps-login-page',

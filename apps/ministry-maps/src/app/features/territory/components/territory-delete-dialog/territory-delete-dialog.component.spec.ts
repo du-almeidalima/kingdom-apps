@@ -1,22 +1,33 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { TerritoryDeleteDialogComponent } from './territory-delete-dialog.component';
+import { MockBuilder, MockRender, ngMocks } from 'ng-mocks';
+import { DialogRef } from '@angular/cdk/dialog';
+import { TerritoryModule } from '../../territory.module';
+import { By } from '@angular/platform-browser';
 
 describe('TerritoryDeleteDialogComponent', () => {
-  let component: TerritoryDeleteDialogComponent;
-  let fixture: ComponentFixture<TerritoryDeleteDialogComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [TerritoryDeleteDialogComponent],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(TerritoryDeleteDialogComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+  beforeEach(() =>
+    MockBuilder(TerritoryDeleteDialogComponent, [TerritoryModule]).provide({
+      provide: DialogRef,
+      useValue: { close: jest.fn() },
+    })
+  );
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    const fixture = MockRender(TerritoryDeleteDialogComponent);
+
+    expect(fixture.point.componentInstance).toBeTruthy();
+  });
+
+  it.each([true, false])('it should return close returning %s', outcome => {
+    const fixture = MockRender(TerritoryDeleteDialogComponent);
+    const dialogRef = ngMocks.get(DialogRef);
+
+    const btn = outcome
+      ? ngMocks.find(fixture, '#territory-delete-dialog-confirm-btn')
+      : ngMocks.find(fixture, '#territory-delete-dialog-cancel-btn');
+
+    ngMocks.click(btn);
+
+    expect(dialogRef.close).toHaveBeenCalledWith(outcome);
   });
 });

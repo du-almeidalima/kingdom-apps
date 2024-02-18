@@ -6,10 +6,12 @@ import { AuthRepository } from '../repositories/auth.repository';
 import { UserStateService } from '../../../../state/user.state.service';
 import { FIREBASE_PROVIDERS } from '../repositories/firebase/firebase-auth-datasource.service';
 import { of } from 'rxjs';
-import { ADMIN_USER_MOCK } from '../../../../mock/models/user.mock';
+import { userMockBuilder } from '../../../../../test/mocks';
+import { RoleEnum } from '../../../../../models/enums/role';
 
 describe('AuthService', () => {
   let service: AuthService;
+  const ADMIN_USER_MOCK = userMockBuilder({ role: RoleEnum.ADMIN });
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -17,6 +19,7 @@ describe('AuthService', () => {
         UserStateService,
         MockProvider(AuthRepository, {
           signInWithProvider: jest.fn().mockReturnValue(of(ADMIN_USER_MOCK)),
+          authStateChanged: jest.fn().mockReturnValue(of(true))
         }),
       ],
     });

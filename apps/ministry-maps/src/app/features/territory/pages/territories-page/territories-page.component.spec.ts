@@ -1,22 +1,14 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { TerritoriesPageComponent } from './territories-page.component';
+import { MockBuilder, MockRender } from 'ng-mocks';
+import { TerritoryModule } from '../../territory.module';
+import { RepositoriesModule } from '../../../../repositories/repositories.module';
 
 describe('TerritoriesPageComponent', () => {
-  let component: TerritoriesPageComponent;
-  let fixture: ComponentFixture<TerritoriesPageComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [TerritoriesPageComponent],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(TerritoriesPageComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+  beforeEach(() => MockBuilder(TerritoriesPageComponent, [TerritoryModule, RepositoriesModule]));
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    const fixture = MockRender(TerritoriesPageComponent);
+
+    expect(fixture.point.componentInstance).toBeTruthy();
   });
 });

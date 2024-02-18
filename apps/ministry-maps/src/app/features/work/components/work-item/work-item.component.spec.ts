@@ -1,22 +1,16 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { WorkItemComponent } from './work-item.component';
+import { MockBuilder, MockRender } from 'ng-mocks';
+import { WorkModule } from '../../work.module';
+import { territoryMockBuilder } from '../../../../../test/mocks/models/territory.mock';
 
 describe('WorkItemComponent', () => {
-  let component: WorkItemComponent;
-  let fixture: ComponentFixture<WorkItemComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [WorkItemComponent],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(WorkItemComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+  beforeEach(() => MockBuilder(WorkItemComponent, [WorkModule]));
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    const fixture = MockRender(WorkItemComponent, {
+      territory: territoryMockBuilder({})
+    });
+
+    expect(fixture.point.componentInstance).toBeTruthy();
   });
 });
