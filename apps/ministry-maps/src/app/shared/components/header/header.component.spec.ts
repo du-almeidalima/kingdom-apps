@@ -1,22 +1,12 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { HeaderComponent } from './header.component';
+import { MockBuilder, MockRender } from 'ng-mocks';
+import { SharedModule } from '../../shared.module';
 
 describe('HeaderComponent', () => {
-  let component: HeaderComponent;
-  let fixture: ComponentFixture<HeaderComponent>;
+  beforeEach(() => MockBuilder(HeaderComponent, [SharedModule]));
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [HeaderComponent],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(HeaderComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('should create the app', () => {
+    const fixture = MockRender(HeaderComponent);
+    expect(fixture.point.componentInstance).toBeTruthy();
   });
 });

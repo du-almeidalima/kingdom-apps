@@ -1,22 +1,16 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { TerritoryListItemComponent } from './territory-list-item.component';
+import { MockBuilder, MockRender } from 'ng-mocks';
+import { TerritoryModule } from '../../territory.module';
+import { territoryMockBuilder } from '../../../../../test/mocks/models/territory.mock';
 
 describe('TerritoryListItemComponent', () => {
-  let component: TerritoryListItemComponent;
-  let fixture: ComponentFixture<TerritoryListItemComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [TerritoryListItemComponent],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(TerritoryListItemComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+  beforeEach(() => MockBuilder(TerritoryListItemComponent, TerritoryModule));
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    const fixture = MockRender(TerritoryListItemComponent, {
+      territory: territoryMockBuilder({})
+    });
+
+    expect(fixture.point.componentInstance).toBeTruthy();
   });
 });

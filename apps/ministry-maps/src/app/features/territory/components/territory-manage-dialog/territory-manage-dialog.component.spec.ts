@@ -1,22 +1,31 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { TerritoryManageDialogComponent } from './territory-manage-dialog.component';
+import { TerritoryDialogData, TerritoryManageDialogComponent } from './territory-manage-dialog.component';
+import { MockBuilder, MockRender } from 'ng-mocks';
+import { TerritoryModule } from '../../territory.module';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { territoryMockBuilder } from '../../../../../test/mocks/models/territory.mock';
+import { congregationMock } from '../../../../../test/mocks';
+import { RepositoriesModule } from '../../../../repositories/repositories.module';
 
 describe('TerritoryManageDialogComponent', () => {
-  let component: TerritoryManageDialogComponent;
-  let fixture: ComponentFixture<TerritoryManageDialogComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [TerritoryManageDialogComponent],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(TerritoryManageDialogComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+  beforeEach(() =>
+    MockBuilder(TerritoryManageDialogComponent, [TerritoryModule, RepositoriesModule])
+      .provide({
+        provide: DialogRef,
+        useValue: {},
+      })
+      .provide({
+        provide: DIALOG_DATA,
+        useValue: {
+          territory: territoryMockBuilder({}),
+          cities: congregationMock.cities,
+          congregationId: congregationMock.id,
+        } as TerritoryDialogData,
+      })
+  );
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    const fixture = MockRender(TerritoryManageDialogComponent);
+
+    expect(fixture.point.componentInstance).toBeTruthy();
   });
 });

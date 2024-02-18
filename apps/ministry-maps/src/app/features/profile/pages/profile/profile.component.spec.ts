@@ -1,21 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ProfileComponent } from './profile.component';
+import { MockBuilder, MockRender } from 'ng-mocks';
+import { UserStateService } from '../../../../state/user.state.service';
+import { AuthService } from '../../../../core/features/auth/services/auth.service';
+import { Dialog } from '@angular/cdk/dialog';
 
 describe('ProfileComponent', () => {
-  let component: ProfileComponent;
-  let fixture: ComponentFixture<ProfileComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [ProfileComponent],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(ProfileComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+  beforeEach(() => MockBuilder(ProfileComponent).mock(UserStateService).mock(AuthService).mock(Dialog));
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    const fixture = MockRender(ProfileComponent);
+
+    expect(fixture.point.componentInstance).toBeTruthy();
   });
 });

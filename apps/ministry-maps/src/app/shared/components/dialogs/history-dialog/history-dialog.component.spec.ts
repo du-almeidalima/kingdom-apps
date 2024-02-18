@@ -1,22 +1,19 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { HistoryDialogComponent } from './history-dialog.component';
+import { MockBuilder, MockRender } from 'ng-mocks';
+import { SharedModule } from '../../../shared.module';
+import { DialogRef } from '@angular/cdk/dialog';
 
 describe('WorkItemHistoryDialogComponent', () => {
-  let component: HistoryDialogComponent;
-  let fixture: ComponentFixture<HistoryDialogComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [HistoryDialogComponent],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(HistoryDialogComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+  beforeEach(() =>
+    MockBuilder(HistoryDialogComponent, SharedModule).provide({
+      provide: DialogRef,
+      useValue: {},
+    })
+  );
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    const fixture = MockRender(HistoryDialogComponent);
+
+    expect(fixture.point.componentInstance).toBeTruthy();
   });
 });

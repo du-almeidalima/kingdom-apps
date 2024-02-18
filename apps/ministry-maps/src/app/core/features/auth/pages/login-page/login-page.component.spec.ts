@@ -1,22 +1,14 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { LoginPageComponent } from './login-page.component';
+import { MockBuilder, MockRender } from 'ng-mocks';
+import { AuthModule } from '../../auth.module';
+import { RepositoriesModule } from '../../../../../repositories/repositories.module';
 
 describe('LoginPageComponent', () => {
-  let component: LoginPageComponent;
-  let fixture: ComponentFixture<LoginPageComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [LoginPageComponent],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(LoginPageComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+  beforeEach(() => MockBuilder(LoginPageComponent, [AuthModule, RepositoriesModule]));
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    const fixture = MockRender(LoginPageComponent);
+
+    expect(fixture.point.componentInstance).toBeTruthy();
   });
 });

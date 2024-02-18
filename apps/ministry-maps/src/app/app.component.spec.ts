@@ -1,32 +1,12 @@
-import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
-import { NxWelcomeComponent } from './nx-welcome.component';
+import { MockBuilder, MockRender } from 'ng-mocks';
+import { AppModule } from './app.module';
 
 describe('AppComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [AppComponent, NxWelcomeComponent],
-    }).compileComponents();
-  });
+  beforeEach(() => MockBuilder(AppComponent, [AppModule]));
 
   it('should create the app', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
-  });
-
-  it(`should have as title 'ministry-maps'`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('ministry-maps');
-  });
-
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain(
-      'Welcome ministry-maps'
-    );
+    const fixture = MockRender(AppComponent);
+    expect(fixture.point.componentInstance).toBeTruthy();
   });
 });

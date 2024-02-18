@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
+import { FirebaseDesignationDatasourceService } from './firebase-designation-datasource.service';
 
-import { FirebaseUserDatasourceService } from './firebase-user-datasource.service';
-
-describe('FirebaseUserDatasourceService', () => {
-  let service: FirebaseUserDatasourceService;
+//TODO: Write tests using Firebase Emulator
+xdescribe('FirebaseDesignationDatasourceService', () => {
+  let service: FirebaseDesignationDatasourceService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(FirebaseUserDatasourceService);
+    service = TestBed.inject(FirebaseDesignationDatasourceService);
   });
 
   it('should be created', () => {
