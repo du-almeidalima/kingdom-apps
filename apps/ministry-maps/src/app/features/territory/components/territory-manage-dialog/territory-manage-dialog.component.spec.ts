@@ -4,11 +4,11 @@ import { TerritoryModule } from '../../territory.module';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { territoryMockBuilder } from '../../../../../test/mocks/models/territory.mock';
 import { congregationMock } from '../../../../../test/mocks';
-import { RepositoriesModule } from '../../../../repositories/repositories.module';
+import { RepositoryModule } from '../../../../repositories/repository.module';
 
 describe('TerritoryManageDialogComponent', () => {
   beforeEach(() =>
-    MockBuilder(TerritoryManageDialogComponent, [TerritoryModule, RepositoriesModule])
+    MockBuilder(TerritoryManageDialogComponent, [TerritoryModule, RepositoryModule])
       .provide({
         provide: DialogRef,
         useValue: {},
