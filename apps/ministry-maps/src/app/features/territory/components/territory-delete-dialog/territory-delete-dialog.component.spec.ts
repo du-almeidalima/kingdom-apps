@@ -2,7 +2,6 @@ import { TerritoryDeleteDialogComponent } from './territory-delete-dialog.compon
 import { MockBuilder, MockRender, ngMocks } from 'ng-mocks';
 import { DialogRef } from '@angular/cdk/dialog';
 import { TerritoryModule } from '../../territory.module';
-import { By } from '@angular/platform-browser';
 
 describe('TerritoryDeleteDialogComponent', () => {
   beforeEach(() =>

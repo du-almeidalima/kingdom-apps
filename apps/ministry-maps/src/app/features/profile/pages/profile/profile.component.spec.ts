@@ -27,6 +27,8 @@ describe('ProfileComponent', () => {
       const userStateService = ngMocks.get(UserStateService);
       userStateService.setUser(roleUser);
 
+      ngMocks.flushTestBed();
+
       MockRender(ProfileComponent);
       const roleBadge = ngMocks.find('.user-card__privilege-badge')
 
