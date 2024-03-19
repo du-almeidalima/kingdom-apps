@@ -14,6 +14,10 @@ export class UserStateService {
     return this.userSubject.getValue();
   }
 
+  public get isLoggedIn() {
+    return !!this.userSubject.getValue();
+  }
+
   setUser(user: User | null) {
     this.userSubject.next(user);
   }

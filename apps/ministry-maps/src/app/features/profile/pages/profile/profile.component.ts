@@ -4,6 +4,7 @@ import { CommonComponentsModule, ConfirmDialogComponent, ConfirmDialogData } fro
 import { UserStateService } from '../../../../state/user.state.service';
 import { AuthService } from '../../../../core/features/auth/services/auth.service';
 import { Dialog } from '@angular/cdk/dialog';
+import { RoleEnum } from '../../../../../models/enums/role';
 
 @Component({
   selector: 'kingdom-apps-profile',
@@ -20,6 +21,7 @@ export class ProfileComponent implements OnInit {
   fullName = signal('Meu Nome');
   congregation = signal('LS Congregation');
   initials = computed(() => this.getInitials(this.fullName()));
+  role = signal('Publicador');
 
   ngOnInit() {
     const user = this.userStateService.currentUser;
@@ -27,6 +29,7 @@ export class ProfileComponent implements OnInit {
     if (user) {
       this.congregation.set(user.congregation?.name ?? 'LS Congregation');
       this.fullName.set(user.name);
+      this.role.set(this.getRole(user.role))
     }
   }
 
@@ -47,5 +50,19 @@ export class ProfileComponent implements OnInit {
 
     const splitWords = name.split(' ');
     return splitWords.length > 1 ? splitWords[0][0] + splitWords[1][0] : splitWords[0].substring(0, 2);
+  }
+
+  private getRole(role: RoleEnum) {
+    switch (role) {
+      case RoleEnum.ORGANIZER:
+        return 'Organizador';
+      case RoleEnum.ADMIN:
+        return 'Admin';
+      case RoleEnum.ELDER:
+        return 'Ancião';
+      case RoleEnum.PUBLISHER:
+      default:
+        return 'Publicador';
+    }
   }
 }
