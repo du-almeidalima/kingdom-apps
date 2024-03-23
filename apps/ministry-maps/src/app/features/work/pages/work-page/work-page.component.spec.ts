@@ -2,14 +2,14 @@ import { WorkPageComponent } from './work-page.component';
 import { MockBuilder, MockInstance, MockRender } from 'ng-mocks';
 import { WorkModule } from '../../work.module';
 import { territoryMockBuilder } from '../../../../../test/mocks/models/territory.mock';
-import { RepositoryModule } from '../../../../repositories/repository.module';
+import { RepositoriesModule } from '../../../../repositories/repositories.module';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 
 describe('WorkPageComponent', () => {
   // Resets customizations after each test, in our case of `ActivatedRoute`.
   MockInstance.scope();
 
-  beforeEach(() => MockBuilder(WorkPageComponent, [RepositoryModule, WorkModule, RouterModule.forRoot([])]));
+  beforeEach(() => MockBuilder(WorkPageComponent, [RepositoriesModule, WorkModule, RouterModule.forRoot([])]));
 
   it('should create', () => {
     MockInstance(ActivatedRoute, 'snapshot', jest.fn(), 'get').mockReturnValue({

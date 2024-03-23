@@ -1,10 +1,10 @@
 import { LoginPageComponent } from './login-page.component';
 import { MockBuilder, MockRender } from 'ng-mocks';
 import { AuthModule } from '../../auth.module';
-import { RepositoryModule } from '../../../../../repositories/repository.module';
+import { RepositoriesModule } from '../../../../../repositories/repositories.module';
 
 describe('LoginPageComponent', () => {
-  beforeEach(() => MockBuilder(LoginPageComponent, [AuthModule, RepositoryModule]));
+  beforeEach(() => MockBuilder(LoginPageComponent, [AuthModule, RepositoriesModule]));
 
   it('should create', () => {
     const fixture = MockRender(LoginPageComponent);

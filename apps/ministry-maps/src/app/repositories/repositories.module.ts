@@ -36,4 +36,4 @@ import { UserRepository } from './user.repository';
     // },
   ],
 })
-export class RepositoryModule {}
+export class RepositoriesModule {}
