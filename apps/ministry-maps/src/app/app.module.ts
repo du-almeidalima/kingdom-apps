@@ -7,7 +7,7 @@ import {
   connectFirestoreEmulator,
   enableIndexedDbPersistence,
   getFirestore,
-  provideFirestore,
+  provideFirestore
 } from '@angular/fire/firestore';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterOutlet } from '@angular/router';
@@ -75,8 +75,13 @@ import { SharedModule } from './shared/shared.module';
       enabled: !isDevMode(),
       // Register the ServiceWorker as soon as the application is stable
       // or after 30 seconds (whichever comes first).
-      registrationStrategy: 'registerWhenStable:30000',
+      registrationStrategy: 'registerWhenStable:30000'
     }),
+    // provideAppCheck(() => {
+    //   // TODO get a reCAPTCHA Enterprise here https://console.cloud.google.com/security/recaptcha?project=_
+    //   const provider = new ReCaptchaEnterpriseProvider(/* reCAPTCHA Enterprise site key */);
+    //   return initializeAppCheck(undefined, { provider, isTokenAutoRefreshEnabled: true });
+    // }),
   ],
   providers: [
     ScreenTrackingService,

@@ -13,8 +13,6 @@ import { AuthRepository } from '../app/core/features/auth/repositories/auth.repo
 import { AuthRepositoryMock } from './mocks/models/auth.mock';
 import { DesignationRepository } from '../app/repositories/designation.repository';
 import { DesignationRepositoryMock } from './mocks/models/designation.mock';
-import { NoteRepository } from '../app/repositories/note.repository';
-import { NoteRepositoryMock } from './mocks/models/note.mock';
 
 ngMocks.defaultMock(TitleStrategy, () => MockService(DefaultTitleStrategy));
 ngMocks.defaultMock(UserStateService, () => organizerUserStateServiceMock);
@@ -22,7 +20,7 @@ ngMocks.defaultMock(CongregationRepository, () => new CongregationRepositoryMock
 ngMocks.defaultMock(TerritoryRepository, () => new TerritoryRepositoryMock());
 ngMocks.defaultMock(AuthRepository, () => new AuthRepositoryMock());
 ngMocks.defaultMock(DesignationRepository, () => new DesignationRepositoryMock());
-ngMocks.defaultMock(NoteRepository, () => new NoteRepositoryMock());
+// ngMocks.defaultMock(NoteRepository, () => new NoteRepositoryMock());
 
 // Firebase Setup (Not in use at the moment)
 @NgModule({
@@ -59,5 +57,3 @@ jest.mock('@angular/fire/firestore', () => {
     doc: jest.fn().mockImplementation((firestore, path) => ({ path })),
   };
 });
-
-jest.mock('dexie');

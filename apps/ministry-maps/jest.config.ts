@@ -4,7 +4,7 @@ export default {
   preset: '../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   globals: {},
-  // coverageDirectory: '../../coverage/apps/ministry-maps',
+  coverageDirectory: '../../coverage/apps/ministry-maps',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',
