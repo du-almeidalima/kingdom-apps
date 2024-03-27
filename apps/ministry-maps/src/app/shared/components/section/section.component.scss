@@ -1,0 +1,18 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+
+:host {
+  display: block;
+}
+
+.section {
+
+  &__title {
+    color: variables.$green-200;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  &__body {
+    margin-top: 1.75rem;
+  }
+}
