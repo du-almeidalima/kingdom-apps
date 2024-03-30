@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SharedModule } from '../../shared.module';
+import { green200, primaryGreen } from '@kingdom-apps/common-ui';
 
 @Component({
   selector: 'kingdom-apps-section',
@@ -10,7 +11,10 @@ import { SharedModule } from '../../shared.module';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <lib-card>
-      <h3 class="section__title">{{title()}}</h3>
+      <header class="flex justify-between items-center h-8">
+        <h3 class="section__title">{{ title() }}</h3>
+        <lib-spinner *ngIf="isLoading()" height="2rem" width="2rem" [color]="green200" />
+      </header>
       <div class="section__body">
         <ng-content></ng-content>
       </div>
@@ -18,5 +22,8 @@ import { SharedModule } from '../../shared.module';
   `,
 })
 export class SectionComponent {
+  protected readonly green200 = green200;
+
   title = input<string>();
+  isLoading = input<boolean>(false);
 }
