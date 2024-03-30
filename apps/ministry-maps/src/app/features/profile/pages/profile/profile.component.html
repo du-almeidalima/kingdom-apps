@@ -19,6 +19,8 @@
     <h2 class='t-headline4 t-primary uppercase mb-5'>Notas</h2>
     <h3 class='t-secondary t-body1'>Exportar</h3>
   </lib-card>
+  <!-- NOTES BACKUP & EXPORT -->
+  <kingdom-apps-change-congregation *lib-authorize="'ADMIN'"/>
   <!-- LOGOUT -->
   <button lib-button class='logout-button mt-auto mb-5' (click)='handleLogOut()'>
     <lib-icon icon='log-out-7' class='h-6 w-6' [fillColor]="'currentColor'"></lib-icon>

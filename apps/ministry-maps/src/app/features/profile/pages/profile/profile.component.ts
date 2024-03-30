@@ -1,37 +1,35 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CommonComponentsModule, ConfirmDialogComponent, ConfirmDialogData } from '@kingdom-apps/common-ui';
+import {
+  CommonComponentsModule,
+  CommonDirectivesModule,
+  ConfirmDialogComponent,
+  ConfirmDialogData,
+} from '@kingdom-apps/common-ui';
 import { UserStateService } from '../../../../state/user.state.service';
 import { AuthService } from '../../../../core/features/auth/services/auth.service';
 import { Dialog } from '@angular/cdk/dialog';
 import { RoleEnum } from '../../../../../models/enums/role';
+import { ChangeCongregationComponent } from '../../components/change-congregation.component';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'kingdom-apps-profile',
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
   standalone: true,
-  imports: [CommonModule, CommonComponentsModule],
+  imports: [CommonModule, CommonComponentsModule, ChangeCongregationComponent, CommonDirectivesModule],
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent {
   private readonly userStateService = inject(UserStateService);
   private readonly authService = inject(AuthService);
   private readonly dialog = inject(Dialog);
 
-  fullName = signal('Meu Nome');
-  congregation = signal('LS Congregation');
+  user = toSignal(this.userStateService.$user);
+  fullName = computed(() => this.user()?.name ?? 'Meu Nome');
+  congregation = computed(() => this.user()?.congregation?.name ?? 'LS Congregação');
   initials = computed(() => this.getInitials(this.fullName()));
-  role = signal('Publicador');
-
-  ngOnInit() {
-    const user = this.userStateService.currentUser;
-
-    if (user) {
-      this.congregation.set(user.congregation?.name ?? 'LS Congregation');
-      this.fullName.set(user.name);
-      this.role.set(this.getRole(user.role))
-    }
-  }
+  role = computed(() => this.getRole(this.user()?.role ?? RoleEnum.PUBLISHER));
 
   handleLogOut() {
     this.dialog
