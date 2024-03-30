@@ -105,7 +105,7 @@ export class FirebaseUserDatasourceService implements UserRepository {
   put(partialUser: FirebaseUserModel): Observable<User> {
     const user: FirebaseUserModel = {
       ...partialUser,
-      role: RoleEnum.PUBLISHER,
+      role: partialUser.role ?? RoleEnum.PUBLISHER,
     };
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -120,6 +120,21 @@ export class FirebaseUserDatasourceService implements UserRepository {
         return { ...user, congregation };
       })
     );
+  }
+
+  /** Basically a wrapper around {@link FirebaseUserDatasourceService#put} to map to a FirebaseModel */
+  update(user: User): Observable<User> {
+
+    if (!user.congregation?.id) {
+      throw new Error('User with no congregation! Aborting update.')
+    }
+
+    const firebaseUser: FirebaseUserModel = {
+      ...user,
+      congregation: doc(this.firestore, `/congregations/${user.congregation?.id}`) as DocumentReference<Congregation, FirebaseCongregationModel>,
+    };
+
+    return this.put(firebaseUser);
   }
 
   /**

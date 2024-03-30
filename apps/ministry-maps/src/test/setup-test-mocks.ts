@@ -1,6 +1,6 @@
 import { MockService, ngMocks } from 'ng-mocks';
 import { UserStateService } from '../app/state/user.state.service';
-import { CongregationRepositoryMock, organizerUserStateServiceMock } from './mocks';
+import { CongregationRepositoryMock, organizerUserStateServiceMock, UserRepositoryMock } from './mocks';
 import { CongregationRepository } from '../app/repositories/congregation.repository';
 import { DefaultTitleStrategy, TitleStrategy } from '@angular/router';
 import { NgModule } from '@angular/core';
@@ -13,9 +13,11 @@ import { AuthRepository } from '../app/core/features/auth/repositories/auth.repo
 import { AuthRepositoryMock } from './mocks/models/auth.mock';
 import { DesignationRepository } from '../app/repositories/designation.repository';
 import { DesignationRepositoryMock } from './mocks/models/designation.mock';
+import { UserRepository } from '../app/repositories/user.repository';
 
 ngMocks.defaultMock(TitleStrategy, () => MockService(DefaultTitleStrategy));
 ngMocks.defaultMock(UserStateService, () => organizerUserStateServiceMock);
+ngMocks.defaultMock(UserRepository, () => new UserRepositoryMock());
 ngMocks.defaultMock(CongregationRepository, () => new CongregationRepositoryMock());
 ngMocks.defaultMock(TerritoryRepository, () => new TerritoryRepositoryMock());
 ngMocks.defaultMock(AuthRepository, () => new AuthRepositoryMock());

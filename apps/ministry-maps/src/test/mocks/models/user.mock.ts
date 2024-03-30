@@ -2,12 +2,23 @@ import { User } from '../../../models/user';
 import { RoleEnum } from '../../../models/enums/role';
 import { congregationMock } from './congregation.mock';
 import { UserStateService } from '../../../app/state/user.state.service';
+import { UserRepository } from '../../../app/repositories/user.repository';
+import { Observable, of } from 'rxjs';
 
 // MOCK CLASSES
 export class UserStateServiceMock extends UserStateService {}
 
+export class UserRepositoryMock extends UserRepository {
+  getById(_: string): Observable<User | undefined> {
+    return of(organizerUser);
+  }
+
+  update(user: User): Observable<User> {
+    return of(user);
+  }
+}
 // USERS
-const organizerUser: User = {
+export const organizerUser: User = {
   id: 'A1B2C3',
   name: 'TestUser',
   email: 'test.user@email.com',
