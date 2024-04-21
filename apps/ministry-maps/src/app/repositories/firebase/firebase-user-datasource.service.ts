@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
 import {
-  collection,
+  collection, collectionData,
   CollectionReference,
   doc,
   DocumentReference,
   Firestore,
   getDoc,
   getDocFromCache,
-  getDocFromServer,
-  setDoc,
+  getDocFromServer, query,
+  setDoc, where,
 } from '@angular/fire/firestore';
-import { catchError, forkJoin, from, map, Observable, of, switchMap } from 'rxjs';
+import { catchError, forkJoin, from, map, Observable, of, switchMap, take } from 'rxjs';
 
 import { Congregation } from '../../../models/congregation';
 import { RoleEnum } from '../../../models/enums/role';
@@ -32,13 +32,13 @@ export class FirebaseUserDatasourceService implements UserRepository {
     // USERS COLLECTION
     this.userCollection = collection(
       this.firestore,
-      FirebaseUserDatasourceService.COLLECTION_NAME
+      FirebaseUserDatasourceService.COLLECTION_NAME,
     ) as CollectionReference<User, FirebaseUserModel>;
 
     // CONGREGATION COLLECTION
     this.congregationCollection = collection(
       this.firestore,
-      FirebaseCongregationDatasourceService.COLLECTION_NAME
+      FirebaseCongregationDatasourceService.COLLECTION_NAME,
     ).withConverter(congregationConverter) as CollectionReference<Congregation, FirebaseCongregationModel>;
   }
 
@@ -60,7 +60,7 @@ export class FirebaseUserDatasourceService implements UserRepository {
 
         // Fetching from server
         return from(getDocFromServer(userReference));
-      })
+      }),
     );
 
     return userSnapshot.pipe(
@@ -96,9 +96,9 @@ export class FirebaseUserDatasourceService implements UserRepository {
 
             // Overriding congregation reference with congregation data
             return { ...user, congregation: { ...congregation } };
-          })
+          }),
         );
-      })
+      }),
     );
   }
 
@@ -118,7 +118,7 @@ export class FirebaseUserDatasourceService implements UserRepository {
     return forkJoin([user$, this.resolveUserCongregationReference(congregationDocRef)]).pipe(
       map(([_, congregation]) => {
         return { ...user, congregation };
-      })
+      }),
     );
   }
 
@@ -126,15 +126,41 @@ export class FirebaseUserDatasourceService implements UserRepository {
   update(user: User): Observable<User> {
 
     if (!user.congregation?.id) {
-      throw new Error('User with no congregation! Aborting update.')
+      throw new Error('User with no congregation! Aborting update.');
     }
 
     const firebaseUser: FirebaseUserModel = {
       ...user,
-      congregation: doc(this.firestore, `/congregations/${user.congregation?.id}`) as DocumentReference<Congregation, FirebaseCongregationModel>,
+      congregation: doc(this.firestore, `/${FirebaseCongregationDatasourceService.COLLECTION_NAME}/${user.congregation?.id}`) as DocumentReference<Congregation, FirebaseCongregationModel>,
     };
 
     return this.put(firebaseUser);
+  }
+
+  getAllByCongregation(congregationId: string): Observable<User[]> {
+    const congregationDocRef = this.createCongregationDoc(congregationId);
+    const q = query(
+      this.userCollection,
+      where('congregation', '==', congregationDocRef),
+    );
+
+    // This is a little nested. However, it's to avoid performing multiple calls to FireStore to resolve the congregation ref
+    // Once the Users have been fetched, we resolve the congregationRef used as a query param only once and map to all users.
+    return from(collectionData(q))
+      .pipe(
+        take(1),
+        switchMap(user => {
+          return this.resolveUserCongregationReference(congregationDocRef)
+            .pipe(
+              map(congregation => {
+                return user.map(u => {
+                  u.congregation = congregation;
+                  return u;
+                });
+              }),
+            );
+        }),
+      );
   }
 
   /**
@@ -143,7 +169,7 @@ export class FirebaseUserDatasourceService implements UserRepository {
    * @private
    */
   private resolveUserCongregationReference(
-    congregation: DocumentReference<Congregation, FirebaseCongregationModel>
+    congregation: DocumentReference<Congregation, FirebaseCongregationModel>,
   ): Observable<Congregation | undefined> {
     // Since Congregation isn't something that changes frequently, fetching from cache to increase Performance
     const cachedCongregationSnapshot = from(getDocFromCache(congregation));
@@ -168,7 +194,7 @@ export class FirebaseUserDatasourceService implements UserRepository {
         }
 
         return congregationDocSnapshot.data();
-      })
+      }),
     );
   }
 

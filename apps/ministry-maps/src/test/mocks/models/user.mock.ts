@@ -16,12 +16,26 @@ export class UserRepositoryMock extends UserRepository {
   update(user: User): Observable<User> {
     return of(user);
   }
+
+  getAllByCongregation(_: string): Observable<User[]> {
+    return of([organizerUser, elderUser]);
+  }
 }
+
 // USERS
 export const organizerUser: User = {
   id: 'A1B2C3',
   name: 'TestUser',
   email: 'test.user@email.com',
+  photoUrl: 'https://i.stack.imgur.com/l60Hf.png',
+  role: RoleEnum.ORGANIZER,
+  congregation: congregationMock
+};
+
+export const elderUser: User = {
+  id: 'A1B2C3',
+  name: 'Test Elder User',
+  email: 'test.elder@email.com',
   photoUrl: 'https://i.stack.imgur.com/l60Hf.png',
   role: RoleEnum.ORGANIZER,
   congregation: congregationMock

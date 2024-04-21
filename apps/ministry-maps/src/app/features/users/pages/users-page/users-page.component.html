@@ -1,6 +1,10 @@
 <main class="container">
-  <h2>Users</h2>
-  <div *ngFor="let user of users" class="flex pt-2 t-body1">
-    <span>{{ user.name }} {{ user.role }}</span>
-  </div>
+  <h2 class="t-headline2 mb-8">Pessoas</h2>
+  <ul class="list-none">
+    @for (user of users; track user.id) {
+      <li class="[&:not(:first-child)]:mt-3">
+        <kingdom-apps-user-list-item [user]="user"/>
+      </li>
+    }
+  </ul>
 </main>

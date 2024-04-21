@@ -20,6 +20,8 @@ describe('ProfileComponent', () => {
     [RoleEnum.ADMIN, 'Admin'],
     [RoleEnum.ELDER, 'Ancião'],
     [RoleEnum.ORGANIZER, 'Organizador'],
+    [RoleEnum.APP_ADMIN, 'App Admin.'],
+    [RoleEnum.SUPERINTENDENT, 'Superintendente'],
   ])(
     'role %s should be %s',
     (role, description) => {

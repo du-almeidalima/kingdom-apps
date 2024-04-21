@@ -1,26 +1,44 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { UserRepository } from 'apps/ministry-maps/src/app/repositories/user.repository';
-import { FirebaseUserModel } from 'apps/ministry-maps/src/models/firebase/firebase-user-model';
-import { Subscription } from 'rxjs';
+import { Component, inject, OnInit } from '@angular/core';
+import { finalize } from 'rxjs';
+import { User } from '../../../../../models/user';
+import { UserStateService } from '../../../../state/user.state.service';
+import { UserRepository } from '../../../../repositories/user.repository';
+import { RoleEnum } from '../../../../../models/enums/role';
 
 @Component({
   selector: 'kingdom-apps-users-page',
   templateUrl: './users-page.component.html',
   styleUrls: ['./users-page.component.scss'],
 })
-export class UsersPageComponent implements OnInit, OnDestroy {
-  usersSubscription: Subscription | undefined;
-  users: FirebaseUserModel[] = [];
+export class UsersPageComponent implements OnInit {
+  private readonly userRepository = inject(UserRepository);
+  private readonly userState = inject(UserStateService);
+  private readonly userPriorityMap = new Map<RoleEnum, number>([
+    [RoleEnum.ADMIN, 1],
+    [RoleEnum.ELDER, 2],
+    [RoleEnum.ORGANIZER, 3],
+    [RoleEnum.PUBLISHER, 4],
+  ]);
 
-  constructor(private readonly usersRepository: UserRepository) {}
+  isLoading = false;
+  users: User[] = [];
 
   ngOnInit(): void {
-    console.log('initing');
-    this.usersSubscription = this.usersRepository.getAll().subscribe(users => (this.users = users));
+    if (this.userState.currentUser?.congregation?.id) {
+      this.isLoading = true;
+      this.userRepository.getAllByCongregation(this.userState.currentUser?.congregation?.id)
+        .pipe(
+          finalize(() => {
+            this.isLoading = false;
+          }),
+        )
+        .subscribe(users => {
+          this.users = users.sort(this.sortUserFn.bind(this));
+        });
+    }
   }
 
-  ngOnDestroy(): void {
-    console.log('destroying');
-    this.usersSubscription?.unsubscribe();
+  private sortUserFn(a: User, b: User) {
+    return (this.userPriorityMap.get(a.role) ?? 99) - (this.userPriorityMap.get(b.role) ?? 99);
   }
 }
