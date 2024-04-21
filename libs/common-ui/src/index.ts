@@ -19,3 +19,6 @@ export * from './lib/components/icon-button/icon-button.component';
 export * from './lib/components/icon/icon.component';
 
 export * from './lib/components/spinner/spinner.component';
+
+// Config
+export {APP_ADMIN_ROLE} from './lib/directives/authorize/authorize.directive';

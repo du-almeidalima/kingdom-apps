@@ -42,9 +42,10 @@
     border-radius: .4rem;
     background-color: variables.$grey-100;
     font-weight: bold;
+    letter-spacing: .1rem;
     @extend .t-white;
 
-    &--admin {
+    &--admin, &--app_admin {
       color: variables.$text;
       background-color: variables.$white-100;
       border: 1px solid variables.$light-grey-100;
@@ -56,6 +57,11 @@
 
     &--organizer {
       background-color: variables.$blue-200;
+    }
+
+    &--superintendent {
+      color: variables.$text;
+      background-color: variables.$orange-200;
     }
   }
 }

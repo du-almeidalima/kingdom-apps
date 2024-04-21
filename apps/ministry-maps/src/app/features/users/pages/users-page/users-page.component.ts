@@ -14,10 +14,12 @@ export class UsersPageComponent implements OnInit {
   private readonly userRepository = inject(UserRepository);
   private readonly userState = inject(UserStateService);
   private readonly userPriorityMap = new Map<RoleEnum, number>([
-    [RoleEnum.ADMIN, 1],
-    [RoleEnum.ELDER, 2],
-    [RoleEnum.ORGANIZER, 3],
-    [RoleEnum.PUBLISHER, 4],
+    [RoleEnum.APP_ADMIN, 1],
+    [RoleEnum.SUPERINTENDENT, 2],
+    [RoleEnum.ADMIN, 3],
+    [RoleEnum.ELDER, 4],
+    [RoleEnum.ORGANIZER, 5],
+    [RoleEnum.PUBLISHER, 6],
   ]);
 
   isLoading = false;

@@ -17,15 +17,17 @@ import { getUserInitials } from '../../../../shared/utils/user-utils';
 
 @Component({
   selector: 'kingdom-apps-profile',
-  templateUrl: './profile.component.html',
-  styleUrl: './profile.component.scss',
+  templateUrl: './profile-page.component.html',
+  styleUrl: './profile-page.component.scss',
   standalone: true,
   imports: [CommonModule, CommonComponentsModule, ChangeCongregationComponent, CommonDirectivesModule],
 })
-export class ProfileComponent {
+export class ProfilePageComponent {
   private readonly userStateService = inject(UserStateService);
   private readonly authService = inject(AuthService);
   private readonly dialog = inject(Dialog);
+
+  protected readonly RoleEnum = RoleEnum;
 
   user = toSignal(this.userStateService.$user);
   fullName = computed(() => this.user()?.name ?? 'Meu Nome');

@@ -3,6 +3,7 @@ import { grey400, Icons, red300 } from '@kingdom-apps/common-ui';
 import { Territory } from '../../../../../models/territory';
 import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territory-icon-mapper';
 import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
+import { EDIT_ALLOWED } from '../../config/territory-roles.config';
 
 @Component({
   selector: 'kingdom-apps-territory-list-item',
@@ -38,7 +39,7 @@ import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
 
         <ng-template #menu>
           <menu class='menu' cdkMenu>
-            <li class='menu__item' cdkMenuItem (cdkMenuItemTriggered)='edit.emit(territory)'>
+            <li class='menu__item' cdkMenuItem (cdkMenuItemTriggered)='edit.emit(territory)' *lib-authorize="EDIT_ALLOWED">
               <button lib-icon-button type='button'>
                 <lib-icon [fillColor]='greyButtonColor' icon='pencil-lined'></lib-icon>
               </button>
@@ -50,22 +51,25 @@ import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
               </button>
               <span>Histórico</span>
             </li>
-            <!-- SEPARATOR -->
-            <hr class='menu__separator' *ngIf='hasRecentlyMoved'>
             <!-- ALERTS -->
-            <li class='menu__item'
-                cdkMenuItem
-                (cdkMenuItemTriggered)='resolveMove.emit(territory)'
-                *ngIf='hasRecentlyMoved'
-            >
-              <button lib-icon-button type='button'>
-                <lib-icon [fillColor]='greyButtonColor' icon='building-8'></lib-icon>
-              </button>
-              <span>Mudou</span>
-            </li>
+            <ng-container *lib-authorize="EDIT_ALLOWED">
+              <!-- SEPARATOR -->
+              <hr class='menu__separator' *ngIf='hasRecentlyMoved'>
+
+              <li class='menu__item'
+                  cdkMenuItem
+                  (cdkMenuItemTriggered)='resolveMove.emit(territory)'
+                  *ngIf='hasRecentlyMoved'
+              >
+                <button lib-icon-button type='button'>
+                  <lib-icon [fillColor]='greyButtonColor' icon='building-8'></lib-icon>
+                </button>
+                <span>Mudou</span>
+              </li>
+            </ng-container>
             <!-- SEPARATOR -->
-            <hr class='menu__separator'>
-            <li class='menu__item' cdkMenuItem (cdkMenuItemTriggered)='remove.emit(territory.id)'>
+            <hr class='menu__separator' *lib-authorize="EDIT_ALLOWED">
+            <li class='menu__item' cdkMenuItem (cdkMenuItemTriggered)='remove.emit(territory.id)' *lib-authorize="EDIT_ALLOWED">
               <button lib-icon-button cdkMenuItem type='button'>
                 <lib-icon [fillColor]='deleteButtonColor' icon='trash-can-lined'></lib-icon>
               </button>
@@ -80,6 +84,8 @@ import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
   `,
 })
 export class TerritoryListItemComponent implements OnInit {
+  protected readonly EDIT_ALLOWED = EDIT_ALLOWED;
+
   public greyButtonColor = grey400;
   public deleteButtonColor = red300;
   public iconColor = grey400;

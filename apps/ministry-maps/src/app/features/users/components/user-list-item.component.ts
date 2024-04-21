@@ -1,17 +1,21 @@
 import { ChangeDetectionStrategy, Component, computed, EventEmitter, input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
+import { CommonComponentsModule, grey400, IconComponent, red300 } from '@kingdom-apps/common-ui';
+
 import { User } from '../../../../models/user';
 import { getUserInitials } from '../../../shared/utils/user-utils';
 import { getTranslatedRole, RoleEnum } from '../../../../models/enums/role';
-import { CommonComponentsModule, grey400, IconComponent, red300 } from '@kingdom-apps/common-ui';
-import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
+import {
+  AuthorizeDirective
+} from '../../../../../../../libs/common-ui/src/lib/directives/authorize/authorize.directive';
 
 @Component({
   selector: 'kingdom-apps-user-list-item',
   standalone: true,
   styleUrl: './user-list-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, CdkMenu, CdkMenuItem, CommonComponentsModule, IconComponent, CdkMenuTrigger],
+  imports: [CommonModule, CdkMenu, CdkMenuItem, CommonComponentsModule, IconComponent, CdkMenuTrigger, AuthorizeDirective],
   template: `
     <div class='user-item'>
       <!-- INITIALS -->
@@ -30,7 +34,7 @@ import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
         </div>
 
         <!-- VERTICAL MENU -->
-        <button lib-icon-button [cdkMenuTriggerFor]='menu' type='button'>
+        <button lib-icon-button [cdkMenuTriggerFor]='menu' type='button' *lib-authorize="[RoleEnum.APP_ADMIN, RoleEnum.SUPERINTENDENT]">
           <lib-icon [fillColor]='greyButtonColor' icon='menu-dot-vertical-filled'></lib-icon>
         </button>
 
@@ -69,4 +73,5 @@ export class UserListItemComponent {
 
   @Output()
   remove = new EventEmitter<string>();
+  protected readonly RoleEnum = RoleEnum;
 }

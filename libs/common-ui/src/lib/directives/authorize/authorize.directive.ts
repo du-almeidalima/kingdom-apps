@@ -1,6 +1,9 @@
 import { Directive, input, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
 import { AuthUserStateService } from '../../state/';
 
+/** Generic App Admin Role.*/
+export const APP_ADMIN_ROLE = "APP_ADMIN";
+
 @Directive({
   selector: '[lib-authorize]',
   standalone: true,
@@ -37,7 +40,7 @@ export class AuthorizeDirective implements OnInit {
 
     const containsRoles = directiveRoles.some(directiveRole => userRoles.includes(directiveRole));
 
-    if (containsRoles) {
+    if (containsRoles || userRoles.includes(APP_ADMIN_ROLE)) {
       this._createEmbeddedView();
       return;
     } else {

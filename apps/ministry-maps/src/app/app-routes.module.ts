@@ -4,6 +4,9 @@ import { redirectUnauthorizedTo } from '@angular/fire/auth-guard';
 
 import { authGuard } from './core/services/auth.guard';
 import { RoleEnum } from '../models/enums/role';
+import { USERS_ALLOWED_ROLES } from './features/users/users-routes.module';
+import { HOME_ALLOWED_ROLES } from './features/home/home-routes.module';
+import { TERRITORY_ALLOWED_ROLES } from './features/territory/territory-routes.module';
 
 export enum FeatureRoutesEnum {
   HOME = 'home',
@@ -24,13 +27,13 @@ const APP_ROUTES: Routes = [
     path: FeatureRoutesEnum.TERRITORIES,
     loadChildren: () => import('./features/territory/territory.module').then(m => m.TerritoryModule),
     canActivate: [authGuard],
-    data: { roles: [RoleEnum.ELDER, RoleEnum.ORGANIZER], authGuardPipe: redirectUnauthorizedToLogin },
+    data: { roles: TERRITORY_ALLOWED_ROLES, authGuardPipe: redirectUnauthorizedToLogin },
   },
   {
     path: FeatureRoutesEnum.HOME,
     loadChildren: () => import('./features/home/home.module').then(m => m.HomeModule),
     canActivate: [authGuard],
-    data: { roles: [RoleEnum.ELDER, RoleEnum.ORGANIZER], authGuardPipe: redirectUnauthorizedToLogin },
+    data: { roles: HOME_ALLOWED_ROLES, authGuardPipe: redirectUnauthorizedToLogin },
   },
   {
     path: FeatureRoutesEnum.PROFILE,
@@ -41,7 +44,7 @@ const APP_ROUTES: Routes = [
   {
     path: FeatureRoutesEnum.USERS,
     loadChildren: () => import('./features/users/users.module').then(m => m.UsersModule),
-    data: { roles: [RoleEnum.ELDER, RoleEnum.ORGANIZER], authGuardPipe: redirectUnauthorizedToLogin },
+    data: { roles: USERS_ALLOWED_ROLES, authGuardPipe: redirectUnauthorizedToLogin },
   },
   {
     path: '',

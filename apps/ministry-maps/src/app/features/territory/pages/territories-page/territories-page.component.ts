@@ -28,12 +28,13 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
   styleUrls: ['./territories-page.component.scss'],
 })
 export class TerritoriesPageComponent implements OnInit {
+  private territories$: Observable<Territory[]> = of([]);
+
   public readonly green200 = green200;
   public readonly white200 = white200;
   public readonly greyButtonColor = grey400;
   public readonly ALL_OPTION = 'ALL';
 
-  private territories$: Observable<Territory[]> = of([]);
   public cities: string[] = [];
   public selectedCity = this.ALL_OPTION;
   public isLoading = false;
