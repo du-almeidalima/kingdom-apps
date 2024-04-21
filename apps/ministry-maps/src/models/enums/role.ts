@@ -1,8 +1,6 @@
-import { APP_ADMIN_ROLE } from '@kingdom-apps/common-ui';
-
 export enum RoleEnum {
   /** Maximum level of access, granted to only maintainers of this application */
-  APP_ADMIN = APP_ADMIN_ROLE,
+  APP_ADMIN = 'APP_ADMIN',
   /** Congregation Admin (usually the SS) */
   ADMIN = 'ADMIN',
   PUBLISHER = 'PUBLISHER',

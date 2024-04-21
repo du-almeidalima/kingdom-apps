@@ -2,7 +2,7 @@ import { Directive, input, OnInit, TemplateRef, ViewContainerRef } from '@angula
 import { AuthUserStateService } from '../../state/';
 
 /** Generic App Admin Role.*/
-export const APP_ADMIN_ROLE = "APP_ADMIN";
+export const APP_ADMIN_ROLE = 'APP_ADMIN' as const;
 
 @Directive({
   selector: '[lib-authorize]',

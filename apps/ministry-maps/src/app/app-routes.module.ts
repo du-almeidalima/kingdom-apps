@@ -3,7 +3,6 @@ import { RouterModule, Routes } from '@angular/router';
 import { redirectUnauthorizedTo } from '@angular/fire/auth-guard';
 
 import { authGuard } from './core/services/auth.guard';
-import { RoleEnum } from '../models/enums/role';
 import { USERS_ALLOWED_ROLES } from './features/users/users-routes.module';
 import { HOME_ALLOWED_ROLES } from './features/home/home-routes.module';
 import { TERRITORY_ALLOWED_ROLES } from './features/territory/territory-routes.module';

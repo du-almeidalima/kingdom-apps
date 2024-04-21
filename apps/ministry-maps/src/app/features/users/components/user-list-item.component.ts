@@ -7,15 +7,15 @@ import { User } from '../../../../models/user';
 import { getUserInitials } from '../../../shared/utils/user-utils';
 import { getTranslatedRole, RoleEnum } from '../../../../models/enums/role';
 import {
-  AuthorizeDirective
-} from '../../../../../../../libs/common-ui/src/lib/directives/authorize/authorize.directive';
+  CommonDirectivesModule
+} from '@kingdom-apps/common-ui';
 
 @Component({
   selector: 'kingdom-apps-user-list-item',
   standalone: true,
   styleUrl: './user-list-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, CdkMenu, CdkMenuItem, CommonComponentsModule, IconComponent, CdkMenuTrigger, AuthorizeDirective],
+  imports: [CommonModule, CdkMenu, CdkMenuItem, CommonComponentsModule, IconComponent, CdkMenuTrigger, CommonDirectivesModule],
   template: `
     <div class='user-item'>
       <!-- INITIALS -->
@@ -61,6 +61,8 @@ import {
   `,
 })
 export class UserListItemComponent {
+  protected readonly RoleEnum = RoleEnum;
+
   protected readonly deleteButtonColor = red300;
   protected readonly greyButtonColor = grey400;
 
@@ -73,5 +75,4 @@ export class UserListItemComponent {
 
   @Output()
   remove = new EventEmitter<string>();
-  protected readonly RoleEnum = RoleEnum;
 }
