@@ -7,7 +7,7 @@ import {
   Firestore,
   getDoc,
   getDocFromCache,
-  getDocFromServer, query,
+  getDocFromServer, getDocs, getDocsFromServer, query,
   setDoc, where,
 } from '@angular/fire/firestore';
 import { catchError, forkJoin, from, map, Observable, of, switchMap, take } from 'rxjs';
@@ -146,16 +146,18 @@ export class FirebaseUserDatasourceService implements UserRepository {
 
     // This is a little nested. However, it's to avoid performing multiple calls to FireStore to resolve the congregation ref
     // Once the Users have been fetched, we resolve the congregationRef used as a query param only once and map to all users.
-    return from(collectionData(q))
+    return from(getDocs(q))
       .pipe(
         take(1),
-        switchMap(user => {
+        switchMap(users => {
           return this.resolveUserCongregationReference(congregationDocRef)
             .pipe(
               map(congregation => {
-                return user.map(u => {
-                  u.congregation = congregation;
-                  return u;
+                return users.docs.map(userSnapshot => {
+                  const user = userSnapshot.data();
+                  user.congregation = congregation;
+
+                  return user;
                 });
               }),
             );
