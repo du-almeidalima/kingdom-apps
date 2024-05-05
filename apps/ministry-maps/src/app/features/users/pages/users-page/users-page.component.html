@@ -2,9 +2,9 @@
   <h2 class="t-headline2 mb-8">Pessoas</h2>
   <ul class="list-none">
     @for (user of users; track user.id) {
-      <li class="[&:not(:first-child)]:mt-3">
-        <kingdom-apps-user-list-item [user]="user"/>
-      </li>
+    <li class="[&:not(:first-child)]:mt-3">
+      <kingdom-apps-user-list-item [user]="user" (remove)="handleDeleteUser($event)" (edit)="handleEditUser($event)"/>
+    </li>
     }
   </ul>
 </main>

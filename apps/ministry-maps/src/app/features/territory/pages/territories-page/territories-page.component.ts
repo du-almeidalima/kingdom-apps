@@ -76,7 +76,7 @@ export class TerritoriesPageComponent implements OnInit {
   }
 
   /**
-   * Handle updating the {@link Territory.positionIndex}. It swaps the indexes of both items
+   * Handle updating the {@link Territory#positionIndex}. It swaps the indexes of both items
    */
   handleTerritoryDrop(event: CdkDragDrop<object>, territories: Territory[]) {
     if (event.previousIndex === event.currentIndex) {

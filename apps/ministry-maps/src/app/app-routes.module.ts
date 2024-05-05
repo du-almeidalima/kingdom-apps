@@ -43,6 +43,7 @@ const APP_ROUTES: Routes = [
   {
     path: FeatureRoutesEnum.USERS,
     loadChildren: () => import('./features/users/users.module').then(m => m.UsersModule),
+    canActivate: [authGuard],
     data: { roles: USERS_ALLOWED_ROLES, authGuardPipe: redirectUnauthorizedToLogin },
   },
   {

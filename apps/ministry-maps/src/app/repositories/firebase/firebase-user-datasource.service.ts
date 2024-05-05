@@ -1,16 +1,20 @@
 import { Injectable } from '@angular/core';
 import {
-  collection, collectionData,
+  collection,
+  collectionData,
   CollectionReference,
+  deleteDoc,
   doc,
   DocumentReference,
   Firestore,
   getDoc,
   getDocFromCache,
-  getDocFromServer, getDocs, getDocsFromServer, query,
-  setDoc, where,
+  getDocFromServer,
+  query,
+  setDoc,
+  where,
 } from '@angular/fire/firestore';
-import { catchError, forkJoin, from, map, Observable, of, switchMap, take } from 'rxjs';
+import { catchError, forkJoin, from, map, Observable, of, switchMap } from 'rxjs';
 
 import { Congregation } from '../../../models/congregation';
 import { RoleEnum } from '../../../models/enums/role';
@@ -19,6 +23,7 @@ import { User } from '../../../models/user';
 import { UserRepository } from '../user.repository';
 import { congregationConverter, FirebaseCongregationModel } from '../../../models/firebase/firebase-congregation-model';
 import { FirebaseCongregationDatasourceService } from './firebase-congregation-datasource.service';
+import { Functions, httpsCallableData } from '@angular/fire/functions';
 
 @Injectable({
   providedIn: 'root',
@@ -27,8 +32,13 @@ export class FirebaseUserDatasourceService implements UserRepository {
   static readonly COLLECTION_NAME = 'users';
   private readonly userCollection: CollectionReference<User, FirebaseUserModel>;
   private readonly congregationCollection: CollectionReference<Congregation, FirebaseCongregationModel>;
+  private readonly deleteUserFn: (userId: string) => Observable<void>;
 
-  constructor(private readonly firestore: Firestore) {
+  constructor(
+    private readonly firestore: Firestore,
+    private readonly functions: Functions,
+
+  ) {
     // USERS COLLECTION
     this.userCollection = collection(
       this.firestore,
@@ -40,6 +50,9 @@ export class FirebaseUserDatasourceService implements UserRepository {
       this.firestore,
       FirebaseCongregationDatasourceService.COLLECTION_NAME,
     ).withConverter(congregationConverter) as CollectionReference<Congregation, FirebaseCongregationModel>;
+
+    // FUNCTIONS
+    this.deleteUserFn = httpsCallableData(this.functions, 'deleteUser');
   }
 
   getById(id: string): Observable<User | undefined> {
@@ -137,6 +150,17 @@ export class FirebaseUserDatasourceService implements UserRepository {
     return this.put(firebaseUser);
   }
 
+  delete(userId: string): Observable<void> {
+    const deletePromise = deleteDoc(doc(this.userCollection, userId));
+    try {
+      this.deleteUserFn(userId);
+    } catch (e) {
+      console.error(`Error calling deleteUserFn Cloud Function for ${userId}`);
+    }
+
+    return from(deletePromise);
+  }
+
   getAllByCongregation(congregationId: string): Observable<User[]> {
     const congregationDocRef = this.createCongregationDoc(congregationId);
     const q = query(
@@ -146,18 +170,15 @@ export class FirebaseUserDatasourceService implements UserRepository {
 
     // This is a little nested. However, it's to avoid performing multiple calls to FireStore to resolve the congregation ref
     // Once the Users have been fetched, we resolve the congregationRef used as a query param only once and map to all users.
-    return from(getDocs(q))
+    return from(collectionData(q))
       .pipe(
-        take(1),
         switchMap(users => {
           return this.resolveUserCongregationReference(congregationDocRef)
             .pipe(
               map(congregation => {
-                return users.docs.map(userSnapshot => {
-                  const user = userSnapshot.data();
-                  user.congregation = congregation;
-
-                  return user;
+                return users.map(u => {
+                  u.congregation = congregation;
+                  return u;
                 });
               }),
             );

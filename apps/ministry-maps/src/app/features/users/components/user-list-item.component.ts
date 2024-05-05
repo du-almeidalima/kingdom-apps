@@ -34,7 +34,7 @@ import {
         </div>
 
         <!-- VERTICAL MENU -->
-        <button lib-icon-button [cdkMenuTriggerFor]='menu' type='button' *lib-authorize="[RoleEnum.APP_ADMIN, RoleEnum.SUPERINTENDENT]">
+        <button lib-icon-button [cdkMenuTriggerFor]='menu' type='button' *lib-authorize="[RoleEnum.APP_ADMIN, RoleEnum.SUPERINTENDENT, RoleEnum.ADMIN]">
           <lib-icon [fillColor]='greyButtonColor' icon='menu-dot-vertical-filled'></lib-icon>
         </button>
 
