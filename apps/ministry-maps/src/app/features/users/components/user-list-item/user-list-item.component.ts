@@ -3,9 +3,9 @@ import { CommonModule } from '@angular/common';
 import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
 import { CommonComponentsModule, grey400, IconComponent, red300 } from '@kingdom-apps/common-ui';
 
-import { User } from '../../../../models/user';
-import { getUserInitials } from '../../../shared/utils/user-utils';
-import { getTranslatedRole, RoleEnum } from '../../../../models/enums/role';
+import { User } from '../../../../../models/user';
+import { getUserInitials } from '../../../../shared/utils/user-utils';
+import { getTranslatedRole, RoleEnum } from '../../../../../models/enums/role';
 import {
   CommonDirectivesModule
 } from '@kingdom-apps/common-ui';

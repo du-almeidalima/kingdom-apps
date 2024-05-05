@@ -7,6 +7,10 @@ import { RoleEnum } from '../../../../../models/enums/role';
 import { ConfirmDialogComponent, ConfirmDialogData } from '@kingdom-apps/common-ui';
 import { Dialog } from '@angular/cdk/dialog';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  UserEditDialogData,
+  UsersEditDialogComponent,
+} from '../../components/user-edit-dialog/users-edit-dialog.component';
 
 @Component({
   selector: 'kingdom-apps-users-page',
@@ -31,16 +35,16 @@ export class UsersPageComponent implements OnInit {
   isLoading = false;
   users: User[] = [];
 
-
   ngOnInit(): void {
     if (this.userState.currentUser?.congregation?.id) {
       this.isLoading = true;
-      this.userRepository.getAllByCongregation(this.userState.currentUser?.congregation?.id)
+      this.userRepository
+        .getAllByCongregation(this.userState.currentUser?.congregation?.id)
         .pipe(
           takeUntilDestroyed(this.destroyRef),
           finalize(() => {
             this.isLoading = false;
-          }),
+          })
         )
         .subscribe(users => {
           this.users = users.sort(this.sortUserFn.bind(this));
@@ -51,18 +55,23 @@ export class UsersPageComponent implements OnInit {
   handleDeleteUser(userId: string): void {
     this.dialog
       .open<ConfirmDialogComponent, ConfirmDialogData>(ConfirmDialogComponent, {
-        data: { title: 'Você realmente deseja excluir este usuário?', bodyText: 'Essa ação não poderá ser desfeita' },
+        data: {
+          title: 'Apagar Usuário',
+          bodyText: `
+          <p>Você realmente deseja apagar esse Usuário?</p>
+          <p class='mt-5'>Essa ação não poderá ser desfeita.</p>
+          `,
+        },
       })
       .closed.subscribe(res => {
-      if (res) {
-        this.userRepository.delete(userId);
-      }
-    });
-
+        if (res) {
+          this.userRepository.delete(userId);
+        }
+      });
   }
 
   handleEditUser(user: User) {
-    console.log(user);
+    this.dialog.open<null, UserEditDialogData>(UsersEditDialogComponent, { data: { user: user } });
   }
 
   private sortUserFn(a: User, b: User) {
