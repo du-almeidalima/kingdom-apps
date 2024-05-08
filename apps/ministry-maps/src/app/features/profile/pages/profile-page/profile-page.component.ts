@@ -14,6 +14,7 @@ import { AuthService } from '../../../../core/features/auth/services/auth.servic
 import { getTranslatedRole, RoleEnum } from '../../../../../models/enums/role';
 import { ChangeCongregationComponent } from '../../components/change-congregation.component';
 import { getUserInitials } from '../../../../shared/utils/user-utils';
+import { ProfileBO } from '../../bo/profile.bo';
 
 @Component({
   selector: 'kingdom-apps-profile',
@@ -28,6 +29,7 @@ export class ProfilePageComponent {
   private readonly dialog = inject(Dialog);
 
   protected readonly RoleEnum = RoleEnum;
+  protected readonly CHANGE_CONGREGATION_ALLOWED = ProfileBO.CHANGE_CONGREGATION_ALLOWED;
 
   user = toSignal(this.userStateService.$user);
   fullName = computed(() => this.user()?.name ?? 'Meu Nome');
