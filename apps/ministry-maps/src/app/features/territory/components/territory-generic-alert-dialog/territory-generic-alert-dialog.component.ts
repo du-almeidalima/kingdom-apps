@@ -26,7 +26,12 @@ export type TerritoryGenericAlertDialogData = {
           <blockquote class="quote-report__quote">
             {{ report.notes }}
           </blockquote>
-          <figcaption class="quote-report__caption text-gray-600 t-caption">{{ report.date | date }}</figcaption>
+          <figcaption class="quote-report__caption text-gray-600 t-caption">
+            @if (report.name) {
+              <span>{{ report.name | slice : 0 : 30 }}</span>,&nbsp;
+            }
+            {{ report.date | date }}
+          </figcaption>
         </figure>
       </div>
 

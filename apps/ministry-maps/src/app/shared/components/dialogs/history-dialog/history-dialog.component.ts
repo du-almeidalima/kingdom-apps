@@ -29,7 +29,12 @@ import { TerritoryVisitHistory } from '../../../../../models/territory-visit-his
             Revisita
           </span>
           }
-          <h3 class="t-caption font-light text-right ml-auto">{{ history.date | date }}</h3>
+          <h3 class="t-caption font-light text-right ml-auto">
+            @if (history.name) {
+              <span>{{ history.name | slice : 0 : 30 }}</span>,&nbsp;
+            }
+            {{ history.date | date }}
+          </h3>
         </div>
       </div>
       <lib-dialog-footer class="sticky bottom-0 left-0 right-0">
