@@ -180,7 +180,32 @@ export class TerritoriesPageComponent implements OnInit {
           },
         },
       })
-      .closed.subscribe((result) => {
+      .closed.subscribe(result => {
+        // Need to re-fetch manually because it seems Firebase doesn't update changes on an array property
+        if (result) {
+          this.getTerritories();
+        }
+      });
+  }
+
+  handleResolveStopVisitingAlert(territory: Territory) {
+    const stopVisitingHistories =
+      territory.recentHistory?.filter(h => {
+        return h.visitOutcome === VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN;
+      }) ?? [];
+
+    this.dialog
+      .open<boolean, TerritoryGenericAlertDialogData>(TerritoryGenericAlertDialogComponent, {
+        data: {
+          title: 'Parar de Visitar',
+          message: 'Um ou mais publicadores marcaram que esse território pediu para não ser visitado: ',
+          history: stopVisitingHistories,
+          markAsResolvedCallback: histories => {
+            return this.territoryAlertsBO.resolveTerritoryHistoryAlert(territory, histories, VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN);
+          },
+        },
+      })
+      .closed.subscribe(result => {
         // Need to re-fetch manually because it seems Firebase doesn't update changes on an array property
         if (result) {
           this.getTerritories();

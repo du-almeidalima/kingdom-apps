@@ -74,7 +74,7 @@ import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territor
             </span>
             <span
               class='territory-alert-badge territory-alert-badge--stop-visiting'
-              title='Essa pessoa não quer ser visitada por uma Testeminha de Jeová'
+              title='Essa pessoa disse que não quer ser visitada por uma Testemunha de Jeová'
               *ngIf='hasRecentlyAskedToStopVisiting'>
               Não quer visitas
             </span>

@@ -4,6 +4,7 @@ import { Territory } from '../../../../../models/territory';
 import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territory-icon-mapper';
 import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
 import { EDIT_ALLOWED } from '../../config/territory-roles.config';
+import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 
 @Component({
   selector: 'kingdom-apps-territory-list-item',
@@ -34,6 +35,12 @@ import { EDIT_ALLOWED } from '../../config/territory-roles.config';
           title='Essa pessoa foi marcada como revisita recentemente'
           *ngIf='hasRecentlyRevisit'>
               Revisita
+        </span>
+        <span
+          class='territory-alert-badge territory-alert-badge--stop-visiting'
+          title='Essa pessoa disse que não quer ser visitada por uma Testemunha de Jeová'
+          *ngIf='hasRecentlyAskedToStopVisiting'>
+              Não quer visitas
         </span>
       </div>
       <!-- RIGHT SIDE MENU -->
@@ -69,7 +76,7 @@ import { EDIT_ALLOWED } from '../../config/territory-roles.config';
                   *ngIf='hasRecentlyMoved'
               >
                 <button lib-icon-button type='button'>
-                  <lib-icon [fillColor]='greyButtonColor' icon='building-8'></lib-icon>
+                  <lib-icon [fillColor]='greyButtonColor' [icon]="VisitOutcomeEnum.MOVED | visitOutcomeToIcon"></lib-icon>
                 </button>
                 <span>Mudou</span>
               </li>
@@ -80,9 +87,20 @@ import { EDIT_ALLOWED } from '../../config/territory-roles.config';
                   *ngIf='hasRecentlyRevisit'
               >
                 <button lib-icon-button type='button'>
-                  <lib-icon [fillColor]='greyButtonColor' icon='speech-bubble-26'></lib-icon>
+                  <lib-icon [fillColor]='greyButtonColor' [icon]="VisitOutcomeEnum.REVISIT | visitOutcomeToIcon"></lib-icon>
                 </button>
                 <span>Revisita</span>
+              </li>
+              <!-- REVISIT ALERT -->
+              <li class='menu__item'
+                  cdkMenuItem
+                  (cdkMenuItemTriggered)='resolveStopVisiting.emit(territory)'
+                  *ngIf='hasRecentlyAskedToStopVisiting'
+              >
+                <button lib-icon-button type='button'>
+                  <lib-icon [fillColor]='greyButtonColor' [icon]="VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN | visitOutcomeToIcon"></lib-icon>
+                </button>
+                <span>Não Visitar</span>
               </li>
             </ng-container>
             <!-- SEPARATOR -->
@@ -103,6 +121,7 @@ import { EDIT_ALLOWED } from '../../config/territory-roles.config';
 })
 export class TerritoryListItemComponent implements OnInit {
   protected readonly EDIT_ALLOWED = EDIT_ALLOWED;
+  protected readonly VisitOutcomeEnum = VisitOutcomeEnum;
 
   public greyButtonColor = grey400;
   public deleteButtonColor = red300;
@@ -111,6 +130,7 @@ export class TerritoryListItemComponent implements OnInit {
   public icon: Icons = 'generation-3';
   public hasRecentlyMoved = false;
   public hasRecentlyRevisit = false;
+  public hasRecentlyAskedToStopVisiting = false;
   public hasAlerts = false;
 
   @Input()
@@ -131,13 +151,17 @@ export class TerritoryListItemComponent implements OnInit {
   @Output()
   resolveRevisit = new EventEmitter<Territory>();
 
+  @Output()
+  resolveStopVisiting = new EventEmitter<Territory>();
+
   ngOnInit(): void {
     this.icon = mapTerritoryIcon(this.territory.icon);
     this.isIconLarge = isIconLarge(this.icon);
 
     this.hasRecentlyMoved = TerritoryAlertsBO.hasRecentlyMoved(this.territory);
     this.hasRecentlyRevisit = TerritoryAlertsBO.hasRecentRevisit(this.territory);
+    this.hasRecentlyAskedToStopVisiting = TerritoryAlertsBO.hasRecentlyAskedToStopVisiting(this.territory);
 
-    this.hasAlerts = this.hasRecentlyMoved || this.hasRecentlyRevisit;
+    this.hasAlerts = this.hasRecentlyMoved || this.hasRecentlyRevisit || this.hasRecentlyAskedToStopVisiting;
   }
 }
