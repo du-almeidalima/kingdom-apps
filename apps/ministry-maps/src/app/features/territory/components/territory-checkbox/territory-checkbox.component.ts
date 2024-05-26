@@ -62,7 +62,7 @@ import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territor
             <!-- VISIT STATUS BADGE -->
             <span
               class='territory-alert-badge territory-alert-badge--revisit'
-              title='Essa pessoa foi revisitada recentemente'
+              title='Essa pessoa foi marcada como revisita recentemente'
               *ngIf='hasRecentRevisit'>
               Revisita
             </span>
@@ -99,6 +99,8 @@ import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territor
   `,
 })
 export class TerritoryCheckboxComponent implements ControlValueAccessor, OnInit {
+  protected readonly iconColor = grey400;
+
   buttonIconColor = primaryGreen;
   hasRecentRevisit = false;
   hasRecentlyMoved = false;
@@ -179,6 +181,4 @@ export class TerritoryCheckboxComponent implements ControlValueAccessor, OnInit 
       data: this.territory.recentHistory?.slice().reverse(),
     });
   }
-
-  protected readonly iconColor = grey400;
 }

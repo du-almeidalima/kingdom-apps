@@ -25,3 +25,4 @@ export type Icons =
   | 'gear-1'
   | 'log-out-7'
   | 'user-29'
+  | 'speech-bubble-26'

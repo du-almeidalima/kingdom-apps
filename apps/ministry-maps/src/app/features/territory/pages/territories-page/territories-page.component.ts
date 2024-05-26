@@ -21,6 +21,10 @@ import { TerritoryVisitHistory } from '../../../../../models/territory-visit-his
 import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import {
+  TerritoryGenericAlertDialogComponent,
+  TerritoryGenericAlertDialogData,
+} from '../../components/territory-generic-alert-dialog/territory-generic-alert-dialog.component';
 
 @Component({
   selector: 'kingdom-apps-territories-page',
@@ -51,21 +55,11 @@ export class TerritoriesPageComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const userCongregationId = this.userState.currentUser?.congregation?.id;
     this.cities = this.userState.currentUser?.congregation?.cities ?? [];
     // Select First City
     this.selectedCity = this.cities.length >= 0 ? this.cities[0] : this.ALL_OPTION;
 
-    this.isLoading = true;
-
-    this.territories$ = this.territoryRepository.getAllByCongregation(userCongregationId ?? '').pipe(
-      finalize(() => {
-        this.isLoading = false;
-      }),
-      shareReplay(1)
-    );
-
-    this.filteredTerritories$ = this.filterTerritoriesByCity(this.selectedCity);
+    this.getTerritories();
   }
 
   trackByRepositoryId(_: number, item: Territory) {
@@ -166,6 +160,31 @@ export class TerritoriesPageComponent implements OnInit {
             this.handleRemoveTerritory(territory.id);
             break;
         }
+
+        // Need to re-fetch manually because it seems Firebase doesn't update changes on an array property
+        this.getTerritories();
+      });
+  }
+
+  handleResolveRevisitAlert(territory: Territory) {
+    const revisitTerritoryHistory = territory.recentHistory?.filter(h => h.isRevisit) ?? [];
+
+    this.dialog
+      .open<boolean, TerritoryGenericAlertDialogData>(TerritoryGenericAlertDialogComponent, {
+        data: {
+          title: 'Revisita',
+          message: 'Um ou mais publicadores marcaram que esse território está sendo revisitado: ',
+          history: revisitTerritoryHistory,
+          markAsResolvedCallback: histories => {
+            return this.territoryAlertsBO.resolveTerritoryHistoryAlert(territory, histories, VisitOutcomeEnum.REVISIT);
+          },
+        },
+      })
+      .closed.subscribe((result) => {
+        // Need to re-fetch manually because it seems Firebase doesn't update changes on an array property
+        if (result) {
+          this.getTerritories();
+        }
       });
   }
 
@@ -180,6 +199,21 @@ export class TerritoriesPageComponent implements OnInit {
         data: data.reverse() ?? [],
       });
     });
+  }
+
+  /** Get territories from the repository and create the filtered observable array */
+  private getTerritories() {
+    const userCongregationId = this.userState.currentUser?.congregation?.id;
+    this.isLoading = true;
+
+    this.territories$ = this.territoryRepository.getAllByCongregation(userCongregationId ?? '').pipe(
+      finalize(() => {
+        this.isLoading = false;
+      }),
+      shareReplay(1)
+    );
+
+    this.filteredTerritories$ = this.filterTerritoriesByCity(this.selectedCity);
   }
 
   private filterTerritoriesByCity(city: string) {

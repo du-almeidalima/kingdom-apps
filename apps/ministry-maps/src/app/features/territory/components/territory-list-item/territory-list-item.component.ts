@@ -29,6 +29,12 @@ import { EDIT_ALLOWED } from '../../config/territory-roles.config';
           *ngIf='hasRecentlyMoved'>
               Mudou
         </span>
+        <span
+          class='territory-alert-badge territory-alert-badge--revisit'
+          title='Essa pessoa foi marcada como revisita recentemente'
+          *ngIf='hasRecentlyRevisit'>
+              Revisita
+        </span>
       </div>
       <!-- RIGHT SIDE MENU -->
       <div class='territory-list-item__menu-button'>
@@ -54,8 +60,9 @@ import { EDIT_ALLOWED } from '../../config/territory-roles.config';
             <!-- ALERTS -->
             <ng-container *lib-authorize="EDIT_ALLOWED">
               <!-- SEPARATOR -->
-              <hr class='menu__separator' *ngIf='hasRecentlyMoved'>
+              <hr class='menu__separator' *ngIf='hasAlerts'>
 
+              <!-- MOVED ALERT -->
               <li class='menu__item'
                   cdkMenuItem
                   (cdkMenuItemTriggered)='resolveMove.emit(territory)'
@@ -65,6 +72,17 @@ import { EDIT_ALLOWED } from '../../config/territory-roles.config';
                   <lib-icon [fillColor]='greyButtonColor' icon='building-8'></lib-icon>
                 </button>
                 <span>Mudou</span>
+              </li>
+              <!-- REVISIT ALERT -->
+              <li class='menu__item'
+                  cdkMenuItem
+                  (cdkMenuItemTriggered)='resolveRevisit.emit(territory)'
+                  *ngIf='hasRecentlyRevisit'
+              >
+                <button lib-icon-button type='button'>
+                  <lib-icon [fillColor]='greyButtonColor' icon='speech-bubble-26'></lib-icon>
+                </button>
+                <span>Revisita</span>
               </li>
             </ng-container>
             <!-- SEPARATOR -->
@@ -92,6 +110,8 @@ export class TerritoryListItemComponent implements OnInit {
   public isIconLarge = false;
   public icon: Icons = 'generation-3';
   public hasRecentlyMoved = false;
+  public hasRecentlyRevisit = false;
+  public hasAlerts = false;
 
   @Input()
   territory!: Territory;
@@ -108,10 +128,16 @@ export class TerritoryListItemComponent implements OnInit {
   @Output()
   resolveMove = new EventEmitter<Territory>();
 
+  @Output()
+  resolveRevisit = new EventEmitter<Territory>();
+
   ngOnInit(): void {
     this.icon = mapTerritoryIcon(this.territory.icon);
     this.isIconLarge = isIconLarge(this.icon);
 
     this.hasRecentlyMoved = TerritoryAlertsBO.hasRecentlyMoved(this.territory);
+    this.hasRecentlyRevisit = TerritoryAlertsBO.hasRecentRevisit(this.territory);
+
+    this.hasAlerts = this.hasRecentlyMoved || this.hasRecentlyRevisit;
   }
 }

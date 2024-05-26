@@ -26,6 +26,7 @@
       (history)='handleOpenHistory($event)'
       (remove)='handleRemoveTerritory($event)'
       (resolveMove)='handleResolveMoveAlert($event)'
+      (resolveRevisit)="handleResolveRevisitAlert($event)"
     >
       <button lib-icon-button type='button' cdkDragHandle style='cursor: grab' *ngIf='selectedCity !== ALL_OPTION'>
         <lib-icon icon='cursor-23' [fillColor]='greyButtonColor'/>

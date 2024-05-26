@@ -20,7 +20,6 @@ export enum MoveResolutionActionsEnum {
 
 @Component({
   selector: 'kingdom-apps-territory-move-alert-dialog',
-  styleUrls: ['./territory-move-alert-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <lib-dialog title="Morador Mudou">

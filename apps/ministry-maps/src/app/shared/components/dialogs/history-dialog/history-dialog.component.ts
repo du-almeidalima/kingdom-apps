@@ -18,10 +18,19 @@ import { TerritoryVisitHistory } from '../../../../../models/territory-visit-his
             [icon]="history.visitOutcome | visitOutcomeToIcon"
             [fillColor]="iconColor"></lib-icon>
           <p class="work-item-history__note">
-            {{ history.notes ? history.notes :  'Sem observações'  }}
+            {{ history.notes ? history.notes : 'Sem observações' }}
           </p>
         </div>
-        <h3 class="t-caption font-light text-right">{{ history.date | date }}</h3>
+        <div class="work-item-history__footer">
+          @if (history.isRevisit) {
+            <span
+              class="territory-alert-badge territory-alert-badge--revisit"
+              title="Essa pessoa foi marcada como revisita recentemente">
+            Revisita
+          </span>
+          }
+          <h3 class="t-caption font-light text-right ml-auto">{{ history.date | date }}</h3>
+        </div>
       </div>
       <lib-dialog-footer class="sticky bottom-0 left-0 right-0">
         <div class="flex justify-end gap-4">

@@ -12,6 +12,7 @@ export class VisitOutcomeToIconPipe implements PipeTransform {
   transform(value: VisitOutcomeEnum): Icons {
     switch (value) {
       case VisitOutcomeEnum.SPOKE:
+      case VisitOutcomeEnum.REVISIT:
         return 'thumb-10';
       case VisitOutcomeEnum.NOT_ANSWERED:
         return 'thumb-12';
