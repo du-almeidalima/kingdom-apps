@@ -26,4 +26,10 @@
       background-color: darken(variables.$blue-btn, 10%);
     }
   }
+
+  &:disabled {
+    border-color: variables.$grey-100;
+    background-color: variables.$light-grey-100;
+    color: variables.$text-low;
+  }
 }

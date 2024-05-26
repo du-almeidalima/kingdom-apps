@@ -1,0 +1,8 @@
+@use '../abstract/variables';
+@use '../base/typography';
+
+// This class is used in all form controls components as a base styling
+.form-control-error {
+  color: variables.$text-error;
+  @extend .t-caption;
+}
