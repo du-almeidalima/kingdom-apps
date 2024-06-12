@@ -19,6 +19,8 @@ export class VisitOutcomeToIconPipe implements PipeTransform {
         return 'building-8';
       case VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN:
         return 'stop-2';
+      case VisitOutcomeEnum.REVISIT:
+        return 'speech-bubble-26'
     }
   }
 }

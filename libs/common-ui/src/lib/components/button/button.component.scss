@@ -19,11 +19,17 @@
 
   &.button--primary {
     color: variables.$white-100;
-    background-color: variables.$blue-100;
-    border-color: darken(variables.$blue-100, 20%);
+    background-color: variables.$blue-btn;
+    border-color: darken(variables.$blue-btn, 20%);
 
     &:hover {
-      background-color: darken(variables.$blue-100, 10%);
+      background-color: darken(variables.$blue-btn, 10%);
     }
+  }
+
+  &:disabled {
+    border-color: variables.$grey-100;
+    background-color: variables.$light-grey-100;
+    color: variables.$text-low;
   }
 }

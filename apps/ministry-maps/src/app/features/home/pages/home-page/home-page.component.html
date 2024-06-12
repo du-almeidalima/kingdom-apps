@@ -1,10 +1,11 @@
 <div class='container'>
   <h2 class='t-headline2 mb-8'>Bem-Vindo {{ userName }}!</h2>
+  <!-- Territories -->
   <lib-card [customStyle]='{ padding: 0 }'>
     <lib-card-header
       icon='task-list-lined'
       title='Designar Territórios'
-      subtitle='Crie listas com territórios e compartilhe para os publicadores'></lib-card-header>
+      subtitle='Crie listas com territórios e compartilhe com os publicadores'></lib-card-header>
     <lib-card-body>
       <ul class='card-body__link-list'>
         <li class='card-body__link-list-item'>
@@ -17,6 +18,25 @@
         <li class='card-body__link-list-item'>
           <a class='card-body__link' routerLink='/{{ FeatureRoutes.TERRITORIES }}/{{ TerritoryRoutes.LIST }}'>
             Administrar Territórios
+          </a>
+        </li>
+      </ul>
+    </lib-card-body>
+  </lib-card>
+  <!-- Users -->
+  <lib-card class="mt-5" [customStyle]='{ padding: 0 }'>
+    <lib-card-header
+      icon='user-29'
+      title='Pessoas'
+      subtitle='Administrar pessoas associadas a sua congregação'>
+    </lib-card-header>
+    <lib-card-body>
+      <ul class='card-body__link-list'>
+        <li class='card-body__link-list-item'>
+          <a
+            class='card-body__link'
+            routerLink='/{{ FeatureRoutes.USERS }}/{{ UsersRoutesEnum.INDEX }}'>
+            Administrar Pessoas
           </a>
         </li>
       </ul>

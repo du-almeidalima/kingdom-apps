@@ -29,7 +29,7 @@ export const authGuard: CanActivateFn = route => {
       return router.createUrlTree(['home']);
     }
 
-    return currentUser?.role === RoleEnum.ADMIN || roles.includes(currentUser?.role);
+    return currentUser?.role === RoleEnum.APP_ADMIN || roles.includes(currentUser?.role);
   }
 
   return firebaseAuthDatasourceService.getUserFromAuthentication().pipe(
@@ -43,7 +43,7 @@ export const authGuard: CanActivateFn = route => {
         return router.createUrlTree(['welcome']);
       }
 
-      return user?.role === RoleEnum.ADMIN || roles.includes(user?.role);
+      return user?.role === RoleEnum.APP_ADMIN || roles.includes(user?.role);
     })
   );
 };

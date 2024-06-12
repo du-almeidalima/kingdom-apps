@@ -104,11 +104,16 @@ export class TerritoryAlertsBO {
     visitOutcome: VisitOutcomeEnum
   ): Observable<void> {
     const copiedTerritory = structuredClone(territory);
+    // Update all entries for the given outcome
     const updatedHistories = histories.map(history => {
       const historyClone: TerritoryVisitHistory = structuredClone(history);
 
       if (history.visitOutcome === visitOutcome) {
         historyClone.isResolved = true;
+      }
+
+      if (visitOutcome === VisitOutcomeEnum.REVISIT && history.isRevisit) {
+        historyClone.isRevisit = false;
       }
 
       return historyClone;

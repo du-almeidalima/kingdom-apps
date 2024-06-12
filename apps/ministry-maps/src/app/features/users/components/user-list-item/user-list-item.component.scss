@@ -1,0 +1,67 @@
+@use '../../../../../../../../libs/common-ui/src/lib/styles/abstract/variables';
+@use '../../../../../../../../libs/common-ui/src/lib/styles/base/typography';
+
+:host {
+  display: block;
+}
+
+.user-item {
+  // user-list-item.component.scss
+  --figure-size: 3.25rem;
+  --figure-font-size: 1.75rem;
+
+  display: flex;
+  flex-flow: row;
+  gap: 1rem;
+
+  border-radius: 3px;
+  padding: 1rem;
+
+  background-color: variables.$white-100;
+  border: 1px solid variables.$light-grey-100;
+
+  &__content {
+    flex: 1;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+  }
+
+  &__title-content {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  &__privilege-badge {
+    place-self: self-start;
+    display: flex;
+    align-items: center;
+    padding: .3em .5em;
+    border-radius: .4rem;
+    background-color: variables.$grey-100;
+    font-weight: bold;
+    letter-spacing: .1rem;
+    @extend .t-white;
+
+    &--admin, &--app_admin {
+      color: variables.$text;
+      background-color: variables.$white-100;
+      border: 1px solid variables.$light-grey-100;
+    }
+
+    &--elder {
+      background-color: variables.$green-200;
+    }
+
+    &--organizer {
+      background-color: variables.$blue-200;
+    }
+
+    &--superintendent {
+      color: variables.$text;
+      background-color: variables.$orange-200;
+    }
+  }
+}

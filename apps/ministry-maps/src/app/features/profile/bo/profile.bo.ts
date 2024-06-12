@@ -7,6 +7,8 @@ import { UserStateService } from '../../../state/user.state.service';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileBO {
+  public static readonly CHANGE_CONGREGATION_ALLOWED = [RoleEnum.APP_ADMIN, RoleEnum.SUPERINTENDENT];
+
   private userRepository = inject(UserRepository);
   private userState = inject(UserStateService);
 
@@ -19,7 +21,7 @@ export class ProfileBO {
             return of(null);
           }
 
-          if (user.role !== RoleEnum.ADMIN) {
+          if (!ProfileBO.CHANGE_CONGREGATION_ALLOWED.includes(user.role)) {
             throw Error('Changing congregations is not authorized by Non-Admin users.');
           }
 
