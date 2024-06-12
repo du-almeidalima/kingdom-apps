@@ -5,6 +5,7 @@ export type TerritoryVisitHistory = {
   notes: string;
   isRevisit: boolean;
   isResolved?: boolean;
+  name?: string;
   date: Date;
   visitOutcome: VisitOutcomeEnum;
 };

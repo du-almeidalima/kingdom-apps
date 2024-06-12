@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FeatureRoutesEnum } from '../../../../app-routes.module';
 import { TerritoryRoutesEnum } from '../../../territory/territory-routes.module';
 import { UserStateService } from '../../../../state/user.state.service';
+import { UsersRoutesEnum } from '../../../users/users-routes.module';
 
 @Component({
   selector: 'kingdom-apps-home-page',
@@ -20,4 +21,6 @@ export class HomePageComponent {
 
     return userNames ? userNames[0] : this.userState.currentUser?.name ?? '';
   }
+
+  protected readonly UsersRoutesEnum = UsersRoutesEnum;
 }

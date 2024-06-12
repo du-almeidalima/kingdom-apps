@@ -1,13 +1,15 @@
 import { APP_INITIALIZER, Injector, isDevMode, NgModule } from '@angular/core';
 import { createCustomElement } from '@angular/elements';
 import { ScreenTrackingService, UserTrackingService } from '@angular/fire/analytics';
-import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { connectAuthEmulator, getAuth, provideAuth } from '@angular/fire/auth';
+import { connectFunctionsEmulator, getFunctions, provideFunctions } from '@angular/fire/functions';
 import {
   connectFirestoreEmulator,
-  enableIndexedDbPersistence,
-  getFirestore,
-  provideFirestore
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+  provideFirestore,
 } from '@angular/fire/firestore';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterOutlet } from '@angular/router';
@@ -30,8 +32,8 @@ import { SharedModule } from './shared/shared.module';
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => {
       const auth = getAuth();
-      // This allows to run Angular in HMR
-      // @ts-ignore
+      // This allows running Angular in HMR
+      // @ts-expect-error this property is not exposed, but need to avoid problems when running Angular in HMR
       if (auth['_isInitialized']) {
         return auth;
       }
@@ -41,10 +43,16 @@ import { SharedModule } from './shared/shared.module';
       return auth;
     }),
     provideFirestore(() => {
-      const firestore = getFirestore();
+      const firestore = initializeFirestore(getApp(), {
+        localCache: persistentLocalCache({
+          tabManager: persistentMultipleTabManager(),
+        }),
+      });
+
+      // const firestore = getFirestore();
       if (environment.env === 'development' && !environment.useCloud) {
-        // This allows to run Angular in HMR
-        // @ts-ignore
+        // This allows running Angular in HMR
+        // @ts-expect-error this property is not exposed, but need to avoid problems when running Angular in HMR
         if (firestore['_initialized']) {
           return firestore;
         }
@@ -52,17 +60,26 @@ import { SharedModule } from './shared/shared.module';
         connectFirestoreEmulator(firestore, 'localhost', 8080);
       }
 
-      // TODO: Upgrade this
-      enableIndexedDbPersistence(firestore)
-        .then(() => {
-          console.log('Persistence enabled');
-        })
-        .catch(err => {
-          console.log('Persistence failed', err);
-        });
+      // TODO: Remove this after validating everything is working ok with the new way of using persistentLocalCache
+      // enableIndexedDbPersistence(firestore)
+      //   .then(() => {
+      //     console.log('Persistence enabled');
+      //   })
+      //   .catch(err => {
+      //     console.log('Persistence failed', err);
+      //   });
+
       return firestore;
     }),
-    // provideFunctions(() => getFunctions()),
+    provideFunctions(() => {
+      const functions = getFunctions();
+
+      if (environment.env === 'development' && !environment.useCloud) {
+        connectFunctionsEmulator(functions, 'localhost', 5001);
+      }
+
+      return functions;
+    }),
     // providePerformance(() => getPerformance()),
     // provideRemoteConfig(() => getRemoteConfig()),
     AppRoutesModule,

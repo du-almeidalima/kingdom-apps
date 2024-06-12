@@ -6,30 +6,36 @@ import {
   ConfirmDialogComponent,
   ConfirmDialogData,
 } from '@kingdom-apps/common-ui';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Dialog } from '@angular/cdk/dialog';
+
 import { UserStateService } from '../../../../state/user.state.service';
 import { AuthService } from '../../../../core/features/auth/services/auth.service';
-import { Dialog } from '@angular/cdk/dialog';
-import { RoleEnum } from '../../../../../models/enums/role';
+import { getTranslatedRole, RoleEnum } from '../../../../../models/enums/role';
 import { ChangeCongregationComponent } from '../../components/change-congregation.component';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { getUserInitials } from '../../../../shared/utils/user-utils';
+import { ProfileBO } from '../../bo/profile.bo';
 
 @Component({
   selector: 'kingdom-apps-profile',
-  templateUrl: './profile.component.html',
-  styleUrl: './profile.component.scss',
+  templateUrl: './profile-page.component.html',
+  styleUrl: './profile-page.component.scss',
   standalone: true,
   imports: [CommonModule, CommonComponentsModule, ChangeCongregationComponent, CommonDirectivesModule],
 })
-export class ProfileComponent {
+export class ProfilePageComponent {
   private readonly userStateService = inject(UserStateService);
   private readonly authService = inject(AuthService);
   private readonly dialog = inject(Dialog);
 
+  protected readonly RoleEnum = RoleEnum;
+  protected readonly CHANGE_CONGREGATION_ALLOWED = ProfileBO.CHANGE_CONGREGATION_ALLOWED;
+
   user = toSignal(this.userStateService.$user);
   fullName = computed(() => this.user()?.name ?? 'Meu Nome');
   congregation = computed(() => this.user()?.congregation?.name ?? 'LS Congregação');
-  initials = computed(() => this.getInitials(this.fullName()));
-  role = computed(() => this.getRole(this.user()?.role ?? RoleEnum.PUBLISHER));
+  initials = computed(() => getUserInitials(this.fullName()));
+  role = computed(() => getTranslatedRole(this.user()?.role ?? RoleEnum.PUBLISHER));
 
   handleLogOut() {
     this.dialog
@@ -41,26 +47,5 @@ export class ProfileComponent {
           this.authService.logOut();
         }
       });
-  }
-
-  private getInitials(name: string | undefined) {
-    if (!name) return 'XX';
-
-    const splitWords = name.split(' ');
-    return splitWords.length > 1 ? splitWords[0][0] + splitWords[1][0] : splitWords[0].substring(0, 2);
-  }
-
-  private getRole(role: RoleEnum) {
-    switch (role) {
-      case RoleEnum.ORGANIZER:
-        return 'Organizador';
-      case RoleEnum.ADMIN:
-        return 'Admin';
-      case RoleEnum.ELDER:
-        return 'Ancião';
-      case RoleEnum.PUBLISHER:
-      default:
-        return 'Publicador';
-    }
   }
 }

@@ -1,0 +1,22 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+
+.user-initials-figure {
+  $size: 4rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+
+  width: var(--figure-size, $size);
+  height: var(--figure-size, $size);
+  padding: calc(var(--figure-size) - 1rem);
+  border-radius: 100%;
+  background-color: darken(variables.$green-100, 10%);
+
+  font-size: var(--figure-font-size, 2.5rem);
+  font-weight: bold;
+  letter-spacing: var(--figure-letter-spacing, 0.2rem);
+  text-transform: uppercase;
+  color: white;
+}

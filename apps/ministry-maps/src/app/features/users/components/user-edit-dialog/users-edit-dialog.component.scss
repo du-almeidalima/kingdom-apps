@@ -1,0 +1,38 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+@use 'libs/common-ui/src/lib/styles/base/typography';
+
+:host {
+  display: block;
+  width: clamp(25rem, 35rem, 80vw);
+}
+
+:host ::ng-deep .icon-radio--active {
+  .option {
+    &__title {
+      color: currentColor;
+    }
+
+    &__description {
+      color: currentColor !important;
+    }
+  }
+}
+
+.option {
+  display: flex;
+  gap: .25rem;
+  flex-flow: column nowrap;
+
+  &__title {
+    @extend .t-body1;
+    color: variables.$text;
+  }
+
+  &__description {
+    @extend .t-caption;
+    color: variables.$text-medium;
+  }
+}
+
+
+

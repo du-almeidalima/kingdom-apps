@@ -2,7 +2,7 @@
   <!-- USER INFORMATION -->
   <lib-card [customStyle]="{ padding: '1.4rem' }">
     <div class='user-card'>
-      <figure class='user-card__initials-figure'>
+      <figure class='user-initials-figure'>
         <figcaption>{{initials()}}</figcaption>
       </figure>
       <div class='user-card__content'>
@@ -20,7 +20,7 @@
     <h3 class='t-secondary t-body1'>Exportar</h3>
   </lib-card>
   <!-- NOTES BACKUP & EXPORT -->
-  <kingdom-apps-change-congregation *lib-authorize="'ADMIN'"/>
+  <kingdom-apps-change-congregation *lib-authorize="CHANGE_CONGREGATION_ALLOWED"/>
   <!-- LOGOUT -->
   <button lib-button class='logout-button mt-auto mb-5' (click)='handleLogOut()'>
     <lib-icon icon='log-out-7' class='h-6 w-6' [fillColor]="'currentColor'"></lib-icon>

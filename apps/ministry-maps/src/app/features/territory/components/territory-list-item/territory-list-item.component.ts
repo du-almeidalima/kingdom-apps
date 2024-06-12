@@ -3,6 +3,8 @@ import { grey400, Icons, red300 } from '@kingdom-apps/common-ui';
 import { Territory } from '../../../../../models/territory';
 import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territory-icon-mapper';
 import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
+import { EDIT_ALLOWED } from '../../config/territory-roles.config';
+import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 
 @Component({
   selector: 'kingdom-apps-territory-list-item',
@@ -28,6 +30,18 @@ import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
           *ngIf='hasRecentlyMoved'>
               Mudou
         </span>
+        <span
+          class='territory-alert-badge territory-alert-badge--revisit'
+          title='Essa pessoa foi marcada como revisita recentemente'
+          *ngIf='hasRecentlyRevisit'>
+              Revisita
+        </span>
+        <span
+          class='territory-alert-badge territory-alert-badge--stop-visiting'
+          title='Essa pessoa disse que não quer ser visitada por uma Testemunha de Jeová'
+          *ngIf='hasRecentlyAskedToStopVisiting'>
+              Não quer visitas
+        </span>
       </div>
       <!-- RIGHT SIDE MENU -->
       <div class='territory-list-item__menu-button'>
@@ -38,7 +52,7 @@ import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
 
         <ng-template #menu>
           <menu class='menu' cdkMenu>
-            <li class='menu__item' cdkMenuItem (cdkMenuItemTriggered)='edit.emit(territory)'>
+            <li class='menu__item' cdkMenuItem (cdkMenuItemTriggered)='edit.emit(territory)' *lib-authorize="EDIT_ALLOWED">
               <button lib-icon-button type='button'>
                 <lib-icon [fillColor]='greyButtonColor' icon='pencil-lined'></lib-icon>
               </button>
@@ -50,22 +64,48 @@ import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
               </button>
               <span>Histórico</span>
             </li>
-            <!-- SEPARATOR -->
-            <hr class='menu__separator' *ngIf='hasRecentlyMoved'>
             <!-- ALERTS -->
-            <li class='menu__item'
-                cdkMenuItem
-                (cdkMenuItemTriggered)='resolveMove.emit(territory)'
-                *ngIf='hasRecentlyMoved'
-            >
-              <button lib-icon-button type='button'>
-                <lib-icon [fillColor]='greyButtonColor' icon='building-8'></lib-icon>
-              </button>
-              <span>Mudou</span>
-            </li>
+            <ng-container *lib-authorize="EDIT_ALLOWED">
+              <!-- SEPARATOR -->
+              <hr class='menu__separator' *ngIf='hasAlerts'>
+
+              <!-- MOVED ALERT -->
+              <li class='menu__item'
+                  cdkMenuItem
+                  (cdkMenuItemTriggered)='resolveMove.emit(territory)'
+                  *ngIf='hasRecentlyMoved'
+              >
+                <button lib-icon-button type='button'>
+                  <lib-icon [fillColor]='greyButtonColor' [icon]="VisitOutcomeEnum.MOVED | visitOutcomeToIcon"></lib-icon>
+                </button>
+                <span>Mudou</span>
+              </li>
+              <!-- REVISIT ALERT -->
+              <li class='menu__item'
+                  cdkMenuItem
+                  (cdkMenuItemTriggered)='resolveRevisit.emit(territory)'
+                  *ngIf='hasRecentlyRevisit'
+              >
+                <button lib-icon-button type='button'>
+                  <lib-icon [fillColor]='greyButtonColor' [icon]="VisitOutcomeEnum.REVISIT | visitOutcomeToIcon"></lib-icon>
+                </button>
+                <span>Revisita</span>
+              </li>
+              <!-- REVISIT ALERT -->
+              <li class='menu__item'
+                  cdkMenuItem
+                  (cdkMenuItemTriggered)='resolveStopVisiting.emit(territory)'
+                  *ngIf='hasRecentlyAskedToStopVisiting'
+              >
+                <button lib-icon-button type='button'>
+                  <lib-icon [fillColor]='greyButtonColor' [icon]="VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN | visitOutcomeToIcon"></lib-icon>
+                </button>
+                <span>Não Visitar</span>
+              </li>
+            </ng-container>
             <!-- SEPARATOR -->
-            <hr class='menu__separator'>
-            <li class='menu__item' cdkMenuItem (cdkMenuItemTriggered)='remove.emit(territory.id)'>
+            <hr class='menu__separator' *lib-authorize="EDIT_ALLOWED">
+            <li class='menu__item' cdkMenuItem (cdkMenuItemTriggered)='remove.emit(territory.id)' *lib-authorize="EDIT_ALLOWED">
               <button lib-icon-button cdkMenuItem type='button'>
                 <lib-icon [fillColor]='deleteButtonColor' icon='trash-can-lined'></lib-icon>
               </button>
@@ -80,12 +120,18 @@ import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
   `,
 })
 export class TerritoryListItemComponent implements OnInit {
+  protected readonly EDIT_ALLOWED = EDIT_ALLOWED;
+  protected readonly VisitOutcomeEnum = VisitOutcomeEnum;
+
   public greyButtonColor = grey400;
   public deleteButtonColor = red300;
   public iconColor = grey400;
   public isIconLarge = false;
   public icon: Icons = 'generation-3';
   public hasRecentlyMoved = false;
+  public hasRecentlyRevisit = false;
+  public hasRecentlyAskedToStopVisiting = false;
+  public hasAlerts = false;
 
   @Input()
   territory!: Territory;
@@ -102,10 +148,20 @@ export class TerritoryListItemComponent implements OnInit {
   @Output()
   resolveMove = new EventEmitter<Territory>();
 
+  @Output()
+  resolveRevisit = new EventEmitter<Territory>();
+
+  @Output()
+  resolveStopVisiting = new EventEmitter<Territory>();
+
   ngOnInit(): void {
     this.icon = mapTerritoryIcon(this.territory.icon);
     this.isIconLarge = isIconLarge(this.icon);
 
     this.hasRecentlyMoved = TerritoryAlertsBO.hasRecentlyMoved(this.territory);
+    this.hasRecentlyRevisit = TerritoryAlertsBO.hasRecentRevisit(this.territory);
+    this.hasRecentlyAskedToStopVisiting = TerritoryAlertsBO.hasRecentlyAskedToStopVisiting(this.territory);
+
+    this.hasAlerts = this.hasRecentlyMoved || this.hasRecentlyRevisit || this.hasRecentlyAskedToStopVisiting;
   }
 }
