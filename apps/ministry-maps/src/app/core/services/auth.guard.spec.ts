@@ -4,7 +4,7 @@ import { authGuard } from './auth.guard';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/router';
 import { MockProvider, ngMocks } from 'ng-mocks';
 import { FirebaseAuthDatasourceService } from '../features/auth/repositories/firebase/firebase-auth-datasource.service';
-import { FeatureRoutesEnum } from '../../app-routes.module';
+import { APP_ROUTES, FeatureRoutesEnum } from '../../app-routes.module';
 import { UserStateService } from '../../state/user.state.service';
 import { organizerUserStateServiceMock, userMockBuilder } from '../../../test/mocks';
 import { RoleEnum } from '../../../models/enums/role';
@@ -135,54 +135,66 @@ describe('AuthGuard', () => {
     expect(true).toBe(false);
   });
 
-  it('should return true to Admin/Organizers/Elders after authentication', done => {
-    const route: ActivatedRouteSnapshot = {
-      data: { roles: 'ORGANIZER' },
-      routeConfig: {
-        path: '',
-      },
-    } as never;
-    const state: RouterStateSnapshot = { url: `` } as never;
-    const userStateService = ngMocks.get(UserStateService);
-    const firebaseAuthDatasourceService = ngMocks.get(FirebaseAuthDatasourceService);
+  describe('should return true after authentication', () => {
+    it.each([RoleEnum.ELDER, RoleEnum.ADMIN, RoleEnum.ORGANIZER, RoleEnum.SUPERINTENDENT, RoleEnum.APP_ADMIN])(
+      'for %s',
+      (role, done) => {
+        const route: ActivatedRouteSnapshot = {
+          data: { roles: [role] },
+          routeConfig: {
+            path: '',
+          },
+        } as never;
+        const state: RouterStateSnapshot = { url: `` } as never;
+        const userStateService = ngMocks.get(UserStateService);
+        const firebaseAuthDatasourceService = ngMocks.get(FirebaseAuthDatasourceService);
 
-    // Stub user unauthenticated
-    userStateService.setUser(null);
-    firebaseAuthDatasourceService.getUserFromAuthentication = jest
-      .fn()
-      .mockReturnValue(of(userMockBuilder({ role: RoleEnum.ADMIN })));
+        // Stub user unauthenticated
+        userStateService.setUser(null);
+        firebaseAuthDatasourceService.getUserFromAuthentication = jest
+          .fn()
+          .mockReturnValue(of(userMockBuilder({ role: role })));
 
-    const result = TestBed.runInInjectionContext(() => authGuard(route, state));
-    if (result instanceof Observable) {
-      result.subscribe(value => {
-        expect(value).toBe(true);
+        const result = TestBed.runInInjectionContext(() => authGuard(route, state));
+        if (result instanceof Observable) {
+          result.subscribe(value => {
+            expect(value).toBe(true);
+            done();
+          });
+
+          return;
+        }
+
+        // Should not have gotten in here
+        expect(true).toBe(false);
         done();
-      });
-
-      return;
-    }
-
-    // Should not have gotten in here
-    expect(true).toBe(false);
+      })
   });
 
   describe('Admins users', () => {
     it.each([FeatureRoutesEnum.TERRITORIES, FeatureRoutesEnum.HOME, FeatureRoutesEnum.WORK, FeatureRoutesEnum.PROFILE])(
       'should Access %s',
       featureRoute => {
-        const route: ActivatedRouteSnapshot = {
-          data: { roles: 'ORGANIZER' },
+        const route = APP_ROUTES.find(r => r.path === featureRoute);
+
+        if (!route) {
+          throw new Error('Route Not Found');
+        }
+
+        const routeSnapshotMock: ActivatedRouteSnapshot = {
+          data: route?.data,
           routeConfig: {
             path: featureRoute,
           },
         } as never;
+
         const state: RouterStateSnapshot = { url: `/${featureRoute}` } as never;
-        const publisherUser = userMockBuilder({ role: RoleEnum.ADMIN });
+        const adminUser = userMockBuilder({ role: RoleEnum.ADMIN });
         const userStateService = ngMocks.get(UserStateService);
 
-        userStateService.setUser(publisherUser);
+        userStateService.setUser(adminUser);
 
-        const result = TestBed.runInInjectionContext(() => authGuard(route, state));
+        const result = TestBed.runInInjectionContext(() => authGuard(routeSnapshotMock, state));
 
         expect(result).toBeTruthy();
       }

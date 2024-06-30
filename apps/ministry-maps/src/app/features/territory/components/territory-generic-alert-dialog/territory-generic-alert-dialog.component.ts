@@ -15,7 +15,7 @@ export type TerritoryGenericAlertDialogData = {
  * Generic class for just handling/resolving alerts.
  */
 @Component({
-  selector: 'kingdom-apps-territory-move-alert-dialog',
+  selector: 'kingdom-apps-territory-generic-alert-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <lib-dialog [title]="data.title">

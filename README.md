@@ -19,7 +19,7 @@ To run and deploy the Kingdom Apps monorepo, you will need:
 
 - Node.js - 20~
 - NPM - 9~
-- [Firebase Tools](https://github.com/firebase/firebase-tools)
+- [Firebase Tools](https://github.com/firebase/firebase-tools) - npm install -g firebase-tools
 
 ## Projects
 

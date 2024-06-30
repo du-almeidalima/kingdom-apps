@@ -1,21 +1,13 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { UserListItemComponent } from './user-list-item.component';
+import { MockBuilder, MockRender } from 'ng-mocks';
+import { elderUser } from '../../../../../test/mocks';
 
 describe('UserListItemComponent', () => {
-  let component: UserListItemComponent;
-  let fixture: ComponentFixture<UserListItemComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [UserListItemComponent],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(UserListItemComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+  beforeEach(() => MockBuilder(UserListItemComponent));
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    const fixture = MockRender(UserListItemComponent, { user: elderUser });
+
+    expect(fixture.point.componentInstance).toBeTruthy();
   });
 });

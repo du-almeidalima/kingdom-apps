@@ -17,10 +17,11 @@ export enum FeatureRoutesEnum {
 
 export const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['/login']);
 
-const APP_ROUTES: Routes = [
+export const APP_ROUTES: Routes = [
   {
     path: FeatureRoutesEnum.WORK,
     loadChildren: () => import('./features/work/work.module').then(m => m.WorkModule),
+    data: { roles: ['*'] },
   },
   {
     path: FeatureRoutesEnum.TERRITORIES,

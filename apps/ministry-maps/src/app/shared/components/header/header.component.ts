@@ -15,6 +15,7 @@ import { UserStateService } from '../../../state/user.state.service';
              routerLink='/{{ FeatureRoutes.PROFILE }}'
              title='Meu Perfil'
              class='header-container__user-btn'
+             id="profile-link"
           >
             <lib-icon [fillColor]='userIconColor' icon='user-5'></lib-icon>
           </a>
