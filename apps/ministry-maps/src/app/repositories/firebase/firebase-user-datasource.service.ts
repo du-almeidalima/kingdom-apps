@@ -86,6 +86,7 @@ export class FirebaseUserDatasourceService implements UserRepository {
           name: '',
           locatedOn: '',
           cities: [],
+          profile: 'sign-language'
         };
 
         if (!user) {

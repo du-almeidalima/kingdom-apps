@@ -23,6 +23,7 @@ export const congregationMock: Congregation = {
   name: 'LS Test Congregation',
   cities: ['City 1', 'City 2', 'City 3'],
   locatedOn: 'City 1',
+  profile: 'sign-language'
 };
 
 export const congregationMock2: Congregation = {
@@ -30,4 +31,5 @@ export const congregationMock2: Congregation = {
   name: 'LS Test Congregation 2',
   cities: ['City 3', 'City 4', 'City 5'],
   locatedOn: 'City 3',
+  profile: 'sign-language'
 };
