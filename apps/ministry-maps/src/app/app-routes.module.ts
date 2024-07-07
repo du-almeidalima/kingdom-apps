@@ -2,7 +2,8 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { redirectUnauthorizedTo } from '@angular/fire/auth-guard';
 
-import { authGuard } from './core/services/auth.guard';
+import { authGuard } from './core/services/auth-guard/auth.guard';
+import { profileMatchGuard } from './core/services/profile-match-guard/profile-match.guard';
 import { USERS_ALLOWED_ROLES } from './features/users/users-routes.module';
 import { HOME_ALLOWED_ROLES } from './features/home/home-routes.module';
 import { TERRITORY_ALLOWED_ROLES } from './features/territory/territory-routes.module';
@@ -18,16 +19,34 @@ export enum FeatureRoutesEnum {
 export const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['/login']);
 
 export const APP_ROUTES: Routes = [
+  // SING-LANGUAGE
   {
     path: FeatureRoutesEnum.WORK,
     loadChildren: () => import('./features/work/work.module').then(m => m.WorkModule),
-    data: { roles: ['*'] },
+    canMatch: [profileMatchGuard],
+    data: { roles: ['*'], profiles: ['sign-language'] },
   },
   {
     path: FeatureRoutesEnum.TERRITORIES,
     loadChildren: () => import('./features/territory/territory.module').then(m => m.TerritoryModule),
+    canMatch: [profileMatchGuard],
     canActivate: [authGuard],
-    data: { roles: TERRITORY_ALLOWED_ROLES, authGuardPipe: redirectUnauthorizedToLogin },
+    data: { roles: TERRITORY_ALLOWED_ROLES, profiles: ['sign-language'], authGuardPipe: redirectUnauthorizedToLogin },
+  },
+  // HEARING
+  {
+    path: FeatureRoutesEnum.WORK,
+    loadChildren: () => import('./features/hearing-work/hearing-work.module').then(m => m.HearingWorkModule),
+    canMatch: [profileMatchGuard],
+    data: { roles: ['*'], profiles: ['hearing'] },
+  },
+  {
+    path: FeatureRoutesEnum.TERRITORIES,
+    loadChildren: () =>
+      import('./features/hearing-territory/hearing-territory.module').then(m => m.HearingTerritoryModule),
+    canMatch: [profileMatchGuard],
+    canActivate: [authGuard],
+    data: { roles: TERRITORY_ALLOWED_ROLES, profiles: ['hearing'], authGuardPipe: redirectUnauthorizedToLogin },
   },
   {
     path: FeatureRoutesEnum.HOME,
