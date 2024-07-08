@@ -29,6 +29,27 @@ import { SharedModule } from './shared/shared.module';
   declarations: [AppComponent],
   imports: [
     BrowserModule,
+    // providePerformance(() => getPerformance()),
+    // provideRemoteConfig(() => getRemoteConfig()),
+    AppRoutesModule,
+    RouterOutlet,
+    RepositoriesModule,
+    CoreModule,
+    CommonComponentsModule,
+    SharedModule,
+    ServiceWorkerModule.register('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      // Register the ServiceWorker as soon as the application is stable
+      // or after 30 seconds (whichever comes first).
+      registrationStrategy: 'registerWhenStable:30000'
+    }),
+    // provideAppCheck(() => {
+    //   // TODO get a reCAPTCHA Enterprise here https://console.cloud.google.com/security/recaptcha?project=_
+    //   const provider = new ReCaptchaEnterpriseProvider(/* reCAPTCHA Enterprise site key */);
+    //   return initializeAppCheck(undefined, { provider, isTokenAutoRefreshEnabled: true });
+    // }),
+  ],
+  providers: [
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => {
       const auth = getAuth();
@@ -80,27 +101,6 @@ import { SharedModule } from './shared/shared.module';
 
       return functions;
     }),
-    // providePerformance(() => getPerformance()),
-    // provideRemoteConfig(() => getRemoteConfig()),
-    AppRoutesModule,
-    RouterOutlet,
-    RepositoriesModule,
-    CoreModule,
-    CommonComponentsModule,
-    SharedModule,
-    ServiceWorkerModule.register('ngsw-worker.js', {
-      enabled: !isDevMode(),
-      // Register the ServiceWorker as soon as the application is stable
-      // or after 30 seconds (whichever comes first).
-      registrationStrategy: 'registerWhenStable:30000'
-    }),
-    // provideAppCheck(() => {
-    //   // TODO get a reCAPTCHA Enterprise here https://console.cloud.google.com/security/recaptcha?project=_
-    //   const provider = new ReCaptchaEnterpriseProvider(/* reCAPTCHA Enterprise site key */);
-    //   return initializeAppCheck(undefined, { provider, isTokenAutoRefreshEnabled: true });
-    // }),
-  ],
-  providers: [
     ScreenTrackingService,
     UserTrackingService,
     {
