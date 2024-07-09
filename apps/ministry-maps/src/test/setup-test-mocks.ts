@@ -26,7 +26,7 @@ ngMocks.defaultMock(DesignationRepository, () => new DesignationRepositoryMock()
 
 // Firebase Setup (Not in use at the moment)
 @NgModule({
-  imports: [
+  providers: [
     provideFirebaseApp(() =>
       initializeApp({
         projectId: 'du-ministry-maps',
