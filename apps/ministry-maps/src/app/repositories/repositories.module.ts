@@ -9,6 +9,12 @@ import { FirebaseTerritoryDatasourceService } from './firebase/firebase-territor
 import { FirebaseUserDatasourceService } from './firebase/firebase-user-datasource.service';
 import { TerritoryRepository } from './territories.repository';
 import { UserRepository } from './user.repository';
+import { HearingDesignationRepository } from './hearing-designation.repository';
+import {
+  FirebaseHearingDesignationDatasourceService
+} from './firebase/firebase-hearing-designation-datasource.service';
+import { HearingTerritoryRepository } from './hearing-territory.repository';
+import { FirebaseHearingTerritoryDatasourceService } from './firebase/firebase-hearing-territory-datasource.service';
 
 @NgModule({
   declarations: [],
@@ -29,6 +35,14 @@ import { UserRepository } from './user.repository';
     {
       provide: DesignationRepository,
       useClass: FirebaseDesignationDatasourceService,
+    },
+    {
+      provide: HearingDesignationRepository,
+      useClass: FirebaseHearingDesignationDatasourceService,
+    },
+    {
+      provide: HearingTerritoryRepository,
+      useClass: FirebaseHearingTerritoryDatasourceService,
     },
     // {
     //   provide: NoteRepository,

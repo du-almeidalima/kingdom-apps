@@ -7,6 +7,7 @@ export type HearingTerritory = {
   name: string;
   note?: string;
   mapsLink?: string;
+  createdAt?: Date;
   congregationId: string;
   /** Order in which it will be sorted. */
   positionIndex?: number;

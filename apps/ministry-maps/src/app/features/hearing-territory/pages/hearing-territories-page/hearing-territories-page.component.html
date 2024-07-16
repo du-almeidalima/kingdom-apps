@@ -1,1 +1,10 @@
-<p>hearing-territories-page works!</p>
+<div class='container'>
+  <h2 class='t-headline2 mb-8'>Territórios</h2>
+
+  <!-- TODO: DELETE ME  -->
+  <ul>
+    @for (territory of territories$ | async; track territory.id) {
+      <li>{{ territory.name }} - {{ territory.createdAt ? (territory.createdAt | date) : "" }}</li>
+    }
+  </ul>
+</div>

@@ -1,12 +1,23 @@
 import { FirestoreDataConverter } from '@firebase/firestore';
-import { DocumentData, QueryDocumentSnapshot, SnapshotOptions } from '@angular/fire/firestore';
+import { DocumentData, QueryDocumentSnapshot, SnapshotOptions, Timestamp } from '@angular/fire/firestore';
 
 type CustomConverterFunction<T> = (data: any) => T | Partial<T>;
 
-export const convertFirebaseTimestampToDateFactory = (field: string) => {
-  return (data: any) => ({
-    [field]: data[field]?.toDate(),
-  });
+export const convertFirebaseTimestampToDateFactory = <T>(field: keyof T) => {
+  return (data: any): Partial<T> => {
+    if (data === null) {
+      return {};
+    }
+
+    if (data?.[field] && data[field] instanceof Timestamp) {
+      //@ts-expect-error if there's a timestamp, the field should be of type data, but I couldn't figure out how to make this work with TS
+      return {
+        [field]: (data[field] as Timestamp).toDate(),
+      }
+    }
+
+    return {};
+  };
 };
 
 // This function ensures that no undefined property is sent to FireStore causing a runtime error;
@@ -21,6 +32,7 @@ export const removeUndefined = (obj: any) => {
   }
 };
 
+/** Function to map FROM and TO Firebase queries */
 export const firebaseEntityConverterFactory = <T extends object>(
   customConverter?: CustomConverterFunction<T>
 ): FirestoreDataConverter<T> => {

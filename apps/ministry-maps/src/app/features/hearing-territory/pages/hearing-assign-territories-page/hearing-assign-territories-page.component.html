@@ -1,1 +1,10 @@
-<p>hearing-assign-territories-page works!</p>
+<div class='container'>
+  <h2 class='t-headline2 mb-8'>Designar Território</h2>
+
+  <!-- TODO: DELETE ME  -->
+  <ul>
+    @for (territory of territories; track territory.id) {
+      <li>{{ territory.name }} - {{ territory.createdAt ? (territory.createdAt | date) : "" }}</li>
+    }
+  </ul>
+</div>
