@@ -1,0 +1,32 @@
+@use "libs/common-ui/src/lib/styles/abstract/variables";
+
+:host {
+  display: block;
+}
+
+.provider-login-button {
+  --default-btn-size: 25px;
+
+  display: grid;
+  grid-template-columns: var(--btn-size, --default-btn-size) 1fr 2.5rem;
+  align-items: center;
+
+  height: 5rem;
+  border: 1px solid variables.$light-grey-100;
+  padding: 1rem;
+
+  cursor: pointer;
+
+  &__logo {
+    aspect-ratio: 1/1;
+
+    place-self: center;
+
+    object-fit: contain;
+  }
+
+  &__text {
+    text-align: start;
+    margin-left: 1rem;
+  }
+}

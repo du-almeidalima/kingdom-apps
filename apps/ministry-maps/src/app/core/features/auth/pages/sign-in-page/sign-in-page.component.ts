@@ -1,32 +1,39 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FIREBASE_PROVIDERS } from '../../repositories/firebase/firebase-auth-datasource.service';
 import { AuthService } from '../../services/auth.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FeatureRoutesEnum } from '../../../../../app-routes.module';
 import { finalize } from 'rxjs';
 import { RoleEnum } from '../../../../../../models/enums/role';
 import { AuthRoutesEnum } from '../../models/enums/auth-routes';
 
 @Component({
-  selector: 'kingdom-apps-login-page',
-  templateUrl: './login-page.component.html',
-  styleUrls: ['./login-page.component.scss'],
+  selector: 'kingdom-apps-sign-in-page',
+  templateUrl: './sign-in-page.component.html',
+  styleUrls: ['./sign-in-page.component.scss'],
 })
-export class LoginPageComponent {
+export class SignInPageComponent implements OnInit {
   protected readonly FIREBASE_PROVIDERS = FIREBASE_PROVIDERS;
-
   loading = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+  ) {}
 
-  handleProviderLoginClick(firebaseProvider: FIREBASE_PROVIDERS) {
+  ngOnInit(): void {
+    console.log(this.route.snapshot.params['inviteId']);
+  }
+
+
+  handleProviderLoginClick(provider: FIREBASE_PROVIDERS) {
     this.loading = true;
     this.authService
-      .signInWithProvider(firebaseProvider)
+      .signInWithProvider(provider, true)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe(user => {
         if (!user) {
-          // TODO: Create a new page for non-created users
           return;
         }
 

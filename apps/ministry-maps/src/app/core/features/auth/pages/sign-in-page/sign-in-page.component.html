@@ -1,0 +1,22 @@
+<div class='container'>
+  <lib-card>
+    <h1 class='mb-10'>Cadastrar</h1>
+    <div class="img-container">
+      <img class="image" alt="MM Image" ngSrc="assets/images/map-image.png" priority fill="contain">
+    </div>
+    <p class="t-body1 mt-10">
+      Bem vindo ao <span class="t-primary font-bold">Ministry Maps</span> ou <span class="t-primary font-bold">MM</span>!
+    </p>
+    <p class="t-body1 mt-5">
+      Parar criar uma conta, clique no botão a baixo.
+    </p>
+    <!-- Google Login Button -->
+    <div class="providers-container mt-10">
+      <kingdom-apps-provider-login-button
+        [provider]="FIREBASE_PROVIDERS.GOOGLE"
+        [loading]="loading"
+        (providerClick)="handleProviderLoginClick($event)"
+      />
+    </div>
+  </lib-card>
+</div>

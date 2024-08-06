@@ -6,6 +6,7 @@ import { authGuard } from './core/services/auth.guard';
 import { USERS_ALLOWED_ROLES } from './features/users/users-routes.module';
 import { HOME_ALLOWED_ROLES } from './features/home/home-routes.module';
 import { TERRITORY_ALLOWED_ROLES } from './features/territory/territory-routes.module';
+import { AuthRoutesEnum } from './core/features/auth/models/enums/auth-routes';
 
 export enum FeatureRoutesEnum {
   HOME = 'home',
@@ -15,7 +16,7 @@ export enum FeatureRoutesEnum {
   USERS = 'users',
 }
 
-export const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['/login']);
+export const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo([AuthRoutesEnum.LOGIN]);
 
 export const APP_ROUTES: Routes = [
   {
