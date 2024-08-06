@@ -38,7 +38,7 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
       .pipe(map(firebaseUser => !!firebaseUser))
   }
 
-  signInWithProvider(provider?: FIREBASE_PROVIDERS) {
+  signInWithProvider(provider: FIREBASE_PROVIDERS, createUser = false): Observable<User | null> {
     let authProviderInstance: GoogleAuthProvider | OAuthProvider;
 
     switch (provider) {
@@ -54,7 +54,7 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
 
     const providerRes = signInWithPopup(this.auth, authProviderInstance);
 
-    return from(providerRes).pipe(switchMap(providerUser => this.handleUserAuthentication(providerUser)));
+    return from(providerRes).pipe(switchMap(providerUser => this.handleUserAuthentication(providerUser, createUser)));
   }
 
   /**
@@ -90,15 +90,31 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
   }
 
   /**
-   * Checks if it's the first time a User signs in and if so creates an entry in Users Collection for signed-up users.
-   * @private
+   * Uses the result from the {@link signInWithProvider} to fetch the user from DB or create a new if
+   * {@link createUser} is true.
+   *
+   * <b>Note:</b> Why deleting the user? This is needed, because whenever the user authenticate with
+   * {@link signInWithPopup}, Firebase creates a new user in the Authentication. So for users that were not
+   * invited, and won't be able to log in, it makes sense clean it from the Firebase Authentication user base.
+   *
+   * @param providerUser The response from the AuthProvider that will be processed.
+   * @param createUser When true, users that are not present in the database will be created (invite link use case).
+   * If false, the user will be deleted.
+   *
+   * @returns the user from DB.
    */
-  private handleUserAuthentication({ user: providerUser }: UserCredential): Observable<User> {
+  private handleUserAuthentication({ user: providerUser }: UserCredential, createUser = false): Observable<User | null> {
     return this.userRepository.getById(providerUser.uid).pipe(
       take(1),
       switchMap(user => {
         if (user) {
           return of(user);
+        }
+
+        // This is a new user.
+        if (!createUser) {
+
+          return from(providerUser.delete()).pipe(map(_ => null));
         }
 
         return this.createUser({
