@@ -8,7 +8,6 @@ import {
   DocumentReference,
   Firestore,
   getDoc,
-  getDocFromCache,
   getDocFromServer,
   query,
   setDoc,
@@ -100,7 +99,7 @@ export class FirebaseUserDatasourceService implements UserRepository {
 
         // Resolving FireBase Congregation Reference
         const congregationDocRef = this.createCongregationDoc(user.congregation.id);
-        return this.resolveUserCongregationReference(congregationDocRef).pipe(
+        return FirebaseCongregationDatasourceService.resolveUserCongregationReference(congregationDocRef).pipe(
           map(congregation => {
             if (!congregation) {
               // User with congregation deleted
@@ -128,7 +127,10 @@ export class FirebaseUserDatasourceService implements UserRepository {
 
     // Resolving FireBase Congregation Reference
     const congregationDocRef = this.createCongregationDoc(user.congregation.id);
-    return forkJoin([user$, this.resolveUserCongregationReference(congregationDocRef)]).pipe(
+    return forkJoin([
+      user$,
+      FirebaseCongregationDatasourceService.resolveUserCongregationReference(congregationDocRef)
+    ]).pipe(
       map(([_, congregation]) => {
         return { ...user, congregation };
       }),
@@ -173,7 +175,7 @@ export class FirebaseUserDatasourceService implements UserRepository {
     return from(collectionData(q))
       .pipe(
         switchMap(users => {
-          return this.resolveUserCongregationReference(congregationDocRef)
+          return FirebaseCongregationDatasourceService.resolveUserCongregationReference(congregationDocRef)
             .pipe(
               map(congregation => {
                 return users.map(u => {
@@ -186,41 +188,8 @@ export class FirebaseUserDatasourceService implements UserRepository {
       );
   }
 
-  /**
-   * Resolves a user congregation reference by id or by reference
-   * @param congregation
-   * @private
-   */
-  private resolveUserCongregationReference(
-    congregation: DocumentReference<Congregation, FirebaseCongregationModel>,
-  ): Observable<Congregation | undefined> {
-    // Since Congregation isn't something that changes frequently, fetching from cache to increase Performance
-    const cachedCongregationSnapshot = from(getDocFromCache(congregation));
-
-    return cachedCongregationSnapshot.pipe(
-      catchError(err => {
-        console.warn(`Cache for Congregation not found: `, err);
-        return of(null);
-      }),
-      switchMap(cachedCongregationRes => {
-        // Cache user found, returning it
-        if (cachedCongregationRes) {
-          return of(cachedCongregationRes);
-        }
-
-        // Fetching from server
-        return from(getDocFromServer(congregation));
-      }),
-      map(congregationDocSnapshot => {
-        if (!congregationDocSnapshot.exists()) {
-          return undefined;
-        }
-
-        return congregationDocSnapshot.data();
-      }),
-    );
-  }
-
+  // TODO: This should be simpler... Maybe the collections should defined in a saperated file so they could be
+  //  reused on other DataSource classes
   private createCongregationDoc(congregationId: string) {
     return doc(this.congregationCollection, congregationId);
   }
