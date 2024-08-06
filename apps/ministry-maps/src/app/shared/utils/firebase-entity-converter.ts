@@ -1,5 +1,5 @@
 import { FirestoreDataConverter } from '@firebase/firestore';
-import { DocumentData, QueryDocumentSnapshot, SnapshotOptions } from '@angular/fire/firestore';
+import { DocumentData, DocumentReference, QueryDocumentSnapshot, SnapshotOptions } from '@angular/fire/firestore';
 
 type CustomConverterFunction<T> = (data: any) => T | Partial<T>;
 
@@ -16,6 +16,11 @@ export const removeUndefined = (obj: any) => {
       console.warn(`Property '${prop}' is undefined or null, removing it from the payload object to firestore.`);
       delete obj[prop];
     } else if (typeof obj[prop] === 'object') {
+      if (obj[prop] instanceof DocumentReference) {
+        // We don't want to go into Firebase objects as they can cause infinite recursion
+        continue;
+      }
+
       removeUndefined(obj[prop]);
     }
   }

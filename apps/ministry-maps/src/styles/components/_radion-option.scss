@@ -1,0 +1,31 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+@use 'libs/common-ui/src/lib/styles/base/typography';
+
+.radio-option {
+  display: flex;
+  gap: .25rem;
+  flex-flow: column nowrap;
+
+  &__title {
+    @extend .t-body1;
+    color: variables.$text;
+  }
+
+  &__description {
+    @extend .t-caption;
+    color: variables.$text-medium;
+  }
+}
+
+/** This leverages the IconRadioComponent active class to also style the currently selected item */
+.icon-radio--active {
+  .radio-option {
+    &__title {
+      color: currentColor;
+    }
+
+    &__description {
+      color: currentColor !important;
+    }
+  }
+}
