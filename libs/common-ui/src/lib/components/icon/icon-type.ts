@@ -26,3 +26,4 @@ export type Icons =
   | 'log-out-7'
   | 'user-29'
   | 'speech-bubble-26'
+  | 'copy-lined'
