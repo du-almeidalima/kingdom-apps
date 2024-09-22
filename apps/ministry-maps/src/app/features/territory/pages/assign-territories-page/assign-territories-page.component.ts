@@ -19,6 +19,7 @@ import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 import { Dialog } from '@angular/cdk/dialog';
 import { TerritoryBO } from '../../bo/territory.bo';
 import { TerritoriesOrderBy, territoryFilterPipe } from '../../../../shared/utils/territory-filter-pipe';
+import { createSendWhatsAppLink } from '../../../../shared/utils/share-utils';
 
 
 @Component({
@@ -133,10 +134,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
   }
 
   shareDesignation(designationId: string) {
-    const workUrl = `${location.origin}/${FeatureRoutesEnum.WORK}/${designationId}`;
-    const whatsAppUrl = `whatsapp://send?text=`;
-
-    const builtUrl = `${whatsAppUrl}${workUrl}`;
+    const builtUrl = createSendWhatsAppLink(`${location.origin}/${FeatureRoutesEnum.WORK}/${designationId}`);
 
     if (isMobileDevice()) {
       window.location.href = builtUrl;

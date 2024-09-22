@@ -12,6 +12,7 @@ import {
   UsersEditDialogComponent,
 } from '../../components/user-edit-dialog/users-edit-dialog.component';
 import { InviteCreateDialogComponent } from '../../components/invite-create-dialog/invite-create-dialog.component';
+import { CREATE_INVITE_LINK_ALLOWED } from '../../config/users-roles.config';
 
 @Component({
   selector: 'kingdom-apps-users-page',
@@ -19,9 +20,14 @@ import { InviteCreateDialogComponent } from '../../components/invite-create-dial
   styleUrls: ['./users-page.component.scss'],
 })
 export class UsersPageComponent implements OnInit {
+  protected readonly CREATE_INVITE_LINK_ALLOWED = CREATE_INVITE_LINK_ALLOWED;
+  protected readonly green200 = green200;
+  protected readonly white200 = white200;
+
   private readonly destroyRef = inject(DestroyRef);
   private readonly userRepository = inject(UserRepository);
   private readonly userState = inject(UserStateService);
+  private readonly dialog = inject(Dialog);
   private readonly userPriorityMap = new Map<RoleEnum, number>([
     [RoleEnum.APP_ADMIN, 1],
     [RoleEnum.SUPERINTENDENT, 2],
@@ -31,10 +37,6 @@ export class UsersPageComponent implements OnInit {
     [RoleEnum.PUBLISHER, 6],
   ]);
 
-  private readonly dialog = inject(Dialog);
-
-  protected readonly green200 = green200;
-  protected readonly white200 = white200;
 
   isLoading = false;
   users: User[] = [];
@@ -85,4 +87,5 @@ export class UsersPageComponent implements OnInit {
   private sortUserFn(a: User, b: User) {
     return (this.userPriorityMap.get(a.role) ?? 99) - (this.userPriorityMap.get(b.role) ?? 99);
   }
+
 }

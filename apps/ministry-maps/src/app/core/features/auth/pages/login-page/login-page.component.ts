@@ -26,7 +26,7 @@ export class LoginPageComponent {
       .pipe(finalize(() => (this.loading = false)))
       .subscribe(user => {
         if (!user) {
-          // TODO: Create a new page for non-created users
+          this.router.navigate([AuthRoutesEnum.NO_ACCOUNT]);
           return;
         }
 

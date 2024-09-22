@@ -8,8 +8,8 @@ import { CommonComponentsModule, CommonDirectivesModule, white100 } from '@kingd
 import { SharedModule } from '../../../../shared/shared.module';
 import { RoleEnum } from '../../../../../models/enums/role';
 import { InviteBO } from '../../bo/invite/invite-bo.service';
-import { InviteCreateCopyLinkComponent } from './invite-create-copy-link/invite-create-copy-link.component';
-import { InviteCreateFormComponent } from './invite-create-form/invite-create-form.component';
+import { InviteCreateDialogCopyLinkComponent } from './invite-create-copy-link/invite-create-dialog-copy-link.component';
+import { InviteCreateDialogFormComponent } from './invite-create-form/invite-create-dialog-form.component';
 import { AuthRoutesEnum } from '../../../../core/features/auth/models/enums/auth-routes';
 import { environment } from '../../../../../environments/environment';
 
@@ -26,17 +26,20 @@ export type TCreateLinkForm = FormGroup<{ role: FormControl<RoleEnum>; email: Fo
     SharedModule,
     ReactiveFormsModule,
     CommonDirectivesModule,
-    InviteCreateCopyLinkComponent,
-    InviteCreateFormComponent,
+    InviteCreateDialogCopyLinkComponent,
+    InviteCreateDialogFormComponent,
   ],
   template: `
-    <lib-dialog title="Criar Link de Convite">
-      @if (true) {
-      <kingdom-apps-invite-create-copy-link [inviteLink]="createdLink()"/>
-      } @else {
-      <kingdom-apps-invite-create-form [form]="form" [isSubmitting]="isSubmitting()" (formSubmit)="handleFormSubmit()"/>
-      }
-    </lib-dialog>
+    @if (createdLink()) {
+      <kingdom-apps-invite-create-dialog-copy-link [inviteLink]="createdLink()" [title]="title()"/>
+    } @else {
+      <kingdom-apps-invite-create-dialog-form
+        [title]="title()"
+        [form]="form"
+        [isSubmitting]="isSubmitting()"
+        (formSubmit)="handleFormSubmit()"
+      />
+    }
   `,
 })
 export class InviteCreateDialogComponent {
@@ -47,14 +50,13 @@ export class InviteCreateDialogComponent {
 
   isSubmitting = signal(false);
   createdLink = signal('');
+  title = signal('Criar Link de Convite');
 
   constructor(private readonly inviteBO: InviteBO, formBuilder: FormBuilder) {
     this.form = formBuilder.group({
       role: formBuilder.control(RoleEnum.ORGANIZER, { nonNullable: true }),
       email: formBuilder.control<string>(''),
     });
-
-    this.createdLink.set(this.composeInviteLink('1234-4321-4312'))
   }
 
   handleFormSubmit() {
@@ -70,7 +72,7 @@ export class InviteCreateDialogComponent {
         })
       )
       .subscribe(invitationLink => {
-        this.createdLink.set(invitationLink.id);
+        this.createdLink.set(this.composeInviteLink(invitationLink.id));
       });
   }
 

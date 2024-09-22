@@ -1,3 +1,47 @@
+@use '../../styles/base/typography';
+@use '../../styles/abstract/variables';
+
 :host {
   display: block;
+}
+
+.copy-text-block {
+  $children-padding: 1rem;
+  $border-color: #A3B4D5;
+
+  display: flex;
+  flex-flow: row nowrap;
+
+  height: 5.5rem;
+  background-color: variables.$blue-50;
+  border: 1px solid $border-color;
+
+  &__button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 4rem;
+    padding: $children-padding;
+    border: none;
+    border-left: 1px solid $border-color;
+
+    cursor: pointer;
+
+    background-color: transparent;
+  }
+
+  &__content {
+    @extend .t-caption;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+
+    padding: $children-padding;
+    background-color: transparent;
+    color: variables.$text;
+    word-break: break-all;
+  }
 }

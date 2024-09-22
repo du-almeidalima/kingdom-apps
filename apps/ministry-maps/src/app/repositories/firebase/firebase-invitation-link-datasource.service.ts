@@ -1,49 +1,59 @@
 import { Injectable } from '@angular/core';
-import { collection, CollectionReference, doc, docData, Firestore, setDoc } from '@angular/fire/firestore';
+import {
+  collection,
+  CollectionReference,
+  doc,
+  DocumentReference,
+  Firestore,
+  getDoc,
+  setDoc,
+} from '@angular/fire/firestore';
 import { from, map, Observable, of, switchMap } from 'rxjs';
 
 import { InvitationLink } from '../../../models/invitation-link';
 import { InvitationLinkRepository } from '../invitation-link.repository';
 import { FirebaseCongregationDatasourceService } from './firebase-congregation-datasource.service';
 import { Congregation } from '../../../models/congregation';
-import { congregationConverter } from '../../../models/firebase/firebase-congregation-model';
 import { firebaseEntityConverterFactory } from '../../shared/utils/firebase-entity-converter';
+import { FirebaseDatasource } from './firebase-datasource';
 
 @Injectable({
   providedIn: 'root',
 })
-export class FirebaseInvitationLinkDataSourceService implements InvitationLinkRepository {
+export class FirebaseInvitationLinkDataSourceService
+  implements InvitationLinkRepository, FirebaseDatasource<InvitationLink>
+{
   static readonly COLLECTION_NAME = 'invitation_links';
   private readonly invitationLinkCollection: CollectionReference<InvitationLink>;
-  private readonly congregationCollection: CollectionReference<Congregation>;
 
-  constructor(private readonly firestore: Firestore) {
+  constructor(
+    private readonly firestore: Firestore,
+    private readonly congregationDatasourceService: FirebaseCongregationDatasourceService
+  ) {
     // USERS COLLECTION
     this.invitationLinkCollection = collection(
       this.firestore,
       FirebaseInvitationLinkDataSourceService.COLLECTION_NAME
     ).withConverter<InvitationLink>(firebaseEntityConverterFactory());
+  }
 
-    // CONGREGATION COLLECTION
-    this.congregationCollection = collection(
-      this.firestore,
-      FirebaseCongregationDatasourceService.COLLECTION_NAME
-    ).withConverter(congregationConverter);
+  createDocumentRef(id: string): DocumentReference<InvitationLink> {
+    return doc(this.invitationLinkCollection, id);
   }
 
   /**
    * Gets the Invitation Link using the ID and also resolve the Congregation reference.
    */
   getById(id: string): Observable<InvitationLink | undefined> {
-    const designationDocReference = doc(this.invitationLinkCollection, `${id}`);
+    const invitationLinkReference = doc(this.invitationLinkCollection, `${id}`);
 
-    return docData(designationDocReference, {
-      idField: 'id',
-    }).pipe(
-      switchMap(invitationLink => {
-        if (!invitationLink) {
+    return from(getDoc(invitationLinkReference)).pipe(
+      switchMap(invitationLinkSnapshot => {
+        if (!invitationLinkSnapshot?.exists()) {
           return of(undefined);
         }
+
+        const invitationLink = invitationLinkSnapshot.data();
 
         const EMPTY_CONGREGATION: Congregation = {
           id: '',
@@ -53,7 +63,7 @@ export class FirebaseInvitationLinkDataSourceService implements InvitationLinkRe
         };
 
         // Resolving FireBase Congregation Reference
-        const congregationDocRef = this.createCongregationDoc(invitationLink.congregation.id);
+        const congregationDocRef = this.congregationDatasourceService.createDocumentRef(invitationLink.congregation.id);
 
         return FirebaseCongregationDatasourceService.resolveUserCongregationReference(congregationDocRef).pipe(
           map(congregation => {
@@ -71,7 +81,9 @@ export class FirebaseInvitationLinkDataSourceService implements InvitationLinkRe
   }
 
   add(invitationLink: Omit<InvitationLink, 'id'>): Observable<InvitationLink> {
-    const congregationDocReference = this.createCongregationDoc(invitationLink.congregation.id);
+    const congregationDocReference = this.congregationDatasourceService.createDocumentRef(
+      invitationLink.congregation.id
+    );
 
     const data = {
       ...invitationLink,
@@ -91,9 +103,9 @@ export class FirebaseInvitationLinkDataSourceService implements InvitationLinkRe
     );
   }
 
-  // TODO: This should be simpler... Maybe the collections should defined in a saperated file so they could be
-  //  reused on other DataSource classes
-  private createCongregationDoc(congregationId: string) {
-    return doc(this.congregationCollection, congregationId);
+  update(invitationLink: Partial<InvitationLink>): Observable<void> {
+    const invitationLinkReference = doc(this.invitationLinkCollection, `${invitationLink.id}`);
+
+    return from(setDoc(invitationLinkReference, { ...invitationLink }));
   }
 }

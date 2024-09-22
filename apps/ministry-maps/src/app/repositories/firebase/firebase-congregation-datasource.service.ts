@@ -3,7 +3,8 @@ import {
   collection,
   CollectionReference,
   doc,
-  docData, DocumentData,
+  docData,
+  DocumentData,
   DocumentReference,
   Firestore,
   getDocFromCache,
@@ -17,18 +18,19 @@ import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
 import { CongregationRepository } from '../congregation.repository';
 import { Congregation } from '../../../models/congregation';
 import { congregationConverter, FirebaseCongregationModel } from '../../../models/firebase/firebase-congregation-model';
+import { FirebaseDatasource } from './firebase-datasource';
 
 @Injectable({
   providedIn: 'root',
 })
-export class FirebaseCongregationDatasourceService implements CongregationRepository {
+export class FirebaseCongregationDatasourceService implements CongregationRepository, FirebaseDatasource<Congregation> {
   static readonly COLLECTION_NAME = 'congregations';
   private readonly congregationCollection: CollectionReference<Congregation>;
 
   constructor(private readonly firestore: Firestore) {
     this.congregationCollection = collection(
       this.firestore,
-      FirebaseCongregationDatasourceService.COLLECTION_NAME,
+      FirebaseCongregationDatasourceService.COLLECTION_NAME
     ).withConverter(congregationConverter);
   }
 
@@ -38,7 +40,7 @@ export class FirebaseCongregationDatasourceService implements CongregationReposi
    * @private
    */
   static resolveUserCongregationReference(
-    congregation: DocumentReference<Congregation, FirebaseCongregationModel | DocumentData>,
+    congregation: DocumentReference<Congregation, FirebaseCongregationModel | DocumentData>
   ): Observable<Congregation | undefined> {
     // Since Congregation isn't something that changes frequently, fetching from cache to increase Performance
     const cachedCongregationSnapshot = from(getDocFromCache(congregation));
@@ -63,8 +65,12 @@ export class FirebaseCongregationDatasourceService implements CongregationReposi
         }
 
         return congregationDocSnapshot.data();
-      }),
+      })
     );
+  }
+
+  createDocumentRef(id: string): DocumentReference<Congregation> {
+    return doc(this.congregationCollection, id);
   }
 
   getById(id: string): Observable<Congregation | undefined> {
@@ -77,14 +83,13 @@ export class FirebaseCongregationDatasourceService implements CongregationReposi
 
   getCongregations(): Observable<Pick<Congregation, 'name' | 'id'>[]> {
     const q = query(this.congregationCollection, orderBy('name', 'asc'));
-    return from(getDocs(q))
-      .pipe(
-        map(snapshot => {
-          return snapshot.docs.map(d => ({
-            name: d.data().name,
-            id: d.data().id,
-          }));
-        }),
-      );
+    return from(getDocs(q)).pipe(
+      map(snapshot => {
+        return snapshot.docs.map(d => ({
+          name: d.data().name,
+          id: d.data().id,
+        }));
+      })
+    );
   }
 }

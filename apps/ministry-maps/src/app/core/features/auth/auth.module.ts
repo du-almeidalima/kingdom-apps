@@ -11,9 +11,10 @@ import { WelcomePageComponent } from './pages/welcome-page/welcome-page.componen
 import { SignInPageComponent } from './pages/sign-in-page/sign-in-page.component';
 import { AuthRoutesModule } from './auth-routes.module';
 import { ProviderLoginButtonComponent } from './components/provider-login-button.component';
+import { NoAccountPageComponent } from './pages/no-account-page/no-account-page.component';
 
 @NgModule({
-  declarations: [LoginPageComponent, WelcomePageComponent, SignInPageComponent],
+  declarations: [LoginPageComponent, WelcomePageComponent, SignInPageComponent, NoAccountPageComponent],
   imports: [CommonModule, AuthRoutesModule, CommonComponentsModule, NgOptimizedImage, ProviderLoginButtonComponent],
   providers: [
     {

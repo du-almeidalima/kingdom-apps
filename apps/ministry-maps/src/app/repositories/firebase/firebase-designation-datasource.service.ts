@@ -1,11 +1,21 @@
 import { Injectable } from '@angular/core';
-import { collection, CollectionReference, doc, docData, Firestore, setDoc, updateDoc } from '@angular/fire/firestore';
+import {
+  collection,
+  CollectionReference,
+  doc,
+  docData,
+  DocumentReference,
+  Firestore,
+  setDoc,
+  updateDoc,
+} from '@angular/fire/firestore';
 import { from, Observable, switchMap, take } from 'rxjs';
 
 import { Designation } from '../../../models/designation';
 import { FirebaseDesignationModel } from '../../../models/firebase/firebase-designation-territory-model';
 import { firebaseEntityConverterFactory } from '../../shared/utils/firebase-entity-converter';
 import { DesignationRepository } from '../designation.repository';
+import { FirebaseDatasource } from './firebase-datasource';
 
 const convertHistoryDateFirebaseTimestampToDate = (data: FirebaseDesignationModel): Designation => {
   return {
@@ -23,7 +33,7 @@ const convertHistoryDateFirebaseTimestampToDate = (data: FirebaseDesignationMode
 @Injectable({
   providedIn: 'root',
 })
-export class FirebaseDesignationDatasourceService implements DesignationRepository {
+export class FirebaseDesignationDatasourceService implements DesignationRepository, FirebaseDatasource<Designation> {
   private readonly collectionName = 'designations';
   private readonly designationCollection: CollectionReference<Designation>;
 
@@ -31,6 +41,10 @@ export class FirebaseDesignationDatasourceService implements DesignationReposito
     this.designationCollection = collection(this.firestore, this.collectionName).withConverter<Designation>(
       firebaseEntityConverterFactory(convertHistoryDateFirebaseTimestampToDate)
     );
+  }
+
+  createDocumentRef(id: string): DocumentReference<Designation> {
+    return doc(this.designationCollection, id);
   }
 
   getById(id: string): Observable<Designation | undefined> {

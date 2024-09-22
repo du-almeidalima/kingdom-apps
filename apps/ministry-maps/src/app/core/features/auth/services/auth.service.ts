@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 
-import { AuthRepository } from '../repositories/auth.repository';
+import { AuthRepository, CreateUserConfig } from '../repositories/auth.repository';
 import { FIREBASE_PROVIDERS } from '../repositories/firebase/firebase-auth-datasource.service';
 import { UserStateService } from '../../../../state/user.state.service';
 import { User } from '../../../../../models/user';
@@ -32,8 +32,14 @@ export class AuthService {
     });
   }
 
-  signInWithProvider(provider: FIREBASE_PROVIDERS, createUser = false): Observable<User | null> {
-    return this.authRepository.signInWithProvider(provider, createUser).pipe(
+  /**
+   * Logs the user using a {@link FIREBASE_PROVIDERS}.
+   * @param provider The provider to log the user against (e.g. Google or Microsoft).
+   * @param createUser Boolean that indicates if the logged user doesn't exist already, if it should be created.
+   * @param createUserConfiguration When provided, will use the configuration found in here to set the user values.
+   */
+  signInWithProvider(provider: FIREBASE_PROVIDERS, createUser = false, createUserConfiguration?: CreateUserConfig): Observable<User | void> {
+    return this.authRepository.signInWithProvider(provider, createUser, createUserConfiguration).pipe(
       tap(userRes => {
         if (!userRes) {
           return;

@@ -8,7 +8,8 @@
     }
   </ul>
 
-  <button lib-floating-action-button title='Criar Link de Convite'
+  <button *lib-authorize="CREATE_INVITE_LINK_ALLOWED"
+          lib-floating-action-button title='Criar Link de Convite'
           [backgroundColor]='green200'
           (click)='handleCreateInviteLink()'>
     <lib-icon icon='plus-lined' [fillColor]='white200' />

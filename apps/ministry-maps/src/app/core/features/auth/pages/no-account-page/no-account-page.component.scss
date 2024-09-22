@@ -1,0 +1,15 @@
+.img-container {
+  position: relative;
+  aspect-ratio: 1/1;
+  width: clamp(250px, 40vw, 350px);
+  margin: auto;
+}
+
+.image {
+  display: block;
+}
+
+.providers-container {
+  display: flex;
+  flex-flow: column nowrap;
+}

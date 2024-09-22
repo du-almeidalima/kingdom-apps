@@ -6,6 +6,7 @@ import {
   deleteDoc,
   doc,
   documentId,
+  DocumentReference,
   Firestore,
   getDoc,
   getDocs,
@@ -24,6 +25,7 @@ import { TerritoryRepository } from '../territories.repository';
 import { Territory } from '../../../models/territory';
 import { TerritoryVisitHistory } from '../../../models/territory-visit-history';
 import { FirebaseTerritoryModel } from '../../../models/firebase/firebase-territory-model';
+import { FirebaseDatasource } from './firebase-datasource';
 
 /** Converts the Firebase Timestamps to Date objects */
 const convertTerritoryFirebaseTimestampsToDate = (data: FirebaseTerritoryModel): Territory => {
@@ -40,7 +42,7 @@ const convertTerritoryFirebaseTimestampsToDate = (data: FirebaseTerritoryModel):
 @Injectable({
   providedIn: 'root',
 })
-export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
+export class FirebaseTerritoryDatasourceService implements TerritoryRepository, FirebaseDatasource<Territory> {
   static readonly COLLECTION_NAME = 'territories';
   private readonly historySubCollectionName = 'history';
   private readonly territoriesCollection: CollectionReference<Territory>;
@@ -50,6 +52,10 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository {
       this.firestore,
       FirebaseTerritoryDatasourceService.COLLECTION_NAME
     ).withConverter<Territory>(firebaseEntityConverterFactory(convertTerritoryFirebaseTimestampsToDate));
+  }
+
+  createDocumentRef(id: string): DocumentReference<Territory> {
+    return doc(this.territoriesCollection, id);
   }
 
   getAllByCongregation(congregationId: string): Observable<Territory[]> {

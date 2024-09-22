@@ -10,7 +10,7 @@ import {
 } from '@angular/fire/auth';
 import { from, map, Observable, of, switchMap, take } from 'rxjs';
 
-import { AuthRepository } from '../auth.repository';
+import { AuthErrorEnum, AuthRepository, CreateUserConfig } from '../auth.repository';
 import { User } from '../../../../../../models/user';
 import { RoleEnum } from '../../../../../../models/enums/role';
 import { doc, DocumentReference, Firestore } from '@angular/fire/firestore';
@@ -38,7 +38,7 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
       .pipe(map(firebaseUser => !!firebaseUser))
   }
 
-  signInWithProvider(provider: FIREBASE_PROVIDERS, createUser = false): Observable<User | null> {
+  signInWithProvider(provider: FIREBASE_PROVIDERS, createUser = false, createUserConfig?: CreateUserConfig): Observable<User | void> {
     let authProviderInstance: GoogleAuthProvider | OAuthProvider;
 
     switch (provider) {
@@ -54,7 +54,7 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
 
     const providerRes = signInWithPopup(this.auth, authProviderInstance);
 
-    return from(providerRes).pipe(switchMap(providerUser => this.handleUserAuthentication(providerUser, createUser)));
+    return from(providerRes).pipe(switchMap(providerUser => this.handleUserAuthentication(providerUser, createUser, createUserConfig)));
   }
 
   /**
@@ -77,18 +77,6 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
     return from(signOut(this.auth));
   }
 
-  private createUser(partialUser: Pick<User, 'id' | 'name' | 'email' | 'photoUrl'>): Observable<User> {
-    // FIXME: We need to find a better way to assign the newly created User to a congregation
-    const user: FirebaseUserModel = {
-      ...partialUser,
-      role: RoleEnum.PUBLISHER,
-      // Hard-codding to LS Artur Nogueira Congregation
-      congregation: doc(this.firestore, '/congregations/cclEP8ueg2vd2JoG7OOl') as DocumentReference<Congregation, FirebaseCongregationModel>,
-    };
-
-    return this.userRepository.put(user);
-  }
-
   /**
    * Uses the result from the {@link signInWithProvider} to fetch the user from DB or create a new if
    * {@link createUser} is true.
@@ -100,10 +88,11 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
    * @param providerUser The response from the AuthProvider that will be processed.
    * @param createUser When true, users that are not present in the database will be created (invite link use case).
    * If false, the user will be deleted.
+   * @param createUserConfig When provided, will use the configuration found in here to set the user values.
    *
    * @returns the user from DB.
    */
-  private handleUserAuthentication({ user: providerUser }: UserCredential, createUser = false): Observable<User | null> {
+  private handleUserAuthentication({ user: providerUser }: UserCredential, createUser = false, createUserConfig?: CreateUserConfig): Observable<User | void> {
     return this.userRepository.getById(providerUser.uid).pipe(
       take(1),
       switchMap(user => {
@@ -111,19 +100,33 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
           return of(user);
         }
 
-        // This is a new user.
-        if (!createUser) {
+        // This is a new user. If this is user is not supposed to be created, or it doesn't have the same email as
+        // provided in the config, delete it.
+        const isConfigEmailDifferent = (createUserConfig?.email && providerUser.email?.toLowerCase() !== createUserConfig.email.toLowerCase());
 
-          return from(providerUser.delete()).pipe(map(_ => null));
+        if (!createUser || isConfigEmailDifferent) {
+          return from(providerUser.delete()).pipe(
+            map(_ => {
+              if (isConfigEmailDifferent) {
+                throw new Error(AuthErrorEnum.INVALID_EMAIL)
+              }
+            })
+          );
         }
 
-        return this.createUser({
+        if (!createUserConfig?.congregation) {
+          throw new Error(AuthErrorEnum.INVALID_CREATE_USER_DATA)
+        }
+
+        return this.userRepository.put({
           id: providerUser.uid,
           email: providerUser.email ?? '',
           name: providerUser.displayName ?? 'Unidentified',
           photoUrl: providerUser.photoURL ?? '',
+          role: createUserConfig?.role ?? RoleEnum.PUBLISHER,
+          congregation: doc(this.firestore, `/congregations/${createUserConfig.congregation.id}`) as DocumentReference<Congregation, FirebaseCongregationModel>
         });
-      })
+      }),
     );
   }
 }

@@ -21,11 +21,20 @@ export class InviteBO {
       createdAt: new Date(),
       role: role,
       isValid: true,
-      createdBy: 'Test',
+      createdBy: this.userState.currentUser.email,
       congregation: this.userState.currentUser?.congregation,
       email: email ?? undefined,
     };
 
     return this.inviteRepository.add(inviteLink);
+  }
+
+
+  consumeInviteLink(inviteLink: InvitationLink): Observable<void> {
+    inviteLink.isValid = false;
+    inviteLink.usedAt = new Date();
+    inviteLink.usedBy = this.userState?.currentUser?.email;
+
+    return this.inviteRepository.update(inviteLink);
   }
 }

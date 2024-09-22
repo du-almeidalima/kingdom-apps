@@ -12,19 +12,19 @@
           {
             "default": [
               // Fields
-              "private-static-field",
               "protected-static-field",
+              "private-static-field",
               "public-static-field",
-              "private-field",
               "protected-field",
+              "private-field",
               "public-field",
-              "private-decorated-field",
               "protected-decorated-field",
+              "private-decorated-field",
               "public-decorated-field",
               // Getters
+              "protected-get",
               "private-get",
               "public-get",
-              "protected-get",
               // Constructor
               "constructor",
               // Methods
