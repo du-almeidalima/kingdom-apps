@@ -15,6 +15,7 @@ export const environment = {
   production: process.env['NX_ENV'] === 'production',
   env: process.env['NX_ENV'],
   useCloud: process.env['NX_USE_CLOUD'] === 'true',
+  baseUrl: process.env['NX_APP_BASE_URL'],
 };
 
 /*

@@ -21,4 +21,6 @@ export * from './lib/components/icon/icon.component';
 export * from './lib/components/spinner/spinner.component';
 
 // Config
-export {APP_ADMIN_ROLE} from './lib/directives/authorize/authorize.directive';
+export { APP_ADMIN_ROLE } from './lib/directives/authorize/authorize.directive';
+
+export * from './lib/components/copy-text-block/copy-text-block.component';

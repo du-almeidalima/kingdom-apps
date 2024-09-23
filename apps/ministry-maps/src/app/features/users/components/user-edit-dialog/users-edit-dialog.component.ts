@@ -11,7 +11,6 @@ import { UserRepository } from '../../../../repositories/user.repository';
 import { UserStateService } from '../../../../state/user.state.service';
 import { User } from '../../../../../models/user';
 import { finalize } from 'rxjs';
-import { user } from '@angular/fire/auth';
 
 export type UserEditDialogData = {
   user: User;
@@ -35,42 +34,42 @@ export type UserEditDialogData = {
         <lib-form-field class="mt-5">
           <label lib-label for="user-name">Permissão</label>
           <kingdom-apps-icon-radio formControlName="role" [value]="RoleEnum.PUBLISHER" class="mt-3">
-            <div class="option">
-              <span class="option__title">Publicador</span>
-              <span class="option__description">Permisão mais básica, apenas está associado a uma congregação.</span>
+            <div class="radio-option">
+              <span class="radio-option__title">Publicador</span>
+              <span class="radio-option__description">Permisão mais básica, apenas está associado a uma congregação.</span>
             </div>
           </kingdom-apps-icon-radio>
           <kingdom-apps-icon-radio formControlName="role" [value]="RoleEnum.ORGANIZER" class="mt-3">
-            <div class="option">
-              <span class="option__title">Organizador</span>
-              <span class="option__description">
+            <div class="radio-option">
+              <span class="radio-option__title">Organizador</span>
+              <span class="radio-option__description">
                 Indicada para Publicadores qualificados ou Servos Ministeriais; Pode designar e atualizar territórios.
               </span>
             </div>
           </kingdom-apps-icon-radio>
           <kingdom-apps-icon-radio formControlName="role" [value]="RoleEnum.ELDER" class="mt-3">
-            <div class="option">
-              <span class="option__title">Ancião</span>
-              <span class="option__description">
+            <div class="radio-option">
+              <span class="radio-option__title">Ancião</span>
+              <span class="radio-option__description">
                 Tem todas as permissões de um Organizador, mas também pode adicionar/remover territórios e ver pessoas
                 da congregação.
               </span>
             </div>
           </kingdom-apps-icon-radio>
           <kingdom-apps-icon-radio formControlName="role" [value]="RoleEnum.ADMIN" class="mt-3">
-            <div class="option">
-              <span class="option__title">Administrador</span>
-              <span class="option__description">
+            <div class="radio-option">
+              <span class="radio-option__title">Administrador</span>
+              <span class="radio-option__description">
                 Permissões geralmente dada ao SS. Tem acesso total aos mapas da congregação além de poder adicionar,
-                excluir e alterar permissões de usuários,
+                excluir e alterar permissões de usuários.
               </span>
             </div>
           </kingdom-apps-icon-radio>
           @if (canEditAdminRoles) {
           <kingdom-apps-icon-radio formControlName="role" [value]="RoleEnum.SUPERINTENDENT" class="mt-3">
-            <div class="option">
-              <span class="option__title">Superintendente</span>
-              <span class="option__description">
+            <div class="radio-option">
+              <span class="radio-option__title">Superintendente</span>
+              <span class="radio-option__description">
                 Tem as mesmas permissões de um Ancião, mas pode mudar de congregações.
               </span>
             </div>
@@ -118,8 +117,6 @@ export class UsersEditDialogComponent {
     formBuilder: NonNullableFormBuilder
   ) {
     this.canEditAdminRoles = !!userState.currentUser?.role.includes(RoleEnum.APP_ADMIN);
-    let isFormDisabled = false;
-
     this.form = formBuilder.group({
       role: formBuilder.control(data.user.role),
       name: formBuilder.control(data.user.name),

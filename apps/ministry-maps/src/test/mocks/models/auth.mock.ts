@@ -1,6 +1,6 @@
 import { User } from '../../../models/user';
 import { EMPTY, Observable, of } from 'rxjs';
-import { AuthRepository } from '../../../app/core/features/auth/repositories/auth.repository';
+import { AuthRepository, CreateUserConfig } from '../../../app/core/features/auth/repositories/auth.repository';
 import { userMockBuilder } from './user.mock';
 
 // MOCK CLASSES
@@ -13,7 +13,7 @@ export class AuthRepositoryMock implements AuthRepository {
     return EMPTY;
   }
 
-  signInWithProvider(providers?: string): Observable<User> {
+  signInWithProvider(providers: string, createUser: boolean, createUserEmail?: CreateUserConfig): Observable<User> {
     return of(userMockBuilder({}));
   }
 }

@@ -9,6 +9,8 @@ import { FirebaseTerritoryDatasourceService } from './firebase/firebase-territor
 import { FirebaseUserDatasourceService } from './firebase/firebase-user-datasource.service';
 import { TerritoryRepository } from './territories.repository';
 import { UserRepository } from './user.repository';
+import { InvitationLinkRepository } from './invitation-link.repository';
+import { FirebaseInvitationLinkDataSourceService } from './firebase/firebase-invitation-link-datasource.service';
 
 @NgModule({
   declarations: [],
@@ -34,6 +36,10 @@ import { UserRepository } from './user.repository';
     //   provide: NoteRepository,
     //   useClass: NoteDatasourceService,
     // },
+    {
+      provide: InvitationLinkRepository,
+      useClass: FirebaseInvitationLinkDataSourceService,
+    },
   ],
 })
 export class RepositoriesModule {}

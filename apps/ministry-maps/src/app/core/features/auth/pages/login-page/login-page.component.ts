@@ -13,16 +13,23 @@ import { AuthRoutesEnum } from '../../models/enums/auth-routes';
   styleUrls: ['./login-page.component.scss'],
 })
 export class LoginPageComponent {
+  protected readonly FIREBASE_PROVIDERS = FIREBASE_PROVIDERS;
+
   loading = false;
 
   constructor(private authService: AuthService, private router: Router) {}
 
-  onGoogleClick() {
+  handleProviderLoginClick(firebaseProvider: FIREBASE_PROVIDERS) {
     this.loading = true;
     this.authService
-      .signInWithProvider(FIREBASE_PROVIDERS.GOOGLE)
+      .signInWithProvider(firebaseProvider)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe(user => {
+        if (!user) {
+          this.router.navigate([AuthRoutesEnum.NO_ACCOUNT]);
+          return;
+        }
+
         if (user.role === RoleEnum.PUBLISHER) {
           this.router.navigate([AuthRoutesEnum.WELCOME]);
         } else {

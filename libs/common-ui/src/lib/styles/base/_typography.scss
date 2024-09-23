@@ -41,7 +41,7 @@
   color: variables.$text;
 }
 
-:is(.t-caption) {
+:where(.t-caption) {
   color: variables.$text-medium;
 }
 

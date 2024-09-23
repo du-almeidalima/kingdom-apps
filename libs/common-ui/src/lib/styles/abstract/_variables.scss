@@ -1,6 +1,7 @@
 // COLORS
 $primary-green: #07AB3BFF;
 
+$green-50: #DCFCE7;
 $green-100: #83D59D;
 $green-200: #45C06C;
 $green-300: #07AB3BFF;
@@ -15,6 +16,7 @@ $orange-300: #FF9800;
 
 $deep-purple-900: #311B92;
 
+$blue-50: #F0F9FF;
 $blue-100: #90CAF9;
 $blue-200: #2196F3;
 $blue-300: #1565C0;
@@ -54,6 +56,6 @@ $background-transition: 200ms linear background;
 $text: rgba(0, 0, 0, 0.87);
 $text-medium: rgba(0, 0, 0, 0.60);
 $text-low: rgba(0, 0, 0, 0.38);
-$text-primary: $green-200;
+$text-primary: $green-300;
 $text-secondary: $green-100;
 $text-error: $red-300;
