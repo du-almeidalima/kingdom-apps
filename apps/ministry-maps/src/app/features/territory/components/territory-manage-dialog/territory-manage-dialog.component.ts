@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { finalize, Observable, retry, switchMap } from 'rxjs';
@@ -7,6 +7,7 @@ import { TerritoryRepository } from '../../../../repositories/territories.reposi
 import { Congregation } from '../../../../../models/congregation';
 import { Territory, TerritoryIcon } from '../../../../../models/territory';
 import { white100 } from '@kingdom-apps/common-ui';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export type TerritoryDialogData = {
   territory?: Territory;
@@ -20,6 +21,8 @@ type TerritoryForm = {
   note: FormControl<string>;
   mapsLink: FormControl<string | undefined>;
   icon: FormControl<TerritoryIcon>;
+  isBibleStudent: FormControl<boolean | undefined>;
+  bibleInstructor: FormControl<string | undefined>;
 };
 
 @Component({
@@ -29,26 +32,30 @@ type TerritoryForm = {
   template: `
     <lib-dialog title="{{ isEdit ? 'Editar Território' : 'Adicionar Território' }}">
       <form [formGroup]="form" (ngSubmit)="handleSubmission()" id="territory-form">
+        <!-- City -->
         <lib-form-field>
-          <label lib-label for="congregation-city">Cidade</label>
-          <select lib-select formControlName="city" id="congregation-city">
+          <label lib-label for="territory-city">Cidade</label>
+          <select lib-select formControlName="city" id="territory-city">
             <option [value]="city" *ngFor="let city of data.cities">
               {{ city }}
             </option>
           </select>
         </lib-form-field>
+        <!-- Icon -->
         <lib-form-field class="mt-5">
-          <label lib-label for="congregation-icon">Ícone</label>
-          <select lib-select formControlName="icon" id="congregation-icon">
+          <label lib-label for="territory-icon">Ícone</label>
+          <select lib-select formControlName="icon" id="territory-icon">
             <option [value]="territoryIcon" *ngFor="let territoryIcon of territoryIcons">
               {{ territoryIcon | territoryIconTranslator }}
             </option>
           </select>
         </lib-form-field>
+        <!-- Address -->
         <lib-form-field class="mt-5">
-          <label lib-label for="congregation-address">Endereço</label>
-          <input lib-input formControlName="address" type="text" id="congregation-address" />
+          <label lib-label for="territory-address">Endereço</label>
+          <input lib-input formControlName="address" type="text" id="territory-address" />
         </lib-form-field>
+        <!-- Note  -->
         <lib-form-field class="mt-5">
           <label lib-label for="note">Observação</label>
           <textarea
@@ -59,16 +66,34 @@ type TerritoryForm = {
             class="resize-y"
             autocomplete="off"></textarea>
         </lib-form-field>
+        <!-- Google Maps Link -->
         <lib-form-field class="mt-5">
-          <label lib-label for="congregation-maps-link">Link do Maps</label>
+          <label lib-label for="territory-maps-link">Link do Maps</label>
           <input
             lib-input
             formControlName="mapsLink"
             type="text"
-            id="congregation-maps-link"
+            id="territory-maps-link"
             autocomplete="off"
             placeholder="https://goo.gl/maps/* ou https://maps.app.goo.gl/*" />
         </lib-form-field>
+        <!-- Revisit -->
+        <lib-form-field class="mt-4" orientation="horizontal">
+          <label lib-label for="bible-student-checkbox">Estudando a Bíblia</label>
+          <input formControlName="isBibleStudent" type="checkbox" id="bible-student-checkbox" />
+        </lib-form-field>
+        @if(this.form.controls.isBibleStudent.value) {
+        <!-- Bible Instructor -->
+        <lib-form-field class="mt-5">
+          <label lib-label for="bible-instructor">Instrutor</label>
+          <input
+            lib-input
+            formControlName="bibleInstructor"
+            type="text"
+            id="bible-instructor"
+            placeholder="Nome do Instrutor" />
+        </lib-form-field>
+        }
       </form>
       <lib-dialog-footer>
         <div class="flex justify-end gap-4">
@@ -88,6 +113,8 @@ type TerritoryForm = {
   `,
 })
 export class TerritoryManageDialogComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+
   public readonly territoryIcons: TerritoryIcon[] = Object.values(TerritoryIcon);
   public readonly white = white100;
   public isSubmitting = false;
@@ -112,11 +139,16 @@ export class TerritoryManageDialogComponent implements OnInit {
       address: fb.control('', { validators: [Validators.required], nonNullable: true }),
       note: fb.control('', { nonNullable: true }),
       mapsLink: fb.control<string | undefined>(undefined, { nonNullable: true }),
+      isBibleStudent: fb.control<boolean | undefined>(false, { nonNullable: true }),
+      bibleInstructor: fb.control<string | undefined>(undefined, { nonNullable: true }),
     });
 
     if (this.data.territory) {
       this.form.patchValue(this.data.territory);
     }
+
+    // Form Listeners
+    this.setIsBibleStudentListener();
   }
 
   handleSubmission() {
@@ -151,7 +183,7 @@ export class TerritoryManageDialogComponent implements OnInit {
 
           return this.territoriesRepository.add(territory);
         })
-      )
+      );
     }
 
     territoryRequest$
@@ -164,5 +196,11 @@ export class TerritoryManageDialogComponent implements OnInit {
       .subscribe(() => {
         this.dialogRef.close();
       });
+  }
+
+  private setIsBibleStudentListener() {
+    this.form.controls.isBibleStudent.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(value => {
+      value && this.form.controls.bibleInstructor.reset();
+    });
   }
 }

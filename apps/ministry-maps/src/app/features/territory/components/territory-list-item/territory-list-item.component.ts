@@ -42,6 +42,12 @@ import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
           *ngIf='hasRecentlyAskedToStopVisiting'>
               Não quer visitas
         </span>
+        <span
+          class='territory-alert-badge territory-alert-badge--bible-student'
+          title='Essa pessoa é um estudante da Bíblia'
+          *ngIf='isBibleStudent'>
+              Estudante
+        </span>
       </div>
       <!-- RIGHT SIDE MENU -->
       <div class='territory-list-item__menu-button'>
@@ -131,6 +137,7 @@ export class TerritoryListItemComponent implements OnInit {
   public hasRecentlyMoved = false;
   public hasRecentlyRevisit = false;
   public hasRecentlyAskedToStopVisiting = false;
+  public isBibleStudent = false;
   public hasAlerts = false;
 
   @Input()
@@ -161,6 +168,7 @@ export class TerritoryListItemComponent implements OnInit {
     this.hasRecentlyMoved = TerritoryAlertsBO.hasRecentlyMoved(this.territory);
     this.hasRecentlyRevisit = TerritoryAlertsBO.hasRecentRevisit(this.territory);
     this.hasRecentlyAskedToStopVisiting = TerritoryAlertsBO.hasRecentlyAskedToStopVisiting(this.territory);
+    this.isBibleStudent = TerritoryAlertsBO.isBibleStudent(this.territory);
 
     this.hasAlerts = this.hasRecentlyMoved || this.hasRecentlyRevisit || this.hasRecentlyAskedToStopVisiting;
   }

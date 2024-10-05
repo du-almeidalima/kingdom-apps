@@ -78,6 +78,12 @@ import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territor
               *ngIf='hasRecentlyAskedToStopVisiting'>
               Não quer visitas
             </span>
+            <span
+              class='territory-alert-badge territory-alert-badge--bible-student'
+              title='Essa pessoa é um estudante da Bíblia'
+              *ngIf='isBibleStudent'>
+              Estudante
+        </span>
           </div>
         </div>
         <!-- BUTTONS CONTAINER -->
@@ -105,6 +111,7 @@ export class TerritoryCheckboxComponent implements ControlValueAccessor, OnInit 
   hasRecentRevisit = false;
   hasRecentlyMoved = false;
   hasRecentlyAskedToStopVisiting = false;
+  isBibleStudent = false;
   icon: Icons = 'generation-3';
   isIconLarge = false;
 
@@ -131,6 +138,8 @@ export class TerritoryCheckboxComponent implements ControlValueAccessor, OnInit 
     this.hasRecentRevisit = TerritoryAlertsBO.hasRecentRevisit(this.territory);
     this.hasRecentlyMoved = TerritoryAlertsBO.hasRecentlyMoved(this.territory);
     this.hasRecentlyAskedToStopVisiting = TerritoryAlertsBO.hasRecentlyAskedToStopVisiting(this.territory);
+    this.isBibleStudent = TerritoryAlertsBO.isBibleStudent(this.territory);
+
     this.icon = mapTerritoryIcon(this.territory.icon);
     this.isIconLarge = isIconLarge(this.icon);
   }

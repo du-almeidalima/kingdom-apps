@@ -66,7 +66,8 @@ export class TerritoriesPageComponent implements OnInit {
     // Had to create an identifier for recentHistory and isResolved changes so Angular can understand changes.
     const recentVisitsId = item.recentHistory?.reduce((acc, cur) => acc + (cur.isResolved ? 1 : 0), 0);
 
-    return `${item.id}-rh${recentVisitsId}`;
+    // TODO: Improve this, maybe create a hash based on the properties
+    return `${item.id}-rh${recentVisitsId}-${item.isBibleStudent}`;
   }
 
   /**

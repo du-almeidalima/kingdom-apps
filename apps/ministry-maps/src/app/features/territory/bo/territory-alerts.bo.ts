@@ -54,6 +54,11 @@ export class TerritoryAlertsBO {
     });
   }
 
+  /** Finds if a Territory is from a Bible student by checking the {@link Territory#isBibleStudent|isBibleStudent} */
+  static isBibleStudent(territory: Territory) {
+    return !!territory.isBibleStudent;
+  }
+
   /** Finds alerts that need attention from the Organizer. Useful when assigning territories */
   static findImportantAlert(territory: Territory) {
     if (TerritoryAlertsBO.hasRecentlyMoved(territory)) {
