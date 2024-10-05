@@ -47,7 +47,7 @@ export class TerritoryAlertsBO {
         const currentDate = new Date();
         const difference = differenceInMonths(history.date, currentDate);
 
-        return difference < 1;
+        return difference < 24;
       }
 
       return false;
