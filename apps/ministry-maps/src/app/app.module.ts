@@ -1,5 +1,4 @@
 import { APP_INITIALIZER, Injector, isDevMode, NgModule } from '@angular/core';
-import { createCustomElement } from '@angular/elements';
 import { ScreenTrackingService, UserTrackingService } from '@angular/fire/analytics';
 import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { connectAuthEmulator, getAuth, provideAuth } from '@angular/fire/auth';
@@ -24,6 +23,7 @@ import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
 import { RepositoriesModule } from './repositories/repositories.module';
 import { SharedModule } from './shared/shared.module';
+import { createCustomElement } from '@angular/elements';
 
 @NgModule({
   declarations: [AppComponent],
@@ -80,15 +80,6 @@ import { SharedModule } from './shared/shared.module';
         console.log('emulador');
         connectFirestoreEmulator(firestore, 'localhost', 8080);
       }
-
-      // TODO: Remove this after validating everything is working ok with the new way of using persistentLocalCache
-      // enableIndexedDbPersistence(firestore)
-      //   .then(() => {
-      //     console.log('Persistence enabled');
-      //   })
-      //   .catch(err => {
-      //     console.log('Persistence failed', err);
-      //   });
 
       return firestore;
     }),

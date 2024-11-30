@@ -50,7 +50,10 @@ Thumbs.db
 *-debug.log
 .runtimeconfig.json
 
+# Nx
 .nx/cache/*
+.nx/workspace-data/*
+
 # Nx-Firebase
 **/.emulators/*
 **/.firebase/*
