@@ -2,7 +2,7 @@
 export default {
   displayName: 'common-ui',
   preset: '../../jest.preset.js',
-  setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/src/setup-jest.ts'],
   globals: {},
   coverageDirectory: '../../coverage/libs/common-ui',
   transform: {
