@@ -20,7 +20,9 @@ $icon-button-padding: .5rem;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 
+  transition: variables.$background-transition;
+
   &:hover, &:active, &:focus {
-    background-color: lighten(variables.$grey-100, 50%);
+    background: var(--background-hover-color);
   }
 }

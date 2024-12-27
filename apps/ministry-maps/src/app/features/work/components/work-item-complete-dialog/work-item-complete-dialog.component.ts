@@ -84,7 +84,7 @@ type WorkItemCompleteForm = ControlsOf<WorkItemCompleteDialogData>;
       </form>
       <lib-dialog-footer class='sticky bottom-0 left-0 right-0'>
         <div class='flex justify-end gap-4'>
-          <button lib-button (click)='handleCancel()'>Cancelar</button>
+          <button lib-button lib-dialog-close>Cancelar</button>
           <button lib-button btnType='primary' type='submit' form='work-item-complete' [disabled]="form.invalid">
             {{isEdit ? 'Atualizar' : 'Concluir'}}
           </button>
@@ -127,11 +127,6 @@ export class WorkItemCompleteDialogComponent implements OnInit {
 
     // Form Listeners
     this._setIsRevisitListener()
-  }
-
-  // TODO: Refactor the basic dialog logic into a base class
-  handleCancel() {
-    this.dialogRef.close();
   }
 
   handleFormSubmit() {

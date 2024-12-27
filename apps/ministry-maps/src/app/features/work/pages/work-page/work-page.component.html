@@ -9,7 +9,7 @@
         class='mt-5'
         *ngFor='let territory of territories'
         [territory]='territory'
-        (territoryUpdated)='updateWorkItem($event)'
+        (territoryUpdated)='handleTerritoryUpdated($event)'
       >
       </kingdom-apps-work-item>
     </ng-template>
@@ -27,7 +27,8 @@
         *ngFor='let territory of doneTerritories'
         [territory]='territory'
         [done]='true'
-        (territoryUpdated)='updateWorkItem($event)'
+        (territoryUpdated)='handleTerritoryUpdated($event)'
+        (lastVisitReverted)="handleLastVisitReverted($event)"
       >
       </kingdom-apps-work-item>
     </ng-template>

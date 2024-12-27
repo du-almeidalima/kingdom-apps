@@ -7,21 +7,25 @@ import {
   DocumentReference,
   Firestore,
   setDoc,
-  updateDoc,
 } from '@angular/fire/firestore';
 import { from, Observable, switchMap, take } from 'rxjs';
 
 import { Designation } from '../../../models/designation';
 import { FirebaseDesignationModel } from '../../../models/firebase/firebase-designation-territory-model';
-import { firebaseEntityConverterFactory } from '../../shared/utils/firebase-entity-converter';
+import {
+  convertFirebaseTimestampToDate,
+  firebaseEntityConverterFactory,
+} from '../../shared/utils/firebase-entity-converter';
 import { DesignationRepository } from '../designation.repository';
 import { FirebaseDatasource } from './firebase-datasource';
 
 const convertHistoryDateFirebaseTimestampToDate = (data: FirebaseDesignationModel): Designation => {
   return {
     ...data,
+    createdAt: convertFirebaseTimestampToDate(data.createdAt),
     territories: data.territories.map(t => ({
       ...t,
+      lastVisit: convertFirebaseTimestampToDate(t.lastVisit),
       history: t.history.map(h => ({
         ...h,
         date: h.date.toDate(),
@@ -71,6 +75,6 @@ export class FirebaseDesignationDatasourceService implements DesignationReposito
   update(designationTerritory: Designation): Observable<void> {
     const designationDocReference = doc(this.designationCollection, `${designationTerritory.id}`);
 
-    return from(updateDoc(designationDocReference, designationTerritory));
+    return from(setDoc(designationDocReference, designationTerritory));
   }
 }

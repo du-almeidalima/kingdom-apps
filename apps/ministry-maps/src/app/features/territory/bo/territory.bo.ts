@@ -18,10 +18,16 @@ export class TerritoryBO {
 
     return territories$.pipe(
       switchMap(territories => {
-        const designationTerritories: DesignationTerritory[] = territories.map(t => ({
-          ...t,
-          status: DesignationStatusEnum.PENDING,
-        }));
+        const designationTerritories: DesignationTerritory[] = territories.map(t => {
+          // This is not needed for the Designation Territory
+          delete t['recentHistory'];
+
+          return {
+            ...t,
+            status: DesignationStatusEnum.PENDING,
+            history: t?.history?.slice(0, 5) ?? [],
+          };
+        });
 
         const newDesignation: Omit<Designation, 'id'> = {
           territories: designationTerritories,
@@ -36,7 +42,7 @@ export class TerritoryBO {
 
   /**
    * Due to a limitation in Firebase that only allow 10 Firebase Query "IN", we are batching the Territory IDs call
-   * And then joning the observables.
+   * And then joining the observables.
    */
   private batchGetTerritoriesInIds(territoriesIds: string[]): Observable<Territory[]> {
     const BATCH_SIZE = 10;

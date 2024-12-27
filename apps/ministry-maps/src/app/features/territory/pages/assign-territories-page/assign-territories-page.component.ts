@@ -83,7 +83,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
     this.isCreatingAssignment = true;
 
     this.territoryBO
-      .createDesignationForTerritories(selectedTerritories)
+      .createDesignationForTerritories(selectedTerritories, this.userState.currentUser?.congregation?.id)
       .pipe(
         finalize(() => {
           this.isCreatingAssignment = false;
