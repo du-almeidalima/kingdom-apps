@@ -27,3 +27,4 @@ export type Icons =
   | 'user-29'
   | 'speech-bubble-26'
   | 'copy-lined'
+  | 'eraser-2'

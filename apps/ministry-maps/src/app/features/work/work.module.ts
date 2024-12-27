@@ -7,13 +7,12 @@ import { WorkRoutesModule } from './work-routes.module';
 import { WorkItemComponent } from './components/work-item/work-item.component';
 import { WorkItemCompleteDialogComponent } from './components/work-item-complete-dialog/work-item-complete-dialog.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { WorkBO } from './bo/work.bo';
+import { CommonDirectivesModule } from '@kingdom-apps/common-ui';
 
 @NgModule({
-  declarations: [
-    WorkPageComponent,
-    WorkItemComponent,
-    WorkItemCompleteDialogComponent,
-  ],
-  imports: [CommonModule, SharedModule, WorkRoutesModule, FormsModule, ReactiveFormsModule],
+  declarations: [WorkPageComponent, WorkItemComponent, WorkItemCompleteDialogComponent],
+  imports: [CommonModule, SharedModule, WorkRoutesModule, FormsModule, ReactiveFormsModule, CommonDirectivesModule],
+  providers: [WorkBO],
 })
 export class WorkModule {}

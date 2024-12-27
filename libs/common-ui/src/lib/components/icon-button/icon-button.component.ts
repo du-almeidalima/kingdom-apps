@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, OnInit, Renderer2 } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, Renderer2 } from '@angular/core';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -10,7 +10,17 @@ import { ChangeDetectionStrategy, Component, ElementRef, OnInit, Renderer2 } fro
 export class IconButtonComponent implements OnInit {
   constructor(private readonly renderer: Renderer2, private readonly elRef: ElementRef<HTMLElement>) {}
 
+  @Input()
+  hoverBackgroundColor = '#dfdddd';
+
   ngOnInit() {
     this.renderer.addClass(this.elRef.nativeElement, `icon-button`);
+    this.renderer.setProperty(
+      this.elRef.nativeElement,
+      `style`,
+      `
+        --background-hover-color: ${this.hoverBackgroundColor}
+      `
+    );
   }
 }

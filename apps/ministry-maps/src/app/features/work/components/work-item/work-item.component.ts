@@ -1,7 +1,15 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 
-import { grey400, Icons, primaryGreen } from '@kingdom-apps/common-ui';
+import {
+  ConfirmDialogComponent,
+  ConfirmDialogData,
+  grey200,
+  grey400,
+  Icons,
+  primaryGreen,
+  white200,
+} from '@kingdom-apps/common-ui';
 import {
   WorkItemCompleteDialogComponent,
   WorkItemCompleteDialogData,
@@ -18,50 +26,56 @@ import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territor
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./work-item.component.scss'],
   template: `
-    <div class='work-item'>
+    <div class="work-item">
       <!-- Checkbox -->
       <label
-        class='work-item__checkbox-container'
-        title='Concluir visita'
+        class="work-item__checkbox-container"
+        [title]="done ? 'Apagar Visita' : 'Concluir visita'"
         [ngClass]="{ 'work-item__checkbox-container--disabled': done }"
-        [for]='territory.id'>
-        <input
-          class='work-item__checkbox'
-          type='checkbox'
-          [id]='territory.id'
-          [checked]='territory.status === DesignationStatusEnum.DONE'
-          [disabled]='done'
-          (click)='handleCheck($event)' />
+        [for]="territory.id">
+        @if (done) {
+          <button lib-icon-button
+                  type="button"
+                  [hoverBackgroundColor]="disabledButtonBackgroundColor"
+                  (click)="handleUndo()"
+          >
+            <lib-icon [fillColor]="whiteButtonColor" icon="eraser-2"></lib-icon>
+          </button>
+        } @else {
+          <input class="work-item__checkbox" type="checkbox" [id]="territory.id" (click)="handleCheck($event)" />
+        }
       </label>
       <!-- Content -->
-      <div class='work-item__content-container'>
+      <div class="work-item__content-container">
         <!-- List Tile -->
-        <div class='work-item__list-tile'>
+        <div class="work-item__list-tile">
           <!-- Icon -->
           <lib-icon
-            class='work-item__icon'
+            class="work-item__icon"
             [ngClass]="{ 'work-item__icon--large': isIconLarge }"
-            [fillColor]='iconColor'
-            [icon]='icon' />
+            [fillColor]="iconColor"
+            [icon]="icon" />
           <!-- Title and Subtitle -->
-          <div class='work-item__title-subtitle-container'>
-            <h3 class='work-item__title'>{{ territory.address }}</h3>
-            <span class='work-item__subtitle'>{{ territory.note }}</span>
+          <div class="work-item__title-subtitle-container">
+            <h3 class="work-item__title">{{ territory.address }}</h3>
+            <span class="work-item__subtitle">{{ territory.note }}</span>
           </div>
         </div>
         <!-- Footer -->
-        <div class='work-item__footer'>
-          <span class='work-item__city'>{{ territory.city }}</span>
-          <div class='work-item__buttons-container'>
-            <button lib-icon-button *ngIf='territory.status === DesignationStatusEnum.DONE' (click)='handleEdit()'>
-              <lib-icon [fillColor]='buttonIconColor' icon='pencil-lined' />
+        <div class="work-item__footer">
+          <span class="work-item__city">{{ territory.city }}</span>
+          <div class="work-item__buttons-container">
+            <button lib-icon-button *ngIf="territory.status === DesignationStatusEnum.DONE" (click)="handleEdit()">
+              <lib-icon [fillColor]="buttonIconColor" icon="pencil-lined" />
             </button>
-            <button lib-icon-button *ngIf='territory.mapsLink' (click)='handleOpenMaps(territory.mapsLink)'>
-              <lib-icon [fillColor]='buttonIconColor' icon='map-5' />
+            <button lib-icon-button *ngIf="territory.mapsLink" (click)="handleOpenMaps(territory.mapsLink)">
+              <lib-icon [fillColor]="buttonIconColor" icon="map-5" />
             </button>
-            <button lib-icon-button *ngIf='territory.history && territory.history.length > 0'
-                    (click)='handleOpenHistory()'>
-              <lib-icon [fillColor]='buttonIconColor' icon='time-17' />
+            <button
+              lib-icon-button
+              *ngIf="territory.history && territory.history.length > 0"
+              (click)="handleOpenHistory()">
+              <lib-icon [fillColor]="buttonIconColor" icon="time-17" />
             </button>
           </div>
         </div>
@@ -70,9 +84,12 @@ import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territor
   `,
 })
 export class WorkItemComponent implements OnInit {
-  public readonly DesignationStatusEnum = DesignationStatusEnum;
-  public buttonIconColor = primaryGreen;
-  public iconColor = grey400;
+  protected readonly DesignationStatusEnum = DesignationStatusEnum;
+  protected readonly whiteButtonColor = white200;
+  protected readonly disabledButtonBackgroundColor = grey200;
+  protected readonly buttonIconColor = primaryGreen;
+  protected readonly iconColor = grey400;
+
   public icon: Icons = 'generation-3';
   public isIconLarge = false;
 
@@ -82,6 +99,8 @@ export class WorkItemComponent implements OnInit {
   done = false;
   @Output()
   territoryUpdated = new EventEmitter<DesignationTerritory>();
+  @Output()
+  lastVisitReverted = new EventEmitter<DesignationTerritory>();
 
   constructor(private readonly dialog: Dialog) {}
 
@@ -99,16 +118,19 @@ export class WorkItemComponent implements OnInit {
 
     this.dialog.open<WorkItemCompleteDialogData>(WorkItemCompleteDialogComponent).closed.subscribe(data => {
       if (data) {
+        const nowDate = new Date();
+
         const historyEntry: TerritoryVisitHistory = {
           ...data,
-          date: new Date(),
-          id: new Date().getTime().toString(),
+          date: nowDate,
+          id: nowDate.getTime().toString(),
         };
 
         const updateDesignationTerritory: DesignationTerritory = {
           ...this.territory,
           status: DesignationStatusEnum.DONE,
           history: [...(this.territory.history ?? []), historyEntry],
+          lastVisit: nowDate,
         };
 
         this.territoryUpdated.emit(updateDesignationTerritory);
@@ -152,6 +174,24 @@ export class WorkItemComponent implements OnInit {
           };
 
           this.territoryUpdated.emit(updatedDesignationTerritory);
+        }
+      });
+  }
+
+  handleUndo() {
+    this.dialog
+      .open<ConfirmDialogComponent, ConfirmDialogData>(ConfirmDialogComponent, {
+        data: {
+          title: 'Apagar Visita',
+          bodyText: `
+            <p>Você gostaria de apagar essa visita?</p>
+            <p class='mt-5'>Isso vai apagar todos os dados que você preencheu.</p>
+          `,
+        },
+      })
+      .closed.subscribe(res => {
+        if (res) {
+          this.lastVisitReverted.emit(this.territory);
         }
       });
   }

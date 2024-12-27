@@ -1,11 +1,12 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { concat, Observable, of, retry, Subscription, tap } from 'rxjs';
+import { catchError, concat, Observable, of, retry, Subscription, tap } from 'rxjs';
 
 import { DesignationRepository } from '../../../../repositories/designation.repository';
 import { Designation, DesignationTerritory } from '../../../../../models/designation';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { DesignationStatusEnum } from '../../../../../models/enums/designation-status';
+import { WorkBO } from '../../bo/work.bo';
 
 @Component({
   selector: 'kingdom-apps-work-page',
@@ -22,7 +23,8 @@ export class WorkPageComponent implements OnInit, OnDestroy {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly designationRepository: DesignationRepository,
-    private readonly territoryRepository: TerritoryRepository
+    private readonly territoryRepository: TerritoryRepository,
+    private readonly workBO: WorkBO
   ) {}
 
   ngOnInit(): void {
@@ -59,26 +61,12 @@ export class WorkPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  updateWorkItem(designationTerritory: DesignationTerritory) {
-    // Manually mutating the designations territories so order is preserved. Maybe it should be collection?
-    const designationTerritories = [...this.designation!.territories];
-    const updatedDesignationTerritories = designationTerritories.map(t => {
-      return t.id === designationTerritory.id
-        ? {
-            ...designationTerritory,
-          }
-        : t;
-    });
-    const updatedDesignation: Designation = {
-      ...this.designation!,
-      territories: updatedDesignationTerritories,
-    };
-
+  handleTerritoryUpdated(designationTerritory: DesignationTerritory) {
+    const updatedDesignation = this.workBO.updateDesignationTerritoryObject(this.designation!, designationTerritory);
     const designationTerritoryUpdate$ = this.designationRepository.update(updatedDesignation);
 
     // Update Territory lastVisit and history
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { status, ...territory } = designationTerritory;
+    const { status: _, ...territory } = designationTerritory;
     territory.lastVisit = new Date();
 
     const territoryUpdate$ = this.territoryRepository.update(territory);
@@ -94,5 +82,29 @@ export class WorkPageComponent implements OnInit, OnDestroy {
     }
 
     concat([designationTerritoryUpdate$, territoryUpdate$, visitHistoryUpdate$]).pipe(retry(2));
+  }
+
+  handleLastVisitReverted(designationTerritory: DesignationTerritory) {
+    if (designationTerritory.status !== DesignationStatusEnum.DONE) {
+      throw new Error('Can only revert last visit for a designation that is done');
+    }
+
+    if (!this.designation) {
+      throw new Error('Can only revert last visit for a designation that is not undefined');
+    }
+
+    this.workBO.undoLastVisitChanges(this.designation, designationTerritory)
+      .pipe(
+        catchError(err => {
+          // TODO: Create a component to display errors
+          alert('Um erro aconteceu ao reverter visita, por favor tente novamente. Erro: ' + JSON.stringify(err));
+
+          return of(undefined);
+        })
+      )
+      .subscribe(_ => {
+        // TODO: Add a success message here
+        console.log("Successfully reverted last visit for designation: " + this.designation?.id + " and territory: " + designationTerritory.id + "");
+      });
   }
 }

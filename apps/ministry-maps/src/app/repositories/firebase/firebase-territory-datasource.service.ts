@@ -18,17 +18,20 @@ import {
   updateDoc,
   where,
 } from '@angular/fire/firestore';
-import { combineLatest, from, map, Observable, switchMap } from 'rxjs';
+import { combineLatest, EMPTY, forkJoin, from, map, Observable, switchMap } from 'rxjs';
 
 import { firebaseEntityConverterFactory, removeUndefined } from '../../shared/utils/firebase-entity-converter';
 import { TerritoryRepository } from '../territories.repository';
 import { Territory } from '../../../models/territory';
 import { TerritoryVisitHistory } from '../../../models/territory-visit-history';
-import { FirebaseTerritoryModel } from '../../../models/firebase/firebase-territory-model';
+import {
+  FirebaseTerritoryVisitHistoryModel,
+  FirebaseTerritoryModel,
+} from '../../../models/firebase/firebase-territory-model';
 import { FirebaseDatasource } from './firebase-datasource';
 
 /** Converts the Firebase Timestamps to Date objects */
-const convertTerritoryFirebaseTimestampsToDate = (data: FirebaseTerritoryModel): Territory => {
+export const convertTerritoryFirebaseTimestampsToDate = (data: FirebaseTerritoryModel): Territory => {
   return {
     ...data,
     lastVisit: data.lastVisit?.toDate(),
@@ -36,6 +39,16 @@ const convertTerritoryFirebaseTimestampsToDate = (data: FirebaseTerritoryModel):
       ...h,
       date: h?.date?.toDate(),
     })),
+  };
+};
+
+/** Converts the Firebase Timestamps to Date objects for FirebaseHistory  */
+export const convertTerritoryHistoryFirebaseTimestampsToDate = (
+  data: FirebaseTerritoryVisitHistoryModel
+): TerritoryVisitHistory => {
+  return {
+    ...data,
+    date: data?.date.toDate(),
   };
 };
 
@@ -64,6 +77,16 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
     return from(collectionData(q));
   }
 
+  getById(id: string): Observable<Territory | undefined> {
+    const territoryDocReference = doc(this.territoriesCollection, `${id}`);
+
+    return from(getDoc(territoryDocReference)).pipe(
+      map(territoryDocSnapshot => {
+        return territoryDocSnapshot.data();
+      })
+    );
+  }
+
   getAllByCongregationAndCity(congregationId: string, city: string): Observable<Territory[]> {
     const q = query(
       this.territoriesCollection,
@@ -84,10 +107,9 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
           const territory = ts.data();
 
           const path = `${FirebaseTerritoryDatasourceService.COLLECTION_NAME}/${territory.id}/${this.historySubCollectionName}`;
-          const territoryVisitHistoryCollection = collection(
-            this.firestore,
-            path
-          ) as CollectionReference<TerritoryVisitHistory>;
+          const territoryVisitHistoryCollection = collection(this.firestore, path).withConverter<TerritoryVisitHistory>(
+            firebaseEntityConverterFactory(convertTerritoryHistoryFirebaseTimestampsToDate)
+          );
 
           return from(getDocs(territoryVisitHistoryCollection)).pipe(
             map(territoryVisitHistorySnapshots => {
@@ -186,8 +208,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
   }
 
   setVisitHistory(territoryId: string, visitHistory: TerritoryVisitHistory): Observable<void> {
-    const path = `${FirebaseTerritoryDatasourceService.COLLECTION_NAME}/${territoryId}/${this.historySubCollectionName}`;
-    const territoryVisitHistoryCollection = collection(this.firestore, path);
+    const territoryVisitHistoryCollection = this.getTerritoryHistoryCollection(territoryId);
     const visitHistoryDocRef = doc(territoryVisitHistoryCollection, visitHistory.id);
 
     return from(setDoc(visitHistoryDocRef, visitHistory));
@@ -212,5 +233,41 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
         return (lastTerritory.positionIndex ?? 0) + 1;
       })
     );
+  }
+
+  /**
+   * Deletes a {@link TerritoryVisitHistory} by its ID. This method takes care of deleting the visit in both the
+   * <b>history</b> collection and the <b>recentHistory</b> array.
+   */
+  deleteVisitHistory(territoryId: string, historyId: string): Observable<void> {
+    const territoryVisitHistoryCollection = this.getTerritoryHistoryCollection(territoryId);
+    const visitHistoryDocRef = doc(territoryVisitHistoryCollection, historyId);
+
+    const deleteHistory$ = from(deleteDoc(visitHistoryDocRef));
+    // Since the History is also present in the 'recentHistory' array, we need to manually delete it from there as well
+    const deleteRecentHistory$ = this.getById(territoryId).pipe(
+      switchMap(territory => {
+        const territoryCopy = structuredClone(territory);
+
+        if (!territoryCopy) {
+          return EMPTY;
+        }
+
+        const updatedTerritory: Territory = {
+          ...territoryCopy,
+          recentHistory: territoryCopy?.recentHistory?.filter(h => h.id !== historyId),
+        };
+
+        return this.update(updatedTerritory);
+      })
+    );
+
+    return forkJoin([deleteRecentHistory$, deleteHistory$]).pipe(map(_ => undefined));
+  }
+
+  /** Gets the {@link CollectionReference} of the Territory History sub-collection */
+  private getTerritoryHistoryCollection(territoryId: string) {
+    const path = `${FirebaseTerritoryDatasourceService.COLLECTION_NAME}/${territoryId}/${this.historySubCollectionName}`;
+    return collection(this.firestore, path);
   }
 }
