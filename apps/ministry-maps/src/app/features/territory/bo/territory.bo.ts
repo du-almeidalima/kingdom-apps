@@ -25,7 +25,7 @@ export class TerritoryBO {
           return {
             ...t,
             status: DesignationStatusEnum.PENDING,
-            history: t?.history?.slice(0, 5) ?? [],
+            history: t?.history?.reverse().slice(0, 5) ?? [],
           };
         });
 
