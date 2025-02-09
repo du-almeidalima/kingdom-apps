@@ -4,6 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AssignTerritoriesPageComponent } from './pages/assign-territories-page/assign-territories-page.component';
 import { TerritoriesPageComponent } from './pages/territories-page/territories-page.component';
 import { RoleEnum } from '../../../models/enums/role';
+import { StatisticsTerritoriesPageComponent } from './pages/statistics-territories-page/statistics-territories-page.component';
 
 export const TERRITORY_ALLOWED_ROLES = [
   RoleEnum.ORGANIZER,
@@ -15,6 +16,7 @@ export const TERRITORY_ALLOWED_ROLES = [
 export enum TerritoryRoutesEnum {
   LIST = '',
   ASSIGN_TERRITORIES = 'assign',
+  STATISTICS = 'statistics',
 }
 
 const TERRITORY_ROUTES: Routes = [
@@ -25,6 +27,10 @@ const TERRITORY_ROUTES: Routes = [
   {
     path: TerritoryRoutesEnum.ASSIGN_TERRITORIES,
     component: AssignTerritoriesPageComponent,
+  },
+  {
+    path: TerritoryRoutesEnum.STATISTICS,
+    component: StatisticsTerritoriesPageComponent,
   },
 ];
 
