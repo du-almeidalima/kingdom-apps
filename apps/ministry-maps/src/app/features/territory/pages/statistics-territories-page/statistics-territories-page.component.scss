@@ -1,0 +1,28 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+
+.parent-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  grid-column-gap: 0.75rem;
+  grid-row-gap: 0px;
+}
+
+.statistics-item {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(2, 1fr);
+  grid-column-gap: 0px;
+  grid-row-gap: 2px;
+  background-color: white;
+  border: 1px solid #BAB7B5;
+  color: #868686;
+  font-size: medium;
+}
+
+.statistics-item span{
+  font-weight: bolder;
+  font-style: italic;
+  font-size: larger;
+  color: variables.$text-primary;
+}

@@ -15,11 +15,10 @@ import { TerritoryCheckboxComponent } from './components/territory-checkbox/terr
 import { TerritoryListItemComponent } from './components/territory-list-item/territory-list-item.component';
 import { TerritoryDeleteDialogComponent } from './components/territory-delete-dialog/territory-delete-dialog.component';
 import { TerritoryMoveAlertDialogComponent } from './components/territory-move-alert-dialog/territory-move-alert-dialog.component';
-import {
-  TerritoryGenericAlertDialogComponent
-} from './components/territory-generic-alert-dialog/territory-generic-alert-dialog.component';
+import { TerritoryGenericAlertDialogComponent } from './components/territory-generic-alert-dialog/territory-generic-alert-dialog.component';
 import { TerritoryBO } from './bo/territory.bo';
 import { TerritoryAlertsBO } from './bo/territory-alerts.bo';
+import { StatisticsTerritoriesPageComponent } from './pages/statistics-territories-page/statistics-territories-page.component';
 
 @NgModule({
   declarations: [
@@ -30,7 +29,8 @@ import { TerritoryAlertsBO } from './bo/territory-alerts.bo';
     TerritoryListItemComponent,
     TerritoryDeleteDialogComponent,
     TerritoryMoveAlertDialogComponent,
-    TerritoryGenericAlertDialogComponent
+    TerritoryGenericAlertDialogComponent,
+    StatisticsTerritoriesPageComponent,
   ],
   imports: [
     FormsModule,

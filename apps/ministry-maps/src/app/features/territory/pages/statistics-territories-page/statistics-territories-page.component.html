@@ -1,0 +1,22 @@
+<div class='container'>
+    <h2 class='t-headline2 mb-8'>Estatísticas territórios</h2>
+    <select
+      lib-select
+      class='w-full'
+      name='Cidade'
+      [ngModel]='selectedCity'
+      (ngModelChange)='handleSelectedCityChange($event)'>
+      <option [value]='city' *ngFor='let city of cities'>{{ city }}</option>
+      <option [value]='ALL_OPTION'>Todas</option>
+    </select>
+    <!-- Resolver todos os valores em vermelho (criar variaveis, método[linha 8])
+     Objetivo: filtrar os territórios da cidade selecionada -->
+    <section class='parent-grid mt-8 pb-56'>
+
+      <div class='statistics-item p-4 mb-3'>Territórios: <span>{{territoryStatistics.territoryCount}}</span></div>
+      <div class='statistics-item p-4 mb-3'>Pessoas: <span>{{territoryStatistics.peopleCount}}</span></div>
+      <div class='statistics-item p-4 mb-3'>Estudos bíblicos: <span>{{territoryStatistics.bibleStudiesCount}}</span></div>
+      <div class='statistics-item p-4 mb-3'>Mudaram: <span>{{territoryStatistics.movedCount}}</span></div>
+      <div class='statistics-item p-4 mb-3'>Revisitas: <span>{{territoryStatistics.revisitCount}}</span></div>
+    </section>
+  </div>
