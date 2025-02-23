@@ -18,9 +18,13 @@ import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 import { Dialog } from '@angular/cdk/dialog';
 import { TerritoryBO } from '../../bo/territory.bo';
-import { TerritoriesOrderBy, territoryFilterPipe } from '../../../../shared/utils/territory-filter-pipe';
+import {
+  ALL_OPTION,
+  territoriesFilterPipe,
+  TerritoriesOrderBy,
+  TerritoryFilterSettings,
+} from '../../../../shared/utils/territories-filter-pipe';
 import { createSendWhatsAppLink } from '../../../../shared/utils/share-utils';
-
 
 @Component({
   selector: 'kingdom-apps-assign-territories-page',
@@ -30,17 +34,17 @@ import { createSendWhatsAppLink } from '../../../../shared/utils/share-utils';
 export class AssignTerritoriesPageComponent implements OnInit {
   private territories$: Observable<Territory[]> = of([]);
 
+  public readonly ALL_OPTION = ALL_OPTION;
   public readonly green200 = green200;
   public readonly white200 = white200;
-  public readonly ALL_OPTION = 'ALL';
   public readonly TerritoriesOrderBy = TerritoriesOrderBy;
 
   isCreatingAssignment = false;
   cities: string[] = [];
   selectedCity = '';
   searchTerm?: string | null;
-  orderBy: TerritoriesOrderBy = TerritoriesOrderBy.SAVED;
-  $filteredTerritories: Observable<Territory[]> = of([]);
+  orderBy: TerritoriesOrderBy = TerritoriesOrderBy.SAVED_INDEX;
+  filteredTerritories$: Observable<Territory[]> = of([]);
   selectedTerritoriesModel = new Set<string>();
   assignedTerritories = new Set<string>();
 
@@ -56,7 +60,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
 
   ngOnInit(): void {
     const { id, cities } = this.userState.currentUser!.congregation!;
-    const firstCity = cities.length >= 0 ? cities[0] : this.ALL_OPTION;
+    const firstCity = cities.length >= 0 ? cities[0] : ALL_OPTION;
 
     this.selectedCity = firstCity;
     this.cities = cities;
@@ -94,20 +98,39 @@ export class AssignTerritoriesPageComponent implements OnInit {
       });
   }
 
-  handleTerritorySearch(searchTerm: string | null) {
+  /**
+   * Performs the filter with the current search settings properties:
+   * <ul>
+   *   <li>{@link searchTerm}</li>
+   *   <li>{@link selectedCity}</li>
+   *   <li>{@link orderBy}</li>
+   * </ul>
+   */
+  filterTerritories() {
+    const searchSettings: TerritoryFilterSettings = {
+      searchTerm: this.searchTerm,
+      city: this.selectedCity,
+      orderBy: this.orderBy,
+    };
+
+    this.filteredTerritories$ = territoriesFilterPipe(this.territories$, searchSettings);
+  }
+
+  handleTerritorySearchTermChange(searchTerm: string | null) {
     this.searchTerm = searchTerm;
-    this.$filteredTerritories = this.filterTerritoriesByText(this.searchTerm);
+    this.filterTerritories();
   }
 
   handleTerritoryOrderByChange(orderBy: TerritoriesOrderBy) {
     this.orderBy = orderBy;
-    this.$filteredTerritories = territoryFilterPipe(this.territories$, this.searchTerm ?? '', this.orderBy);
+    this.filterTerritories();
   }
 
   handleSelectedCityChange(city: string) {
-    this.fetchTerritories(this.userState.currentUser!.congregation!.id, city);
+    this.selectedCity = city;
     this.searchTerm = '';
     this.searchInputComponent.resetSearch();
+    this.fetchTerritories(this.userState.currentUser!.congregation!.id, city);
   }
 
   handleTerritoryCheck(value: boolean, territory: Territory) {
@@ -143,18 +166,14 @@ export class AssignTerritoriesPageComponent implements OnInit {
     }
   }
 
-  private filterTerritoriesByText(searchTerm: string | null) {
-    return territoryFilterPipe(this.territories$, searchTerm ?? '', this.orderBy);
-  }
-
   private fetchTerritories(congregationId: string, city: string) {
     // This is the object that will be iterated, since we can't iterate through formGroup.controls...
     this.territories$ =
-      city === this.ALL_OPTION
+      city === ALL_OPTION
         ? this.territoryRepository.getAllByCongregation(congregationId).pipe(shareReplay(1))
         : this.territoryRepository.getAllByCongregationAndCity(congregationId, city).pipe(shareReplay(1));
 
-    this.$filteredTerritories = this.filterTerritoriesByText('');
+    this.filterTerritories();
   }
 
   private openConfirmAssignmentDialog(importantAlert: VisitOutcomeEnum) {

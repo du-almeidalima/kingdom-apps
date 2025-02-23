@@ -10,7 +10,12 @@ import {
   TerritoryManageDialogComponent,
 } from '../../components/territory-manage-dialog/territory-manage-dialog.component';
 import { TerritoryDeleteDialogComponent } from '../../components/territory-delete-dialog/territory-delete-dialog.component';
-import { territoryFilterPipe } from '../../../../shared/utils/territory-filter-pipe';
+import {
+  ALL_OPTION,
+  territoriesFilterPipe,
+  TerritoriesOrderBy,
+  TerritoryFilterSettings,
+} from '../../../../shared/utils/territories-filter-pipe';
 import {
   MoveResolutionActionsEnum,
   TerritoryMoveAlertDialogComponent,
@@ -37,10 +42,11 @@ export class TerritoriesPageComponent implements OnInit {
   public readonly green200 = green200;
   public readonly white200 = white200;
   public readonly greyButtonColor = grey400;
-  public readonly ALL_OPTION = 'ALL';
+  public readonly ALL_OPTION = ALL_OPTION;
 
   public cities: string[] = [];
-  public selectedCity = this.ALL_OPTION;
+  public selectedCity = ALL_OPTION;
+  public searchTerm?: string | null;
   public isLoading = false;
   public filteredTerritories$: Observable<Territory[]> = of([]);
 
@@ -67,7 +73,35 @@ export class TerritoriesPageComponent implements OnInit {
     const recentVisitsId = item.recentHistory?.reduce((acc, cur) => acc + (cur.isResolved ? 1 : 0), 0);
 
     // TODO: Improve this, maybe create a hash based on the properties
-    return `${item.id}-rh${recentVisitsId}-${item.isBibleStudent}`;
+    return `${item.id}-${item.icon}-rh${recentVisitsId}-${item.isBibleStudent}`;
+  }
+
+  /**
+   * Performs the filter with the current search settings properties:
+   * <ul>
+   *   <li>{@link searchTerm}</li>
+   *   <li>{@link selectedCity}</li>
+   *   <li>{@link orderBy}</li>
+   * </ul>
+   */
+  filterTerritories() {
+    const searchSettings: TerritoryFilterSettings = {
+      searchTerm: this.searchTerm,
+      city: this.selectedCity,
+      orderBy: TerritoriesOrderBy.SAVED_INDEX,
+    };
+
+    this.filteredTerritories$ = territoriesFilterPipe(this.territories$, searchSettings);
+  }
+
+  handleTerritorySearchTermChange(searchTerm: string | null) {
+    this.searchTerm = searchTerm;
+    this.filterTerritories();
+  }
+
+  handleSelectedCityChange(city: string) {
+    this.selectedCity = city;
+    this.filterTerritories();
   }
 
   /**
@@ -121,15 +155,11 @@ export class TerritoriesPageComponent implements OnInit {
     this.dialog.open<object, TerritoryDialogData>(TerritoryManageDialogComponent, {
       data: {
         territory,
+        selectedCity: this.selectedCity !== ALL_OPTION ? this.selectedCity : undefined,
         cities: this.userState.currentUser?.congregation?.cities ?? [],
         congregationId: this.userState.currentUser?.congregation?.id ?? '',
       },
     });
-  }
-
-  handleSelectedCityChange(city: string) {
-    this.selectedCity = city;
-    this.filteredTerritories$ = this.filterTerritoriesByCity(city);
   }
 
   handleRemoveTerritory(territoryId: string) {
@@ -202,7 +232,11 @@ export class TerritoriesPageComponent implements OnInit {
           message: 'Um ou mais publicadores marcaram que esse território pediu para não ser visitado: ',
           history: stopVisitingHistories,
           markAsResolvedCallback: histories => {
-            return this.territoryAlertsBO.resolveTerritoryHistoryAlert(territory, histories, VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN);
+            return this.territoryAlertsBO.resolveTerritoryHistoryAlert(
+              territory,
+              histories,
+              VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN
+            );
           },
         },
       })
@@ -212,11 +246,6 @@ export class TerritoriesPageComponent implements OnInit {
           this.getTerritories();
         }
       });
-  }
-
-  handleTerritorySearch($event: string | null) {
-    const cityFilteredTerritories$ = this.filterTerritoriesByCity(this.selectedCity);
-    this.filteredTerritories$ = territoryFilterPipe(cityFilteredTerritories$, $event ?? '');
   }
 
   handleOpenHistory(territory: Territory) {
@@ -239,32 +268,6 @@ export class TerritoriesPageComponent implements OnInit {
       shareReplay(1)
     );
 
-    this.filteredTerritories$ = this.filterTerritoriesByCity(this.selectedCity);
-  }
-
-  private filterTerritoriesByCity(city: string) {
-    // Don't reset search input for same city
-    if (city !== this.selectedCity) {
-      this.searchInputComponent?.resetSearch();
-    }
-
-    return this.territories$.pipe(
-      map(tArr => {
-        if (city === this.ALL_OPTION) {
-          const allTerritories = [...tArr];
-
-          // Sorting per city when ALL is selected
-          return allTerritories.sort((a, b) => {
-            return a.city.localeCompare(b.city);
-          });
-        }
-
-        return tArr
-          .filter(t => t.city === city)
-          .sort((t1, t2) => {
-            return (t1.positionIndex ?? 0) - (t2.positionIndex ?? 0);
-          });
-      })
-    );
+    this.filterTerritories();
   }
 }

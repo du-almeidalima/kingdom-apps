@@ -9,7 +9,7 @@
     <option [value]='city' *ngFor='let city of cities'>{{ city }}</option>
     <option [value]='ALL_OPTION'>Todas</option>
   </select>
-  <lib-search-input class='mt-5' (searched)='handleTerritorySearch($event)' />
+  <lib-search-input class='mt-5' (searched)='handleTerritorySearchTermChange($event)' />
 
   <section class='territories-list mt-8 pb-56'
            *ngIf='filteredTerritories$ | async; let territories'
