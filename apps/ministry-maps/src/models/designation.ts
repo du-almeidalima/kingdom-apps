@@ -7,7 +7,9 @@ export type DesignationTerritory = Omit<Territory, 'recentHistory'> & {
 
 export type Designation = {
   id: string;
+  congregationId: string;
   territories: DesignationTerritory[];
-  createdAt?: Date;
+  createdAt: Date;
   createdBy: string;
+  expiresAt?: Date;
 };

@@ -30,6 +30,7 @@ import {
   TerritoryGenericAlertDialogComponent,
   TerritoryGenericAlertDialogData,
 } from '../../components/territory-generic-alert-dialog/territory-generic-alert-dialog.component';
+import { TerritoryBO } from '../../bo/territory.bo';
 
 @Component({
   selector: 'kingdom-apps-territories-page',
@@ -57,6 +58,7 @@ export class TerritoriesPageComponent implements OnInit {
     private readonly territoryRepository: TerritoryRepository,
     private readonly userState: UserStateService,
     private readonly territoryAlertsBO: TerritoryAlertsBO,
+    private readonly territoryBO: TerritoryBO,
     public dialog: Dialog
   ) {}
 
@@ -164,7 +166,7 @@ export class TerritoriesPageComponent implements OnInit {
 
   handleRemoveTerritory(territoryId: string) {
     this.dialog.open<object, TerritoryDialogData>(TerritoryDeleteDialogComponent).closed.subscribe(result => {
-      if (result) this.territoryRepository.delete(territoryId);
+      if (result) this.territoryBO.deleteTerritory(territoryId);
     });
   }
 

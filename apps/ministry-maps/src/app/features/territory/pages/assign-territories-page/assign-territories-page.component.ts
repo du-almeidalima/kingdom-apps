@@ -86,8 +86,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
     // Loading Spinner on Button
     this.isCreatingAssignment = true;
 
-    this.territoryBO
-      .createDesignationForTerritories(selectedTerritories, this.userState.currentUser?.congregation?.id)
+    this.territoryBO.createDesignationForTerritories(selectedTerritories)
       .pipe(
         finalize(() => {
           this.isCreatingAssignment = false;

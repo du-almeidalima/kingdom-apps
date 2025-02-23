@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   collection,
   collectionData,
@@ -24,14 +24,18 @@ import { FirebaseCongregationModel } from '../../../models/firebase/firebase-con
 import { FirebaseCongregationDatasourceService } from './firebase-congregation-datasource.service';
 import { Functions, httpsCallableData } from '@angular/fire/functions';
 import { FirebaseDatasource } from './firebase-datasource';
+import { environment } from '../../../environments/environment';
+import { LoggerService } from '../../shared/services/logger/logger.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FirebaseUserDatasourceService implements UserRepository, FirebaseDatasource<User> {
   static readonly COLLECTION_NAME = 'users';
+
   private readonly userCollection: CollectionReference<User, FirebaseUserModel>;
   private readonly deleteUserFn: (userId: string) => Observable<void>;
+  private readonly loggerService = inject(LoggerService);
 
   constructor(
     private readonly firestore: Firestore,
@@ -83,6 +87,7 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
           name: '',
           locatedOn: '',
           cities: [],
+          settings: environment.congregationSettingsDefaultValues
         };
 
         if (!user) {
@@ -100,6 +105,7 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
         return FirebaseCongregationDatasourceService.resolveUserCongregationReference(congregationDocRef).pipe(
           map(congregation => {
             if (!congregation) {
+              this.loggerService.error(`Could not find Congregation ID: ${user.congregation?.id} for User ID: ${user.id}`);
               // User with congregation deleted
               return { ...user, congregation: EMPTY_CONGREGATION };
             }
@@ -174,6 +180,10 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
         return FirebaseCongregationDatasourceService.resolveUserCongregationReference(congregationDocRef).pipe(
           map(congregation => {
             return users.map(u => {
+              if (!congregation) {
+                this.loggerService.error(`Could not find Congregation ID: ${congregationId} when fetching congregation People`);
+              }
+
               u.congregation = congregation;
               return u;
             });

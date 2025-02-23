@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   collection,
   CollectionReference,
@@ -16,6 +16,8 @@ import { FirebaseCongregationDatasourceService } from './firebase-congregation-d
 import { Congregation } from '../../../models/congregation';
 import { firebaseEntityConverterFactory } from '../../shared/utils/firebase-entity-converter';
 import { FirebaseDatasource } from './firebase-datasource';
+import { environment } from '../../../environments/environment';
+import { LoggerService } from '../../shared/services/logger/logger.service';
 
 @Injectable({
   providedIn: 'root',
@@ -25,6 +27,7 @@ export class FirebaseInvitationLinkDataSourceService
 {
   static readonly COLLECTION_NAME = 'invitation_links';
   private readonly invitationLinkCollection: CollectionReference<InvitationLink>;
+  private readonly loggerService = inject(LoggerService);
 
   constructor(
     private readonly firestore: Firestore,
@@ -60,6 +63,7 @@ export class FirebaseInvitationLinkDataSourceService
           name: '',
           locatedOn: '',
           cities: [],
+          settings: environment.congregationSettingsDefaultValues
         };
 
         // Resolving FireBase Congregation Reference
@@ -68,6 +72,7 @@ export class FirebaseInvitationLinkDataSourceService
         return FirebaseCongregationDatasourceService.resolveUserCongregationReference(congregationDocRef).pipe(
           map(congregation => {
             if (!congregation) {
+              this.loggerService.error(`Could not find Congregation ID: ${invitationLink.congregation?.id} for Invitation Link ID: ${invitationLink.id}`);
               // User with congregation deleted
               return { ...invitationLink, congregation: EMPTY_CONGREGATION };
             }
