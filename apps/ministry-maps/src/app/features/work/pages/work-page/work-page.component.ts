@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { catchError, concat, Observable, of, retry, Subscription, tap } from 'rxjs';
+import { catchError, concat, debounceTime, Observable, of, retry, Subscription, tap } from 'rxjs';
 
 import { DesignationRepository } from '../../../../repositories/designation.repository';
 import { Designation, DesignationTerritory } from '../../../../../models/designation';
@@ -19,6 +19,7 @@ export class WorkPageComponent implements OnInit, OnDestroy {
   designation: Designation | undefined;
   territories: Designation['territories'] = [];
   doneTerritories: Designation['territories'] = [];
+  isDisabled = false;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -34,12 +35,15 @@ export class WorkPageComponent implements OnInit, OnDestroy {
     this.designationTerritorySubscription = this.designationRepository
       .getById(designationId)
       .pipe(
+        debounceTime(100),
         tap(() => {
           this.isLoading = false;
         })
       )
       .subscribe(designation => {
         if (designation?.territories) {
+          this.isDisabled = this.shouldDisableDesignation(designation);
+
           this.designation = designation;
           this.territories = [];
           this.doneTerritories = [];
@@ -106,5 +110,18 @@ export class WorkPageComponent implements OnInit, OnDestroy {
         // TODO: Add a success message here
         console.log("Successfully reverted last visit for designation: " + this.designation?.id + " and territory: " + designationTerritory.id + "");
       });
+  }
+
+  /**
+   * Checks if this {@link Designation} has expired. <br />
+   * Since this is a field that was introduced, even though it's not optional in the {@link Designation} model. For the
+   * time being, we'll treat it as an option. After 2 months from this commit, we can remove the undefined checks.
+   */
+  private shouldDisableDesignation(designation: Designation | undefined) {
+    if (designation?.expiresAt) {
+      return designation.expiresAt.getTime() < Date.now();
+    }
+
+    return false;
   }
 }

@@ -4,7 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { LoginPageComponent } from './pages/login-page/login-page.component';
 import { WelcomePageComponent } from './pages/welcome-page/welcome-page.component';
 import { SignInPageComponent } from './pages/sign-in-page/sign-in-page.component';
-import { authGuard } from '../../services/auth.guard';
+import { authGuard } from './guards/auth.guard';
 import { RoleEnum } from '../../../../models/enums/role';
 import { AuthRoutesEnum } from './models/enums/auth-routes';
 import { NoAccountPageComponent } from './pages/no-account-page/no-account-page.component';

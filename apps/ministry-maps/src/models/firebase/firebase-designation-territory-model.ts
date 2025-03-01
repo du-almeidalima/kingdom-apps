@@ -12,7 +12,8 @@ export type FirebaseDesignationTerritoryModel = Omit<DesignationTerritory, 'hist
   lastVisit: Timestamp
 };
 
-export type FirebaseDesignationModel = Omit<Designation, 'territories' | 'createdAt'> & {
+export type FirebaseDesignationModel = Omit<Designation, 'territories' | 'createdAt' | 'expiresAt'> & {
   createdAt: Timestamp;
+  expiresAt: Timestamp;
   territories: FirebaseDesignationTerritoryModel[];
 };

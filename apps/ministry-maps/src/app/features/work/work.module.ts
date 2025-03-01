@@ -9,10 +9,19 @@ import { WorkItemCompleteDialogComponent } from './components/work-item-complete
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { WorkBO } from './bo/work.bo';
 import { CommonDirectivesModule } from '@kingdom-apps/common-ui';
+import { NoteComponent } from '../../../../../../libs/common-ui/src/lib/components/note/note.component';
 
 @NgModule({
   declarations: [WorkPageComponent, WorkItemComponent, WorkItemCompleteDialogComponent],
-  imports: [CommonModule, SharedModule, WorkRoutesModule, FormsModule, ReactiveFormsModule, CommonDirectivesModule],
+  imports: [
+    CommonModule,
+    SharedModule,
+    WorkRoutesModule,
+    FormsModule,
+    ReactiveFormsModule,
+    CommonDirectivesModule,
+    NoteComponent,
+  ],
   providers: [WorkBO],
 })
 export class WorkModule {}

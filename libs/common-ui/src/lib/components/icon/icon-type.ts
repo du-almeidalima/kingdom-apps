@@ -28,3 +28,7 @@ export type Icons =
   | 'speech-bubble-26'
   | 'copy-lined'
   | 'eraser-2'
+  | 'info-lined'
+  | 'check-mark-circle-thin'
+  | 'error-8'
+  | 'warning-lined'

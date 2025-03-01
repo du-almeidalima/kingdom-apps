@@ -2,6 +2,8 @@
 // `ng build` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
+import { CongregationSettings } from '../models/congregation';
+
 export const environment = {
   firebase: {
     projectId: process.env['NX_FIREBASE_PROJECT_ID'],
@@ -16,6 +18,9 @@ export const environment = {
   env: process.env['NX_ENV'],
   useCloud: process.env['NX_USE_CLOUD'] === 'true',
   baseUrl: process.env['NX_APP_BASE_URL'],
+  congregationSettingsDefaultValues: {
+    designationAccessExpiryDays: 45
+  } as CongregationSettings
 };
 
 /*

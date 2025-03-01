@@ -2,13 +2,22 @@
   <span *ngIf='isLoading'>Loading...</span>
   <div *ngIf='designation'>
 
+    @if (isDisabled) {
+      <lib-note
+        type="info"
+        message="Essa designação está desabilitada. Por favor peça ao seu SG uma designação nova."
+      />
+    }
     <ng-container *ngIf='territories.length > 0; then territoriesTemplate; else congratulationsTemplate'></ng-container>
 
     <ng-template #territoriesTemplate>
+      <h2 class='t-headline4 my-5'>Territórios</h2>
+
       <kingdom-apps-work-item
         class='mt-5'
         *ngFor='let territory of territories'
         [territory]='territory'
+        [disabled]="isDisabled"
         (territoryUpdated)='handleTerritoryUpdated($event)'
       >
       </kingdom-apps-work-item>
@@ -27,6 +36,7 @@
         *ngFor='let territory of doneTerritories'
         [territory]='territory'
         [done]='true'
+        [disabled]="isDisabled"
         (territoryUpdated)='handleTerritoryUpdated($event)'
         (lastVisitReverted)="handleLastVisitReverted($event)"
       >

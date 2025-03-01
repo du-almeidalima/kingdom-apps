@@ -3,16 +3,11 @@ import {
   DocumentData,
   DocumentReference,
   QueryDocumentSnapshot,
-  SnapshotOptions,
-  Timestamp,
+  SnapshotOptions
 } from '@angular/fire/firestore';
 
 type CustomConverterFunction<T> = (data: any) => T | Partial<T>;
 
-/** */
-export const convertFirebaseTimestampToDate = (timestamp: Timestamp | undefined) => {
-  return timestamp instanceof Timestamp ? timestamp.toDate() : timestamp
-};
 
 /**
  * @deprecated This was intended to be used as a generic converter, but it doesn't work well with TS and only supports

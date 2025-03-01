@@ -53,7 +53,7 @@ export class SearchInputComponent implements OnInit, OnDestroy {
 
   // TODO: This is not a very good approach, but I didn't have time to implement ControlValueAccessor
   // FIXME: Implement this with ControlValueAccessor
-  resetSearch(emitEvent = false) {
+  resetSearch(emitEvent = true) {
     this.searchControl.reset('', { emitEvent });
   }
 }

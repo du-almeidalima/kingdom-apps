@@ -3,13 +3,13 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { authGuard } from './auth.guard';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/router';
 import { MockProvider, ngMocks } from 'ng-mocks';
-import { FirebaseAuthDatasourceService } from '../features/auth/repositories/firebase/firebase-auth-datasource.service';
-import { APP_ROUTES, FeatureRoutesEnum } from '../../app-routes.module';
-import { UserStateService } from '../../state/user.state.service';
-import { organizerUserStateServiceMock, userMockBuilder } from '../../../test/mocks';
-import { RoleEnum } from '../../../models/enums/role';
+import { FirebaseAuthDatasourceService } from '../repositories/firebase/firebase-auth-datasource.service';
+import { APP_ROUTES, FeatureRoutesEnum } from '../../../../app-routes.module';
+import { UserStateService } from '../../../../state/user.state.service';
+import { organizerUserStateServiceMock, userMockBuilder } from '../../../../../test/mocks';
+import { RoleEnum } from '../../../../../models/enums/role';
 import { Observable, of } from 'rxjs';
-import { AuthRoutesEnum } from '../features/auth/models/enums/auth-routes';
+import { AuthRoutesEnum } from '../models/enums/auth-routes';
 
 describe('AuthGuard', () => {
   beforeEach(() => {

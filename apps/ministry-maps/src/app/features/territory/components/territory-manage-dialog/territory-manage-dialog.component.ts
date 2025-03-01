@@ -12,6 +12,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export type TerritoryDialogData = {
   territory?: Territory;
   congregationId: string;
+  /**
+   * Represents the city that is currently selected on the screen. This will be set that as the initial value when
+   * creating a new Territory.
+   */
+  selectedCity?: string;
   cities: Congregation['cities'];
 };
 
@@ -133,8 +138,10 @@ export class TerritoryManageDialogComponent implements OnInit {
   ngOnInit(): void {
     const fb = new FormBuilder();
 
+    const initialCity = this.data.territory?.city ?? this.data.selectedCity ?? this.data.cities[0];
+
     this.form = fb.group({
-      city: fb.control(this.data.cities[0], { validators: [Validators.required], nonNullable: true }),
+      city: fb.control(initialCity, { validators: [Validators.required], nonNullable: true }),
       icon: fb.control(this.territoryIcons[0], { validators: [Validators.required], nonNullable: true }),
       address: fb.control('', { validators: [Validators.required], nonNullable: true }),
       note: fb.control('', { nonNullable: true }),

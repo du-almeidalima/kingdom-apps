@@ -13,7 +13,6 @@ import { from, Observable, switchMap, take } from 'rxjs';
 import { Designation } from '../../../models/designation';
 import { FirebaseDesignationModel } from '../../../models/firebase/firebase-designation-territory-model';
 import {
-  convertFirebaseTimestampToDate,
   firebaseEntityConverterFactory,
 } from '../../shared/utils/firebase-entity-converter';
 import { DesignationRepository } from '../designation.repository';
@@ -22,10 +21,11 @@ import { FirebaseDatasource } from './firebase-datasource';
 const convertHistoryDateFirebaseTimestampToDate = (data: FirebaseDesignationModel): Designation => {
   return {
     ...data,
-    createdAt: convertFirebaseTimestampToDate(data.createdAt),
+    createdAt: data.createdAt && data.createdAt.toDate(),
+    expiresAt: data.expiresAt && data.expiresAt.toDate(),
     territories: data.territories.map(t => ({
       ...t,
-      lastVisit: convertFirebaseTimestampToDate(t.lastVisit),
+      lastVisit: t.lastVisit && t.lastVisit.toDate(),
       history: t.history.map(h => ({
         ...h,
         date: h.date.toDate(),

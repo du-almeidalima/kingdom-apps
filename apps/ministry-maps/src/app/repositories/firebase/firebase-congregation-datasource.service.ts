@@ -7,13 +7,12 @@ import {
   DocumentData,
   DocumentReference,
   Firestore,
-  getDocFromCache,
-  getDocFromServer,
+  getDoc,
   getDocs,
   orderBy,
   query,
 } from '@angular/fire/firestore';
-import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
+import { from, map, Observable } from 'rxjs';
 
 import { CongregationRepository } from '../congregation.repository';
 import { Congregation } from '../../../models/congregation';
@@ -42,23 +41,7 @@ export class FirebaseCongregationDatasourceService implements CongregationReposi
   static resolveUserCongregationReference(
     congregation: DocumentReference<Congregation, FirebaseCongregationModel | DocumentData>
   ): Observable<Congregation | undefined> {
-    // Since Congregation isn't something that changes frequently, fetching from cache to increase Performance
-    const cachedCongregationSnapshot = from(getDocFromCache(congregation));
-
-    return cachedCongregationSnapshot.pipe(
-      catchError(err => {
-        console.warn(`Cache for Congregation not found: `, err);
-        return of(null);
-      }),
-      switchMap(cachedCongregationRes => {
-        // Cache user found, returning it
-        if (cachedCongregationRes) {
-          return of(cachedCongregationRes);
-        }
-
-        // Fetching from the server
-        return from(getDocFromServer(congregation));
-      }),
+    return from(getDoc(congregation)).pipe(
       map(congregationDocSnapshot => {
         if (!congregationDocSnapshot.exists()) {
           return undefined;
