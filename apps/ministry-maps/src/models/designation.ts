@@ -11,5 +11,5 @@ export type Designation = {
   territories: DesignationTerritory[];
   createdAt: Date;
   createdBy: string;
-  expiresAt?: Date;
+  expiresAt: Date;
 };
