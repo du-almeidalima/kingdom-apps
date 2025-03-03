@@ -1,6 +1,6 @@
 import { ChangeCongregationComponent } from './change-congregation.component';
 import { MockBuilder, MockProvider, MockRender, ngMocks } from 'ng-mocks';
-import { RepositoriesModule } from '../../../repositories/repositories.module';
+import { RepositoriesModule } from '../../../repositories/repositories-providers';
 import { UserStateService } from '../../../state/user.state.service';
 import { organizerUserStateServiceMock } from '../../../../test/mocks';
 import { ProfileBO } from '../bo/profile.bo';

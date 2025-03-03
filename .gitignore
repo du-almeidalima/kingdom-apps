@@ -6,9 +6,9 @@
 !**/.env.development
 
 # compiled output
-/dist
-/tmp
-/out-tsc
+dist
+tmp
+out-tsc
 
 # dependencies
 node_modules
@@ -43,16 +43,15 @@ testem.log
 .DS_Store
 Thumbs.db
 
+.nx/cache
+.nx/workspace-data
+
 .angular
 
 # Firebase
 .firebase
 *-debug.log
 .runtimeconfig.json
-
-# Nx
-.nx/cache/*
-.nx/workspace-data/*
 
 # Nx-Firebase
 **/.emulators/*

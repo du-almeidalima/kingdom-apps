@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
-import { User } from '../../../../../models/user';
-import { RoleEnum } from '../../../../../models/enums/role';
-import { Congregation } from '../../../../../models/congregation';
+import { User } from '../../models/user';
+import { RoleEnum } from '../../models/enums/role';
+import { Congregation } from '../../models/congregation';
 
 export enum AuthErrorEnum {
   INVALID_EMAIL= 'INVALID_EMAIL',

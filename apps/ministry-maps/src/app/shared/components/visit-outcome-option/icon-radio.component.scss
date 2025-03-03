@@ -1,5 +1,5 @@
-@use 'libs/common-ui/src/lib/styles/components/form-control' as *;
-@use 'libs/common-ui/src/lib/styles/abstract/variables';
+@use 'components/form-control' as *;
+@use 'abstract/variables';
 
 kingdom-apps-icon-radio {
   display: block;

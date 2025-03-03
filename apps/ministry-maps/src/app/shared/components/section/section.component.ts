@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SharedModule } from '../../shared.module';
-import { green200, primaryGreen } from '@kingdom-apps/common-ui';
+import { CardComponent, green200, SpinnerComponent } from '@kingdom-apps/common-ui';
 
 @Component({
   selector: 'kingdom-apps-section',
   standalone: true,
-  imports: [CommonModule, SharedModule],
+  imports: [CommonModule, CardComponent, SpinnerComponent],
   styleUrl: './section.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `

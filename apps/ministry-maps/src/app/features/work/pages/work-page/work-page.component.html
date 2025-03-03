@@ -1,46 +1,49 @@
 <main class='container'>
-  <span *ngIf='isLoading'>Loading...</span>
-  <div *ngIf='designation'>
+  @if (isLoading) {
+    <span>Loading...</span>
+  }
+  @if (designation) {
+    <div>
+      @if (isDisabled) {
+        <lib-note
+          type="info"
+          message="Essa designação está desabilitada. Por favor peça ao seu SG uma designação nova."
+        />
+      }
 
-    @if (isDisabled) {
-      <lib-note
-        type="info"
-        message="Essa designação está desabilitada. Por favor peça ao seu SG uma designação nova."
-      />
-    }
-    <ng-container *ngIf='territories.length > 0; then territoriesTemplate; else congratulationsTemplate'></ng-container>
+      <!-- IN PROGRESS TERRITORIES -->
+      @if (territories.length > 0) {
+        <h2 class='t-headline4 my-5'>Territórios</h2>
+        <!-- TODO: Check if this is updating properly -->
+        @for (territory of territories; track territory.id + territory.status) {
+          <kingdom-apps-work-item
+            class='mt-5'
+            [territory]='territory'
+            [disabled]="isDisabled"
+            (territoryUpdated)='handleTerritoryUpdated($event)'
+          />
+        }
+      } @else {
+        <h2 class='t-headline2 mb-3'>Parabéns!</h2>
+        <p class='t-body1'>Todos os territórios foram concluidos, que Jeová abençoe seu trabalho!</p>
+      }
 
-    <ng-template #territoriesTemplate>
-      <h2 class='t-headline4 my-5'>Territórios</h2>
+      <!-- DONE TERRITORIES -->
+      @if (doneTerritories.length > 0) {
+        <h2 class='t-headline4 my-5'>Concluídos</h2>
 
-      <kingdom-apps-work-item
-        class='mt-5'
-        *ngFor='let territory of territories'
-        [territory]='territory'
-        [disabled]="isDisabled"
-        (territoryUpdated)='handleTerritoryUpdated($event)'
-      >
-      </kingdom-apps-work-item>
-    </ng-template>
-
-    <ng-template #congratulationsTemplate>
-      <h2 class='t-headline2 mb-3'>Parabéns!</h2>
-      <p class='t-body1'>Todos os territórios foram concluidos, que Jeová abençoe seu trabalho!</p>
-    </ng-template>
-    <!-- Done Territories -->
-    <ng-template [ngIf]='doneTerritories.length > 0'>
-      <h2 class='t-headline4 my-5'>Concluídos</h2>
-
-      <kingdom-apps-work-item
-        class='mt-5'
-        *ngFor='let territory of doneTerritories'
-        [territory]='territory'
-        [done]='true'
-        [disabled]="isDisabled"
-        (territoryUpdated)='handleTerritoryUpdated($event)'
-        (lastVisitReverted)="handleLastVisitReverted($event)"
-      >
-      </kingdom-apps-work-item>
-    </ng-template>
-  </div>
+        @for (territory of doneTerritories; track territory.id + territory.status) {
+          <!-- TODO: Check if this is updating properly -->
+          <kingdom-apps-work-item
+            class='mt-5'
+            [territory]='territory'
+            [done]='true'
+            [disabled]="isDisabled"
+            (territoryUpdated)='handleTerritoryUpdated($event)'
+            (lastVisitReverted)="handleLastVisitReverted($event)"
+          />
+        }
+      }
+    </div>
+  }
 </main>

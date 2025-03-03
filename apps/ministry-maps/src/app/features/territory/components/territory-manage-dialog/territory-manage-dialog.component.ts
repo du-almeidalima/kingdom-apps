@@ -1,13 +1,23 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { finalize, Observable, retry, switchMap } from 'rxjs';
 
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { Congregation } from '../../../../../models/congregation';
 import { Territory, TerritoryIcon } from '../../../../../models/territory';
-import { white100 } from '@kingdom-apps/common-ui';
+import {
+  ButtonComponent,
+  DialogComponent,
+  DialogFooterComponent,
+  FormFieldComponent,
+  InputComponent, LabelComponent,
+  SelectComponent,
+  SpinnerComponent,
+  white100,
+} from '@kingdom-apps/common-ui';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { TerritoryIconTranslatorPipe } from '../../../../shared/pipes/territory-icon-translator/territory-icon-translator.pipe';
 
 export type TerritoryDialogData = {
   territory?: Territory;
@@ -41,18 +51,22 @@ type TerritoryForm = {
         <lib-form-field>
           <label lib-label for="territory-city">Cidade</label>
           <select lib-select formControlName="city" id="territory-city">
-            <option [value]="city" *ngFor="let city of data.cities">
+            @for (city of data.cities; track city) {
+            <option [value]="city">
               {{ city }}
             </option>
+            }
           </select>
         </lib-form-field>
         <!-- Icon -->
         <lib-form-field class="mt-5">
           <label lib-label for="territory-icon">Ícone</label>
           <select lib-select formControlName="icon" id="territory-icon">
-            <option [value]="territoryIcon" *ngFor="let territoryIcon of territoryIcons">
+            @for (territoryIcon of territoryIcons; track territoryIcon) {
+            <option [value]="territoryIcon">
               {{ territoryIcon | territoryIconTranslator }}
             </option>
+            }
           </select>
         </lib-form-field>
         <!-- Address -->
@@ -87,7 +101,7 @@ type TerritoryForm = {
           <label lib-label for="bible-student-checkbox">Estudando a Bíblia</label>
           <input formControlName="isBibleStudent" type="checkbox" id="bible-student-checkbox" />
         </lib-form-field>
-        @if(this.form.controls.isBibleStudent.value) {
+        @if (this.form.controls.isBibleStudent.value) {
         <!-- Bible Instructor -->
         <lib-form-field class="mt-5">
           <label lib-label for="bible-instructor">Instrutor</label>
@@ -109,13 +123,28 @@ type TerritoryForm = {
             type="submit"
             form="territory-form"
             [disabled]="!this.form.valid || isSubmitting">
-            <ng-container *ngIf="!isSubmitting">{{ isEdit ? 'Salvar' : 'Adicionar' }}</ng-container>
-            <lib-spinner *ngIf="isSubmitting" height="1.75rem" width="1.75rem" [color]="white" />
+            @if (isSubmitting) {
+            <lib-spinner height="1.75rem" width="1.75rem" [color]="white" />
+            } @else {
+            <ng-container>{{ isEdit ? 'Salvar' : 'Adicionar' }}</ng-container>
+            }
           </button>
         </div>
       </lib-dialog-footer>
     </lib-dialog>
   `,
+  imports: [
+    SpinnerComponent,
+    ButtonComponent,
+    DialogFooterComponent,
+    DialogComponent,
+    LabelComponent,
+    FormFieldComponent,
+    InputComponent,
+    ReactiveFormsModule,
+    SelectComponent,
+    TerritoryIconTranslatorPipe,
+  ],
 })
 export class TerritoryManageDialogComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);

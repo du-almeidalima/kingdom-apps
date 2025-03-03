@@ -11,13 +11,12 @@ import {
 import { from, map, Observable, of, switchMap, take } from 'rxjs';
 
 import { AuthErrorEnum, AuthRepository, CreateUserConfig } from '../auth.repository';
-import { User } from '../../../../../../models/user';
-import { RoleEnum } from '../../../../../../models/enums/role';
+import { User } from '../../../models/user';
+import { RoleEnum } from '../../../models/enums/role';
 import { doc, DocumentReference, Firestore } from '@angular/fire/firestore';
-import { Congregation } from '../../../../../../models/congregation';
-import { FirebaseUserModel } from '../../../../../../models/firebase/firebase-user-model';
-import { FirebaseUserDatasourceService } from '../../../../../repositories/firebase/firebase-user-datasource.service';
-import { FirebaseCongregationModel } from '../../../../../../models/firebase/firebase-congregation-model';
+import { Congregation } from '../../../models/congregation';
+import { FirebaseUserDatasourceService } from './firebase-user-datasource.service';
+import { FirebaseCongregationModel } from '../../../models/firebase/firebase-congregation-model';
 
 export enum FIREBASE_PROVIDERS {
   'GOOGLE' = 'GOOGLE',

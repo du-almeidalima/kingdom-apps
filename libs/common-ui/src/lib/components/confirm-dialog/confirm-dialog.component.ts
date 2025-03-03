@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { DialogComponent, DialogFooterComponent } from '../dialog';
+import { ButtonComponent } from '../button/button.component';
 
 export type ConfirmDialogData = {
   title: string;
@@ -16,16 +18,17 @@ export type ConfirmDialogData = {
   styleUrls: ['./confirm-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <lib-dialog [title]='title'>
-      <p class="t-body1" [innerHTML]='bodyText'></p>
+    <lib-dialog [title]="title">
+      <p class="t-body1" [innerHTML]="bodyText"></p>
       <lib-dialog-footer>
         <div class="flex justify-end gap-4">
-          <button lib-button (click)="handleCancel(false)" [tabIndex]='1'>Cancelar</button>
+          <button lib-button (click)="handleCancel(false)" [tabIndex]="1">Cancelar</button>
           <button lib-button btnType="primary" (click)="handleCancel(true)">Confirmar</button>
         </div>
-      </lib-dialog-footer> </lib-dialog
-    >\`
+      </lib-dialog-footer>
+    </lib-dialog>
   `,
+  imports: [DialogComponent, ButtonComponent, DialogFooterComponent],
 })
 export class ConfirmDialogComponent {
   title: string;

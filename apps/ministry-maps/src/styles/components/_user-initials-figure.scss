@@ -1,4 +1,5 @@
-@use 'libs/common-ui/src/lib/styles/abstract/variables';
+@use 'sass:color';
+@use 'abstract/variables';
 
 .user-initials-figure {
   $size: 4rem;
@@ -12,7 +13,7 @@
   height: var(--figure-size, $size);
   padding: calc(var(--figure-size) - 1rem);
   border-radius: 100%;
-  background-color: darken(variables.$green-100, 10%);
+  background-color: color.scale(variables.$green-100, $lightness: 10%);
 
   font-size: var(--figure-font-size, 2.5rem);
   font-weight: bold;

@@ -1,5 +1,6 @@
 import { Component, Input, OnInit, Self, ViewEncapsulation } from '@angular/core';
-import { ControlValueAccessor, NgControl } from '@angular/forms';
+import { ControlValueAccessor, FormsModule, NgControl } from '@angular/forms';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'kingdom-apps-icon-radio',
@@ -7,25 +8,26 @@ import { ControlValueAccessor, NgControl } from '@angular/forms';
   styleUrls: ['./icon-radio.component.scss'],
   template: `
     <label
-      for='icon-radio-{{ value }}'
-      class='icon-radio'
-      tabindex='0'
+      for="icon-radio-{{ value }}"
+      class="icon-radio"
+      tabindex="0"
       [ngClass]="{ 'icon-radio--active': value === modelValue }"
-      (keydown.enter)='valueChanged(value)'
-      (keydown.space)='valueChanged(value)'>
+      (keydown.enter)="valueChanged(value)"
+      (keydown.space)="valueChanged(value)">
       <!-- Icon -->
-      <ng-content select='lib-icon'></ng-content>
-      <span class='icon-radio__description'><ng-content></ng-content></span>
+      <ng-content select="lib-icon"></ng-content>
+      <span class="icon-radio__description"><ng-content></ng-content></span>
       <input
-        class='icon-radio__input'
-        type='radio'
-        id='icon-radio-{{ value }}'
-        [(ngModel)]='modelValue'
-        [name]='name'
-        [value]='value'
-        (change)='valueChanged()' />
+        class="icon-radio__input"
+        type="radio"
+        id="icon-radio-{{ value }}"
+        [(ngModel)]="modelValue"
+        [name]="name"
+        [value]="value"
+        (change)="valueChanged()" />
     </label>
   `,
+  imports: [NgClass, FormsModule],
 })
 export class IconRadioComponent implements OnInit, ControlValueAccessor {
   disabled = false;
@@ -42,12 +44,6 @@ export class IconRadioComponent implements OnInit, ControlValueAccessor {
     ngControl.valueAccessor = this;
   }
 
-  // Control Value Accessor
-  onTouched!: () => void;
-  onChange: (value: string | number) => void = () => {
-    return;
-  };
-
   ngOnInit(): void {
     // Looks like Reactive Forms doesn't call writeValue on model changes.
     // Doing this work manually here.
@@ -62,7 +58,13 @@ export class IconRadioComponent implements OnInit, ControlValueAccessor {
   }
 
   // Control Value Accessor
-  registerOnChange(fn: IconRadioComponent['onChange'] ): void {
+  onTouched!: () => void;
+
+  onChange: (value: string | number) => void = () => {
+    return;
+  };
+  // Control Value Accessor
+  registerOnChange(fn: IconRadioComponent['onChange']): void {
     this.onChange = fn;
   }
 

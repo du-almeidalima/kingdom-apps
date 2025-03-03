@@ -1,5 +1,5 @@
-@use 'libs/common-ui/src/lib/styles/abstract/variables';
-@use 'libs/common-ui/src/lib/styles/base/typography';
+@use 'abstract/variables';
+@use 'base/typography';
 
 .territory-alert-badge {
   padding: .25rem .5rem;

@@ -1,9 +1,7 @@
-/* eslint-disable */
 export default {
   displayName: 'ministry-maps',
   preset: '../../jest.preset.js',
-  setupFilesAfterEnv: ['<rootDir>/src/setup-jest.ts'],
-  globals: {},
+  setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   coverageDirectory: '../../coverage/apps/ministry-maps',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [

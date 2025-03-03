@@ -1,6 +1,6 @@
 import { MockBuilder, MockRender } from 'ng-mocks';
 import { UsersPageComponent } from './users-page.component';
-import { RepositoriesModule } from '../../../../repositories/repositories.module';
+import { RepositoriesModule } from '../../../../repositories/repositories-providers';
 
 describe('UsersPageComponent', () => {
   beforeEach(() => MockBuilder(UsersPageComponent, [RepositoriesModule]));

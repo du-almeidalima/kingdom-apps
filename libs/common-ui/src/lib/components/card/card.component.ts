@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { NgStyle } from '@angular/common';
 
 @Component({
   selector: 'lib-card',
@@ -9,6 +10,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
       <ng-content></ng-content>
     </div>
   `,
+  imports: [NgStyle],
 })
 export class CardComponent {
   @Input()

@@ -2,7 +2,7 @@ import { WorkPageComponent } from './work-page.component';
 import { MockBuilder, MockInstance, MockRender } from 'ng-mocks';
 import { WorkModule } from '../../work.module';
 import { territoryMockBuilder } from '../../../../../test/mocks/models/territory.mock';
-import { RepositoriesModule } from '../../../../repositories/repositories.module';
+import { RepositoriesModule } from '../../../../repositories/repositories-providers';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 
 describe('WorkPageComponent', () => {

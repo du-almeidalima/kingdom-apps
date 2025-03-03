@@ -2,28 +2,29 @@
   "name": "ministry-maps",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "prefix": "kingdom-apps",
+  "prefix": "app",
   "sourceRoot": "apps/ministry-maps/src",
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/angular:webpack-browser",
+      "executor": "@angular-devkit/build-angular:application",
       "outputs": [
         "{options.outputPath}"
       ],
       "options": {
         "outputPath": "dist/apps/ministry-maps",
         "index": "apps/ministry-maps/src/index.html",
-        "main": "apps/ministry-maps/src/main.ts",
+        "browser": "apps/ministry-maps/src/main.ts",
         "polyfills": [
           "zone.js"
         ],
         "tsConfig": "apps/ministry-maps/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
-          "apps/ministry-maps/src/favicon.ico",
-          "apps/ministry-maps/src/assets",
-          "apps/ministry-maps/src/manifest.webmanifest",
+          {
+            "glob": "**/*",
+            "input": "apps/ministry-maps/public"
+          },
           {
             "input": "libs/common-ui/src/assets",
             "glob": "**/*",
@@ -31,51 +32,43 @@
           }
         ],
         "styles": [
-          "apps/ministry-maps/src/styles/main.scss"
+          "apps/ministry-maps/src/styles/main.scss",
+          "libs/common-ui/src/lib/styles/index.scss"
         ],
         "stylePreprocessorOptions": {
           "includePaths": [
             "libs/common-ui/src/lib/styles"
           ]
         },
-        "scripts": [],
-        "customWebpackConfig": {
-          "path": "apps/ministry-maps/webpack.config.js"
-        },
-        "serviceWorker": true,
-        "ngswConfigPath": "apps/ministry-maps/ngsw-config.json"
+        "scripts": []
       },
       "configurations": {
         "production": {
-          "optimization": true,
-          "sourceMap": false,
           "budgets": [
             {
               "type": "initial",
-              "maximumWarning": "500kb",
+              "maximumWarning": "1mb",
               "maximumError": "1.5mb"
             },
             {
               "type": "anyComponentStyle",
-              "maximumWarning": "3kb",
-              "maximumError": "4kb"
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
             }
           ],
-          "outputHashing": "all"
+          "outputHashing": "all",
+          "serviceWorker": "apps/ministry-maps/ngsw-config.json"
         },
         "development": {
-          "buildOptimizer": false,
           "optimization": false,
-          "vendorChunk": true,
           "extractLicenses": false,
-          "sourceMap": true,
-          "namedChunks": true
+          "sourceMap": true
         }
       },
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@nx/angular:dev-server",
+      "executor": "@angular-devkit/build-angular:dev-server",
       "configurations": {
         "production": {
           "buildTarget": "ministry-maps:build:production"
@@ -104,18 +97,13 @@
         "jestConfig": "apps/ministry-maps/jest.config.ts"
       }
     },
-    "deploy": {
-      "executor": "@angular/fire:deploy",
+    "serve-static": {
+      "executor": "@nx/web:file-server",
       "options": {
-        "version": 2
-      },
-      "configurations": {
-        "production": {
-          "buildTarget": "ministry-maps:build:production",
-          "serveTarget": "ministry-maps:serve:production"
-        }
-      },
-      "defaultConfiguration": "production"
+        "buildTarget": "ministry-maps:build",
+        "staticFilePath": "dist/apps/ministry-maps/browser",
+        "spa": true
+      }
     }
   }
 }

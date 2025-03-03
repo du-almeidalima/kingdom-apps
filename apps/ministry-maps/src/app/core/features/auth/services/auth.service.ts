@@ -1,17 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 
-import { AuthRepository, CreateUserConfig } from '../repositories/auth.repository';
-import { FIREBASE_PROVIDERS } from '../repositories/firebase/firebase-auth-datasource.service';
+import { AuthRepository, CreateUserConfig } from '../../../../repositories/auth.repository';
+import { FIREBASE_PROVIDERS } from '../../../../repositories/firebase/firebase-auth-datasource.service';
 import { UserStateService } from '../../../../state/user.state.service';
 import { User } from '../../../../../models/user';
 import { Router } from '@angular/router';
 import { AuthUserStateService } from '@kingdom-apps/common-ui';
 import { AuthRoutesEnum } from '../models/enums/auth-routes';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root'})
 export class AuthService {
   constructor(
     private readonly authRepository: AuthRepository,

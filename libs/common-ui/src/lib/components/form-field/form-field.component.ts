@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, ContentChild, Input } from '@angular/core';
 import { InputComponent } from './input/input.component';
 import { LabelComponent } from './label/label.component';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'lib-form-field',
@@ -12,6 +13,7 @@ import { LabelComponent } from './label/label.component';
       <ng-content></ng-content>
     </div>
   `,
+  imports: [NgClass],
 })
 export class FormFieldComponent {
   @Input()

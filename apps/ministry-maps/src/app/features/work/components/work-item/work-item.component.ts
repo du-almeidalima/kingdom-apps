@@ -5,7 +5,7 @@ import {
   ConfirmDialogComponent,
   ConfirmDialogData, disabled, disabledLight,
   grey200,
-  grey400,
+  grey400, IconButtonComponent, IconComponent,
   Icons,
   primaryGreen,
   white200,
@@ -20,6 +20,7 @@ import { TerritoryVisitHistory } from '../../../../../models/territory-visit-his
 import { HistoryDialogComponent } from '../../../../shared/components/dialogs';
 import openGoogleMapsHandler from '../../../../shared/utils/open-google-maps';
 import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territory-icon-mapper';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'kingdom-apps-work-item',
@@ -39,8 +40,7 @@ import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territor
             type="button"
             [disabled]="disabled"
             [hoverBackgroundColor]="disabledButtonBackgroundColor"
-            (click)="handleUndo()"
-          >
+            (click)="handleUndo()">
             <lib-icon [fillColor]="disabled ? disabledLight : whiteButtonColor" icon="eraser-2"></lib-icon>
           </button>
         } @else {
@@ -49,8 +49,7 @@ import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territor
             type="checkbox"
             [id]="territory.id"
             [disabled]="disabled"
-            (click)="handleCheck($event)"
-          />
+            (click)="handleCheck($event)" />
         }
       </label>
       <!-- Content -->
@@ -73,28 +72,27 @@ import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territor
         <div class="work-item__footer">
           <span class="work-item__city">{{ territory.city }}</span>
           <div class="work-item__buttons-container">
-            <button
-              *ngIf="territory.status === DesignationStatusEnum.DONE"
-              lib-icon-button
-              [disabled]="disabled"
-              (click)="handleEdit()"
-            >
-              <lib-icon [fillColor]="disabled ? disabledColor : buttonIconColor" icon="pencil-lined" />
-            </button>
-            <button lib-icon-button *ngIf="territory.mapsLink" (click)="handleOpenMaps(territory.mapsLink)">
-              <lib-icon [fillColor]="buttonIconColor" icon="map-5" />
-            </button>
-            <button
-              lib-icon-button
-              *ngIf="territory.history && territory.history.length > 0"
-              (click)="handleOpenHistory()">
-              <lib-icon [fillColor]="buttonIconColor" icon="time-17" />
-            </button>
+            @if (territory.status === DesignationStatusEnum.DONE) {
+              <button lib-icon-button [disabled]="disabled" (click)="handleEdit()">
+                <lib-icon [fillColor]="disabled ? disabledColor : buttonIconColor" icon="pencil-lined" />
+              </button>
+            }
+            @if (territory.mapsLink) {
+              <button lib-icon-button (click)="handleOpenMaps(territory.mapsLink)">
+                <lib-icon [fillColor]="buttonIconColor" icon="map-5" />
+              </button>
+            }
+            @if (territory.history && territory.history.length > 0) {
+              <button lib-icon-button (click)="handleOpenHistory()">
+                <lib-icon [fillColor]="buttonIconColor" icon="time-17" />
+              </button>
+            }
           </div>
         </div>
       </div>
     </div>
   `,
+  imports: [IconComponent, NgClass, IconButtonComponent],
 })
 export class WorkItemComponent implements OnInit {
   protected readonly DesignationStatusEnum = DesignationStatusEnum;

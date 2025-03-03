@@ -1,16 +1,36 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { CommonComponentsModule, CommonDirectivesModule, white100 } from '@kingdom-apps/common-ui';
+import {
+  ButtonComponent,
+  DialogCloseDirective,
+  DialogComponent,
+  DialogFooterComponent,
+  FormFieldComponent,
+  InputComponent,
+  LabelComponent,
+  SpinnerComponent,
+  white100,
+} from '@kingdom-apps/common-ui';
 import { TCreateLinkForm } from '../invite-create-dialog.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RoleEnum } from '../../../../../../models/enums/role';
-import { SharedModule } from '../../../../../shared/shared.module';
+import { IconRadioComponent } from '../../../../../shared/components/visit-outcome-option/icon-radio.component';
 
 @Component({
   selector: 'kingdom-apps-invite-create-dialog-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, CommonComponentsModule, ReactiveFormsModule, CommonDirectivesModule, SharedModule],
+  imports: [
+    ReactiveFormsModule,
+    DialogComponent,
+    DialogFooterComponent,
+    FormFieldComponent,
+    LabelComponent,
+    InputComponent,
+    IconRadioComponent,
+    SpinnerComponent,
+    ButtonComponent,
+    DialogCloseDirective,
+  ],
   styles: `
     :host {
       display: block;
@@ -31,26 +51,26 @@ import { SharedModule } from '../../../../../shared/shared.module';
           <kingdom-apps-icon-radio formControlName="role" [value]="RoleEnum.PUBLISHER" class="mt-3">
             <div class="radio-option">
               <span class="radio-option__title">Publicador</span>
-              <span class="radio-option__description"
-              >Permisão mais básica, apenas está associado a uma congregação.</span
-              >
+              <span class="radio-option__description">
+                Permisão mais básica, apenas está associado a uma congregação.
+              </span>
             </div>
           </kingdom-apps-icon-radio>
           <kingdom-apps-icon-radio formControlName="role" [value]="RoleEnum.ORGANIZER" class="mt-3">
             <div class="radio-option">
               <span class="radio-option__title">Organizador</span>
               <span class="radio-option__description">
-              Indicada para Publicadores qualificados ou Servos Ministeriais; Pode designar e atualizar territórios.
-            </span>
+                Indicada para Publicadores qualificados ou Servos Ministeriais; Pode designar e atualizar territórios.
+              </span>
             </div>
           </kingdom-apps-icon-radio>
           <kingdom-apps-icon-radio formControlName="role" [value]="RoleEnum.ELDER" class="mt-3">
             <div class="radio-option">
               <span class="radio-option__title">Ancião</span>
               <span class="radio-option__description">
-              Tem todas as permissões de um Organizador, mas também pode adicionar/remover territórios e ver pessoas da
-              congregação.
-            </span>
+                Tem todas as permissões de um Organizador, mas também pode adicionar/remover territórios e ver pessoas
+                da congregação.
+              </span>
             </div>
           </kingdom-apps-icon-radio>
         </lib-form-field>
@@ -59,15 +79,13 @@ import { SharedModule } from '../../../../../shared/shared.module';
       <!-- FOOTER -->
       <lib-dialog-footer>
         <div class="flex flex-nowrap justify-end gap-4">
-          <button lib-button lib-dialog-close>Cancelar</button>
+          <button lib-button libDialogClose>Cancelar</button>
           <button lib-button btnType="primary" type="submit" form="invite-link-create-form">
-            <span *ngIf="!isSubmitting()">Criar Link</span>
-            <lib-spinner
-              *ngIf="isSubmitting()"
-              class="login-button__spinner"
-              height="1.75rem"
-              width="1.75rem"
-              [color]="white" />
+            @if (!isSubmitting()) {
+              <span>Criar Link</span>
+            } @else {
+              <lib-spinner class="login-button__spinner" height="1.75rem" width="1.75rem" [color]="white" />
+            }
           </button>
         </div>
       </lib-dialog-footer>

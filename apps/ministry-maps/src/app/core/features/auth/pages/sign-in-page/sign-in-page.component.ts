@@ -1,20 +1,24 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { FIREBASE_PROVIDERS } from '../../repositories/firebase/firebase-auth-datasource.service';
+import { FIREBASE_PROVIDERS } from '../../../../../repositories/firebase/firebase-auth-datasource.service';
 import { AuthService } from '../../services/auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FeatureRoutesEnum } from '../../../../../app-routes.module';
+import { FeatureRoutesEnum } from '../../../../../app-routes';
 import { catchError, EMPTY, finalize } from 'rxjs';
 import { RoleEnum } from '../../../../../../models/enums/role';
 import { AuthRoutesEnum } from '../../models/enums/auth-routes';
 import { InvitationLinkRepository } from '../../../../../repositories/invitation-link.repository';
 import { InvitationLink } from '../../../../../../models/invitation-link';
-import { AuthErrorEnum, CreateUserConfig } from '../../repositories/auth.repository';
+import { AuthErrorEnum, CreateUserConfig } from '../../../../../repositories/auth.repository';
 import { InviteBO } from '../../../../../features/users/bo/invite/invite-bo.service';
+import { CardComponent } from '@kingdom-apps/common-ui';
+import { NgOptimizedImage } from '@angular/common';
+import { ProviderLoginButtonComponent } from '../../components/provider-login-button.component';
 
 @Component({
   selector: 'kingdom-apps-sign-in-page',
   templateUrl: './sign-in-page.component.html',
   styleUrls: ['./sign-in-page.component.scss'],
+  imports: [CardComponent, NgOptimizedImage, ProviderLoginButtonComponent],
 })
 export class SignInPageComponent implements OnInit {
   protected readonly FIREBASE_PROVIDERS = FIREBASE_PROVIDERS;

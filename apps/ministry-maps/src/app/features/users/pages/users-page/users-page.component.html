@@ -2,13 +2,16 @@
   <h2 class="t-headline2 mb-8">Pessoas</h2>
   <ul class="list-none">
     @for (user of users; track user.id) {
-    <li class="[&:not(:first-child)]:mt-3">
-      <kingdom-apps-user-list-item [user]="user" (remove)="handleDeleteUser($event)" (edit)="handleEditUser($event)"/>
-    </li>
+      <li class="[&:not(:first-child)]:mt-3">
+        <kingdom-apps-user-list-item
+          [user]="user"
+          (remove)="handleDeleteUser($event)"
+          (edit)="handleEditUser($event)" />
+      </li>
     }
   </ul>
 
-  <button *lib-authorize="CREATE_INVITE_LINK_ALLOWED"
+  <button *libAuthorize="CREATE_INVITE_LINK_ALLOWED"
           lib-floating-action-button title='Criar Link de Convite'
           [backgroundColor]='green200'
           (click)='handleCreateInviteLink()'>

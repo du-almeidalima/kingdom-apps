@@ -1,5 +1,4 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 
 import { LoginPageComponent } from './pages/login-page/login-page.component';
 import { WelcomePageComponent } from './pages/welcome-page/welcome-page.component';
@@ -26,9 +25,3 @@ export const AUTH_ROUTES: Routes = [
     component: SignInPageComponent,
   },
 ];
-
-@NgModule({
-  imports: [RouterModule.forChild(AUTH_ROUTES)],
-  exports: [RouterModule],
-})
-export class AuthRoutesModule {}

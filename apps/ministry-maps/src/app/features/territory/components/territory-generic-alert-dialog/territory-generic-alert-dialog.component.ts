@@ -1,8 +1,16 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
-import { white100 } from '@kingdom-apps/common-ui';
+import {
+  ButtonComponent,
+  DialogComponent,
+  DialogFooterComponent,
+  IconComponent,
+  SpinnerComponent,
+  white100,
+} from '@kingdom-apps/common-ui';
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
 import { finalize, Observable } from 'rxjs';
+import { DatePipe, SlicePipe } from '@angular/common';
 
 export type TerritoryGenericAlertDialogData = {
   history: TerritoryVisitHistory[];
@@ -22,17 +30,19 @@ export type TerritoryGenericAlertDialogData = {
       <p class="t-body2 mb-5">{{ data.message }}</p>
       <!-- REPORTS -->
       <div class="overflow-y-auto" style="max-height: 30dvh">
-        <figure class="quote-report" *ngFor="let report of data.history">
-          <blockquote class="quote-report__quote">
-            {{ report.notes }}
-          </blockquote>
-          <figcaption class="quote-report__caption text-gray-600 t-caption">
-            @if (report.name) {
-              <span>{{ report.name | slice : 0 : 30 }}</span>,&nbsp;
-            }
-            {{ report.date | date }}
-          </figcaption>
-        </figure>
+        @for (report of data.history; track report.id) {
+          <figure class="quote-report">
+            <blockquote class="quote-report__quote">
+              {{ report.notes }}
+            </blockquote>
+            <figcaption class="quote-report__caption text-gray-600 t-caption">
+              @if (report.name) {
+                <span>{{ report.name | slice : 0 : 30 }}</span>,&nbsp;
+              }
+              {{ report.date | date }}
+            </figcaption>
+          </figure>
+        }
       </div>
 
       <!-- FOOTER -->
@@ -42,22 +52,26 @@ export type TerritoryGenericAlertDialogData = {
           <button lib-button btnType="primary" (click)="handleResolveAlert()">
             @if (!isSubmitting) {
               <div class="flex gap-1.5 items-center">
-                <lib-icon class='h-7 w-7' icon="check-mark-circle-lined" />
+                <lib-icon class="h-7 w-7" icon="check-mark-circle-lined" />
                 <span>Remover Marcação</span>
               </div>
             } @else {
-              <lib-spinner
-                *ngIf="isSubmitting"
-                class="login-button__spinner"
-                height="1.75rem"
-                width="1.75rem"
-                [color]="white" />
+              <lib-spinner class="login-button__spinner" height="1.75rem" width="1.75rem" [color]="white" />
             }
           </button>
         </div>
       </lib-dialog-footer>
     </lib-dialog>
   `,
+  imports: [
+    SpinnerComponent,
+    ButtonComponent,
+    IconComponent,
+    DatePipe,
+    SlicePipe,
+    DialogComponent,
+    DialogFooterComponent,
+  ],
 })
 export class TerritoryGenericAlertDialogComponent {
   protected readonly white = white100;
