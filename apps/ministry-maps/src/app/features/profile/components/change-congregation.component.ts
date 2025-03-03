@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { CommonModule } from '@angular/common';
 import { SectionComponent } from '../../../shared/components/section/section.component';
 import { UserStateService } from '../../../state/user.state.service';
-import { CommonComponentsModule } from '@kingdom-apps/common-ui';
+import { SelectComponent } from '@kingdom-apps/common-ui';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CongregationRepository } from '../../../repositories/congregation.repository';
@@ -14,19 +14,18 @@ import { finalize } from 'rxjs';
   selector: 'kingdom-apps-change-congregation',
   styleUrl: './change-congregation.component.scss',
   standalone: true,
-  imports: [CommonModule, SectionComponent, CommonComponentsModule, FormsModule],
+  imports: [CommonModule, SectionComponent, FormsModule, SelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <kingdom-apps-section title="Administrador" [isLoading]="isLoading()">
       <p class="t-body2 mb-2.5">Selecione a congregação que deseja ver:</p>
       <select
         lib-select
-        class='w-full'
-        name='Cidade'
+        class="w-full"
+        name="Cidade"
         [ngModel]="user()?.congregation?.id"
-        (ngModelChange)="handleChangeCongregation($event)"
-      >
-        <option [value]='congregation.id' *ngFor='let congregation of congregations()'>{{ congregation.name }}</option>
+        (ngModelChange)="handleChangeCongregation($event)">
+        <option [value]="congregation.id" *ngFor="let congregation of congregations()">{{ congregation.name }}</option>
       </select>
     </kingdom-apps-section>
   `,
@@ -38,10 +37,12 @@ export class ChangeCongregationComponent implements OnInit {
 
   isLoading = signal(false);
   user = toSignal(this.userState.$user);
-  congregations = signal<Pick<Congregation, 'name' | 'id'>[]>([{
-    name: this.user()?.congregation?.name ?? '',
-    id: this.user()?.congregation?.id ?? '',
-  }]);
+  congregations = signal<Pick<Congregation, 'name' | 'id'>[]>([
+    {
+      name: this.user()?.congregation?.name ?? '',
+      id: this.user()?.congregation?.id ?? '',
+    },
+  ]);
 
   ngOnInit(): void {
     this.congregationRepository.getCongregations().subscribe(congregations => {
@@ -55,11 +56,14 @@ export class ChangeCongregationComponent implements OnInit {
     }
 
     this.isLoading.set(true);
+    this.profileBo
     // @ts-expect-error: TypeScript is struggling to infer types with Signals...
-    this.profileBo.changeUserCongregation(this.user()?.id, congregationId)
-      .pipe(finalize(() => {
-        this.isLoading.set(false);
-      }))
+      .changeUserCongregation(this.user()?.id, congregationId)
+      .pipe(
+        finalize(() => {
+          this.isLoading.set(false);
+        })
+      )
       .subscribe();
   }
 }

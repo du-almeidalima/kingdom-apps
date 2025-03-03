@@ -6,12 +6,14 @@
     name='Cidade'
     [ngModel]='selectedCity'
     (ngModelChange)='handleSelectedCityChange($event)'>
-    <option [value]='city' *ngFor='let city of cities'>{{ city }}</option>
+    @for (city of cities; track city) {
+      <option [value]='city'>{{ city }}</option>
+    }
     <option [value]='ALL_OPTION'>Todas</option>
   </select>
   <!-- Filters -->
   <div class='flex flex-row gap-3 mt-3'>
-    <lib-search-input class='flex-1' (searched)='handleTerritorySearchTermChange($event)'/>
+    <lib-search-input class='flex-1' (searched)='handleTerritorySearchTermChange($event)' />
     <select
       lib-select
       class='w-44'
@@ -26,14 +28,15 @@
   <!-- Territories -->
   <form id='territory-form' (submit)='handleTerritoryFormSubmit()'>
     <div class='flex flex-col gap-5 mt-8 pb-56'>
-      <kingdom-apps-territory-checkbox
-        *ngFor='let territory of filteredTerritories$ | async; trackBy: trackByRepositoryId'
-        [territory]='territory'
-        [name]='territory.id'
-        [ngModel]='hasAlreadyBeenSelected(territory.id)'
-        [disabled]='assignedTerritories.has(territory.id)'
-        (ngModelChange)='handleTerritoryCheck($event, territory)'>
-      </kingdom-apps-territory-checkbox>
+      @for (territory of filteredTerritories$ | async; track territory.id) {
+        <kingdom-apps-territory-checkbox
+          [territory]='territory'
+          [name]='territory.id'
+          [ngModel]='hasAlreadyBeenSelected(territory.id)'
+          [disabled]='assignedTerritories.has(territory.id)'
+          (ngModelChange)='handleTerritoryCheck($event, territory)'>
+        </kingdom-apps-territory-checkbox>
+      }
     </div>
   </form>
 

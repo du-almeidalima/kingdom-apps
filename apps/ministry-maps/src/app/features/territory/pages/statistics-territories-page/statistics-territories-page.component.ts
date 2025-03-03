@@ -3,16 +3,17 @@ import { TerritoryRepository } from '../../../../repositories/territories.reposi
 import { UserStateService } from '../../../../state/user.state.service';
 import { finalize, map, Observable, of, shareReplay } from 'rxjs';
 import { Territory } from '../../../../../models/territory';
-import { SearchInputComponent } from '@kingdom-apps/common-ui';
+import { SearchInputComponent, SelectComponent } from '@kingdom-apps/common-ui';
 import { Dialog } from '@angular/cdk/dialog';
 import { TerritoryStatisticsBO } from '../../bo/territory-statistics.bo';
 import { TerritoryStatistics } from '../../../../../models/territory-statistics';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'kingdom-apps-statistics-territories-page',
   templateUrl: './statistics-territories-page.component.html',
   styleUrls: ['./statistics-territories-page.component.scss'],
-  providers: [TerritoryStatisticsBO],
+  imports: [SelectComponent, FormsModule],
 })
 export class StatisticsTerritoriesPageComponent implements OnInit {
   private territories$: Observable<Territory[]> = of([]);
@@ -47,20 +48,19 @@ export class StatisticsTerritoriesPageComponent implements OnInit {
     this.selectedCity = this.cities.length >= 0 ? this.cities[0] : this.ALL_OPTION;
 
     this.getTerritories();
-    this.territoryStatisticsBO.getTerritoryStatistics(this.selectedCity)
-      .subscribe((statisticsResponse) =>{
+    this.territoryStatisticsBO.getTerritoryStatistics(this.selectedCity).subscribe(statisticsResponse => {
       this.territoryStatistics = statisticsResponse;
-    })
-
+    });
   }
 
   handleSelectedCityChange(city: string) {
     this.selectedCity = city;
     this.filteredTerritories$ = this.filterTerritoriesByCity(city);
-    this.territoryStatisticsBO.getTerritoryStatistics((city === this.ALL_OPTION) ? undefined : this.selectedCity)
-      .subscribe((statisticsResponse) =>{
+    this.territoryStatisticsBO
+      .getTerritoryStatistics(city === this.ALL_OPTION ? undefined : this.selectedCity)
+      .subscribe(statisticsResponse => {
         this.territoryStatistics = statisticsResponse;
-      })
+      });
   }
 
   /** Get territories from the repository and create the filtered observable array */

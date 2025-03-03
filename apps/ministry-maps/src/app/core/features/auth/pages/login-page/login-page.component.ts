@@ -1,16 +1,19 @@
 import { Component } from '@angular/core';
-import { FIREBASE_PROVIDERS } from '../../repositories/firebase/firebase-auth-datasource.service';
+import { FIREBASE_PROVIDERS } from '../../../../../repositories/firebase/firebase-auth-datasource.service';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
-import { FeatureRoutesEnum } from '../../../../../app-routes.module';
+import { FeatureRoutesEnum } from '../../../../../app-routes';
 import { finalize } from 'rxjs';
 import { RoleEnum } from '../../../../../../models/enums/role';
 import { AuthRoutesEnum } from '../../models/enums/auth-routes';
+import { CardComponent } from '@kingdom-apps/common-ui';
+import { ProviderLoginButtonComponent } from '../../components/provider-login-button.component';
 
 @Component({
   selector: 'kingdom-apps-login-page',
   templateUrl: './login-page.component.html',
   styleUrls: ['./login-page.component.scss'],
+  imports: [CardComponent, ProviderLoginButtonComponent],
 })
 export class LoginPageComponent {
   protected readonly FIREBASE_PROVIDERS = FIREBASE_PROVIDERS;

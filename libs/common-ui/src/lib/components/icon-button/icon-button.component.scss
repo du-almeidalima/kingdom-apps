@@ -1,7 +1,5 @@
 @use '../../styles/abstract/variables';
 
-$icon-button-padding: .5rem;
-
 // The .icon-button needs to be specified to avoid the :host selector to conflict, when importing this file
 :host:where(.icon-button) {
   $size: 3rem;
@@ -12,7 +10,7 @@ $icon-button-padding: .5rem;
 
   width: $size;
   height: $size;
-  padding: $icon-button-padding;
+  padding: variables.$icon-button-padding;
   border: none;
   border-radius: 50%;
 

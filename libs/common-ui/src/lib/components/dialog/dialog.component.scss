@@ -1,4 +1,5 @@
 @use 'sass:math';
+@use 'sass:color';
 @use '../../styles/abstract/variables';
 @use '../../styles/base/typography';
 
@@ -56,7 +57,7 @@
     cursor: pointer;
 
     &:hover {
-      background-color: lighten(variables.$grey-100, 10%);
+      background-color: color.scale(variables.$grey-100, $lightness: 10%);
     }
   }
 

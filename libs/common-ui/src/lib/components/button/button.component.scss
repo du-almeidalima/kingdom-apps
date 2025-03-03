@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '../../styles/abstract/variables';
 
 :host {
@@ -5,7 +6,7 @@
   min-height: 4.2rem;
   padding: 1.2rem 1.6rem;
   border-radius: 2px;
-  border: 1px solid darken(variables.$white-300, 20%);
+  border: 1px solid color.scale(variables.$white-300, $lightness: -20%);
 
   transition: background-color 100ms linear, width 200ms ease-out;
   background-color: variables.$white-300;
@@ -14,16 +15,16 @@
   cursor: pointer;
 
   &:hover {
-    background-color: darken(variables.$white-300, 10%);
+    background-color: color.scale(variables.$white-300, $lightness: -10%);
   }
 
   &.button--primary {
     color: variables.$white-100;
     background-color: variables.$blue-btn;
-    border-color: darken(variables.$blue-btn, 20%);
+    border-color: color.scale(variables.$blue-btn, $lightness: -20%);
 
     &:hover {
-      background-color: darken(variables.$blue-btn, 10%);
+      background-color: color.scale(variables.$blue-btn, $lightness: -10%);
     }
   }
 

@@ -2,7 +2,7 @@
   "name": "ministry-maps",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "prefix": "kingdom-apps",
+  "prefix": "app",
   "sourceRoot": "apps/ministry-maps/src",
   "tags": [],
   "targets": {
@@ -12,6 +12,9 @@
         "{options.outputPath}"
       ],
       "options": {
+        "customWebpackConfig": {
+          "path": "apps/ministry-maps/webpack.config.js"
+        },
         "outputPath": "dist/apps/ministry-maps",
         "index": "apps/ministry-maps/src/index.html",
         "main": "apps/ministry-maps/src/main.ts",
@@ -21,9 +24,10 @@
         "tsConfig": "apps/ministry-maps/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
-          "apps/ministry-maps/src/favicon.ico",
-          "apps/ministry-maps/src/assets",
-          "apps/ministry-maps/src/manifest.webmanifest",
+          {
+            "glob": "**/*",
+            "input": "apps/ministry-maps/public"
+          },
           {
             "input": "libs/common-ui/src/assets",
             "glob": "**/*",
@@ -31,6 +35,7 @@
           }
         ],
         "styles": [
+          "libs/common-ui/src/lib/styles/index.scss",
           "apps/ministry-maps/src/styles/main.scss"
         ],
         "stylePreprocessorOptions": {
@@ -39,16 +44,11 @@
           ]
         },
         "scripts": [],
-        "customWebpackConfig": {
-          "path": "apps/ministry-maps/webpack.config.js"
-        },
         "serviceWorker": true,
         "ngswConfigPath": "apps/ministry-maps/ngsw-config.json"
       },
       "configurations": {
         "production": {
-          "optimization": true,
-          "sourceMap": false,
           "budgets": [
             {
               "type": "initial",
@@ -57,8 +57,8 @@
             },
             {
               "type": "anyComponentStyle",
-              "maximumWarning": "3kb",
-              "maximumError": "4kb"
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
             }
           ],
           "outputHashing": "all"
@@ -116,6 +116,13 @@
         }
       },
       "defaultConfiguration": "production"
+    },
+    "serve-static": {
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "ministry-maps:build",
+        "spa": true
+      }
     }
   }
 }

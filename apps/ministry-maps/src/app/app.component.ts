@@ -1,6 +1,10 @@
 import { Component } from '@angular/core';
+import { RouterModule } from '@angular/router';
+
+import { HeaderComponent } from './shared/components/header/header.component';
 
 @Component({
+  imports: [RouterModule, HeaderComponent],
   selector: 'kingdom-apps-root',
   templateUrl: './app.component.html',
   styles: [
@@ -14,4 +18,6 @@ import { Component } from '@angular/core';
     `,
   ],
 })
-export class AppComponent {}
+export class AppComponent {
+  title = 'ministry-maps';
+}

@@ -1,6 +1,6 @@
 import { User } from '../../../models/user';
 import { EMPTY, Observable, of } from 'rxjs';
-import { AuthRepository, CreateUserConfig } from '../../../app/core/features/auth/repositories/auth.repository';
+import { AuthRepository, CreateUserConfig } from '../../../app/repositories/auth.repository';
 import { userMockBuilder } from './user.mock';
 
 // MOCK CLASSES

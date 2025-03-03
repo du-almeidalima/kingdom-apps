@@ -7,11 +7,15 @@ import { Designation, DesignationTerritory } from '../../../../../models/designa
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { DesignationStatusEnum } from '../../../../../models/enums/designation-status';
 import { WorkBO } from '../../bo/work.bo';
+import { NoteComponent } from '@kingdom-apps/common-ui';
+import { WorkItemComponent } from '../../components/work-item/work-item.component';
 
 @Component({
   selector: 'kingdom-apps-work-page',
   templateUrl: './work-page.component.html',
   styleUrls: ['./work-page.component.scss'],
+  providers: [WorkBO],
+  imports: [NoteComponent, WorkItemComponent],
 })
 export class WorkPageComponent implements OnInit, OnDestroy {
   private designationTerritorySubscription: Subscription | undefined;
@@ -97,7 +101,8 @@ export class WorkPageComponent implements OnInit, OnDestroy {
       throw new Error('Can only revert last visit for a designation that is not undefined');
     }
 
-    this.workBO.undoLastVisitChanges(this.designation, designationTerritory)
+    this.workBO
+      .undoLastVisitChanges(this.designation, designationTerritory)
       .pipe(
         catchError(err => {
           // TODO: Create a component to display errors
@@ -108,7 +113,13 @@ export class WorkPageComponent implements OnInit, OnDestroy {
       )
       .subscribe(_ => {
         // TODO: Add a success message here
-        console.log("Successfully reverted last visit for designation: " + this.designation?.id + " and territory: " + designationTerritory.id + "");
+        console.log(
+          'Successfully reverted last visit for designation: ' +
+            this.designation?.id +
+            ' and territory: ' +
+            designationTerritory.id +
+            ''
+        );
       });
   }
 

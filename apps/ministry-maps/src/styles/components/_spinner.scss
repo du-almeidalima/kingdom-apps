@@ -1,0 +1,28 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+
+// After upgrading to Angular 19, I was no longer able to make the SpinnerComponent be rendered while the application is
+// loading. Before, Angular was able to create it as a WebComponent, but now, but the time it creates it, the application
+// is already loaded.
+
+.spinner {
+  width: 5.5rem;
+  height: 5.5rem;
+}
+
+.spinner__inner-block {
+  height: 100%;
+  border-radius: 100%;
+  border: 3px solid variables.$primary-green;
+  border-bottom-color: transparent;
+
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

@@ -9,7 +9,7 @@ import { connectAuthEmulator, getAuth, provideAuth } from '@angular/fire/auth';
 import { connectFirestoreEmulator, getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { TerritoryRepository } from '../app/repositories/territories.repository';
 import { TerritoryRepositoryMock } from './mocks/models/territory.mock';
-import { AuthRepository } from '../app/core/features/auth/repositories/auth.repository';
+import { AuthRepository } from '../app/repositories/auth.repository';
 import { AuthRepositoryMock } from './mocks/models/auth.mock';
 import { DesignationRepository } from '../app/repositories/designation.repository';
 import { DesignationRepositoryMock } from './mocks/models/designation.mock';

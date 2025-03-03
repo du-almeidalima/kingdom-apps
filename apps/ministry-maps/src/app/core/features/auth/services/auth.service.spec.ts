@@ -2,9 +2,9 @@ import { TestBed } from '@angular/core/testing';
 
 import { AuthService } from './auth.service';
 import { MockProvider, ngMocks } from 'ng-mocks';
-import { AuthRepository } from '../repositories/auth.repository';
+import { AuthRepository } from '../../../../repositories/auth.repository';
 import { UserStateService } from '../../../../state/user.state.service';
-import { FIREBASE_PROVIDERS } from '../repositories/firebase/firebase-auth-datasource.service';
+import { FIREBASE_PROVIDERS } from '../../../../repositories/firebase/firebase-auth-datasource.service';
 import { of } from 'rxjs';
 import { userMockBuilder } from '../../../../../test/mocks';
 import { RoleEnum } from '../../../../../models/enums/role';

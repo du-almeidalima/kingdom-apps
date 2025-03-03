@@ -2,11 +2,11 @@ import { Directive, HostListener, Input } from '@angular/core';
 import { DialogRef } from '@angular/cdk/dialog';
 
 @Directive({
-  selector: '[lib-dialog-close]',
+  selector: '[libDialogClose]',
 })
 export class DialogCloseDirective {
   /** The result for when this action closes the dialog */
-  @Input('lib-dialog-close')
+  @Input('libDialogClose')
   dialogResult: any;
 
   constructor(public dialogRef: DialogRef<any>) {}

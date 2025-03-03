@@ -2,12 +2,12 @@ import { TestBed } from '@angular/core/testing';
 
 import { FIREBASE_PROVIDERS, FirebaseAuthDatasourceService } from './firebase-auth-datasource.service';
 import { MockProvider, ngMocks } from 'ng-mocks';
-import { Auth, user } from '@angular/fire/auth';
-import { FirebaseUserDatasourceService } from '../../../../../repositories/firebase/firebase-user-datasource.service';
+import { Auth } from '@angular/fire/auth';
+import { FirebaseUserDatasourceService } from './firebase-user-datasource.service';
 import { Firestore } from '@angular/fire/firestore';
 import { of } from 'rxjs';
-import { userMockBuilder } from '../../../../../../test/mocks';
-import { RoleEnum } from '../../../../../../models/enums/role';
+import { userMockBuilder } from '../../../test/mocks';
+import { RoleEnum } from '../../../models/enums/role';
 
 const MOCK_AUTH_RES = {
   user: {

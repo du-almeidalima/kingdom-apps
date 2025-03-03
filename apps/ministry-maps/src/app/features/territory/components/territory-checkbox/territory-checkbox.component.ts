@@ -1,13 +1,14 @@
 import { ChangeDetectionStrategy, Component, forwardRef, Input, OnInit } from '@angular/core';
 import { Territory } from '../../../../../models/territory';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
 import openGoogleMapsHandler from '../../../../shared/utils/open-google-maps';
-import { grey400, Icons, primaryGreen } from '@kingdom-apps/common-ui';
+import { grey400, IconButtonComponent, IconComponent, Icons, primaryGreen } from '@kingdom-apps/common-ui';
 import { Dialog } from '@angular/cdk/dialog';
 import { HistoryDialogComponent } from '../../../../shared/components/dialogs';
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
 import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
 import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territory-icon-mapper';
+import { DatePipe, NgClass } from '@angular/common';
 
 @Component({
   selector: 'kingdom-apps-territory-checkbox',
@@ -22,87 +23,96 @@ import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territor
   ],
   template: `
     <label
-      class='territory-checkbox'
-      [for]='territory.id'
+      class="territory-checkbox"
+      [for]="territory.id"
       [ngClass]="{
         'territory-checkbox--disabled': disabled,
         'territory-checkbox--selected': !disabled && value
       }">
-      <div class='territory-checkbox__control-container'>
+      <div class="territory-checkbox__control-container">
         <input
-          type='checkbox'
-          [name]='territory.id'
-          [id]='territory.id'
-          [checked]='value'
-          [ngModel]='value'
-          [disabled]='disabled'
+          type="checkbox"
+          [name]="territory.id"
+          [id]="territory.id"
+          [checked]="value"
+          [ngModel]="value"
+          [disabled]="disabled"
           hidden
-          (ngModelChange)='setValue($event)' />
+          (ngModelChange)="setValue($event)" />
         <div
-          class='territory-checkbox__description'
+          class="territory-checkbox__description"
           [ngClass]="{ 'territory-checkbox__description--disabled': disabled }">
           <!-- Title and Subtitle -->
-          <div class='territory-checkbox__title-subtitle-container'>
+          <div class="territory-checkbox__title-subtitle-container">
             <lib-icon
-              class='territory-checkbox__icon'
+              class="territory-checkbox__icon"
               [ngClass]="{ 'territory-checkbox__icon--large': isIconLarge }"
-              [fillColor]='iconColor'
-              [icon]='icon' />
+              [fillColor]="iconColor"
+              [icon]="icon" />
             <!-- Address and Note -->
-            <div class='flex flex-col gap-1'>
-              <h3 class='territory-checkbox__title'>{{ territory.address }}</h3>
-              <span class='territory-checkbox__subtitle'>{{ territory.note }}</span>
+            <div class="flex flex-col gap-1">
+              <h3 class="territory-checkbox__title">{{ territory.address }}</h3>
+              <span class="territory-checkbox__subtitle">{{ territory.note }}</span>
             </div>
           </div>
           <!-- VISIT CONTAINER -->
-          <div class='territory-checkbox__visit-container'>
-            <span class='territory-checkbox__last-visit' *ngIf='territory.lastVisit'>
-              Última visita: {{ territory.lastVisit | date : 'dd/MM/yyyy' }}
-            </span>
+          <div class="territory-checkbox__visit-container">
+            @if (territory.lastVisit) {
+              <span class="territory-checkbox__last-visit">
+                Última visita: {{ territory.lastVisit | date : 'dd/MM/yyyy' }}
+              </span>
+            }
             <!-- VISIT STATUS BADGE -->
-            <span
-              class='territory-alert-badge territory-alert-badge--revisit'
-              title='Essa pessoa foi marcada como revisita recentemente'
-              *ngIf='hasRecentRevisit'>
-              Revisita
-            </span>
-            <span
-              class='territory-alert-badge territory-alert-badge--moved'
-              title='Essa pessoa se mudou'
-              *ngIf='hasRecentlyMoved'>
-              Mudou
-            </span>
-            <span
-              class='territory-alert-badge territory-alert-badge--stop-visiting'
-              title='Essa pessoa disse que não quer ser visitada por uma Testemunha de Jeová'
-              *ngIf='hasRecentlyAskedToStopVisiting'>
-              Não quer visitas
-            </span>
-            <span
-              class='territory-alert-badge territory-alert-badge--bible-student'
-              title='Essa pessoa é um estudante da Bíblia'
-              *ngIf='isBibleStudent'>
+            @if (hasRecentRevisit) {
+              <span
+                class="territory-alert-badge territory-alert-badge--revisit"
+                title="Essa pessoa foi marcada como revisita recentemente">
+                Revisita
+              </span>
+            }
+            @if (hasRecentlyMoved) {
+              <span class="territory-alert-badge territory-alert-badge--moved"
+                    title="Essa pessoa se mudou"
+              >
+                Mudou
+              </span>
+            }
+            @if (hasRecentlyAskedToStopVisiting) {
+              <span
+                class="territory-alert-badge territory-alert-badge--stop-visiting"
+                title="Essa pessoa disse que não quer ser visitada por uma Testemunha de Jeová"
+              >
+                Não quer visitas
+              </span>
+            }
+            @if (isBibleStudent) {
+              <span
+                class="territory-alert-badge territory-alert-badge--bible-student"
+                title="Essa pessoa é um estudante da Bíblia"
+              >
               Estudante
-        </span>
+            </span>
+            }
           </div>
         </div>
         <!-- BUTTONS CONTAINER -->
-        <div class='territory-checkbox__buttons-container'>
-          <button
-            *ngIf='territory.mapsLink'
-            lib-icon-button
-            type='button'
-            (click)='handleOpenMaps(territory.mapsLink)'>
-            <lib-icon [fillColor]='buttonIconColor' icon='map-5'></lib-icon>
-          </button>
-          <button *ngIf='territory.recentHistory' lib-icon-button type='button' (click)='handleOpenHistory()'>
-            <lib-icon [fillColor]='buttonIconColor' icon='time-17'></lib-icon>
-          </button>
+        <div class="territory-checkbox__buttons-container">
+          @if (territory.mapsLink) {
+            <button lib-icon-button type="button" (click)="handleOpenMaps(territory.mapsLink)">
+              <lib-icon [fillColor]="buttonIconColor" icon="map-5"></lib-icon>
+            </button>
+          }
+          @if (territory.recentHistory) {
+            <button lib-icon-button type="button" (click)="handleOpenHistory()">
+              <lib-icon [fillColor]="buttonIconColor" icon="time-17"></lib-icon>
+            </button>
+          }
         </div>
       </div>
-      <span class='territory-checkbox__indicator' [ngClass]='statusClass'></span>
+      <span class="territory-checkbox__indicator" [ngClass]="statusClass"></span>
     </label>
   `,
+  imports: [FormsModule, NgClass, IconComponent, DatePipe, IconButtonComponent],
 })
 export class TerritoryCheckboxComponent implements ControlValueAccessor, OnInit {
   protected readonly iconColor = grey400;

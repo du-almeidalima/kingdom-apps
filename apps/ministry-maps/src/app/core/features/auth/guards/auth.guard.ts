@@ -3,7 +3,7 @@ import { CanActivateFn, Router } from '@angular/router';
 import { map } from 'rxjs';
 import { UserStateService } from '../../../../state/user.state.service';
 import { RoleEnum } from '../../../../../models/enums/role';
-import { FirebaseAuthDatasourceService } from '../repositories/firebase/firebase-auth-datasource.service';
+import { FirebaseAuthDatasourceService } from '../../../../repositories/firebase/firebase-auth-datasource.service';
 import { inject } from '@angular/core';
 
 export const authGuard: CanActivateFn = route => {
@@ -13,7 +13,7 @@ export const authGuard: CanActivateFn = route => {
 
   const currentUser = userState.currentUser;
   const { roles } = route.data;
-  if (roles.includes('*')) {
+  if (!roles || roles?.includes('*')) {
     return true;
   }
 

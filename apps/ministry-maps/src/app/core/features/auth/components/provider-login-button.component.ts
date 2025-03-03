@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { CommonComponentsModule } from '@kingdom-apps/common-ui';
-import { FIREBASE_PROVIDERS } from '../repositories/firebase/firebase-auth-datasource.service';
+import { NgOptimizedImage } from '@angular/common';
+import { FIREBASE_PROVIDERS } from '../../../../repositories/firebase/firebase-auth-datasource.service';
+import { SpinnerComponent } from '@kingdom-apps/common-ui';
 
 @Component({
   selector: 'kingdom-apps-provider-login-button',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, CommonComponentsModule, NgOptimizedImage],
+  imports: [NgOptimizedImage, SpinnerComponent],
   styleUrl: './provider-login-button.component.scss',
   template: `
     <!-- Button Container -->
@@ -17,22 +17,19 @@ import { FIREBASE_PROVIDERS } from '../repositories/firebase/firebase-auth-datas
         type="button"
         [style.--btn-size]="btnSize + 'px'"
         [disabled]="loading"
-        (click)="providerClick.emit(provider)"
-      >
+        (click)="providerClick.emit(provider)">
         <!-- Button Content -->
         <img
           class="provider-login-button__logo"
-          priority
+          priority="1"
           [height]="btnSize"
           [width]="btnSize"
           [ngSrc]="imgUrl"
           [alt]="imgAltText" />
         <span class="provider-login-button__text t-body2">Entrar com uma conta do {{ imgAltText }}</span>
-        <lib-spinner *ngIf="loading"
-                     class="provider-login-button__spinner"
-                     height="2.5rem"
-                     width="2.5rem"
-        />
+        @if (loading) {
+          <lib-spinner class="provider-login-button__spinner" height="2.5rem" width="2.5rem" />
+        }
       </button>
     </div>
   `,

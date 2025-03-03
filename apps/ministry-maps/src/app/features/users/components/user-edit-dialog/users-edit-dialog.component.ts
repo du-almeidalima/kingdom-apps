@@ -1,16 +1,25 @@
 import { ChangeDetectionStrategy, Component, Inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 
-import { CommonComponentsModule, CommonDirectivesModule, grey400, white100 } from '@kingdom-apps/common-ui';
+import {
+  ButtonComponent,
+  DialogCloseDirective,
+  DialogComponent,
+  DialogFooterComponent,
+  FormFieldComponent,
+  grey400,
+  InputComponent,
+  SpinnerComponent,
+  white100,
+} from '@kingdom-apps/common-ui';
 
-import { SharedModule } from '../../../../shared/shared.module';
 import { RoleEnum } from '../../../../../models/enums/role';
 import { UserRepository } from '../../../../repositories/user.repository';
 import { UserStateService } from '../../../../state/user.state.service';
 import { User } from '../../../../../models/user';
 import { finalize } from 'rxjs';
+import { IconRadioComponent } from '../../../../shared/components/visit-outcome-option/icon-radio.component';
 
 export type UserEditDialogData = {
   user: User;
@@ -21,7 +30,17 @@ export type UserEditDialogData = {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './users-edit-dialog.component.scss',
-  imports: [CommonModule, CommonComponentsModule, SharedModule, ReactiveFormsModule, CommonDirectivesModule],
+  imports: [
+    ReactiveFormsModule,
+    DialogComponent,
+    DialogFooterComponent,
+    FormFieldComponent,
+    IconRadioComponent,
+    SpinnerComponent,
+    ButtonComponent,
+    DialogCloseDirective,
+    InputComponent,
+  ],
   template: `
     <lib-dialog title="Editar Usuário">
       <form id="move-alert-resolution-form" [formGroup]="form" (ngSubmit)="handleFormSubmit()" tabindex="0">
@@ -36,7 +55,9 @@ export type UserEditDialogData = {
           <kingdom-apps-icon-radio formControlName="role" [value]="RoleEnum.PUBLISHER" class="mt-3">
             <div class="radio-option">
               <span class="radio-option__title">Publicador</span>
-              <span class="radio-option__description">Permisão mais básica, apenas está associado a uma congregação.</span>
+              <span class="radio-option__description">
+                Permisão mais básica, apenas está associado a uma congregação.
+              </span>
             </div>
           </kingdom-apps-icon-radio>
           <kingdom-apps-icon-radio formControlName="role" [value]="RoleEnum.ORGANIZER" class="mt-3">
@@ -81,15 +102,13 @@ export type UserEditDialogData = {
       <!-- FOOTER -->
       <lib-dialog-footer>
         <div class="flex flex-nowrap justify-end gap-4">
-          <button lib-button lib-dialog-close>Cancelar</button>
+          <button lib-button libDialogClose>Cancelar</button>
           <button lib-button btnType="primary" type="submit" form="move-alert-resolution-form">
-            <span *ngIf="!isSubmitting()">Salvar</span>
-            <lib-spinner
-              *ngIf="isSubmitting()"
-              class="login-button__spinner"
-              height="1.75rem"
-              width="1.75rem"
-              [color]="white" />
+            @if (isSubmitting()) {
+            <lib-spinner class="login-button__spinner" height="1.75rem" width="1.75rem" [color]="white" />
+            } @else {
+            <span>Salvar</span>
+            }
           </button>
         </div>
       </lib-dialog-footer>
@@ -101,10 +120,7 @@ export class UsersEditDialogComponent {
   protected readonly white = white100;
   protected readonly iconColor = grey400;
 
-  public form: FormGroup<{
-    role: FormControl<RoleEnum>;
-    name: FormControl<string>;
-  }>;
+  public form: FormGroup<{ role: FormControl<RoleEnum>; name: FormControl<string> }>;
 
   isSubmitting = signal(false);
   canEditAdminRoles = false;

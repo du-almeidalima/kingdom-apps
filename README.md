@@ -48,11 +48,11 @@ tools
         └───seed
 ```
 
-To update the **seed** data back-up, run the command: 
+To update the **seed** data back-up, run the command:
 
 `firebase emulators:export tools/executors/firebase-emulator/seed`
 
-> **_NOTE:_** Anytime a change that requires DB data to work is made, please, run the above command and add it to the Pull Request before merging your feature. 
+> **_NOTE:_** Anytime a change that requires DB data to work is made, please, run the above command and add it to the Pull Request before merging your feature.
 
 ## Understand this workspace
 

@@ -3,7 +3,15 @@ import { TerritoryRepository } from '../../../../repositories/territories.reposi
 import { UserStateService } from '../../../../state/user.state.service';
 import { finalize, map, Observable, of, shareReplay } from 'rxjs';
 import { Territory } from '../../../../../models/territory';
-import { green200, grey400, SearchInputComponent, white200 } from '@kingdom-apps/common-ui';
+import {
+  FloatingActionButtonComponent,
+  green200,
+  grey400,
+  IconButtonComponent, IconComponent,
+  SearchInputComponent,
+  SelectComponent,
+  white200,
+} from '@kingdom-apps/common-ui';
 import { Dialog } from '@angular/cdk/dialog';
 import {
   TerritoryDialogData,
@@ -25,17 +33,34 @@ import { HistoryDialogComponent } from '../../../../shared/components/dialogs';
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
 import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
   TerritoryGenericAlertDialogComponent,
   TerritoryGenericAlertDialogData,
 } from '../../components/territory-generic-alert-dialog/territory-generic-alert-dialog.component';
 import { TerritoryBO } from '../../bo/territory.bo';
+import { FormsModule } from '@angular/forms';
+import { TerritoryListItemComponent } from '../../components/territory-list-item/territory-list-item.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'kingdom-apps-territories-page',
   templateUrl: './territories-page.component.html',
   styleUrls: ['./territories-page.component.scss'],
+  imports: [
+    SelectComponent,
+    FormsModule,
+    SearchInputComponent,
+    CdkDrag,
+    TerritoryListItemComponent,
+    AsyncPipe,
+    CdkDropList,
+    IconButtonComponent,
+    CdkDragHandle,
+    IconComponent,
+    FloatingActionButtonComponent,
+  ],
+  providers: [TerritoryBO],
 })
 export class TerritoriesPageComponent implements OnInit {
   private territories$: Observable<Territory[]> = of([]);
@@ -70,7 +95,7 @@ export class TerritoriesPageComponent implements OnInit {
     this.getTerritories();
   }
 
-  trackByRepositoryId(_: number, item: Territory) {
+  trackByRepositoryId(item: Territory) {
     // Had to create an identifier for recentHistory and isResolved changes so Angular can understand changes.
     const recentVisitsId = item.recentHistory?.reduce((acc, cur) => acc + (cur.isResolved ? 1 : 0), 0);
 

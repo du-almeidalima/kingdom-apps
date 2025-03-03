@@ -1,10 +1,11 @@
 import { Component, computed, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import {
-  CommonComponentsModule,
-  CommonDirectivesModule,
+  AuthorizeDirective,
+  ButtonComponent,
+  CardComponent,
   ConfirmDialogComponent,
   ConfirmDialogData,
+  IconComponent,
 } from '@kingdom-apps/common-ui';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Dialog } from '@angular/cdk/dialog';
@@ -21,15 +22,15 @@ import { ProfileBO } from '../../bo/profile.bo';
   templateUrl: './profile-page.component.html',
   styleUrl: './profile-page.component.scss',
   standalone: true,
-  imports: [CommonModule, CommonComponentsModule, ChangeCongregationComponent, CommonDirectivesModule],
+  imports: [ChangeCongregationComponent, CardComponent, ButtonComponent, IconComponent, AuthorizeDirective],
 })
 export class ProfilePageComponent {
+  protected readonly RoleEnum = RoleEnum;
+  protected readonly CHANGE_CONGREGATION_ALLOWED = ProfileBO.CHANGE_CONGREGATION_ALLOWED;
+
   private readonly userStateService = inject(UserStateService);
   private readonly authService = inject(AuthService);
   private readonly dialog = inject(Dialog);
-
-  protected readonly RoleEnum = RoleEnum;
-  protected readonly CHANGE_CONGREGATION_ALLOWED = ProfileBO.CHANGE_CONGREGATION_ALLOWED;
 
   user = toSignal(this.userStateService.$user);
   fullName = computed(() => this.user()?.name ?? 'Meu Nome');

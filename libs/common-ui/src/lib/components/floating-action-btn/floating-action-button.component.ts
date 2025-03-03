@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, Renderer2 } from '@angular/core';
-import { white100 } from '../../../';
+import { white100 } from '../../styles/abstract/variables';
+import { SpinnerComponent} from '../spinner/spinner.component';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -7,11 +8,12 @@ import { white100 } from '../../../';
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./floating-action-button.component.scss'],
   template: `
-    <lib-spinner [color]='spinnerColor' [hide]='!loading' width='3rem' height='3rem' />
-    <ng-container *ngIf='!loading'>
+    <lib-spinner [color]="spinnerColor" [hide]="!loading" width="3rem" height="3rem" />
+    @if (!loading) {
       <ng-content />
-    </ng-container>
+    }
   `,
+  imports: [SpinnerComponent],
 })
 export class FloatingActionButtonComponent implements OnInit {
   spinnerColor = white100;

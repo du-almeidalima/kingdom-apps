@@ -6,34 +6,42 @@
     name='Cidade'
     [ngModel]='selectedCity'
     (ngModelChange)='handleSelectedCityChange($event)'>
-    <option [value]='city' *ngFor='let city of cities'>{{ city }}</option>
+    @for (city of cities; track city) {
+      <option [value]='city'>{{ city }}</option>
+
+    }
     <option [value]='ALL_OPTION'>Todas</option>
   </select>
   <lib-search-input class='mt-5' (searched)='handleTerritorySearchTermChange($event)' />
 
-  <section class='territories-list mt-8 pb-56'
-           *ngIf='filteredTerritories$ | async; let territories'
-           cdkDropList
-           (cdkDropListDropped)='handleTerritoryDrop($event, territories)'
-  >
-    <kingdom-apps-territory-list-item
-      class='territory-list-item mb-3'
-      cdkDrag
-      [cdkDragDisabled]='selectedCity === ALL_OPTION'
-      *ngFor='let territory of territories; trackBy: trackByRepositoryId'
-      [territory]='territory'
-      (edit)='handleOpenManageTerritoryDialog($event)'
-      (history)='handleOpenHistory($event)'
-      (remove)='handleRemoveTerritory($event)'
-      (resolveMove)='handleResolveMoveAlert($event)'
-      (resolveRevisit)="handleResolveRevisitAlert($event)"
-      (resolveStopVisiting)="handleResolveStopVisitingAlert($event)"
+  @if (filteredTerritories$ | async; as territories) {
+    <section class='territories-list mt-8 pb-56'
+             cdkDropList
+             (cdkDropListDropped)='handleTerritoryDrop($event, territories)'
     >
-      <button lib-icon-button type='button' cdkDragHandle style='cursor: grab' *ngIf='selectedCity !== ALL_OPTION'>
-        <lib-icon icon='cursor-23' [fillColor]='greyButtonColor'/>
-      </button>
-    </kingdom-apps-territory-list-item>
-  </section>
+      <!-- TODO: Check if this is updating -->
+      @for (territory of territories; track trackByRepositoryId(territory)) {
+        <kingdom-apps-territory-list-item
+          class='territory-list-item mb-3'
+          cdkDrag
+          [cdkDragDisabled]='selectedCity === ALL_OPTION'
+          [territory]='territory'
+          (edit)='handleOpenManageTerritoryDialog($event)'
+          (history)='handleOpenHistory($event)'
+          (remove)='handleRemoveTerritory($event)'
+          (resolveMove)='handleResolveMoveAlert($event)'
+          (resolveRevisit)="handleResolveRevisitAlert($event)"
+          (resolveStopVisiting)="handleResolveStopVisitingAlert($event)"
+        >
+          @if (selectedCity !== ALL_OPTION) {
+            <button lib-icon-button type='button' cdkDragHandle style='cursor: grab'>
+              <lib-icon icon='cursor-23' [fillColor]='greyButtonColor' />
+            </button>
+          }
+        </kingdom-apps-territory-list-item>
+      }
+    </section>
+  }
 
   <button lib-floating-action-button title='Adicionar Território'
           [backgroundColor]='green200'

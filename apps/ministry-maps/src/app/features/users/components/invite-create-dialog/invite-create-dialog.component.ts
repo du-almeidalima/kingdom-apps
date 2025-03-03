@@ -3,9 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 
-import { CommonComponentsModule, CommonDirectivesModule, white100 } from '@kingdom-apps/common-ui';
+import { white100 } from '@kingdom-apps/common-ui';
 
-import { SharedModule } from '../../../../shared/shared.module';
 import { RoleEnum } from '../../../../../models/enums/role';
 import { InviteBO } from '../../bo/invite/invite-bo.service';
 import { InviteCreateDialogCopyLinkComponent } from './invite-create-copy-link/invite-create-dialog-copy-link.component';
@@ -22,23 +21,19 @@ export type TCreateLinkForm = FormGroup<{ role: FormControl<RoleEnum>; email: Fo
   styleUrl: './invite-create-dialog.component.scss',
   imports: [
     CommonModule,
-    CommonComponentsModule,
-    SharedModule,
     ReactiveFormsModule,
-    CommonDirectivesModule,
     InviteCreateDialogCopyLinkComponent,
     InviteCreateDialogFormComponent,
   ],
   template: `
     @if (createdLink()) {
-      <kingdom-apps-invite-create-dialog-copy-link [inviteLink]="createdLink()" [title]="title()"/>
+    <kingdom-apps-invite-create-dialog-copy-link [inviteLink]="createdLink()" [title]="title()" />
     } @else {
-      <kingdom-apps-invite-create-dialog-form
-        [title]="title()"
-        [form]="form"
-        [isSubmitting]="isSubmitting()"
-        (formSubmit)="handleFormSubmit()"
-      />
+    <kingdom-apps-invite-create-dialog-form
+      [title]="title()"
+      [form]="form"
+      [isSubmitting]="isSubmitting()"
+      (formSubmit)="handleFormSubmit()" />
     }
   `,
 })
@@ -77,6 +72,6 @@ export class InviteCreateDialogComponent {
   }
 
   private composeInviteLink(inviteLink: string) {
-    return `${environment.baseUrl}${AuthRoutesEnum.SIGN_IN}/${inviteLink}`
+    return `${environment.baseUrl}${AuthRoutesEnum.SIGN_IN}/${inviteLink}`;
   }
 }

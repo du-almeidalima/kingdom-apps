@@ -1,9 +1,8 @@
 import { IconRadioComponent } from './icon-radio.component';
 import { MockBuilder, MockRender } from 'ng-mocks';
-import { SharedModule } from '../../shared.module';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Component, ViewChild } from '@angular/core';
-import { grey400 } from '@kingdom-apps/common-ui';
+import { grey400, IconComponent } from '@kingdom-apps/common-ui';
 import { MoveResolutionActionsEnum } from '../../../features/territory/components/territory-move-alert-dialog/territory-move-alert-dialog.component';
 
 @Component({
@@ -15,6 +14,7 @@ import { MoveResolutionActionsEnum } from '../../../features/territory/component
       </kingdom-apps-icon-radio>
     </form>
   `,
+  imports: [IconRadioComponent, ReactiveFormsModule, IconComponent],
 })
 class TestingInputComponent {
   public readonly MoveResolutionActions = MoveResolutionActionsEnum;
@@ -29,7 +29,7 @@ class TestingInputComponent {
 }
 
 describe('IconRadioComponent', () => {
-  beforeEach(() => MockBuilder([IconRadioComponent, TestingInputComponent, ReactiveFormsModule], [SharedModule]));
+  beforeEach(() => MockBuilder([IconRadioComponent, TestingInputComponent, ReactiveFormsModule]));
 
   it('should create', async () => {
     const fixture = MockRender(TestingInputComponent);

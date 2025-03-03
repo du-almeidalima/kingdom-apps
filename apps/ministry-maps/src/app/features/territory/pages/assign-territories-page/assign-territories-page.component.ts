@@ -4,15 +4,18 @@ import { finalize, Observable, of, shareReplay } from 'rxjs';
 import {
   ConfirmDialogComponent,
   ConfirmDialogData,
+  FloatingActionButtonComponent,
   green200,
+  IconComponent,
   SearchInputComponent,
+  SelectComponent,
   white200,
 } from '@kingdom-apps/common-ui';
 
 import { Territory } from '../../../../../models/territory';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { UserStateService } from '../../../../state/user.state.service';
-import { FeatureRoutesEnum } from '../../../../app-routes.module';
+import { FeatureRoutesEnum } from '../../../../app-routes';
 import { isMobileDevice } from '../../../../shared/utils/user-agent';
 import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
@@ -25,11 +28,23 @@ import {
   TerritoryFilterSettings,
 } from '../../../../shared/utils/territories-filter-pipe';
 import { createSendWhatsAppLink } from '../../../../shared/utils/share-utils';
+import { FormsModule } from '@angular/forms';
+import { TerritoryCheckboxComponent } from '../../components/territory-checkbox/territory-checkbox.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'kingdom-apps-assign-territories-page',
   templateUrl: './assign-territories-page.component.html',
   styleUrls: ['./assign-territories-page.component.scss'],
+  imports: [
+    SelectComponent,
+    FormsModule,
+    SearchInputComponent,
+    TerritoryCheckboxComponent,
+    AsyncPipe,
+    FloatingActionButtonComponent,
+    IconComponent,
+  ],
 })
 export class AssignTerritoriesPageComponent implements OnInit {
   private territories$: Observable<Territory[]> = of([]);
@@ -86,7 +101,8 @@ export class AssignTerritoriesPageComponent implements OnInit {
     // Loading Spinner on Button
     this.isCreatingAssignment = true;
 
-    this.territoryBO.createDesignationForTerritories(selectedTerritories)
+    this.territoryBO
+      .createDesignationForTerritories(selectedTerritories)
       .pipe(
         finalize(() => {
           this.isCreatingAssignment = false;
@@ -149,10 +165,6 @@ export class AssignTerritoriesPageComponent implements OnInit {
         }
       });
     }
-  }
-
-  trackByRepositoryId(_: number, item: Territory) {
-    return item.id;
   }
 
   shareDesignation(designationId: string) {

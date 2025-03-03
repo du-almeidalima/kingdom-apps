@@ -1,14 +1,17 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { FeatureRoutesEnum } from '../../../../app-routes.module';
+import { FeatureRoutesEnum } from '../../../../app-routes';
 import { TerritoryRoutesEnum } from '../../../territory/territory-routes.module';
 import { UserStateService } from '../../../../state/user.state.service';
 import { UsersRoutesEnum } from '../../../users/users-routes.module';
+import { RouterLink } from '@angular/router';
+import { CardBodyComponent, CardComponent, CardHeaderComponent } from '@kingdom-apps/common-ui';
 
 @Component({
   selector: 'kingdom-apps-home-page',
   templateUrl: './home-page.component.html',
   styleUrls: ['./home-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink, CardBodyComponent, CardComponent, CardHeaderComponent],
 })
 export class HomePageComponent {
   public readonly TerritoryRoutes = TerritoryRoutesEnum;

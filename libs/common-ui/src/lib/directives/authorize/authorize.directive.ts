@@ -5,12 +5,12 @@ import { AuthUserStateService } from '../../state/';
 export const APP_ADMIN_ROLE = 'APP_ADMIN' as const;
 
 @Directive({
-  selector: '[lib-authorize]',
+  selector: '[libAuthorize]',
   standalone: true,
 })
 export class AuthorizeDirective implements OnInit {
 
-  roles = input.required<string | string[]>({ alias: 'lib-authorize' });
+  roles = input.required<string | string[]>({ alias: 'libAuthorize' });
 
   constructor(
     private readonly templateRef: TemplateRef<unknown>,

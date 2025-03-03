@@ -1,6 +1,6 @@
 @use '../../../styles/abstract/variables';
 
-:host {
+:host.label {
   font-size: 1.3rem;
   font-weight: bold;
   color: variables.$grey-300;

@@ -1,5 +1,5 @@
-export { CommonComponentsModule } from './lib/components/common-components.module';
-export { CommonDirectivesModule } from './lib/directives/common-directives.module';
+// Directives
+export * from './lib/directives';
 
 // Styles
 export * from './lib/styles/abstract/variables';
@@ -7,18 +7,9 @@ export * from './lib/styles/abstract/variables';
 // States
 export * from './lib/state';
 
-// Icons
+// Components
+export * from './lib/components';
 export * from './lib/components/icon/icon-type';
-
-export * from './lib/components/search-input/search-input.component';
-
-export * from './lib/components/confirm-dialog/confirm-dialog.component';
-
-export * from './lib/components/icon-button/icon-button.component';
-
-export * from './lib/components/icon/icon.component';
-
-export * from './lib/components/spinner/spinner.component';
 
 // Config
 export { APP_ADMIN_ROLE } from './lib/directives/authorize/authorize.directive';

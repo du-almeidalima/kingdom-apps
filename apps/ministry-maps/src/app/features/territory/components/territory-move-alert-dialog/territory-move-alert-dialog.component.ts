@@ -1,11 +1,21 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
-import { grey400, white100 } from '@kingdom-apps/common-ui';
+import {
+  ButtonComponent,
+  DialogComponent,
+  DialogFooterComponent,
+  grey400,
+  IconComponent,
+  SpinnerComponent,
+  white100,
+} from '@kingdom-apps/common-ui';
 
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
 import { finalize, Observable } from 'rxjs';
+import { IconRadioComponent } from '../../../../shared/components/visit-outcome-option/icon-radio.component';
+import { DatePipe } from '@angular/common';
 
 export type TerritoryMoveAlertDialogData = {
   history: TerritoryVisitHistory[];
@@ -25,13 +35,15 @@ export enum MoveResolutionActionsEnum {
     <lib-dialog title="Morador Mudou">
       <p class="t-body2 mb-5">Recentemente um publicador reportou que esse morador não está mais nesse endereço:</p>
       <!-- REPORTS -->
-      <div class='overflow-y-auto' style='max-height: 30dvh'>
-        <figure class="quote-report" *ngFor="let report of historyReports">
-          <blockquote class="quote-report__quote">
-            {{ report.notes }}
-          </blockquote>
-          <figcaption class="quote-report__caption text-gray-600 t-caption">{{ report.date | date }}</figcaption>
-        </figure>
+      <div class="overflow-y-auto" style="max-height: 30dvh">
+        @for (report of historyReports; track report.id) {
+          <figure class="quote-report">
+            <blockquote class="quote-report__quote">
+              {{ report.notes }}
+            </blockquote>
+            <figcaption class="quote-report__caption text-gray-600 t-caption">{{ report.date | date }}</figcaption>
+          </figure>
+        }
       </div>
 
       <!-- ACTION -->
@@ -56,18 +68,26 @@ export enum MoveResolutionActionsEnum {
         <div class="flex flex-nowrap justify-end gap-4">
           <button lib-button lib-dialog-close>Cancelar</button>
           <button lib-button btnType="primary" type="submit" form="move-alert-resolution-form">
-            <span *ngIf="!isSubmitting">Salvar</span>
-            <lib-spinner
-              *ngIf="isSubmitting"
-              class="login-button__spinner"
-              height="1.75rem"
-              width="1.75rem"
-              [color]="white" />
+            @if (!isSubmitting) {
+              <span>Salvar</span>
+            } @else {
+              <lib-spinner class="login-button__spinner" height="1.75rem" width="1.75rem" [color]="white" />
+            }
           </button>
         </div>
       </lib-dialog-footer>
     </lib-dialog>
   `,
+  imports: [
+    SpinnerComponent,
+    DialogComponent,
+    DialogFooterComponent,
+    ButtonComponent,
+    IconRadioComponent,
+    ReactiveFormsModule,
+    IconComponent,
+    DatePipe,
+  ],
 })
 export class TerritoryMoveAlertDialogComponent {
   protected readonly white = white100;

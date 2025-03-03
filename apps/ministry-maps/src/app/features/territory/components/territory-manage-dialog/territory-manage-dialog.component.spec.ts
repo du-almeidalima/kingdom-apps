@@ -4,7 +4,7 @@ import { TerritoryModule } from '../../territory.module';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { territoryMockBuilder } from '../../../../../test/mocks/models/territory.mock';
 import { congregationMock } from '../../../../../test/mocks';
-import { RepositoriesModule } from '../../../../repositories/repositories.module';
+import { RepositoriesModule } from '../../../../repositories/repositories-providers';
 
 describe('TerritoryManageDialogComponent', () => {
   beforeEach(() =>

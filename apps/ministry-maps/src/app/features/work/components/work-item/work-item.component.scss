@@ -1,6 +1,5 @@
 @use 'libs/common-ui/src/lib/styles/abstract/variables';
 @use 'libs/common-ui/src/lib/styles/base/typography';
-@use 'libs/common-ui/src/lib/components/icon-button/icon-button.component' as icon-button;
 
 :host {
   display: block;
@@ -106,7 +105,7 @@
     @extend .t-caption;
 
     // This margin makes the text align with the buttons due to their "invisible" padding
-    margin-bottom: icon-button.$icon-button-padding;
+    margin-bottom: variables.$icon-button-padding;
     color: variables.$grey-100;
   }
 

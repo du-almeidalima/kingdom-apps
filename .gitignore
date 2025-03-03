@@ -1,4 +1,4 @@
-# See http://help.github.com/ignore-files/ for more about ignoring files.
+# See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
 # Sensible Information
 **/.env*
@@ -6,9 +6,9 @@
 !**/.env.development
 
 # compiled output
-/dist
-/tmp
-/out-tsc
+dist
+tmp
+out-tsc
 
 # dependencies
 node_modules
@@ -43,24 +43,12 @@ testem.log
 .DS_Store
 Thumbs.db
 
+.nx/cache
+.nx/workspace-data
+
 .angular
 
 # Firebase
 .firebase
 *-debug.log
 .runtimeconfig.json
-
-# Nx
-.nx/cache/*
-.nx/workspace-data/*
-
-# Nx-Firebase
-**/.emulators/*
-**/.firebase/*
-database-debug.log
-firebase-debug.log
-firestore-debug.log
-pubsub-debug.log
-ui-debug.log
-firebase-export*
-.secret.local

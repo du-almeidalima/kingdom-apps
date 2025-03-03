@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use 'libs/common-ui/src/lib/styles/abstract/variables';
 @use 'libs/common-ui/src/lib/styles/base/typography';
 
@@ -111,7 +112,8 @@
     transition: background-color 75ms linear;
 
     &--default {
-      background-color: lighten(variables.$light-grey-100, 10);
+
+      background-color: color.scale(variables.$light-grey-100, $lightness: 10%);
       border: $border-size solid variables.$light-grey-100;
     }
 
