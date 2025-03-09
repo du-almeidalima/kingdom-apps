@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { TerritoryRepository } from '../../../repositories/territories.repository';
 import { DesignationRepository } from '../../../repositories/designation.repository';
 import { catchError, EMPTY, forkJoin, map, Observable, switchMap, tap } from 'rxjs';
-import { Designation, DesignationTerritory } from '../../../../models/designation';
+import { Designation, DesignationSettings, DesignationTerritory } from '../../../../models/designation';
 import { DesignationStatusEnum } from '../../../../models/enums/designation-status';
 import { Territory } from '../../../../models/territory';
 import { UserStateService } from '../../../state/user.state.service';
@@ -34,6 +34,9 @@ export class TerritoryBO {
 
     const expiresInDays = this.congregationSettingsBO.getSettingOrDefault('designationAccessExpiryDays');
     const designationExpirationDate = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000);
+    const designationSettings: DesignationSettings = {
+      shouldDesignationBlockAfterExpired: this.congregationSettingsBO.getSettingOrDefault('shouldDesignationBlockAfterExpired')
+    }
 
     return territories$.pipe(
       switchMap(territories => {
@@ -54,6 +57,7 @@ export class TerritoryBO {
           createdAt: new Date(),
           createdBy: user.id,
           expiresAt: designationExpirationDate,
+          settings: designationSettings
         };
 
         return this.designationRepository.add(newDesignation);

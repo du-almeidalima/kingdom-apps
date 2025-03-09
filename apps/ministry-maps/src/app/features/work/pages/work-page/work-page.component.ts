@@ -24,6 +24,7 @@ export class WorkPageComponent implements OnInit, OnDestroy {
   territories: Designation['territories'] = [];
   doneTerritories: Designation['territories'] = [];
   isDisabled = false;
+  isBlocked = false;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -47,6 +48,7 @@ export class WorkPageComponent implements OnInit, OnDestroy {
       .subscribe(designation => {
         if (designation?.territories) {
           this.isDisabled = this.shouldDisableDesignation(designation);
+          this.isBlocked = this.isDisabled && !!designation.settings?.shouldDesignationBlockAfterExpired;
 
           this.designation = designation;
           this.territories = [];

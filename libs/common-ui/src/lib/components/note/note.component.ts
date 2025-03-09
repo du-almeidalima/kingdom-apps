@@ -14,7 +14,7 @@ type NotificationType = 'info' | 'success' | 'warning' | 'error';
   template: `
     <div class="w-full flex items-center gap-3 p-4 border border-solid" [ngClass]="typeClasses()">
       <!-- Icon -->
-      <lib-icon class="w-32 h-32" [icon]="typeIcon()" [fillColor]="typeColor()" />
+      <lib-icon class="w-28 h-16" [icon]="typeIcon()" [fillColor]="typeColor()" />
       <!-- Message -->
       <p class="t-body2" [ngClass]="textClasses()">{{ message() }}</p>
     </div>

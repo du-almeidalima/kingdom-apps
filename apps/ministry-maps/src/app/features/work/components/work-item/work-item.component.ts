@@ -78,8 +78,8 @@ import { NgClass } from '@angular/common';
               </button>
             }
             @if (territory.mapsLink) {
-              <button lib-icon-button (click)="handleOpenMaps(territory.mapsLink)">
-                <lib-icon [fillColor]="buttonIconColor" icon="map-5" />
+              <button lib-icon-button [disabled]="blocked" (click)="handleOpenMaps(territory.mapsLink)">
+                <lib-icon [fillColor]="blocked ? disabledColor : buttonIconColor" icon="map-5" />
               </button>
             }
             @if (territory.history && territory.history.length > 0) {
@@ -112,6 +112,8 @@ export class WorkItemComponent implements OnInit {
   done = false;
   @Input()
   disabled = false;
+  @Input()
+  blocked = false;
   @Output()
   territoryUpdated = new EventEmitter<DesignationTerritory>();
   @Output()

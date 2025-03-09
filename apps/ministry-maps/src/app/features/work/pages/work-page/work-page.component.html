@@ -8,6 +8,7 @@
         <lib-note
           type="info"
           message="Essa designação está desabilitada. Por favor peça ao seu SG uma designação nova."
+          class="mb-8"
         />
       }
 
@@ -20,6 +21,7 @@
             class='mt-5'
             [territory]='territory'
             [disabled]="isDisabled"
+            [blocked]="isBlocked"
             (territoryUpdated)='handleTerritoryUpdated($event)'
           />
         }
@@ -39,6 +41,7 @@
             [territory]='territory'
             [done]='true'
             [disabled]="isDisabled"
+            [blocked]="isBlocked"
             (territoryUpdated)='handleTerritoryUpdated($event)'
             (lastVisitReverted)="handleLastVisitReverted($event)"
           />

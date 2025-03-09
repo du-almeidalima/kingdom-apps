@@ -15,7 +15,8 @@ export const environment = {
   useCloud: process.env['NX_USE_CLOUD'] === 'true',
   baseUrl: process.env['NX_APP_BASE_URL'],
   congregationSettingsDefaultValues: {
-    designationAccessExpiryDays: 45
+    designationAccessExpiryDays: 45,
+    shouldDesignationBlockAfterExpired: false,
   } as CongregationSettings
 };
 
