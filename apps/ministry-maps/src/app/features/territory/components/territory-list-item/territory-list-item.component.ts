@@ -29,7 +29,10 @@ import { NgClass } from '@angular/common';
         [icon]="icon" />
       <h3 class="territory-list-item__address">
         <span class="t-body2">{{ territory.address }}</span>
-        <span class="t-caption text-gray-600">{{ territory.city }}</span>
+        <span class="t-caption text-gray-600">{{ territory.city }}
+          @if(territory.peopleQuantity){
+            , {{ territory.peopleQuantity }} pessoa(s)
+          }</span>
       </h3>
       <!-- BADGES -->
       @if (territory.note) {
