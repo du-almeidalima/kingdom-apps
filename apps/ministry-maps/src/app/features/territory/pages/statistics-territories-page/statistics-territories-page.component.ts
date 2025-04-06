@@ -18,9 +18,12 @@ import { FormsModule } from '@angular/forms';
 export class StatisticsTerritoriesPageComponent implements OnInit {
   private territories$: Observable<Territory[]> = of([]);
   public readonly ALL_OPTION = 'ALL';
+  public readonly LAST_MONTH = 'LAST_MONTH';
 
   public cities: string[] = [];
   public selectedCity = this.ALL_OPTION;
+  public periods: string[] = ['Este Ano', '1 ano', '6 meses', '3 meses'];
+  public selectedPeriod = this.LAST_MONTH;
   public isLoading = false;
   public filteredTerritories$: Observable<Territory[]> = of([]);
 
