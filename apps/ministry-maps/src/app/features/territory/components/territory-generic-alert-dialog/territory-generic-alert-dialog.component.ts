@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import {
   ButtonComponent,
+  DialogCloseDirective,
   DialogComponent,
   DialogFooterComponent,
   IconComponent,
@@ -37,7 +38,8 @@ export type TerritoryGenericAlertDialogData = {
             </blockquote>
             <figcaption class="quote-report__caption text-gray-600 t-caption">
               @if (report.name) {
-                <span>{{ report.name | slice : 0 : 30 }}</span>,&nbsp;
+                <span>{{ report.name | slice : 0 : 30 }}</span
+                >,&nbsp;
               }
               {{ report.date | date }}
             </figcaption>
@@ -48,7 +50,7 @@ export type TerritoryGenericAlertDialogData = {
       <!-- FOOTER -->
       <lib-dialog-footer>
         <div class="flex flex-nowrap justify-end gap-4">
-          <button lib-button lib-dialog-close>Cancelar</button>
+          <button lib-button libDialogClose>Cancelar</button>
           <button lib-button btnType="primary" (click)="handleResolveAlert()">
             @if (!isSubmitting) {
               <div class="flex gap-1.5 items-center">
@@ -71,6 +73,7 @@ export type TerritoryGenericAlertDialogData = {
     SlicePipe,
     DialogComponent,
     DialogFooterComponent,
+    DialogCloseDirective,
   ],
 })
 export class TerritoryGenericAlertDialogComponent {

@@ -1,10 +1,10 @@
 import { TerritoriesPageComponent } from './territories-page.component';
 import { MockBuilder, MockRender } from 'ng-mocks';
 import { TerritoryModule } from '../../territory.module';
-import { RepositoriesModule } from '../../../../repositories/repositories-providers';
+import { MOCK_REPOSITORIES_PROVIDERS } from '../../../../../test/mocks/providers/mock-repositories-providers';
 
 describe('TerritoriesPageComponent', () => {
-  beforeEach(() => MockBuilder(TerritoriesPageComponent, [TerritoryModule, RepositoriesModule]));
+  beforeEach(() => MockBuilder(TerritoriesPageComponent, [TerritoryModule]).provide(MOCK_REPOSITORIES_PROVIDERS));
 
   it('should create', () => {
     const fixture = MockRender(TerritoriesPageComponent);

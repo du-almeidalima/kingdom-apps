@@ -35,6 +35,7 @@ export class AuthService {
    * @param provider The provider to log the user against (e.g. Google or Microsoft).
    * @param createUser Boolean that indicates if the logged user doesn't exist already, if it should be created.
    * @param createUserConfiguration When provided, will use the configuration found in here to set the user values.
+   * This data is usually from the {@link InvitationLink}
    */
   signInWithProvider(provider: FIREBASE_PROVIDERS, createUser = false, createUserConfiguration?: CreateUserConfig): Observable<User | void> {
     return this.authRepository.signInWithProvider(provider, createUser, createUserConfiguration).pipe(

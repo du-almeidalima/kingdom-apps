@@ -1,22 +1,12 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { WelcomePageComponent } from './welcome-page.component';
+import { MockBuilder, MockRender } from 'ng-mocks';
 
 describe('WelcomePageComponent', () => {
-  let component: WelcomePageComponent;
-  let fixture: ComponentFixture<WelcomePageComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [WelcomePageComponent],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(WelcomePageComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+  beforeEach(() => MockBuilder(WelcomePageComponent));
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    const component = MockRender(WelcomePageComponent);
+
+    expect(component.point.componentInstance).toBeTruthy();
   });
 });
