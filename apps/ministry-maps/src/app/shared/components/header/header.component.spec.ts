@@ -2,11 +2,10 @@ import { HeaderComponent } from './header.component';
 import { MockBuilder, MockProvider, MockRender, ngMocks } from 'ng-mocks';
 import { UserStateService } from '../../../state/user.state.service';
 import { organizerUserStateServiceMock } from '../../../../test/mocks';
-import { CommonComponentsModule } from '@kingdom-apps/common-ui';
 
 describe('HeaderComponent', () => {
   beforeEach(() => {
-    return MockBuilder(HeaderComponent, CommonComponentsModule).provide(
+    return MockBuilder(HeaderComponent).provide(
       MockProvider(UserStateService, organizerUserStateServiceMock)
     );
   });

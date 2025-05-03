@@ -7,7 +7,7 @@ import { TerritoryRepository } from '../../../../repositories/territories.reposi
 import { Congregation } from '../../../../../models/congregation';
 import { Territory, TerritoryIcon } from '../../../../../models/territory';
 import {
-  ButtonComponent,
+  ButtonComponent, DialogCloseDirective,
   DialogComponent,
   DialogFooterComponent,
   FormFieldComponent,
@@ -125,7 +125,7 @@ type TerritoryForm = {
       </form>
       <lib-dialog-footer>
         <div class="flex justify-end gap-4">
-          <button lib-button lib-dialog-close>Cancelar</button>
+          <button lib-button libDialogClose>Cancelar</button>
           <button
             lib-button
             btnType="primary"
@@ -155,6 +155,7 @@ type TerritoryForm = {
     SelectComponent,
     TerritoryIconTranslatorPipe,
     OnlyNumbersDirective,
+    DialogCloseDirective,
   ],
 })
 export class TerritoryManageDialogComponent implements OnInit {

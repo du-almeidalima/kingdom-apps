@@ -1,15 +1,16 @@
 import { ChangeCongregationComponent } from './change-congregation.component';
 import { MockBuilder, MockProvider, MockRender, ngMocks } from 'ng-mocks';
-import { RepositoriesModule } from '../../../repositories/repositories-providers';
 import { UserStateService } from '../../../state/user.state.service';
 import { organizerUserStateServiceMock } from '../../../../test/mocks';
 import { ProfileBO } from '../bo/profile.bo';
 import { of } from 'rxjs';
+import { MOCK_REPOSITORIES_PROVIDERS } from '../../../../test/mocks/providers/mock-repositories-providers';
 
 describe('ChangeCongregationComponent', () => {
   beforeEach(() => {
-    return MockBuilder(ChangeCongregationComponent, [RepositoriesModule])
-      .provide(MockProvider(UserStateService, organizerUserStateServiceMock));
+    return MockBuilder(ChangeCongregationComponent)
+      .provide(MockProvider(UserStateService, organizerUserStateServiceMock))
+      .provide(MOCK_REPOSITORIES_PROVIDERS);
   });
 
   it('should create', () => {
@@ -37,6 +38,9 @@ describe('ChangeCongregationComponent', () => {
     ngMocks.change(select, select.nativeElement.options[1].value);
 
     expect((select.nativeElement as HTMLSelectElement).value).toBe(select.nativeElement.options[1].value);
-    expect(profileBo.changeUserCongregation).toHaveBeenCalledWith(user.currentUser?.id, select.nativeElement.options[1].value);
+    expect(profileBo.changeUserCongregation).toHaveBeenCalledWith(
+      user.currentUser?.id,
+      select.nativeElement.options[1].value
+    );
   });
 });

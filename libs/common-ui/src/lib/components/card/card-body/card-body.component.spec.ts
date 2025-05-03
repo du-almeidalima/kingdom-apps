@@ -1,22 +1,14 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MockBuilder, MockRender } from 'ng-mocks';
 
 import { CardBodyComponent } from './card-body.component';
 
 describe('CardBodyComponent', () => {
-  let component: CardBodyComponent;
-  let fixture: ComponentFixture<CardBodyComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [CardBodyComponent],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(CardBodyComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+  beforeEach(() => {
+    return MockBuilder(CardBodyComponent);
   });
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    const component = MockRender(CardBodyComponent);
+    expect(component.point.componentInstance).toBeTruthy();
   });
 });

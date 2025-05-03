@@ -1,22 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MockBuilder, MockRender } from 'ng-mocks';
 
 import { DialogComponent } from './dialog.component';
+import { DialogRef } from '@angular/cdk/dialog';
 
 describe('DialogComponent', () => {
-  let component: DialogComponent;
-  let fixture: ComponentFixture<DialogComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [DialogComponent],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(DialogComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+  beforeEach(() => {
+    return MockBuilder(DialogComponent).mock(DialogRef);
   });
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    const component = MockRender(DialogComponent);
+    expect(component.point.componentInstance).toBeTruthy();
   });
 });

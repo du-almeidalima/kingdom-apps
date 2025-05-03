@@ -27,6 +27,15 @@ export class UserRepositoryMock extends UserRepository {
 }
 
 // USERS
+export const publisherUser: User = {
+  id: 'A1B2C3',
+  name: 'Publisher User',
+  email: 'test.publisher@email.com',
+  photoUrl: 'https://i.stack.imgur.com/l60Hf.png',
+  role: RoleEnum.ORGANIZER,
+  congregation: congregationMock
+};
+
 export const organizerUser: User = {
   id: 'A1B2C3',
   name: 'TestUser',
