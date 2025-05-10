@@ -1,22 +1,13 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { MockBuilder, MockRender } from 'ng-mocks';
 import { FormFieldComponent } from './form-field.component';
 
 describe('FormFieldComponent', () => {
-  let component: FormFieldComponent;
-  let fixture: ComponentFixture<FormFieldComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [FormFieldComponent],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(FormFieldComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+  beforeEach(() => {
+    return MockBuilder(FormFieldComponent);
   });
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    const component = MockRender(FormFieldComponent);
+    expect(component.point.componentInstance).toBeTruthy();
   });
 });

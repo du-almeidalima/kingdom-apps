@@ -1,22 +1,11 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { MockBuilder, MockRender } from 'ng-mocks';
 import { DialogFooterComponent } from './dialog-footer.component';
 
 describe('DialogFooterComponent', () => {
-  let component: DialogFooterComponent;
-  let fixture: ComponentFixture<DialogFooterComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [DialogFooterComponent],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(DialogFooterComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+  beforeEach(() => MockBuilder(DialogFooterComponent));
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    const component = MockRender(DialogFooterComponent);
+    expect(component.point.componentInstance).toBeTruthy();
   });
 });
