@@ -1,22 +1,12 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { NoAccountPageComponent } from './no-account-page.component';
+import { MockBuilder, MockRender } from 'ng-mocks';
 
-import { WelcomePageComponent } from './no-account-page.component';
-
-describe('WelcomePageComponent', () => {
-  let component: WelcomePageComponent;
-  let fixture: ComponentFixture<WelcomePageComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [WelcomePageComponent],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(WelcomePageComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+describe('NoAccountPageComponent', () => {
+  beforeEach(() => MockBuilder(NoAccountPageComponent));
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    const fixture = MockRender(NoAccountPageComponent);
+
+    expect(fixture.componentInstance).toBeTruthy();
   });
 });

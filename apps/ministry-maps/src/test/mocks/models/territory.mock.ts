@@ -5,7 +5,7 @@ import { VisitOutcomeEnum } from '../../../models/enums/visit-outcome';
 import { TerritoryRepository } from '../../../app/repositories/territories.repository';
 import { EMPTY, Observable, of } from 'rxjs';
 
-const mockDateBuilder = (daysAgo: number = 0) => {
+const mockDateBuilder = (daysAgo = 0) => {
   const date = new Date();
   date.setDate(date.getDate() - daysAgo);
 
@@ -51,6 +51,10 @@ export class TerritoryRepositoryMock implements TerritoryRepository {
   }
 
   update(territory: Territory): Observable<void> {
+    return EMPTY;
+  }
+
+  deleteVisitHistory(territoryId: string, historyId: string): Observable<void> {
     return EMPTY;
   }
 }

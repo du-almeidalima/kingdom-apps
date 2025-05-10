@@ -11,12 +11,33 @@
       }
       <option [value]='ALL_OPTION'>Todas</option>
     </select>
-
-    <section class='parent-grid mt-8 pb-56'>
+    <!-- Resolver todos os valores em vermelho (criar variaveis, método[linha 8])
+     Objetivo: filtrar os territórios da cidade selecionada -->
+    <h2 class="mt-8">Gerais</h2>
+    <section class='parent-grid mt-4'>
       <div class='statistics-item p-4 mb-3'>Territórios: <span>{{territoryStatistics.territoryCount}}</span></div>
       <div class='statistics-item p-4 mb-3'>Pessoas: <span>{{territoryStatistics.peopleCount}}</span></div>
       <div class='statistics-item p-4 mb-3'>Estudos bíblicos: <span>{{territoryStatistics.bibleStudiesCount}}</span></div>
       <div class='statistics-item p-4 mb-3'>Mudaram: <span>{{territoryStatistics.movedCount}}</span></div>
+    </section>
+
+    <section
+      class='parent-grid select-period mt-8'>
+      <h2 class='h2-period'>Por período</h2>
+      <select
+        lib-select
+        name="Periodo"
+        [ngModel] = 'selectedPeriod'
+      >
+        @for (period of periods; track period) {
+          <option [value]='period'>{{ period }}</option>
+        }
+        <option [value]='LAST_MONTH'>Último mês</option>
+      </select>
+    </section>
+
+    <section class='parent-grid mt-4'>
       <div class='statistics-item p-4 mb-3'>Revisitas: <span>{{territoryStatistics.revisitCount}}</span></div>
+      <div class='statistics-item p-4 mb-3'>Visitas: <span>Nº?</span></div>
     </section>
   </div>

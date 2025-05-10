@@ -11,10 +11,10 @@ import {
   DialogComponent,
   DialogFooterComponent,
   FormFieldComponent,
-  InputComponent, LabelComponent,
+  InputComponent, LabelComponent, OnlyNumbersDirective,
   SelectComponent,
   SpinnerComponent,
-  white100,
+  white100
 } from '@kingdom-apps/common-ui';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TerritoryIconTranslatorPipe } from '../../../../shared/pipes/territory-icon-translator/territory-icon-translator.pipe';
@@ -38,6 +38,7 @@ type TerritoryForm = {
   icon: FormControl<TerritoryIcon>;
   isBibleStudent: FormControl<boolean | undefined>;
   bibleInstructor: FormControl<string | undefined>;
+  peopleQuantity: FormControl<number>;
 };
 
 @Component({
@@ -74,6 +75,11 @@ type TerritoryForm = {
           <label lib-label for="territory-address">Endereço</label>
           <input lib-input formControlName="address" type="text" id="territory-address" />
         </lib-form-field>
+        <!-- People Quantity -->
+        <lib-form-field class="mt-5">
+          <label lib-label for="people-quantity">Quantidade de pessoas</label>
+          <input lib-input type="number" libOnlyNumbers formControlName="peopleQuantity" id="people-quantity"/>
+        </lib-form-field>
         <!-- Note  -->
         <lib-form-field class="mt-5">
           <label lib-label for="note">Observação</label>
@@ -83,9 +89,10 @@ type TerritoryForm = {
             type="text"
             id="note"
             class="resize-y"
-            autocomplete="off"></textarea>
+            autocomplete="off"
+          ></textarea>
         </lib-form-field>
-        <!-- Google Maps Link -->
+        <!-- Google Maps Link-->
         <lib-form-field class="mt-5">
           <label lib-label for="territory-maps-link">Link do Maps</label>
           <input
@@ -94,7 +101,8 @@ type TerritoryForm = {
             type="text"
             id="territory-maps-link"
             autocomplete="off"
-            placeholder="https://goo.gl/maps/* ou https://maps.app.goo.gl/*" />
+            placeholder="https://goo.gl/maps/* ou https://maps.app.goo.gl/*"
+          />
         </lib-form-field>
         <!-- Revisit -->
         <lib-form-field class="mt-4" orientation="horizontal">
@@ -110,7 +118,8 @@ type TerritoryForm = {
             formControlName="bibleInstructor"
             type="text"
             id="bible-instructor"
-            placeholder="Nome do Instrutor" />
+            placeholder="Nome do Instrutor"
+          />
         </lib-form-field>
         }
       </form>
@@ -122,7 +131,8 @@ type TerritoryForm = {
             btnType="primary"
             type="submit"
             form="territory-form"
-            [disabled]="!this.form.valid || isSubmitting">
+            [disabled]="!this.form.valid || isSubmitting"
+          >
             @if (isSubmitting) {
             <lib-spinner height="1.75rem" width="1.75rem" [color]="white" />
             } @else {
@@ -144,6 +154,7 @@ type TerritoryForm = {
     ReactiveFormsModule,
     SelectComponent,
     TerritoryIconTranslatorPipe,
+    OnlyNumbersDirective,
   ],
 })
 export class TerritoryManageDialogComponent implements OnInit {
@@ -173,6 +184,7 @@ export class TerritoryManageDialogComponent implements OnInit {
       city: fb.control(initialCity, { validators: [Validators.required], nonNullable: true }),
       icon: fb.control(this.territoryIcons[0], { validators: [Validators.required], nonNullable: true }),
       address: fb.control('', { validators: [Validators.required], nonNullable: true }),
+      peopleQuantity: fb.control<number>(1, { validators: [Validators.required], nonNullable: true }),
       note: fb.control('', { nonNullable: true }),
       mapsLink: fb.control<string | undefined>(undefined, { nonNullable: true }),
       isBibleStudent: fb.control<boolean | undefined>(false, { nonNullable: true }),
@@ -214,7 +226,7 @@ export class TerritoryManageDialogComponent implements OnInit {
     } else {
       // Getting next positionIndex and creating the territory
       territoryRequest$ = this.territoriesRepository.getNextPositionIndexForCity(territory.city).pipe(
-        switchMap(positionIndex => {
+        switchMap((positionIndex) => {
           territory.positionIndex = positionIndex;
 
           return this.territoriesRepository.add(territory);
@@ -235,7 +247,7 @@ export class TerritoryManageDialogComponent implements OnInit {
   }
 
   private setIsBibleStudentListener() {
-    this.form.controls.isBibleStudent.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(value => {
+    this.form.controls.isBibleStudent.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
       value && this.form.controls.bibleInstructor.reset();
     });
   }
