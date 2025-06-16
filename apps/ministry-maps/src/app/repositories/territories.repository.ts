@@ -2,8 +2,16 @@ import { Observable } from 'rxjs';
 import { Territory } from '../../models/territory';
 import { TerritoryVisitHistory } from '../../models/territory-visit-history';
 
+export type TerritoryRepositoryQueryOptions = {
+  /** When true, fetches the visit history of the territory. */
+  getHistory?: boolean;
+};
+
 export abstract class TerritoryRepository {
-  abstract getAllByCongregation(congregationId: string): Observable<Territory[]>;
+  abstract getAllByCongregation(
+    congregationId: string,
+    options?: TerritoryRepositoryQueryOptions
+  ): Observable<Territory[]>;
 
   abstract getAllByCongregationAndCity(congregationId: string, city: string): Observable<Territory[]>;
 

@@ -3,22 +3,38 @@ import { MockBuilder, MockRender } from 'ng-mocks';
 import { MOCK_REPOSITORIES_PROVIDERS } from '../../../../../test/mocks/providers/mock-repositories-providers';
 import { TerritoryStatisticsBO } from '../../bo/territory-statistics.bo';
 import { of } from 'rxjs';
-import { TerritoryStatistics } from '../../../../../models/territory-statistics';
+import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
+import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
+import { territoryMockBuilder } from '../../../../../test/mocks/models/territory.mock';
 
 describe('StatisticsTerritoriesPageComponent', () => {
-  const MOCK_TERRITORY_STATISTICS: TerritoryStatistics = {
-    territoryCount: 10,
-    peopleCount: 15,
-    bibleStudiesCount: 3,
-    movedCount: 2,
-    revisitCount: 5,
+  const mockMoveVisit: TerritoryVisitHistory = {
+    id: '1',
+    date: new Date(),
+    visitOutcome: VisitOutcomeEnum.MOVED,
+    isRevisit: false,
+    notes: 'MOVED TEST',
   };
+
+  const mockRevisit: TerritoryVisitHistory = {
+    id: '2',
+    date: new Date(),
+    visitOutcome: VisitOutcomeEnum.SPOKE,
+    isRevisit: true,
+    notes: 'REVISIT',
+  };
+
+  const mockMovedTerritory = territoryMockBuilder({ recentHistory: [mockMoveVisit], history: [mockMoveVisit] });
+  const mockRevisitTerritory = territoryMockBuilder({ recentHistory: [mockRevisit], history: [mockRevisit] });
+  const mockStudentTerritory = territoryMockBuilder({ isBibleStudent: true });
+
+  const territories = [mockMovedTerritory, mockRevisitTerritory, mockStudentTerritory];
 
   beforeEach(() =>
     MockBuilder(StatisticsTerritoriesPageComponent)
       .provide([...MOCK_REPOSITORIES_PROVIDERS])
       .mock(TerritoryStatisticsBO, {
-        getTerritoryStatistics: jest.fn().mockReturnValue(of(MOCK_TERRITORY_STATISTICS))
+        getTerritories: jest.fn().mockReturnValue(of(territories)),
       })
   );
 

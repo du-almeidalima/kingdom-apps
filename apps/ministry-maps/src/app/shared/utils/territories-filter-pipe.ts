@@ -18,6 +18,20 @@ export type TerritoryFilterSettings = {
 };
 
 /**
+ * Filters territories based on the given city name.
+ *
+ * @param {Territory} t - The territory object to evaluate.
+ * @param {string} city - The city name to filter by. If the value is equal to `ALL_OPTION`, the filter will always return true.
+ */
+export const cityFilter = (t: Territory, city: string) => {
+  if (city === ALL_OPTION) {
+    return true;
+  }
+
+  return city.toLowerCase().localeCompare(t.city.toLowerCase()) === 0;
+}
+
+/**
  * Given a Territory observable, this function returns a filtered observable with every Territory that has a match
  * for *searchTerm* for the following properties:
  * - address
@@ -31,14 +45,6 @@ export const territoriesFilterPipe = (
   const searchTerm = filterSettings.searchTerm;
   const orderBy = filterSettings.orderBy;
   const city = filterSettings.city;
-
-  const cityFilter = (t: Territory) => {
-    if (city === ALL_OPTION) {
-      return true;
-    }
-
-    return city.toLowerCase().localeCompare(t.city.toLowerCase()) === 0;
-  }
 
   let sortFn = (t1: Territory, t2: Territory) => {
     if (orderBy === TerritoriesOrderBy.LAST_VISIT) {
@@ -60,7 +66,7 @@ export const territoriesFilterPipe = (
 
       if (!searchTerm) {
         return tArr
-          .filter(cityFilter)
+          .filter((t) => cityFilter(t, city))
           .sort(sortFn);
       }
 
@@ -68,7 +74,7 @@ export const territoriesFilterPipe = (
 
       return tArr
         .filter(t => {
-          if (!cityFilter(t)) {
+          if (!cityFilter(t, city)) {
             return false;
           }
 
