@@ -1,4 +1,4 @@
-import { Territory } from '../../../../models/territory';
+import { type Territory } from '../../../../models/territory';
 import { VisitOutcomeEnum } from '../../../../models/enums/visit-outcome';
 import { differenceInMonths } from '../../../shared/utils/date';
 import { TerritoryVisitHistory } from '../../../../models/territory-visit-history';

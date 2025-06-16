@@ -18,10 +18,10 @@ import {
   updateDoc,
   where,
 } from '@angular/fire/firestore';
-import { combineLatest, EMPTY, forkJoin, from, map, Observable, switchMap } from 'rxjs';
+import { combineLatest, EMPTY, forkJoin, from, map, Observable, of, switchMap } from 'rxjs';
 
 import { firebaseEntityConverterFactory, removeUndefined } from '../../shared/utils/firebase-entity-converter';
-import { TerritoryRepository } from '../territories.repository';
+import { TerritoryRepository, TerritoryRepositoryQueryOptions } from '../territories.repository';
 import { Territory } from '../../../models/territory';
 import { TerritoryVisitHistory } from '../../../models/territory-visit-history';
 import {
@@ -71,10 +71,39 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
     return doc(this.territoriesCollection, id);
   }
 
-  getAllByCongregation(congregationId: string): Observable<Territory[]> {
+  getAllByCongregation(congregationId: string, options?: TerritoryRepositoryQueryOptions): Observable<Territory[]> {
     const q = query(this.territoriesCollection, where('congregationId', '==', congregationId));
 
-    return from(collectionData(q));
+    return from(collectionData(q))
+      .pipe(
+        // Resolve Territory History
+        switchMap(territoriesSnapshot => {
+          if (!options?.getHistory) {
+            return of(territoriesSnapshot);
+          }
+
+          // Looping through each territory and resolving the history sub collection documents
+          const territories$ = territoriesSnapshot.map(territory => {
+
+            const path = `${FirebaseTerritoryDatasourceService.COLLECTION_NAME}/${territory.id}/${this.historySubCollectionName}`;
+            const territoryVisitHistoryCollection = collection(this.firestore, path).withConverter<TerritoryVisitHistory>(
+              firebaseEntityConverterFactory(convertTerritoryHistoryFirebaseTimestampsToDate)
+            );
+
+            return from(getDocs(territoryVisitHistoryCollection)).pipe(
+              map(territoryVisitHistorySnapshots => {
+                return {
+                  ...territory,
+                  history: territoryVisitHistorySnapshots.docs.map(visitHistorySnapshot => visitHistorySnapshot.data()),
+                };
+              })
+            );
+          });
+
+          // Combining all territoriesObservables into one array
+          return combineLatest(territories$);
+        })
+      );
   }
 
   getById(id: string): Observable<Territory | undefined> {
