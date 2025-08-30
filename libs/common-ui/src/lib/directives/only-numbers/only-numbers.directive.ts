@@ -9,8 +9,45 @@ export class OnlyNumbersDirective {
 
   constructor(private el: ElementRef) {}
 
+  /**
+   * Handles the key press event to allow or block specific characters based on defined criteria.
+   * @see https://angular.dev/api/core/HostListener#description
+   */
   @HostListener('keydown', ['$event'])
   onKeyPress(event: KeyboardEvent) {
+    // Allow special keys (navigation, editing, etc.)
+    const specialKeys = [
+      'Backspace',
+      'Delete',
+      'Tab',
+      'Escape',
+      'Enter',
+      'Home',
+      'End',
+      'ArrowLeft',
+      'ArrowRight',
+      'ArrowUp',
+      'ArrowDown',
+      'Clear',
+      'Copy',
+      'Paste',
+      'Cut',
+      'Undo',
+      'Redo',
+      'Select',
+      'SelectAll',
+    ];
+
+    // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+Z combinations
+    if (event.ctrlKey || event.metaKey) {
+      return true;
+    }
+
+    // Allow special keys
+    if (specialKeys.includes(event.key)) {
+      return true;
+    }
+
     // Get the character that would be added
     const charCode = event.key.charCodeAt(0);
     const charStr = String.fromCharCode(charCode);
@@ -24,14 +61,12 @@ export class OnlyNumbersDirective {
 
       // Prevent multiple decimal points
       if (charStr === '.' && this.el.nativeElement.value.includes('.')) {
-        event.preventDefault();
-        return;
+        return false;
       }
 
       // Prevent negative sign if not at the beginning
       if (charStr === '-' && this.el.nativeElement.value.length > 0) {
-        event.preventDefault();
-        return;
+        return false;
       }
     } else if (this.decimal) {
       // Allow digits and decimal point
@@ -39,8 +74,7 @@ export class OnlyNumbersDirective {
 
       // Prevent multiple decimal points
       if (charStr === '.' && this.el.nativeElement.value.includes('.')) {
-        event.preventDefault();
-        return;
+        return false;
       }
     } else if (this.negative) {
       // Allow digits and negative sign
@@ -48,8 +82,7 @@ export class OnlyNumbersDirective {
 
       // Prevent negative sign if not at the beginning
       if (charStr === '-' && this.el.nativeElement.value.length > 0) {
-        event.preventDefault();
-        return;
+        return false;
       }
     } else {
       // Allow only digits
@@ -57,9 +90,7 @@ export class OnlyNumbersDirective {
     }
 
     // Prevent the keypress if it doesn't match the pattern
-    if (!pattern.test(charStr)) {
-      event.preventDefault();
-    }
+    return pattern.test(charStr);
   }
 
   @HostListener('paste', ['$event'])
@@ -81,8 +112,6 @@ export class OnlyNumbersDirective {
     }
 
     // If the pasted text doesn't match the pattern, prevent the paste action
-    if (!regExp.test(pastedText)) {
-      event.preventDefault();
-    }
+    return regExp.test(pastedText);
   }
 }
