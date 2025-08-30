@@ -78,7 +78,7 @@ type TerritoryForm = {
         <!-- People Quantity -->
         <lib-form-field class="mt-5">
           <label lib-label for="people-quantity">Quantidade de pessoas</label>
-          <input lib-input type="number" libOnlyNumbers formControlName="peopleQuantity" id="people-quantity"/>
+          <input lib-input libOnlyNumbers formControlName="peopleQuantity" id="people-quantity"/>
         </lib-form-field>
         <!-- Note  -->
         <lib-form-field class="mt-5">
