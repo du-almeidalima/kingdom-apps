@@ -1,8 +1,8 @@
 import { MockBuilder, MockRender } from 'ng-mocks';
 
 import { TerritoryStatisticsStaticSectionComponent } from './territory-statistics-static-section.component';
-import { TerritoryStatisticsBO } from '../../bo/territory-statistics.bo';
-import { mockTerritories } from '../../bo/territory-statistics.bo.spec';
+import { TerritoryStatisticsBO } from '../../bo/territory-statistics/territory-statistics.bo';
+import { mockTerritories } from '../../bo/territory-alerts/territory-statistics.bo.spec';
 import { MOCK_REPOSITORIES_PROVIDERS } from '../../../../../test/mocks/providers/mock-repositories-providers';
 
 describe('TerritoryStatisticsStaticSectionComponent', () => {

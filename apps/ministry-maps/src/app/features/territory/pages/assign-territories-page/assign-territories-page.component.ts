@@ -17,10 +17,10 @@ import { TerritoryRepository } from '../../../../repositories/territories.reposi
 import { UserStateService } from '../../../../state/user.state.service';
 import { FeatureRoutesEnum } from '../../../../app-routes';
 import { isMobileDevice } from '../../../../shared/utils/user-agent';
-import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
+import { TerritoryAlertsBO } from '../../bo/territory-alerts/territory-alerts.bo';
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 import { Dialog } from '@angular/cdk/dialog';
-import { TerritoryBO } from '../../bo/territory.bo';
+import { TerritoryBO } from '../../bo/territory/territory.bo';
 import {
   ALL_OPTION,
   territoriesFilterPipe,

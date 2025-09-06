@@ -2,13 +2,13 @@ import { TestBed } from '@angular/core/testing';
 import { MockProvider, ngMocks } from 'ng-mocks';
 import { lastValueFrom, of } from 'rxjs';
 
-import { territoryMockBuilder } from '../../../../test/mocks/models/territory.mock';
-import { VisitOutcomeEnum } from '../../../../models/enums/visit-outcome';
-import { type TerritoryVisitHistory } from '../../../../models/territory-visit-history';
-import { TerritoryStatisticsBO, type TStatisticsPeriod } from './territory-statistics.bo';
-import { type TerritoryStatisticsDTO } from '../dto/territory-statistics.dto';
-import { UserStateService } from '../../../state/user.state.service';
-import { TerritoryRepository } from '../../../repositories/territories.repository';
+import { territoryMockBuilder } from '../../../../../test/mocks/models/territory.mock';
+import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
+import { type TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
+import { TerritoryStatisticsBO, type TStatisticsPeriod } from '../territory-statistics/territory-statistics.bo';
+import { type TerritoryStatisticsDTO } from '../../dto/territory-statistics.dto';
+import { UserStateService } from '../../../../state/user.state.service';
+import { TerritoryRepository } from '../../../../repositories/territories.repository';
 
 // PLEASE DO NOT MODIFY THOSE, AS THEY'RE BEING USED IN OTHER TESTS
 export const mockMoveVisit: TerritoryVisitHistory = {

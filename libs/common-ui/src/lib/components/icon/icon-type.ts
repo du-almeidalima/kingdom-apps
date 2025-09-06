@@ -32,3 +32,4 @@ export type Icons =
   | 'check-mark-circle-thin'
   | 'error-8'
   | 'warning-lined'
+  | 'download-20'

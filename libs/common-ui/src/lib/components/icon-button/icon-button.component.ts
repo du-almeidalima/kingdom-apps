@@ -15,10 +15,11 @@ export class IconButtonComponent implements OnInit {
 
   ngOnInit() {
     this.renderer.addClass(this.elRef.nativeElement, `icon-button`);
+    const currentStyle = this.elRef.nativeElement.getAttribute('style') || '';
     this.renderer.setProperty(
       this.elRef.nativeElement,
       `style`,
-      `
+      `${currentStyle}
         --background-hover-color: ${this.hoverBackgroundColor}
       `
     );

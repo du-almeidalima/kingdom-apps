@@ -8,7 +8,7 @@ import { SearchInputComponent, SelectComponent } from '@kingdom-apps/common-ui';
 
 import { UserStateService } from '../../../../state/user.state.service';
 import { Territory } from '../../../../../models/territory';
-import { TerritoryStatisticsBO } from '../../bo/territory-statistics.bo';
+import { TerritoryStatisticsBO } from '../../bo/territory-statistics/territory-statistics.bo';
 import { TerritoryStatisticsStaticSectionComponent } from '../../components/territory-statistics-static-section/territory-statistics-static-section.component';
 import { TerritoryStatisticsDynamicSectionComponent } from '../../components/territory-statistics-dynamic-section/territory-statistics-dynamic-section.component';
 import { ALL_OPTION } from '../../../../shared/utils/territories-filter-pipe';

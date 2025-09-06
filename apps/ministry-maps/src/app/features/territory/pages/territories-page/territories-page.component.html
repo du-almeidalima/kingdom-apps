@@ -1,5 +1,26 @@
 <div class='container'>
-  <h2 class='t-headline2 mb-8'>Territórios</h2>
+  <div class="flex items-center justify-between mb-8">
+    <h2 class='t-headline2'>Territórios</h2>
+    <!-- VERTICAL MENU -->
+    <button
+      lib-icon-button
+      [cdkMenuTriggerFor]="menu"
+      type="button"
+      *libAuthorize="[RoleEnum.APP_ADMIN, RoleEnum.SUPERINTENDENT, RoleEnum.ADMIN]">
+      <lib-icon [fillColor]="greyButtonColor" icon="menu-dot-vertical-filled"></lib-icon>
+    </button>
+
+    <ng-template #menu>
+      <menu class="menu" cdkMenu>
+        <li class="menu__item" cdkMenuItem (cdkMenuItemTriggered)="handleExportTerritories()">
+          <button lib-icon-button type="button">
+            <lib-icon [fillColor]="greyButtonColor" icon="download-20"></lib-icon>
+          </button>
+          <span>Exportar Territórios</span>
+        </li>
+      </menu>
+    </ng-template>
+  </div>
   <select
     lib-select
     class='w-full'
@@ -19,7 +40,6 @@
              cdkDropList
              (cdkDropListDropped)='handleTerritoryDrop($event, territories)'
     >
-      <!-- TODO: Check if this is updating -->
       @for (territory of territories; track trackByRepositoryId(territory)) {
         <kingdom-apps-territory-list-item
           class='territory-list-item mb-3'

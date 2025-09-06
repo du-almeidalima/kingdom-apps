@@ -1,8 +1,8 @@
 import { MockBuilder, MockedComponentFixture, MockRender, ngMocks } from 'ng-mocks';
 
 import { TerritoryStatisticsDynamicSectionComponent } from './territory-statistics-dynamic-section.component';
-import { TerritoryStatisticsBO, TStatisticsPeriod } from '../../bo/territory-statistics.bo';
-import { mockTerritories } from '../../bo/territory-statistics.bo.spec';
+import { TerritoryStatisticsBO, TStatisticsPeriod } from '../../bo/territory-statistics/territory-statistics.bo';
+import { mockTerritories } from '../../bo/territory-alerts/territory-statistics.bo.spec';
 import { MOCK_REPOSITORIES_PROVIDERS } from '../../../../../test/mocks/providers/mock-repositories-providers';
 import { Territory } from '../../../../../models/territory';
 

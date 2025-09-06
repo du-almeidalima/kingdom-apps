@@ -4,10 +4,12 @@ import { UserStateService } from '../../../../state/user.state.service';
 import { finalize, map, Observable, of, shareReplay } from 'rxjs';
 import { Territory } from '../../../../../models/territory';
 import {
+  AuthorizeDirective,
   FloatingActionButtonComponent,
   green200,
   grey400,
-  IconButtonComponent, IconComponent,
+  IconButtonComponent,
+  IconComponent,
   SearchInputComponent,
   SelectComponent,
   white200,
@@ -31,17 +33,20 @@ import {
 } from '../../components/territory-move-alert-dialog/territory-move-alert-dialog.component';
 import { HistoryDialogComponent } from '../../../../shared/components/dialogs';
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
-import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
+import { TerritoryAlertsBO } from '../../bo/territory-alerts/territory-alerts.bo';
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
   TerritoryGenericAlertDialogComponent,
   TerritoryGenericAlertDialogData,
 } from '../../components/territory-generic-alert-dialog/territory-generic-alert-dialog.component';
-import { TerritoryBO } from '../../bo/territory.bo';
+import { TerritoryBO } from '../../bo/territory/territory.bo';
 import { FormsModule } from '@angular/forms';
 import { TerritoryListItemComponent } from '../../components/territory-list-item/territory-list-item.component';
 import { AsyncPipe } from '@angular/common';
+import { CdkMenuModule } from '@angular/cdk/menu';
+import { RoleEnum } from '../../../../../models/enums/role';
+import { TerritoryCsvExporterBO } from '../../bo/territory-csv-exporter/territory-csv-exporter.bo';
 
 @Component({
   selector: 'kingdom-apps-territories-page',
@@ -59,8 +64,10 @@ import { AsyncPipe } from '@angular/common';
     CdkDragHandle,
     IconComponent,
     FloatingActionButtonComponent,
+    AuthorizeDirective,
+    CdkMenuModule,
   ],
-  providers: [TerritoryBO],
+  providers: [TerritoryBO, TerritoryCsvExporterBO],
 })
 export class TerritoriesPageComponent implements OnInit {
   private territories$: Observable<Territory[]> = of([]);
@@ -68,6 +75,7 @@ export class TerritoriesPageComponent implements OnInit {
   public readonly green200 = green200;
   public readonly white200 = white200;
   public readonly greyButtonColor = grey400;
+  public readonly RoleEnum = RoleEnum;
   public readonly ALL_OPTION = ALL_OPTION;
 
   public cities: string[] = [];
@@ -84,6 +92,7 @@ export class TerritoriesPageComponent implements OnInit {
     private readonly userState: UserStateService,
     private readonly territoryAlertsBO: TerritoryAlertsBO,
     private readonly territoryBO: TerritoryBO,
+    private readonly territoryExporterBO: TerritoryCsvExporterBO,
     public dialog: Dialog
   ) {}
 
@@ -152,8 +161,8 @@ export class TerritoriesPageComponent implements OnInit {
       });
 
       // Find all territories that had their positionIndex updated
-      const changedTerritories = updatedTerritories.filter(tUpdated => {
-        const originalTerritory = territories.find(t => t.id === tUpdated.id);
+      const changedTerritories = updatedTerritories.filter((tUpdated) => {
+        const originalTerritory = territories.find((t) => t.id === tUpdated.id);
 
         return originalTerritory && originalTerritory.positionIndex !== tUpdated.positionIndex;
       });
@@ -165,7 +174,7 @@ export class TerritoriesPageComponent implements OnInit {
         map((t, index) => {
           // Only doing this operation for the first time, otherwise updatedTerritories would override repository emission
           if (index === 0) {
-            return updatedTerritories.map(updatedT => updatedT);
+            return updatedTerritories.map((updatedT) => updatedT);
           }
 
           return t;
@@ -190,7 +199,7 @@ export class TerritoriesPageComponent implements OnInit {
   }
 
   handleRemoveTerritory(territoryId: string) {
-    this.dialog.open<object, TerritoryDialogData>(TerritoryDeleteDialogComponent).closed.subscribe(result => {
+    this.dialog.open<object, TerritoryDialogData>(TerritoryDeleteDialogComponent).closed.subscribe((result) => {
       if (result) this.territoryBO.deleteTerritory(territoryId);
     });
   }
@@ -200,12 +209,12 @@ export class TerritoriesPageComponent implements OnInit {
       .open<MoveResolutionActionsEnum, TerritoryMoveAlertDialogData>(TerritoryMoveAlertDialogComponent, {
         data: {
           history: territory.recentHistory ?? [],
-          markAsResolvedCallback: histories => {
+          markAsResolvedCallback: (histories) => {
             return this.territoryAlertsBO.resolveTerritoryHistoryAlert(territory, histories, VisitOutcomeEnum.MOVED);
           },
         },
       })
-      .closed.subscribe(action => {
+      .closed.subscribe((action) => {
         if (!action) {
           return;
         }
@@ -225,7 +234,7 @@ export class TerritoriesPageComponent implements OnInit {
   }
 
   handleResolveRevisitAlert(territory: Territory) {
-    const revisitTerritoryHistory = territory.recentHistory?.filter(h => h.isRevisit) ?? [];
+    const revisitTerritoryHistory = territory.recentHistory?.filter((h) => h.isRevisit) ?? [];
 
     this.dialog
       .open<boolean, TerritoryGenericAlertDialogData>(TerritoryGenericAlertDialogComponent, {
@@ -233,12 +242,12 @@ export class TerritoriesPageComponent implements OnInit {
           title: 'Revisita',
           message: 'Um ou mais publicadores marcaram que esse território está sendo revisitado: ',
           history: revisitTerritoryHistory,
-          markAsResolvedCallback: histories => {
+          markAsResolvedCallback: (histories) => {
             return this.territoryAlertsBO.resolveTerritoryHistoryAlert(territory, histories, VisitOutcomeEnum.REVISIT);
           },
         },
       })
-      .closed.subscribe(result => {
+      .closed.subscribe((result) => {
         // Need to re-fetch manually because it seems Firebase doesn't update changes on an array property
         if (result) {
           this.getTerritories();
@@ -248,7 +257,7 @@ export class TerritoriesPageComponent implements OnInit {
 
   handleResolveStopVisitingAlert(territory: Territory) {
     const stopVisitingHistories =
-      territory.recentHistory?.filter(h => {
+      territory.recentHistory?.filter((h) => {
         return h.visitOutcome === VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN;
       }) ?? [];
 
@@ -258,7 +267,7 @@ export class TerritoriesPageComponent implements OnInit {
           title: 'Parar de Visitar',
           message: 'Um ou mais publicadores marcaram que esse território pediu para não ser visitado: ',
           history: stopVisitingHistories,
-          markAsResolvedCallback: histories => {
+          markAsResolvedCallback: (histories) => {
             return this.territoryAlertsBO.resolveTerritoryHistoryAlert(
               territory,
               histories,
@@ -267,7 +276,7 @@ export class TerritoriesPageComponent implements OnInit {
           },
         },
       })
-      .closed.subscribe(result => {
+      .closed.subscribe((result) => {
         // Need to re-fetch manually because it seems Firebase doesn't update changes on an array property
         if (result) {
           this.getTerritories();
@@ -276,11 +285,15 @@ export class TerritoriesPageComponent implements OnInit {
   }
 
   handleOpenHistory(territory: Territory) {
-    this.territoryRepository.getTerritoryVisitHistory(territory.id).subscribe(data => {
+    this.territoryRepository.getTerritoryVisitHistory(territory.id).subscribe((data) => {
       this.dialog.open<HistoryDialogComponent, TerritoryVisitHistory[]>(HistoryDialogComponent, {
         data: data.reverse() ?? [],
       });
     });
+  }
+
+  handleExportTerritories() {
+    this.territoryExporterBO.export();
   }
 
   /** Get territories from the repository and create the filtered observable array */

@@ -1,9 +1,9 @@
-import { type Territory } from '../../../../models/territory';
-import { VisitOutcomeEnum } from '../../../../models/enums/visit-outcome';
-import { differenceInMonths } from '../../../shared/utils/date';
-import { TerritoryVisitHistory } from '../../../../models/territory-visit-history';
+import { type Territory } from '../../../../../models/territory';
+import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
+import { differenceInMonths } from '../../../../shared/utils/date';
+import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
 import { Injectable } from '@angular/core';
-import { TerritoryRepository } from '../../../repositories/territories.repository';
+import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { concat, Observable, retry } from 'rxjs';
 
 @Injectable()
