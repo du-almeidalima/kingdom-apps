@@ -1,13 +1,13 @@
 import { inject, Injectable } from '@angular/core';
-import { TerritoryRepository } from '../../../repositories/territories.repository';
-import { DesignationRepository } from '../../../repositories/designation.repository';
+import { TerritoryRepository } from '../../../../repositories/territories.repository';
+import { DesignationRepository } from '../../../../repositories/designation.repository';
 import { catchError, EMPTY, forkJoin, map, Observable, switchMap, tap } from 'rxjs';
-import { Designation, DesignationSettings, DesignationTerritory } from '../../../../models/designation';
-import { DesignationStatusEnum } from '../../../../models/enums/designation-status';
-import { Territory } from '../../../../models/territory';
-import { UserStateService } from '../../../state/user.state.service';
-import { LoggerService } from '../../../shared/services/logger/logger.service';
-import { CongregationSettingsBO } from '../../../core/features/congregation-settings/bo/congregation-settings.bo';
+import { Designation, DesignationSettings, DesignationTerritory } from '../../../../../models/designation';
+import { DesignationStatusEnum } from '../../../../../models/enums/designation-status';
+import { Territory } from '../../../../../models/territory';
+import { UserStateService } from '../../../../state/user.state.service';
+import { LoggerService } from '../../../../shared/services/logger/logger.service';
+import { CongregationSettingsBO } from '../../../../core/features/congregation-settings/bo/congregation-settings.bo';
 
 @Injectable()
 export class TerritoryBO {

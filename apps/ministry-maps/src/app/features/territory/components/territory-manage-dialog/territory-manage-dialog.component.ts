@@ -45,6 +45,20 @@ type TerritoryForm = {
   selector: 'kingdom-apps-territory-manage-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./territory-manage-dialog.component.scss'],
+  imports: [
+    SpinnerComponent,
+    ButtonComponent,
+    DialogFooterComponent,
+    DialogComponent,
+    LabelComponent,
+    FormFieldComponent,
+    InputComponent,
+    ReactiveFormsModule,
+    SelectComponent,
+    TerritoryIconTranslatorPipe,
+    OnlyNumbersDirective,
+    DialogCloseDirective,
+  ],
   template: `
     <lib-dialog title="{{ isEdit ? 'Editar Território' : 'Adicionar Território' }}">
       <form [formGroup]="form" (ngSubmit)="handleSubmission()" id="territory-form">
@@ -143,20 +157,6 @@ type TerritoryForm = {
       </lib-dialog-footer>
     </lib-dialog>
   `,
-  imports: [
-    SpinnerComponent,
-    ButtonComponent,
-    DialogFooterComponent,
-    DialogComponent,
-    LabelComponent,
-    FormFieldComponent,
-    InputComponent,
-    ReactiveFormsModule,
-    SelectComponent,
-    TerritoryIconTranslatorPipe,
-    OnlyNumbersDirective,
-    DialogCloseDirective,
-  ],
 })
 export class TerritoryManageDialogComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);

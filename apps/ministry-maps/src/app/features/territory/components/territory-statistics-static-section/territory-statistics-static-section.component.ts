@@ -2,7 +2,7 @@ import { Component, computed, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { Territory } from '../../../../../models/territory';
-import { TerritoryStatisticsBO } from '../../bo/territory-statistics.bo';
+import { TerritoryStatisticsBO } from '../../bo/territory-statistics/territory-statistics.bo';
 
 @Component({
   selector: 'kingdom-apps-territory-statistics-static-section',

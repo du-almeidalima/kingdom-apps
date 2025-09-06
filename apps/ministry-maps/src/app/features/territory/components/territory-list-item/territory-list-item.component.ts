@@ -9,7 +9,7 @@ import {
 } from '@kingdom-apps/common-ui';
 import { Territory } from '../../../../../models/territory';
 import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territory-icon-mapper';
-import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
+import { TerritoryAlertsBO } from '../../bo/territory-alerts/territory-alerts.bo';
 import { EDIT_ALLOWED } from '../../config/territory-roles.config';
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';

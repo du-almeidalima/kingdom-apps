@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { map, Observable, of, take, tap } from 'rxjs';
 
-import { TerritoryRepository } from '../../../repositories/territories.repository';
-import type { Territory } from '../../../../models/territory';
-import type { TerritoryStatisticsDTO, TerritoryStatisticsDynamicDTO } from '../dto/territory-statistics.dto';
-import { UserStateService } from '../../../state/user.state.service';
-import { cityFilter } from '../../../shared/utils/territories-filter-pipe';
-import { VisitOutcomeEnum } from '../../../../models/enums/visit-outcome';
-import { TerritoryAlertsBO } from './territory-alerts.bo';
+import { TerritoryRepository } from '../../../../repositories/territories.repository';
+import type { Territory } from '../../../../../models/territory';
+import type { TerritoryStatisticsDTO, TerritoryStatisticsDynamicDTO } from '../../dto/territory-statistics.dto';
+import { UserStateService } from '../../../../state/user.state.service';
+import { cityFilter } from '../../../../shared/utils/territories-filter-pipe';
+import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
+import { TerritoryAlertsBO } from '../territory-alerts/territory-alerts.bo';
 
 /**
  * Represents the interval for dynamic calculations

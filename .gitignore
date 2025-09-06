@@ -4,6 +4,7 @@
 **/.env*
 !**/.env.sample
 !**/.env.development
+export
 
 # compiled output
 dist

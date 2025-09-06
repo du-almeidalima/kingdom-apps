@@ -6,7 +6,7 @@ import { grey400, IconButtonComponent, IconComponent, Icons, primaryGreen } from
 import { Dialog } from '@angular/cdk/dialog';
 import { HistoryDialogComponent } from '../../../../shared/components/dialogs';
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
-import { TerritoryAlertsBO } from '../../bo/territory-alerts.bo';
+import { TerritoryAlertsBO } from '../../bo/territory-alerts/territory-alerts.bo';
 import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territory-icon-mapper';
 import { DatePipe, NgClass } from '@angular/common';
 

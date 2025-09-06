@@ -5,7 +5,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
 import { SelectComponent } from '@kingdom-apps/common-ui';
 
-import { TerritoryStatisticsBO, type TStatisticsPeriod } from '../../bo/territory-statistics.bo';
+import { TerritoryStatisticsBO, type TStatisticsPeriod } from '../../bo/territory-statistics/territory-statistics.bo';
 import type { Territory } from '../../../../../models/territory';
 
 export type TPeriodOption = {

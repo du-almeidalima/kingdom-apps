@@ -1,7 +1,7 @@
 import { StatisticsTerritoriesPageComponent } from './statistics-territories-page.component';
 import { MockBuilder, MockRender } from 'ng-mocks';
 import { MOCK_REPOSITORIES_PROVIDERS } from '../../../../../test/mocks/providers/mock-repositories-providers';
-import { TerritoryStatisticsBO } from '../../bo/territory-statistics.bo';
+import { TerritoryStatisticsBO } from '../../bo/territory-statistics/territory-statistics.bo';
 import { of } from 'rxjs';
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
