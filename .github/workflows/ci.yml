@@ -37,3 +37,50 @@ jobs:
       # - run: npx nx-cloud record -- echo Hello World
       # Nx Affected runs only tasks affected by the changes in this PR/commit. Learn more: https://nx.dev/ci/features/affected
       - run: npx nx affected -t test --no-cloud
+
+  # Deploy job: runs only on pushes to the main branch and after the `main` job completes
+  deploy:
+    runs-on: ubuntu-latest
+    needs: main
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Cache node_modules
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - run: npm ci --legacy-peer-deps
+      - uses: nrwl/nx-set-shas@v4
+
+      - name: Determine affected projects with deploy target
+        id: affected
+        run: |
+          echo "Calculating affected projects with a 'deploy' target..."
+          # print-affected --select=projects prints a JSON array of projects that would run the target
+          npx nx print-affected --target=deploy --base=origin/main --head=HEAD --select=projects > affected.json || true
+          # Convert JSON array to space-separated list (empty if none)
+          projects=$(node -e "const fs=require('fs'); const p=JSON.parse(fs.readFileSync('affected.json')); console.log((p && p.length)?p.join(' '):'')")
+          echo "projects=$projects" >> $GITHUB_OUTPUT
+
+      - name: Deploy affected projects
+        if: steps.affected.outputs.projects != ''
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          NX_FIREBASE_PROJECT_ID: ${{ secrets.NX_FIREBASE_PROJECT_ID }}
+          NX_FIREBASE_API_KEY: ${{ secrets.NX_FIREBASE_API_KEY }}
+          NX_FIREBASE_APP_ID: ${{ secrets.NX_FIREBASE_APP_ID }}
+          NX_FIREBASE_AUTH_DOMAIN: ${{ secrets.NX_FIREBASE_AUTH_DOMAIN }}
+          NX_ENV: production
+          NX_APP_BASE_URL: ${{ vars.NX_APP_BASE_URL }}
+        run: |
+          echo "Deploying projects: ${{ steps.affected.outputs.projects }}"
+          for proj in ${{ steps.affected.outputs.projects }}; do
+            echo "--> Deploying $proj"
+            # Run the project's deploy target. Adjust --configuration if needed per-project.
+            npx nx run "$proj":deploy --configuration=production
+          done
