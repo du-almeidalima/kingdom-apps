@@ -20,5 +20,6 @@ import { PortalAnchorComponent } from '@kingdom-apps/common-ui';
   ],
 })
 export class AppComponent {
+  // Trigger Change Comment
   title = 'ministry-maps';
 }
