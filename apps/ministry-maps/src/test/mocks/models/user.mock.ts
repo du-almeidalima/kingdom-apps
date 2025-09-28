@@ -37,20 +37,29 @@ export const publisherUser: User = {
 };
 
 export const organizerUser: User = {
-  id: 'A1B2C3',
-  name: 'TestUser',
-  email: 'test.user@email.com',
+  id: 'ORG123',
+  name: 'Organizer Test User',
+  email: 'org.user@email.com',
   photoUrl: 'https://i.stack.imgur.com/l60Hf.png',
   role: RoleEnum.ORGANIZER,
   congregation: congregationMock
 };
 
 export const elderUser: User = {
-  id: 'A1B2C3',
-  name: 'Test Elder User',
-  email: 'test.elder@email.com',
+  id: 'ELD123',
+  name: 'Elder Test User',
+  email: 'elder.test@email.com',
   photoUrl: 'https://i.stack.imgur.com/l60Hf.png',
   role: RoleEnum.ORGANIZER,
+  congregation: congregationMock
+};
+
+export const adminUser: User = {
+  id: 'ADM123',
+  name: 'Admin Test User',
+  email: 'admin.user@email.com',
+  photoUrl: 'https://i.stack.imgur.com/l60Hf.png',
+  role: RoleEnum.ADMIN,
   congregation: congregationMock
 };
 

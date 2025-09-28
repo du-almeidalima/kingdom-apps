@@ -1,20 +1,22 @@
-import { inject, Injectable } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { UserStateService } from '../../../../state/user.state.service';
-import { TerritoryRepository } from '../../../../repositories/territories.repository';
+import { inject, Injectable } from '@angular/core';
+import { of, switchMap } from 'rxjs';
 import type { Territory } from '../../../../../models/territory';
-import { TerritoryIconTranslatorPipe } from '../../../../shared/pipes/territory-icon-translator/territory-icon-translator.pipe';
+import { TerritoryRepository } from '../../../../repositories/territories.repository';
+import {
+  TerritoryIconTranslatorPipe
+} from '../../../../shared/pipes/territory-icon-translator/territory-icon-translator.pipe';
+import { UserStateService } from '../../../../state/user.state.service';
 
 /**
  * Service for exporting Territories into CSV.
  */
 @Injectable()
 export class TerritoryCsvExporterBO {
-  private readonly userState = inject(UserStateService);
-  private readonly territoryRepository = inject(TerritoryRepository);
   private readonly datePipe = new DatePipe('en-US');
   private readonly territoryIconTranslatorPipe = new TerritoryIconTranslatorPipe();
-
+  private readonly userState = inject(UserStateService);
+  private readonly territoryRepository = inject(TerritoryRepository);
   /**
    * Exports all Territories into a downloadable blob of CSV.
    */
@@ -25,14 +27,18 @@ export class TerritoryCsvExporterBO {
       throw new Error('No congregation id found');
     }
 
-    this.territoryRepository.getAllByCongregation(congregationId).subscribe((territories) => {
-      territories.sort((a, b) => {
-        return a.city.localeCompare(b.city);
-      });
+    return this.territoryRepository.getAllByCongregation(congregationId).pipe(
+      switchMap((territories) => {
+        territories.sort((a, b) => {
+          return a.city.localeCompare(b.city);
+        });
 
-      // Keep method for backward-compatibility; delegates to new CSV export.
-      this.exportCsv(territories);
-    });
+        // Keep method for backward-compatibility; delegates to new CSV export.
+        this.exportCsv(territories);
+
+        return of(true);
+      })
+    );
   }
 
   /**

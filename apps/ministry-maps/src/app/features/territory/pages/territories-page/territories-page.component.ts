@@ -12,6 +12,7 @@ import {
   IconComponent,
   SearchInputComponent,
   SelectComponent,
+  ToasterService,
   white200,
 } from '@kingdom-apps/common-ui';
 import { Dialog } from '@angular/cdk/dialog';
@@ -93,6 +94,7 @@ export class TerritoriesPageComponent implements OnInit {
     private readonly territoryAlertsBO: TerritoryAlertsBO,
     private readonly territoryBO: TerritoryBO,
     private readonly territoryExporterBO: TerritoryCsvExporterBO,
+    private readonly toasterService: ToasterService,
     public dialog: Dialog
   ) {}
 
@@ -293,7 +295,9 @@ export class TerritoriesPageComponent implements OnInit {
   }
 
   handleExportTerritories() {
-    this.territoryExporterBO.export();
+    this.territoryExporterBO.export().subscribe(() => {
+      this.toasterService.success('Territórios exportados com sucesso.');
+    });
   }
 
   /** Get territories from the repository and create the filtered observable array */

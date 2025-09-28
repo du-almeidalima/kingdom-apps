@@ -29,6 +29,11 @@
             "input": "apps/ministry-maps/public"
           },
           {
+            "glob": "**/*",
+            "input": "apps/ministry-maps/src/assets",
+            "output": "assets"
+          },
+          {
             "input": "libs/common-ui/src/assets",
             "glob": "**/*",
             "output": "assets/common-ui"
