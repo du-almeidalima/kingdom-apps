@@ -16,14 +16,13 @@ import { CardBodyComponent, CardComponent, CardHeaderComponent } from '@kingdom-
 export class HomePageComponent {
   public readonly TerritoryRoutes = TerritoryRoutesEnum;
   public readonly FeatureRoutes = FeatureRoutesEnum;
+  public readonly UsersRoutesEnum = UsersRoutesEnum;
 
   constructor(public readonly userState: UserStateService) {}
 
   get userName(): string {
-    const userNames = this.userState.currentUser!.name.split(' ');
+    const userNames = this.userState.currentUser?.name.split(' ');
 
     return userNames ? userNames[0] : this.userState.currentUser?.name ?? '';
   }
-
-  protected readonly UsersRoutesEnum = UsersRoutesEnum;
 }

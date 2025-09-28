@@ -10,6 +10,7 @@ export * from './lib/state';
 // Components
 export * from './lib/components';
 export * from './lib/components/icon/icon-type';
+export * from './lib/components/portal/portal-anchor.component';
 
 // Config
 export { APP_ADMIN_ROLE } from './lib/directives/authorize/authorize.directive';

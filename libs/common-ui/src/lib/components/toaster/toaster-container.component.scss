@@ -1,0 +1,97 @@
+@use '../../styles/abstract/variables';
+@use '../../styles/abstract/breakpoints';
+@use '../../styles/base/typography';
+
+.lib-toaster-host {
+  position: fixed;
+  inset: 0;
+  pointer-events: none; // let underlying app still receive clicks
+}
+
+.toaster {
+  position: fixed;
+  bottom: 9rem;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+
+  width: 100%;
+  padding: 1.5rem;
+  z-index: 1000;
+
+  // Desktop/laptop viewport adjustments
+  @include breakpoints.tablet-up {
+    top: 8rem;
+    right: 2rem;
+    bottom: auto;
+
+    width: auto;
+    min-width: 320px;
+    max-width: 400px;
+
+    align-items: flex-end;
+    padding: 0;
+  }
+}
+
+.toast {
+  border-radius: 6px;
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid variables.$grey-300;
+  background: variables.$grey-200;
+  box-shadow: variables.$shadow-z4;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: variables.$white-100;
+  pointer-events: auto; // clickable
+  cursor: pointer;
+
+  @extend .t-body2;
+
+  &__icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+  }
+
+  &__message {
+    line-height: 1.4;
+    flex: 1;
+  }
+
+  // Desktop/laptop viewport adjustments
+  @include breakpoints.tablet-up {
+    width: 100%;
+    min-width: 320px;
+  }
+
+  &--info {
+    border-color: variables.$gray-300;
+    background: variables.$gray-100;
+    color: variables.$white-100;
+  }
+
+  &--success {
+    border-color: variables.$green-700;
+    background: variables.$green-50;
+    color: variables.$green-700;
+  }
+
+  &--warning {
+    border-color: variables.$orange-700;
+    background: variables.$orange-50;
+    color: variables.$orange-700;
+  }
+
+  &--error {
+    border-color: variables.$red-700;
+    background: variables.$red-50;
+    color: variables.$red-700;
+  }
+}

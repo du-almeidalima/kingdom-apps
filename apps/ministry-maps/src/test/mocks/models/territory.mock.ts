@@ -76,13 +76,29 @@ const mockVisit2: TerritoryVisitHistory = {
   notes: `Couldn't find this time, will try tomorrow`,
 };
 
-const mockTerritory: Territory = {
-  id: 'TERRITORY1234',
+const mockVisit3: TerritoryVisitHistory = {
+  id: 'VISIT-3',
+  visitOutcome: VisitOutcomeEnum.SPOKE,
+  isRevisit: true,
+  date: mockDateBuilder(14),
+  notes: 'Great conversation about hope for the future, left a magazine',
+};
+
+const mockVisit4: TerritoryVisitHistory = {
+  id: 'VISIT-4',
+  visitOutcome: VisitOutcomeEnum.SPOKE,
+  isRevisit: false,
+  date: mockDateBuilder(21),
+  notes: 'Not interested at this time, was polite but declined literature',
+};
+
+export const mockTerritory1: Territory = {
+  id: 'TERRITORY1',
   congregationId: congregationMock.id,
   icon: TerritoryIcon.MAN,
-  note: 'Territory note that adds some information',
+  note: 'Territory 1 Note',
   lastVisit: new Date(),
-  address: 'Test Street, 1234',
+  address: 'Territory 1 Street 1',
   city: congregationMock.cities[0],
   mapsLink: 'https://maps.app.goo.gl/5mid2cabJ2R72fUL8',
   positionIndex: 0,
@@ -90,9 +106,51 @@ const mockTerritory: Territory = {
   recentHistory: [mockVisit1, mockVisit2],
 };
 
+export const mockTerritory2: Territory = {
+  id: 'TERRITORY2',
+  congregationId: congregationMock.id,
+  icon: TerritoryIcon.WOMAN,
+  note: 'Territory 2 Note',
+  lastVisit: new Date(),
+  address: 'Territory 2 Street 5',
+  city: congregationMock.cities[0],
+  mapsLink: 'https://maps.app.goo.gl/6nke3dabK3S83gVM9',
+  positionIndex: 1,
+  history: [mockVisit3, mockVisit4],
+  recentHistory: [mockVisit3, mockVisit4],
+};
+
+export const mockTerritory3: Territory = {
+  id: 'TERRITORY3',
+  congregationId: congregationMock.id,
+  icon: TerritoryIcon.MAN,
+  note: 'Territory 3 Note',
+  lastVisit: new Date(),
+  address: 'Territory 3 Avenue 12',
+  city: congregationMock.cities[1],
+  mapsLink: 'https://maps.app.goo.gl/7pke4eabL4T94hWN0',
+  positionIndex: 0,
+  history: [mockVisit1, mockVisit3],
+  recentHistory: [mockVisit1, mockVisit3],
+};
+
+export const mockTerritory4: Territory = {
+  id: 'TERRITORY4',
+  congregationId: congregationMock.id,
+  icon: TerritoryIcon.WOMAN,
+  note: 'Territory 4 Note',
+  lastVisit: new Date(),
+  address: 'Territory 4 Boulevard 8',
+  city: congregationMock.cities[2],
+  mapsLink: 'https://maps.app.goo.gl/8qke5fabM5U05iXO1',
+  positionIndex: 0,
+  history: [mockVisit2, mockVisit4],
+  recentHistory: [mockVisit2, mockVisit4],
+};
+
 export const territoryMockBuilder = (territory: Partial<Territory>): Territory => {
   return {
-    ...mockTerritory,
+    ...mockTerritory1,
     lastVisit: mockDateBuilder(10),
     ...territory,
   };

@@ -12,3 +12,7 @@ export * from './icon-button/icon-button.component';
 export * from './note/note.component';
 export * from './search-input/search-input.component';
 export * from './spinner/spinner.component';
+export * from './toaster/toaster.service';
+export * from './toaster/toaster.models';
+export * from './portal/portal-anchor.component';
+export * from './portal/portal.service';
