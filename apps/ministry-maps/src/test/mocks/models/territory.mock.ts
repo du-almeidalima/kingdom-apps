@@ -38,12 +38,12 @@ export class TerritoryRepositoryMock implements TerritoryRepository {
     return EMPTY;
   }
 
-  getAllByCongregationAndCity(congregationId: string, city: string): Observable<Territory[]> {
+  getAllByCongregationAndCities(congregationId: string, cities: string[]): Observable<Territory[]> {
     return of([]);
   }
 
   add(territory: Omit<Territory, 'id'>): Observable<Territory> {
-    return of();
+    return of({ ...territory, id: 'MOCK_TERRITORY_ID' } as Territory);
   }
 
   delete(id: string): Observable<void> {

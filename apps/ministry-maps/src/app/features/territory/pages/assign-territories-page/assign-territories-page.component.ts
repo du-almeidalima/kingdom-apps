@@ -182,7 +182,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
     this.territories$ =
       city === ALL_OPTION
         ? this.territoryRepository.getAllByCongregation(congregationId).pipe(shareReplay(1))
-        : this.territoryRepository.getAllByCongregationAndCity(congregationId, city).pipe(shareReplay(1));
+        : this.territoryRepository.getAllByCongregationAndCities(congregationId, [city]).pipe(shareReplay(1));
 
     this.filterTerritories();
   }

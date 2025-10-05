@@ -13,7 +13,7 @@ export abstract class TerritoryRepository {
     options?: TerritoryRepositoryQueryOptions
   ): Observable<Territory[]>;
 
-  abstract getAllByCongregationAndCity(congregationId: string, city: string): Observable<Territory[]>;
+  abstract getAllByCongregationAndCities(congregationId: string, cities: string[]): Observable<Territory[]>;
 
   abstract getAllInIds(ids: string[]): Observable<Territory[]>;
 
