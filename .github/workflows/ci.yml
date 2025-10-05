@@ -47,6 +47,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.ref }}
 
       # Cache node_modules
       - uses: actions/setup-node@v4
@@ -57,16 +58,21 @@ jobs:
       - run: npm ci --legacy-peer-deps
       - uses: nrwl/nx-set-shas@v4
 
-      - name: Determine affected projects with deploy target
+      - name: Get projects with deploy target
         id: affected
         run: |
-          echo "Calculating affected projects with a 'deploy' target..."
-          # Use the modern NX command to show affected projects and include only those with a deploy target.
-          # Output JSON to a file, but allow the command to succeed even when there are no affected projects.
-          npx nx show projects --affected --with-target=deploy --base=origin/main --head=HEAD --json > affected.json || true
-          # Robustly parse different possible JSON shapes that nx may emit and produce a space-separated list.
-          projects=$(node -e "const fs=require('fs'); const raw = fs.readFileSync('affected.json','utf8') || ''; if(!raw.trim()){console.log(''); process.exit(0);} try{ const j=JSON.parse(raw); let list=[]; if(Array.isArray(j)){ list = j.map(x => typeof x === 'string' ? x : (x.name || x.project || '')); } else if (j && j.projects) { list = j.projects.map(p => typeof p === 'string' ? p : (p.name || p.project || '')); } else if (typeof j === 'object') { list = Object.keys(j); } console.log(list.filter(Boolean).join(' ')); } catch(e){ console.error('failed to parse nx output:', e); console.error(raw); process.exit(0); }")
-          echo "projects=$projects" >> $GITHUB_OUTPUT
+          echo "Finding projects with deploy target..."
+
+          # Get all projects that have a deploy target configured
+          PROJECTS_TO_DEPLOY=$(npx nx show projects --json | jq -r '.[] | select(.targets.deploy != null) | .name' 2>/dev/null || echo "")
+
+          if [ -n "$PROJECTS_TO_DEPLOY" ]; then
+            echo "Found projects with deploy target: $PROJECTS_TO_DEPLOY"
+          else
+            echo "No projects with deploy target found"
+          fi
+
+          echo "projects=$PROJECTS_TO_DEPLOY" >> $GITHUB_OUTPUT
 
       - name: Deploy affected projects
         if: steps.affected.outputs.projects != ''
