@@ -1,4 +1,5 @@
 import { StatisticsTerritoriesPageComponent } from './statistics-territories-page.component';
+import { SpinnerComponent } from '@kingdom-apps/common-ui';
 import { MockBuilder, MockRender } from 'ng-mocks';
 import { MOCK_REPOSITORIES_PROVIDERS } from '../../../../../test/mocks/providers/mock-repositories-providers';
 import { TerritoryStatisticsBO } from '../../bo/territory-statistics/territory-statistics.bo';
@@ -36,6 +37,7 @@ describe('StatisticsTerritoriesPageComponent', () => {
       .mock(TerritoryStatisticsBO, {
         getTerritories: jest.fn().mockReturnValue(of(territories)),
       })
+      .mock(SpinnerComponent)
   );
 
   it('should create', () => {

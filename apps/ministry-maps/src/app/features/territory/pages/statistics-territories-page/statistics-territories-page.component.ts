@@ -4,7 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Dialog } from '@angular/cdk/dialog';
 import { finalize, Observable, of, shareReplay } from 'rxjs';
 
-import { SearchInputComponent, SelectComponent } from '@kingdom-apps/common-ui';
+import { SearchInputComponent, SelectComponent, SpinnerComponent } from '@kingdom-apps/common-ui';
 
 import { UserStateService } from '../../../../state/user.state.service';
 import { Territory } from '../../../../../models/territory';
@@ -24,6 +24,7 @@ import { ALL_OPTION } from '../../../../shared/utils/territories-filter-pipe';
     TerritoryStatisticsStaticSectionComponent,
     AsyncPipe,
     TerritoryStatisticsDynamicSectionComponent,
+    SpinnerComponent,
   ],
 })
 export class StatisticsTerritoriesPageComponent implements OnInit {
