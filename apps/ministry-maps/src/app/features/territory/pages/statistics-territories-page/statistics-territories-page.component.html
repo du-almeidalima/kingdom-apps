@@ -3,6 +3,7 @@
 
   <select
     lib-select
+    [disabled]="isLoading"
     class='w-full'
     name='Cidade'
     [ngModel]='selectedCity'
@@ -14,7 +15,12 @@
   </select>
 
   @let territories = (filteredTerritories$ | async) || [];
-
-  <kingdom-apps-territory-statistics-static-section [territories]="territories" />
-  <kingdom-apps-territory-statistics-dynamic-section [territories]="territories" />
+  @if (isLoading) {
+    <div class="flex items-center justify-center mt-52 py-6">
+      <lib-spinner [height]="'5rem'" [width]="'5rem'" class="mx-auto" />
+    </div>
+  } @else {
+    <kingdom-apps-territory-statistics-static-section [territories]="territories" />
+    <kingdom-apps-territory-statistics-dynamic-section [territories]="territories" />
+  }
 </div>

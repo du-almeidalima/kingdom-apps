@@ -11,6 +11,7 @@ import {
   getDocs,
   orderBy,
   query,
+  updateDoc,
 } from '@angular/fire/firestore';
 import { from, map, Observable } from 'rxjs';
 
@@ -74,5 +75,15 @@ export class FirebaseCongregationDatasourceService implements CongregationReposi
         }));
       })
     );
+  }
+
+  /**
+   * Updates the {@link Congregation} object in Firestore (patch operation).
+   */
+  update(congregation: Congregation): Observable<void> {
+    const congregationRef = doc(this.congregationCollection, congregation.id);
+    const { id: _, ...updateData } = congregation;
+
+    return from(updateDoc(congregationRef, updateData));
   }
 }

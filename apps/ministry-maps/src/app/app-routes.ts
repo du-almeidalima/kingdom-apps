@@ -13,6 +13,7 @@ export enum FeatureRoutesEnum {
   TERRITORIES = 'territories',
   WORK = 'work',
   PROFILE = 'profile',
+  CONFIGURATION = 'configuration',
   USERS = 'users',
 }
 
@@ -48,6 +49,12 @@ export const APP_ROUTES: Routes = [
     loadChildren: () => import('./features/users/users.module').then(m => m.UsersModule),
     canActivate: [authGuard],
     data: { roles: USERS_ALLOWED_ROLES, authGuardPipe: redirectUnauthorizedToLogin },
+  },
+  {
+    path: FeatureRoutesEnum.CONFIGURATION,
+    loadChildren: () => import('./features/configuration/configuration.routes').then(m => m.CONFIGURATION_ROUTES),
+    canActivate: [authGuard],
+    data: { roles: ['*'] },
   },
   {
     path: '',

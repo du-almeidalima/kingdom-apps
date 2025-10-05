@@ -15,6 +15,10 @@ export class CongregationRepositoryMock implements CongregationRepository {
       name: congregationMock2.name,
     }]);
   }
+
+  update(congregation: Congregation): Observable<void> {
+    return of(void 0);
+  }
 }
 
 // CONGREGATION

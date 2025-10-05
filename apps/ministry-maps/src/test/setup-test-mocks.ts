@@ -16,12 +16,11 @@ import { InvitationLinkRepositoryMock } from './mocks/models/invitation-link.moc
 // auto spy
 ngMocks.autoSpy('jest');
 
-ngMocks.defaultMock(TitleStrategy, () => MockService(DefaultTitleStrategy));
-ngMocks.defaultMock(UserStateService, () => organizerUserStateServiceMock);
-ngMocks.defaultMock(UserRepository, () => new UserRepositoryMock());
-ngMocks.defaultMock(CongregationRepository, () => new CongregationRepositoryMock());
-ngMocks.defaultMock(TerritoryRepository, () => new TerritoryRepositoryMock());
-ngMocks.defaultMock(AuthRepository, () => new AuthRepositoryMock());
-ngMocks.defaultMock(DesignationRepository, () => new DesignationRepositoryMock());
-ngMocks.defaultMock(InvitationLinkRepositoryMock, () => new InvitationLinkRepositoryMock());
-
+ngMocks.defaultMock([TitleStrategy], () => MockService(DefaultTitleStrategy));
+ngMocks.defaultMock([UserStateService], () => organizerUserStateServiceMock);
+ngMocks.defaultMock([UserRepository], () => new UserRepositoryMock());
+ngMocks.defaultMock([CongregationRepository], () => new CongregationRepositoryMock());
+ngMocks.defaultMock([TerritoryRepository], () => new TerritoryRepositoryMock());
+ngMocks.defaultMock([AuthRepository], () => new AuthRepositoryMock());
+ngMocks.defaultMock([DesignationRepository], () => new DesignationRepositoryMock());
+ngMocks.defaultMock([InvitationLinkRepositoryMock], () => new InvitationLinkRepositoryMock());

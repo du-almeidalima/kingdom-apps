@@ -7,7 +7,7 @@ export type Congregation = {
 };
 
 export type CongregationSettings = {
-  /** The amount of days a {@link Designation} can be accessed by a publisher. */
+  /** The number of days a {@link Designation} can be accessed by a publisher. */
   designationAccessExpiryDays: number;
   /** Once a {@link Designation} is expired, should all buttons be disabled. */
   shouldDesignationBlockAfterExpired: boolean;
