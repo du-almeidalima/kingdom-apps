@@ -9,6 +9,8 @@ import { TerritoryVisitHistory } from '../../../../../models/territory-visit-his
 import { TerritoryAlertsBO } from '../../bo/territory-alerts/territory-alerts.bo';
 import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territory-icon-mapper';
 import { DatePipe, NgClass } from '@angular/common';
+import { VisitOutcomeToIconPipe } from '../../../../shared/pipes/visit-outcome-to-icon/visit-outcome-to-icon.pipe';
+import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 
 @Component({
   selector: 'kingdom-apps-territory-checkbox',
@@ -28,7 +30,8 @@ import { DatePipe, NgClass } from '@angular/common';
       [ngClass]="{
         'territory-checkbox--disabled': disabled,
         'territory-checkbox--selected': !disabled && value
-      }">
+      }"
+    >
       <div class="territory-checkbox__control-container">
         <input
           type="checkbox"
@@ -38,17 +41,20 @@ import { DatePipe, NgClass } from '@angular/common';
           [ngModel]="value"
           [disabled]="disabled"
           hidden
-          (ngModelChange)="setValue($event)" />
+          (ngModelChange)="setValue($event)"
+        />
         <div
           class="territory-checkbox__description"
-          [ngClass]="{ 'territory-checkbox__description--disabled': disabled }">
+          [ngClass]="{ 'territory-checkbox__description--disabled': disabled }"
+        >
           <!-- Title and Subtitle -->
           <div class="territory-checkbox__title-subtitle-container">
             <lib-icon
               class="territory-checkbox__icon"
               [ngClass]="{ 'territory-checkbox__icon--large': isIconLarge }"
               [fillColor]="iconColor"
-              [icon]="icon" />
+              [icon]="icon"
+            />
             <!-- Address and Note -->
             <div class="flex flex-col gap-1">
               <h3 class="territory-checkbox__title">{{ territory.address }}</h3>
@@ -58,32 +64,44 @@ import { DatePipe, NgClass } from '@angular/common';
           <!-- VISIT CONTAINER -->
           <div class="territory-checkbox__visit-container">
             @if (territory.lastVisit) {
-              <span class="territory-checkbox__last-visit">
-                Última visita: {{ territory.lastVisit | date : 'dd/MM/yyyy' }}
-              </span>
+              <div class="territory-checkbox__last-visit-container">
+                <span class="territory-checkbox__last-visit-label">
+                  Última visita: {{ territory.lastVisit | date : 'dd/MM/yyyy' }}
+                </span>
+                @if (territory.recentHistory?.length
+                && territory.recentHistory![territory.recentHistory!.length - 1].visitOutcome !== undefined) {
+                  <lib-icon
+                    [ngClass]="{
+                      '-mt-0.5': territory.recentHistory![territory.recentHistory!.length - 1].visitOutcome === VisitOutcomeEnum.NOT_ANSWERED,
+                      '-mt-1.5': territory.recentHistory![territory.recentHistory!.length - 1].visitOutcome !== VisitOutcomeEnum.NOT_ANSWERED,
+                    }"
+                    class="territory-checkbox__last-visit-icon"
+                    [icon]="territory.recentHistory![territory.recentHistory!.length - 1].visitOutcome | visitOutcomeToIcon"
+                    [fillColor]="iconColor"
+                  />
+                }
+              </div>
             }
             <!-- VISIT STATUS BADGE -->
             @if (hasRecentRevisit) {
               <span
                 class="territory-alert-badge territory-alert-badge--revisit"
-                title="Essa pessoa foi marcada como revisita recentemente">
-                Revisita
-              </span>
+                title="Essa pessoa foi marcada como revisita recentemente"
+              >
+              Revisita
+            </span>
             }
             @if (hasRecentlyMoved) {
               <span class="territory-alert-badge territory-alert-badge--moved"
-                    title="Essa pessoa se mudou"
-              >
-                Mudou
-              </span>
+                    title="Essa pessoa se mudou"> Mudou </span>
             }
             @if (hasRecentlyAskedToStopVisiting) {
               <span
                 class="territory-alert-badge territory-alert-badge--stop-visiting"
                 title="Essa pessoa disse que não quer ser visitada por uma Testemunha de Jeová"
               >
-                Não quer visitas
-              </span>
+              Não quer visitas
+            </span>
             }
             @if (isBibleStudent) {
               <span
@@ -112,10 +130,11 @@ import { DatePipe, NgClass } from '@angular/common';
       <span class="territory-checkbox__indicator" [ngClass]="statusClass"></span>
     </label>
   `,
-  imports: [FormsModule, NgClass, IconComponent, DatePipe, IconButtonComponent],
+  imports: [FormsModule, NgClass, IconComponent, DatePipe, IconButtonComponent, VisitOutcomeToIconPipe],
 })
 export class TerritoryCheckboxComponent implements ControlValueAccessor, OnInit {
   protected readonly iconColor = grey400;
+  protected readonly VisitOutcomeEnum = VisitOutcomeEnum;
 
   buttonIconColor = primaryGreen;
   hasRecentRevisit = false;

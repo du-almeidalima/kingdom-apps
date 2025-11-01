@@ -5,7 +5,7 @@ import {
   IconButtonComponent,
   IconComponent,
   Icons,
-  red300,
+  red400,
 } from '@kingdom-apps/common-ui';
 import { Territory } from '../../../../../models/territory';
 import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territory-icon-mapper';
@@ -26,43 +26,43 @@ import { NgClass } from '@angular/common';
         class="territory-list-item__icon"
         [ngClass]="{ 'territory-list-item__icon--large': isIconLarge }"
         [fillColor]="iconColor"
-        [icon]="icon" />
+        [icon]="icon"
+      />
       <h3 class="territory-list-item__address">
         <span class="t-body2">{{ territory.address }}</span>
-        <span class="t-caption text-gray-600">{{ territory.city }}
-          @if(territory.peopleQuantity){
-            , {{ territory.peopleQuantity }} pessoa(s)
-          }</span>
+        <span class="t-caption text-gray-600"
+          >{{ territory.city }} @if(territory.peopleQuantity){ , {{ territory.peopleQuantity }} pessoa(s) }</span
+        >
       </h3>
       <!-- BADGES -->
       @if (territory.note) {
-        <div class="territory-list-item__notes">
-          <span class="t-caption">Notas: {{ territory.note }}</span>
-          @if (hasRecentlyMoved) {
-            <span class="territory-alert-badge territory-alert-badge--moved" title="Essa pessoa se mudou"> Mudou </span>
-          }
-          @if (hasRecentlyRevisit) {
-            <span
-              class="territory-alert-badge territory-alert-badge--revisit"
-              title="Essa pessoa foi marcada como revisita recentemente">
+      <div class="territory-list-item__notes">
+        <span class="t-caption">Notas: {{ territory.note }}</span>
+        @if (hasRecentlyMoved) {
+        <span class="territory-alert-badge territory-alert-badge--moved" title="Essa pessoa se mudou"> Mudou </span>
+        } @if (hasRecentlyRevisit) {
+        <span
+          class="territory-alert-badge territory-alert-badge--revisit"
+          title="Essa pessoa foi marcada como revisita recentemente"
+        >
           Revisita
         </span>
-          }
-          @if (hasRecentlyAskedToStopVisiting) {
-            <span
-              class="territory-alert-badge territory-alert-badge--stop-visiting"
-              title="Essa pessoa disse que não quer ser visitada por uma Testemunha de Jeová">
+        } @if (hasRecentlyAskedToStopVisiting) {
+        <span
+          class="territory-alert-badge territory-alert-badge--stop-visiting"
+          title="Essa pessoa disse que não quer ser visitada por uma Testemunha de Jeová"
+        >
           Não quer visitas
         </span>
-          }
-          @if (isBibleStudent) {
-            <span
-              class="territory-alert-badge territory-alert-badge--bible-student"
-              title="Essa pessoa é um estudante da Bíblia">
+        } @if (isBibleStudent) {
+        <span
+          class="territory-alert-badge territory-alert-badge--bible-student"
+          title="Essa pessoa é um estudante da Bíblia"
+        >
           Estudante
         </span>
-          }
-        </div>
+        }
+      </div>
       }
       <!-- RIGHT SIDE MENU -->
       <div class="territory-list-item__menu-button">
@@ -77,7 +77,8 @@ import { NgClass } from '@angular/common';
               class="menu__item"
               cdkMenuItem
               (cdkMenuItemTriggered)="edit.emit(territory)"
-              *libAuthorize="EDIT_ALLOWED">
+              *libAuthorize="EDIT_ALLOWED"
+            >
               <button lib-icon-button type="button">
                 <lib-icon [fillColor]="greyButtonColor" icon="pencil-lined"></lib-icon>
               </button>
@@ -93,40 +94,43 @@ import { NgClass } from '@angular/common';
             <ng-container *libAuthorize="EDIT_ALLOWED">
               <!-- SEPARATOR -->
               @if (hasAlerts) {
-                <hr class="menu__separator" />
+              <hr class="menu__separator" />
               }
               <!-- MOVED ALERT -->
               @if (hasRecentlyMoved) {
-                <li class="menu__item" cdkMenuItem (cdkMenuItemTriggered)="resolveMove.emit(territory)">
-                  <button lib-icon-button type="button">
-                    <lib-icon
-                      [fillColor]="greyButtonColor"
-                      [icon]="VisitOutcomeEnum.MOVED | visitOutcomeToIcon"></lib-icon>
-                  </button>
-                  <span>Mudou</span>
-                </li>
+              <li class="menu__item" cdkMenuItem (cdkMenuItemTriggered)="resolveMove.emit(territory)">
+                <button lib-icon-button type="button">
+                  <lib-icon
+                    [fillColor]="greyButtonColor"
+                    [icon]="VisitOutcomeEnum.MOVED | visitOutcomeToIcon"
+                  ></lib-icon>
+                </button>
+                <span>Mudou</span>
+              </li>
               }
               <!-- REVISIT ALERT -->
               @if (hasRecentlyRevisit) {
-                <li class="menu__item" cdkMenuItem (cdkMenuItemTriggered)="resolveRevisit.emit(territory)">
-                  <button lib-icon-button type="button">
-                    <lib-icon
-                      [fillColor]="greyButtonColor"
-                      [icon]="VisitOutcomeEnum.REVISIT | visitOutcomeToIcon"></lib-icon>
-                  </button>
-                  <span>Revisita</span>
-                </li>
+              <li class="menu__item" cdkMenuItem (cdkMenuItemTriggered)="resolveRevisit.emit(territory)">
+                <button lib-icon-button type="button">
+                  <lib-icon
+                    [fillColor]="greyButtonColor"
+                    [icon]="VisitOutcomeEnum.REVISIT | visitOutcomeToIcon"
+                  ></lib-icon>
+                </button>
+                <span>Revisita</span>
+              </li>
               }
               <!-- REVISIT ALERT -->
               @if (hasRecentlyAskedToStopVisiting) {
-                <li class="menu__item" cdkMenuItem (cdkMenuItemTriggered)="resolveStopVisiting.emit(territory)">
-                  <button lib-icon-button type="button">
-                    <lib-icon
-                      [fillColor]="greyButtonColor"
-                      [icon]="VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN | visitOutcomeToIcon"></lib-icon>
-                  </button>
-                  <span>Não Visitar</span>
-                </li>
+              <li class="menu__item" cdkMenuItem (cdkMenuItemTriggered)="resolveStopVisiting.emit(territory)">
+                <button lib-icon-button type="button">
+                  <lib-icon
+                    [fillColor]="greyButtonColor"
+                    [icon]="VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN | visitOutcomeToIcon"
+                  ></lib-icon>
+                </button>
+                <span>Não Visitar</span>
+              </li>
               }
             </ng-container>
             <!-- SEPARATOR -->
@@ -135,7 +139,8 @@ import { NgClass } from '@angular/common';
               class="menu__item"
               cdkMenuItem
               (cdkMenuItemTriggered)="remove.emit(territory.id)"
-              *libAuthorize="EDIT_ALLOWED">
+              *libAuthorize="EDIT_ALLOWED"
+            >
               <button lib-icon-button cdkMenuItem type="button">
                 <lib-icon [fillColor]="deleteButtonColor" icon="trash-can-lined"></lib-icon>
               </button>
@@ -164,7 +169,7 @@ export class TerritoryListItemComponent implements OnInit {
   protected readonly VisitOutcomeEnum = VisitOutcomeEnum;
 
   public greyButtonColor = grey400;
-  public deleteButtonColor = red300;
+  public deleteButtonColor = red400;
   public iconColor = grey400;
   public isIconLarge = false;
   public icon: Icons = 'generation-3';

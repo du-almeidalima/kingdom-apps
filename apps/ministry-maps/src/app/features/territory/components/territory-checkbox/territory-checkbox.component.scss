@@ -8,7 +8,7 @@
 
 .territory-checkbox {
   $border-size: 1px;
-  $accent: variables.$green-200;
+  $accent: variables.$green-400;
 
   display: flex;
 
@@ -97,9 +97,21 @@
     gap: .75rem;
   }
 
-  &__last-visit {
+  &__last-visit-container {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: .75rem;
+  }
+
+  &__last-visit-label {
     @extend .t-caption;
     color: variables.$grey-100;
+  }
+
+  &__last-visit-icon {
+    height: 1.25rem;
+    width: 1.25rem;
   }
 
   &__indicator {
