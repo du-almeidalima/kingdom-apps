@@ -33,11 +33,14 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
 
   /** Triggered by FireBase during Log-In and Log-Out events*/
   authStateChanged(): Observable<boolean> {
-    return authState(this.auth)
-      .pipe(map(firebaseUser => !!firebaseUser))
+    return authState(this.auth).pipe(map((firebaseUser) => !!firebaseUser));
   }
 
-  signInWithProvider(provider: FIREBASE_PROVIDERS, createUser = false, createUserConfig?: CreateUserConfig): Observable<User | void> {
+  signInWithProvider(
+    provider: FIREBASE_PROVIDERS,
+    createUser = false,
+    createUserConfig?: CreateUserConfig
+  ): Observable<User | void> {
     let authProviderInstance: GoogleAuthProvider | OAuthProvider;
 
     switch (provider) {
@@ -53,18 +56,20 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
 
     const providerRes = signInWithPopup(this.auth, authProviderInstance);
 
-    return from(providerRes).pipe(switchMap(providerUser => this.handleUserAuthentication(providerUser, createUser, createUserConfig)));
+    return from(providerRes).pipe(
+      switchMap((providerUser) => this.handleUserAuthentication(providerUser, createUser, createUserConfig))
+    );
   }
 
   /**
-   * Specific for initializing a User from Firebase Authentication
+   * Specific for initializing a User from Firebase Authentication.
    */
   getUserFromAuthentication() {
     return authState(this.auth).pipe(
       take(1),
-      switchMap(providerUser => {
+      switchMap((providerUser) => {
         if (providerUser) {
-          return this.userRepository.getById(providerUser.uid);
+          return this.userRepository.getByIdFromCache(providerUser.uid);
         }
 
         return of(undefined);
@@ -91,30 +96,35 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
    *
    * @returns the user from DB.
    */
-  private handleUserAuthentication({ user: providerUser }: UserCredential, createUser = false, createUserConfig?: CreateUserConfig): Observable<User | void> {
+  private handleUserAuthentication(
+    { user: providerUser }: UserCredential,
+    createUser = false,
+    createUserConfig?: CreateUserConfig
+  ): Observable<User | void> {
     return this.userRepository.getById(providerUser.uid).pipe(
       take(1),
-      switchMap(user => {
+      switchMap((user) => {
         if (user) {
           return of(user);
         }
 
         // This is a new user. If this is user is not supposed to be created, or it doesn't have the same email as
         // provided in the config, delete it.
-        const isConfigEmailDifferent = (createUserConfig?.email && providerUser.email?.toLowerCase() !== createUserConfig.email.toLowerCase());
+        const isConfigEmailDifferent =
+          createUserConfig?.email && providerUser.email?.toLowerCase() !== createUserConfig.email.toLowerCase();
 
         if (!createUser || isConfigEmailDifferent) {
           return from(providerUser.delete()).pipe(
-            map(_ => {
+            map((_) => {
               if (isConfigEmailDifferent) {
-                throw new Error(AuthErrorEnum.INVALID_EMAIL)
+                throw new Error(AuthErrorEnum.INVALID_EMAIL);
               }
             })
           );
         }
 
         if (!createUserConfig?.congregation) {
-          throw new Error(AuthErrorEnum.INVALID_CREATE_USER_DATA)
+          throw new Error(AuthErrorEnum.INVALID_CREATE_USER_DATA);
         }
 
         return this.userRepository.put({
@@ -123,9 +133,12 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
           name: providerUser.displayName ?? 'Unidentified',
           photoUrl: providerUser.photoURL ?? '',
           role: createUserConfig?.role ?? RoleEnum.PUBLISHER,
-          congregation: doc(this.firestore, `/congregations/${createUserConfig.congregation.id}`) as DocumentReference<Congregation, FirebaseCongregationModel>
+          congregation: doc(this.firestore, `/congregations/${createUserConfig.congregation.id}`) as DocumentReference<
+            Congregation,
+            FirebaseCongregationModel
+          >,
         });
-      }),
+      })
     );
   }
 }

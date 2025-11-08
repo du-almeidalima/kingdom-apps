@@ -3,13 +3,18 @@ import { CanActivateFn, Router } from '@angular/router';
 import { map } from 'rxjs';
 import { UserStateService } from '../../../../state/user.state.service';
 import { RoleEnum } from '../../../../../models/enums/role';
-import { FirebaseAuthDatasourceService } from '../../../../repositories/firebase/firebase-auth-datasource.service';
 import { inject } from '@angular/core';
+import { AuthService } from '../services/auth.service';
+import { User } from '../../../../../models/user';
 
-export const authGuard: CanActivateFn = route => {
+const canAccessRoute = (user: User, roles: string[]) => {
+  return user?.role === RoleEnum.APP_ADMIN || roles.includes(user?.role);
+};
+
+export const authGuard: CanActivateFn = (route) => {
   const router = inject(Router);
   const userState = inject(UserStateService);
-  const firebaseAuthDatasourceService = inject(FirebaseAuthDatasourceService);
+  const authService = inject(AuthService);
 
   const currentUser = userState.currentUser;
   const { roles } = route.data;
@@ -29,11 +34,11 @@ export const authGuard: CanActivateFn = route => {
       return router.createUrlTree(['home']);
     }
 
-    return currentUser?.role === RoleEnum.APP_ADMIN || roles.includes(currentUser?.role);
+    return canAccessRoute(currentUser, roles);
   }
 
-  return firebaseAuthDatasourceService.getUserFromAuthentication().pipe(
-    map(user => {
+  return authService.resolveUserFromAuthProvider().pipe(
+    map((user) => {
       // User hasn't authenticated yet to this application
       if (!user) {
         return router.createUrlTree(['login']);
@@ -43,7 +48,7 @@ export const authGuard: CanActivateFn = route => {
         return router.createUrlTree(['welcome']);
       }
 
-      return user?.role === RoleEnum.APP_ADMIN || roles.includes(user?.role);
+      return canAccessRoute(user, roles);
     })
   );
 };
