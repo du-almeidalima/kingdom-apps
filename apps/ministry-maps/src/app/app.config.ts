@@ -1,4 +1,4 @@
-import { ApplicationConfig, isDevMode, provideAppInitializer, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, isDevMode, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { connectAuthEmulator, getAuth, provideAuth } from '@angular/fire/auth';
@@ -13,7 +13,6 @@ import { connectFunctionsEmulator, getFunctions, provideFunctions } from '@angul
 import { getRemoteConfig, provideRemoteConfig } from '@angular/fire/remote-config';
 import { provideServiceWorker } from '@angular/service-worker';
 import { environment } from '../environments/environment';
-import { appLoginInitializer } from './app-login-initializer';
 import { APP_ROUTES } from './app-routes';
 import { REPOSITORIES_PROVIDERS } from './repositories/repositories-providers';
 
@@ -32,7 +31,7 @@ export const appConfig: ApplicationConfig = {
       }
 
       if (environment.env === 'development' && !environment.useCloud) {
-        connectAuthEmulator(auth, 'http://localhost:9099');
+        connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
       }
 
       return auth;
@@ -70,7 +69,6 @@ export const appConfig: ApplicationConfig = {
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',
-    }),
-    provideAppInitializer(() => appLoginInitializer()),
+    })
   ],
 };

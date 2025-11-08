@@ -1,5 +1,14 @@
 <kingdom-apps-header />
 
-<router-outlet />
+@if (authService.isAuthenticating()) {
+  <main class="flex justify-center items-center" style="height: 100dvh;">
+    <!-- Spinner while the application is loading (margin-top to offset header) -->
+    <div class="spinner" style="margin-top: -94px">
+      <div class="spinner__inner-block"></div>
+    </div>
+  </main>
+} @else {
+  <router-outlet />
+}
 
 <lib-portal-anchor />

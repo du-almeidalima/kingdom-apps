@@ -8,6 +8,7 @@ import {
   DocumentReference,
   Firestore,
   getDoc,
+  getDocFromCache,
   getDocs,
   orderBy,
   query,
@@ -36,14 +37,18 @@ export class FirebaseCongregationDatasourceService implements CongregationReposi
 
   /**
    * Resolves a congregation reference by id or by reference
-   * @param congregation
+   * @param congregationRef The Congregation {@link DocumentReference}
+   * @param options Options for resolving the congregation reference
    * @private
    */
   static resolveUserCongregationReference(
-    congregation: DocumentReference<Congregation, FirebaseCongregationModel | DocumentData>
+    congregationRef: DocumentReference<Congregation, FirebaseCongregationModel | DocumentData>,
+    options?: { useCache: boolean }
   ): Observable<Congregation | undefined> {
-    return from(getDoc(congregation)).pipe(
-      map(congregationDocSnapshot => {
+    const congregationDoc = options?.useCache ? getDocFromCache(congregationRef) : getDoc(congregationRef);
+
+    return from(congregationDoc).pipe(
+      map((congregationDocSnapshot) => {
         if (!congregationDocSnapshot.exists()) {
           return undefined;
         }
@@ -68,8 +73,8 @@ export class FirebaseCongregationDatasourceService implements CongregationReposi
   getCongregations(): Observable<Pick<Congregation, 'name' | 'id'>[]> {
     const q = query(this.congregationCollection, orderBy('name', 'asc'));
     return from(getDocs(q)).pipe(
-      map(snapshot => {
-        return snapshot.docs.map(d => ({
+      map((snapshot) => {
+        return snapshot.docs.map((d) => ({
           name: d.data().name,
           id: d.data().id,
         }));

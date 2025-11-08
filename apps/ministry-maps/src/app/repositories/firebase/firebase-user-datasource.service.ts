@@ -7,7 +7,7 @@ import {
   doc,
   DocumentReference,
   Firestore,
-  getDoc,
+  getDocFromCache,
   getDocFromServer,
   query,
   setDoc,
@@ -58,62 +58,71 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
 
   getById(id: string): Observable<User | undefined> {
     const userReference = doc(this.userCollection, id);
-    // Since the User isn't something that changes frequently, fetching from cache to increase Performance
-    const cachedUserDoc = from(getDoc(userReference));
 
-    const userSnapshot = cachedUserDoc.pipe(
-      catchError(err => {
-        console.warn(`Cache for User not found: `, err);
-        return of(null);
-      }),
-      switchMap(userDocSnapshot => {
-        // Cache user found, returning it
-        if (userDocSnapshot) {
-          return of(userDocSnapshot);
-        }
-
-        // Fetching from server
-        return from(getDocFromServer(userReference));
-      })
+    return from(getDocFromServer(userReference)).pipe(
+      map((userDocSnapshot) => userDocSnapshot.data()),
+      switchMap((user) => this.resolveUser(user, { useCache: false }))
     );
+  }
 
-    return userSnapshot.pipe(
-      map(userDocSnapshot => {
+  /**
+   * Gets user from cache first, falling back to server if not cached.
+   */
+  getByIdFromCache(id: string): Observable<User | undefined> {
+    const userReference = doc(this.userCollection, id);
+
+    // Try to get from cache only
+    const cachedUserDoc = from(getDocFromCache(userReference));
+
+    return cachedUserDoc.pipe(
+      map((userDocSnapshot) => {
+        // If it came from a server, still return it
         return userDocSnapshot.data();
       }),
-      switchMap(user => {
-        const EMPTY_CONGREGATION: Congregation = {
-          id: '',
-          name: '',
-          locatedOn: '',
-          cities: [],
-          settings: environment.congregationSettingsDefaultValues
-        };
+      switchMap((user) => this.resolveUser(user, { useCache: true })),
+      catchError((err) => {
+        console.warn(`Error getting user from cache: `, err);
+        // Fall back to the regular getById which tries cache then server
+        return this.getById(id);
+      })
+    );
+  }
 
-        if (!user) {
-          return of(undefined);
+  private resolveUser(user: User | undefined, options?: { useCache: boolean }): Observable<User | undefined> {
+    const EMPTY_CONGREGATION: Congregation = {
+      id: '',
+      name: '',
+      locatedOn: '',
+      cities: [],
+      settings: environment.congregationSettingsDefaultValues,
+    };
+
+    if (!user) {
+      return of(undefined);
+    }
+
+    if (!user?.congregation) {
+      const userWithNoCongregation: User = { ...user, congregation: EMPTY_CONGREGATION };
+      return of(userWithNoCongregation);
+    }
+
+    // Resolving FireBase Congregation Reference
+    const congregationDocRef = this.congregationDatasourceService.createDocumentRef(user.congregation.id);
+    const congregation$ = FirebaseCongregationDatasourceService.resolveUserCongregationReference(
+      congregationDocRef,
+      options
+    );
+
+    return congregation$.pipe(
+      map((congregation) => {
+        if (!congregation) {
+          this.loggerService.error(`Could not find Congregation ID: ${user.congregation?.id} for User ID: ${user.id}`);
+          // User with congregation deleted
+          return { ...user, congregation: EMPTY_CONGREGATION };
         }
 
-        if (!user?.congregation) {
-          const userWithNoCongregation: User = { ...user, congregation: EMPTY_CONGREGATION };
-
-          return of(userWithNoCongregation);
-        }
-
-        // Resolving FireBase Congregation Reference
-        const congregationDocRef = this.congregationDatasourceService.createDocumentRef(user.congregation.id);
-        return FirebaseCongregationDatasourceService.resolveUserCongregationReference(congregationDocRef).pipe(
-          map(congregation => {
-            if (!congregation) {
-              this.loggerService.error(`Could not find Congregation ID: ${user.congregation?.id} for User ID: ${user.id}`);
-              // User with congregation deleted
-              return { ...user, congregation: EMPTY_CONGREGATION };
-            }
-
-            // Overriding congregation reference with congregation data
-            return { ...user, congregation: { ...congregation } };
-          })
-        );
+        // Overriding congregation reference with congregation data
+        return { ...user, congregation: { ...congregation } };
       })
     );
   }
@@ -176,12 +185,14 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
     // This is a little nested. However, it's to avoid performing multiple calls to FireStore to resolve the congregation ref
     // Once the Users have been fetched, we resolve the congregationRef used as a query param only once and map to all users.
     return from(collectionData(q)).pipe(
-      switchMap(users => {
+      switchMap((users) => {
         return FirebaseCongregationDatasourceService.resolveUserCongregationReference(congregationDocRef).pipe(
-          map(congregation => {
-            return users.map(u => {
+          map((congregation) => {
+            return users.map((u) => {
               if (!congregation) {
-                this.loggerService.error(`Could not find Congregation ID: ${congregationId} when fetching congregation People`);
+                this.loggerService.error(
+                  `Could not find Congregation ID: ${congregationId} when fetching congregation People`
+                );
               }
 
               u.congregation = congregation;

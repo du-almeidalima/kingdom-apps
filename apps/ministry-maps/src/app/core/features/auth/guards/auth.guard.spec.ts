@@ -3,20 +3,20 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { authGuard } from './auth.guard';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/router';
 import { MockProvider, ngMocks } from 'ng-mocks';
-import { FirebaseAuthDatasourceService } from '../../../../repositories/firebase/firebase-auth-datasource.service';
 import { APP_ROUTES, FeatureRoutesEnum } from '../../../../app-routes';
 import { UserStateService } from '../../../../state/user.state.service';
 import { organizerUserStateServiceMock, userMockBuilder } from '../../../../../test/mocks';
 import { RoleEnum } from '../../../../../models/enums/role';
 import { Observable, of } from 'rxjs';
 import { AuthRoutesEnum } from '../models/enums/auth-routes';
+import { AuthService } from '../services/auth.service';
 
 describe('AuthGuard', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         RouterTestingModule,
-        MockProvider(FirebaseAuthDatasourceService),
+        MockProvider(AuthService),
         MockProvider(UserStateService, organizerUserStateServiceMock),
       ],
     });
@@ -80,12 +80,12 @@ describe('AuthGuard', () => {
     } as never;
     const state: RouterStateSnapshot = { url: `/${FeatureRoutesEnum.TERRITORIES}` } as never;
     const userStateService = ngMocks.get(UserStateService);
-    const firebaseAuthDatasourceService = ngMocks.get(FirebaseAuthDatasourceService);
+    const authService = ngMocks.get(AuthService);
     const router = ngMocks.get(Router);
 
     // Stub user unauthenticated
     userStateService.setUser(null);
-    firebaseAuthDatasourceService.getUserFromAuthentication = jest.fn().mockReturnValue(of(undefined));
+    authService.resolveUserFromAuthProvider = jest.fn().mockReturnValue(of(undefined));
 
     const result = TestBed.runInInjectionContext(() => authGuard(route, state));
 
@@ -111,12 +111,12 @@ describe('AuthGuard', () => {
     } as never;
     const state: RouterStateSnapshot = { url: `` } as never;
     const userStateService = ngMocks.get(UserStateService);
-    const firebaseAuthDatasourceService = ngMocks.get(FirebaseAuthDatasourceService);
+    const authService = ngMocks.get(AuthService);
     const router = ngMocks.get(Router);
 
     // Stub user unauthenticated
     userStateService.setUser(null);
-    firebaseAuthDatasourceService.getUserFromAuthentication = jest
+    authService.resolveUserFromAuthProvider = jest
       .fn()
       .mockReturnValue(of(userMockBuilder({ role: RoleEnum.PUBLISHER })));
 
@@ -147,11 +147,11 @@ describe('AuthGuard', () => {
         } as never;
         const state: RouterStateSnapshot = { url: `` } as never;
         const userStateService = ngMocks.get(UserStateService);
-        const firebaseAuthDatasourceService = ngMocks.get(FirebaseAuthDatasourceService);
+        const authService = ngMocks.get(AuthService);
 
         // Stub user unauthenticated
         userStateService.setUser(null);
-        firebaseAuthDatasourceService.getUserFromAuthentication = jest
+        authService.resolveUserFromAuthProvider = jest
           .fn()
           .mockReturnValue(of(userMockBuilder({ role: role })));
 
