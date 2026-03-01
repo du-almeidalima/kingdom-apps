@@ -2,9 +2,10 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { UserStateService } from '../../../../state/user.state.service';
 import { finalize, map, Observable, of, shareReplay } from 'rxjs';
-import { Territory } from '../../../../../models/territory';
+import { Territory, TerritoryIcon } from '../../../../../models/territory';
 import {
   AuthorizeDirective,
+  disabledLight,
   FloatingActionButtonComponent,
   green200,
   grey400,
@@ -12,6 +13,9 @@ import {
   IconComponent,
   SearchInputComponent,
   SelectComponent,
+  SortFilterComponent,
+  SortFilterConfig,
+  SortFilterValue,
   ToasterService,
   white200,
 } from '@kingdom-apps/common-ui';
@@ -67,23 +71,70 @@ import { TerritoryCsvExporterBO } from '../../bo/territory-csv-exporter/territor
     FloatingActionButtonComponent,
     AuthorizeDirective,
     CdkMenuModule,
+    SortFilterComponent,
   ],
   providers: [TerritoryBO, TerritoryCsvExporterBO],
 })
 export class TerritoriesPageComponent implements OnInit {
   private territories$: Observable<Territory[]> = of([]);
 
-  public readonly green200 = green200;
-  public readonly white200 = white200;
-  public readonly greyButtonColor = grey400;
-  public readonly RoleEnum = RoleEnum;
-  public readonly ALL_OPTION = ALL_OPTION;
+  protected readonly green200 = green200;
+  protected readonly white200 = white200;
+  protected readonly greyButtonColor = grey400;
+  protected readonly disabledLight = disabledLight;
+  protected readonly RoleEnum = RoleEnum;
+  protected readonly ALL_OPTION = ALL_OPTION;
+  protected readonly TerritoriesOrderBy = TerritoriesOrderBy;
 
   public cities: string[] = [];
   public selectedCity = ALL_OPTION;
   public searchTerm?: string | null;
+  public searchFilters: TerritoryFilterSettings['filters'] = {};
+  public sortBy = TerritoriesOrderBy.SAVED_INDEX;
   public isLoading = false;
   public filteredTerritories$: Observable<Territory[]> = of([]);
+
+  public sortFilterConfig: SortFilterConfig = {
+    sortConfigs: {
+      initial: TerritoriesOrderBy.SAVED_INDEX,
+      options: [
+        { value: TerritoriesOrderBy.SAVED_INDEX, label: 'Ordem de Cadastro' },
+        { value: TerritoriesOrderBy.LAST_VISIT, label: 'Última Visita' },
+      ],
+    },
+    filterConfigs: {
+      initial: {
+        isBibleStudent: false,
+      },
+      options: {
+        isBibleStudent: {
+          title: 'Estudantes da Bíblia',
+          controlName: 'isBibleStudent',
+          filterType: 'toggle',
+          secondaryText: 'Filtrar territórios com estudantes da Bíblia',
+        },
+        hasMoved: {
+          title: 'Territórios que Mudaram',
+          controlName: 'hasMoved',
+          filterType: 'toggle',
+          secondaryText: 'Incluir territórios que mudaram de endereço',
+        },
+        icon: {
+          title: 'Ícone',
+          controlName: 'icon',
+          filterType: 'select',
+          placeholder: 'Todos',
+          options: [
+            { value: TerritoryIcon.MAN, label: 'Homem' },
+            { value: TerritoryIcon.WOMAN, label: 'Mulher' },
+            { value: TerritoryIcon.CHILD, label: 'Criança' },
+            { value: TerritoryIcon.COUPLE, label: 'Casal' },
+            { value: TerritoryIcon.OTHER, label: 'Outro' },
+          ],
+        },
+      },
+    },
+  };
 
   @ViewChild(SearchInputComponent)
   searchInputComponent?: SearchInputComponent;
@@ -126,7 +177,12 @@ export class TerritoriesPageComponent implements OnInit {
     const searchSettings: TerritoryFilterSettings = {
       searchTerm: this.searchTerm,
       city: this.selectedCity,
-      orderBy: TerritoriesOrderBy.SAVED_INDEX,
+      orderBy: this.sortBy as TerritoriesOrderBy,
+      filters: {
+        isBibleStudent: this.searchFilters?.isBibleStudent,
+        hasMoved: this.searchFilters?.hasMoved,
+        icon: this.searchFilters?.icon,
+      },
     };
 
     this.filteredTerritories$ = territoriesFilterPipe(this.territories$, searchSettings);
@@ -134,6 +190,12 @@ export class TerritoriesPageComponent implements OnInit {
 
   handleTerritorySearchTermChange(searchTerm: string | null) {
     this.searchTerm = searchTerm;
+    this.filterTerritories();
+  }
+
+  handleSortFilterChange(value: SortFilterValue) {
+    this.searchFilters = value.filters ?? {};
+    this.sortBy = value.sort as TerritoriesOrderBy;
     this.filterTerritories();
   }
 

@@ -1,5 +1,6 @@
 import { map, Observable } from 'rxjs';
-import { Territory } from '../../../models/territory';
+import { Territory, TerritoryIcon } from '../../../models/territory';
+import { TerritoryAlertsBO } from '../../features/territory/bo/territory-alerts/territory-alerts.bo';
 
 export const ALL_OPTION = 'ALL';
 
@@ -15,6 +16,11 @@ export type TerritoryFilterSettings = {
   searchTerm?: string | null;
   city: string;
   orderBy?: TerritoriesOrderBy;
+  filters?: {
+    isBibleStudent?: boolean;
+    hasMoved?: boolean;
+    icon?: TerritoryIcon;
+  };
 };
 
 /**
@@ -63,26 +69,34 @@ export const territoriesFilterPipe = (
 
   return territory$.pipe(
     map(tArr => {
+      const filtered = tArr.filter(t => {
+        if (!cityFilter(t, city)) {
+          return false;
+        }
 
-      if (!searchTerm) {
-        return tArr
-          .filter((t) => cityFilter(t, city))
-          .sort(sortFn);
-      }
+        if (filterSettings.filters?.isBibleStudent && !TerritoryAlertsBO.isBibleStudent(t)) {
+          return false;
+        }
 
-      const searchWords = searchTerm.split(' ');
+        if (filterSettings.filters?.hasMoved && !TerritoryAlertsBO.hasRecentlyMoved(t)) {
+          return false;
+        }
 
-      return tArr
-        .filter(t => {
-          if (!cityFilter(t, city)) {
-            return false;
-          }
+        if (filterSettings.filters?.icon && t.icon !== filterSettings.filters?.icon) {
+          return false;
+        }
 
-          const territorySearchableText = (t.address + t.note).toLowerCase();
+        if (!searchTerm) {
+          return true;
+        }
 
-          return searchWords.every(word => territorySearchableText.includes(word.toLowerCase()));
-        })
-        .sort(sortFn);
+        const searchWords = searchTerm.split(' ');
+        const territorySearchableText = (t.address + t.note).toLowerCase();
+
+        return searchWords.every(word => territorySearchableText.includes(word.toLowerCase()));
+      });
+
+      return filtered.sort(sortFn);
     })
   );
 };

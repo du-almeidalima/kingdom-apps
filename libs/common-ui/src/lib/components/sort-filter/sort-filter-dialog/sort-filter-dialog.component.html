@@ -1,0 +1,64 @@
+<lib-dialog title="Ordenar e Filtrar">
+  <form [formGroup]="form" (ngSubmit)="handleApply()">
+    <!-- SORT -->
+    @if (data.sortConfigs?.options?.length) {
+      <section class="mb-6">
+        <h3 class="t-headline3 mb-4">Ordenar</h3>
+        <lib-form-field>
+          <label lib-label for="sort-select">Ordenar por</label>
+          <select lib-select id="sort-select" formControlName="sort">
+            @for (option of data.sortConfigs!.options; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </lib-form-field>
+      </section>
+    }
+
+    <!-- FILTERS -->
+    @if (data.filterConfigs && filterConfigEntries().length > 0) {
+      <section>
+        <h3 class="t-headline3 mb-4">Filtrar</h3>
+        <div formGroupName="filters" class="space-y-4">
+          @for (entry of filterConfigEntries(); track entry[0]) {
+            @switch (entry[1].filterType) {
+              @case ('select') {
+                <lib-select-filter
+                  [title]="entry[1].title"
+                  [controlName]="entry[1].controlName"
+                  [placeholder]="entry[1].placeholder || ''"
+                  [options]="entry[1].options"
+                  [formControlName]="entry[0]"
+                />
+              }
+              @case ('toggle') {
+                <lib-toggle-filter
+                  [title]="entry[1].title"
+                  [controlName]="entry[1].controlName"
+                  [icon]="entry[1].icon"
+                  [secondaryText]="entry[1].secondaryText || ''"
+                  [formControlName]="entry[0]"
+                />
+              }
+              @case ('text') {
+                <lib-text-filter
+                  [title]="entry[1].title"
+                  [controlName]="entry[1].controlName"
+                  [placeholder]="entry[1].placeholder || ''"
+                  [formControlName]="entry[0]"
+                />
+              }
+            }
+          }
+        </div>
+      </section>
+    }
+  </form>
+
+  <lib-dialog-footer>
+    <div class="flex flex-nowrap justify-end gap-4">
+      <button lib-button (click)="handleCancel()">Cancelar</button>
+      <button lib-button btnType="primary" (click)="handleApply()">Aplicar</button>
+    </div>
+  </lib-dialog-footer>
+</lib-dialog>

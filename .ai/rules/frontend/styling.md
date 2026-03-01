@@ -566,7 +566,7 @@ Prepare for dark mode support:
 ## Checklist
 
 Before committing styles:
-- ✅ Tailwind utilities used where possible
+- ✅ Tailwind utilities are used where possible
 - ✅ SCSS follows 7-1 architecture
 - ✅ Using `@use` instead of `@import`
 - ✅ Nesting max 3 levels deep
