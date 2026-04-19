@@ -1,8 +1,9 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
+import { TERRITORY_SORT_FILTER_CONFIG } from '../../config/territory-filter.config';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { UserStateService } from '../../../../state/user.state.service';
 import { finalize, map, Observable, of, shareReplay } from 'rxjs';
-import { Territory, TerritoryIcon } from '../../../../../models/territory';
+import { Territory } from '../../../../../models/territory';
 import {
   AuthorizeDirective,
   disabledLight,
@@ -14,7 +15,6 @@ import {
   SearchInputComponent,
   SelectComponent,
   SortFilterComponent,
-  SortFilterConfig,
   SortFilterValue,
   ToasterService,
   white200,
@@ -89,52 +89,12 @@ export class TerritoriesPageComponent implements OnInit {
   public cities: string[] = [];
   public selectedCity = ALL_OPTION;
   public searchTerm?: string | null;
-  public searchFilters: TerritoryFilterSettings['filters'] = {};
+  public searchFilters: TerritoryFilterSettings['filters'] = TERRITORY_SORT_FILTER_CONFIG.filterConfigs?.initial;
   public sortBy = TerritoriesOrderBy.SAVED_INDEX;
   public isLoading = false;
   public filteredTerritories$: Observable<Territory[]> = of([]);
 
-  public sortFilterConfig: SortFilterConfig = {
-    sortConfigs: {
-      initial: TerritoriesOrderBy.SAVED_INDEX,
-      options: [
-        { value: TerritoriesOrderBy.SAVED_INDEX, label: 'Ordem de Cadastro' },
-        { value: TerritoriesOrderBy.LAST_VISIT, label: 'Última Visita' },
-      ],
-    },
-    filterConfigs: {
-      initial: {
-        isBibleStudent: false,
-      },
-      options: {
-        isBibleStudent: {
-          title: 'Estudantes da Bíblia',
-          controlName: 'isBibleStudent',
-          filterType: 'toggle',
-          secondaryText: 'Filtrar territórios com estudantes da Bíblia',
-        },
-        hasMoved: {
-          title: 'Territórios que Mudaram',
-          controlName: 'hasMoved',
-          filterType: 'toggle',
-          secondaryText: 'Incluir territórios que mudaram de endereço',
-        },
-        icon: {
-          title: 'Ícone',
-          controlName: 'icon',
-          filterType: 'select',
-          placeholder: 'Todos',
-          options: [
-            { value: TerritoryIcon.MAN, label: 'Homem' },
-            { value: TerritoryIcon.WOMAN, label: 'Mulher' },
-            { value: TerritoryIcon.CHILD, label: 'Criança' },
-            { value: TerritoryIcon.COUPLE, label: 'Casal' },
-            { value: TerritoryIcon.OTHER, label: 'Outro' },
-          ],
-        },
-      },
-    },
-  };
+  public sortFilterConfig = TERRITORY_SORT_FILTER_CONFIG;
 
   @ViewChild(SearchInputComponent)
   searchInputComponent?: SearchInputComponent;
@@ -179,8 +139,8 @@ export class TerritoriesPageComponent implements OnInit {
       city: this.selectedCity,
       orderBy: this.sortBy as TerritoriesOrderBy,
       filters: {
-        isBibleStudent: this.searchFilters?.isBibleStudent,
-        hasMoved: this.searchFilters?.hasMoved,
+        includeBibleStudent: this.searchFilters?.includeBibleStudent,
+        includeMoved: this.searchFilters?.includeMoved,
         icon: this.searchFilters?.icon,
       },
     };
@@ -244,9 +204,9 @@ export class TerritoriesPageComponent implements OnInit {
           return t;
         })
       );
-    } catch (e) {
+    } catch {
       alert(
-        `Uma excessão ocorreu quando os territórios [${event.previousIndex} e ${event.previousIndex}] foram movidos!`
+        `Uma excessão ocorreu quando os territórios [${event.previousIndex} e ${event.currentIndex}] foram movidos!`
       );
     }
   }

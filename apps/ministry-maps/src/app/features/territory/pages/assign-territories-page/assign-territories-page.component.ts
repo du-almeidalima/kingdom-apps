@@ -9,10 +9,13 @@ import {
   IconComponent,
   SearchInputComponent,
   SelectComponent,
+  SortFilterComponent,
+  SortFilterValue,
   white200,
 } from '@kingdom-apps/common-ui';
 
 import { Territory } from '../../../../../models/territory';
+import { TERRITORY_SORT_FILTER_CONFIG } from '../../config/territory-filter.config';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { UserStateService } from '../../../../state/user.state.service';
 import { FeatureRoutesEnum } from '../../../../app-routes';
@@ -44,6 +47,7 @@ import { AsyncPipe } from '@angular/common';
     AsyncPipe,
     FloatingActionButtonComponent,
     IconComponent,
+    SortFilterComponent,
   ],
 })
 export class AssignTerritoriesPageComponent implements OnInit {
@@ -52,16 +56,18 @@ export class AssignTerritoriesPageComponent implements OnInit {
   public readonly ALL_OPTION = ALL_OPTION;
   public readonly green200 = green200;
   public readonly white200 = white200;
-  public readonly TerritoriesOrderBy = TerritoriesOrderBy;
 
   isCreatingAssignment = false;
   cities: string[] = [];
   selectedCity = '';
   searchTerm?: string | null;
+  searchFilters: TerritoryFilterSettings['filters'] = TERRITORY_SORT_FILTER_CONFIG.filterConfigs?.initial;
   orderBy: TerritoriesOrderBy = TerritoriesOrderBy.SAVED_INDEX;
   filteredTerritories$: Observable<Territory[]> = of([]);
   selectedTerritoriesModel = new Set<string>();
   assignedTerritories = new Set<string>();
+
+  public sortFilterConfig = TERRITORY_SORT_FILTER_CONFIG;
 
   @ViewChild(SearchInputComponent)
   searchInputComponent!: SearchInputComponent;
@@ -108,7 +114,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
           this.isCreatingAssignment = false;
         })
       )
-      .subscribe(designation => {
+      .subscribe((designation) => {
         this.shareDesignation(designation.id);
       });
   }
@@ -126,6 +132,11 @@ export class AssignTerritoriesPageComponent implements OnInit {
       searchTerm: this.searchTerm,
       city: this.selectedCity,
       orderBy: this.orderBy,
+      filters: {
+        includeBibleStudent: this.searchFilters?.includeBibleStudent,
+        includeMoved: this.searchFilters?.includeMoved,
+        icon: this.searchFilters?.icon,
+      },
     };
 
     this.filteredTerritories$ = territoriesFilterPipe(this.territories$, searchSettings);
@@ -136,8 +147,9 @@ export class AssignTerritoriesPageComponent implements OnInit {
     this.filterTerritories();
   }
 
-  handleTerritoryOrderByChange(orderBy: TerritoriesOrderBy) {
-    this.orderBy = orderBy;
+  handleSortFilterChange(value: SortFilterValue) {
+    this.searchFilters = value.filters ?? {};
+    this.orderBy = (value.sort as TerritoriesOrderBy) ?? TerritoriesOrderBy.SAVED_INDEX;
     this.filterTerritories();
   }
 
@@ -156,10 +168,14 @@ export class AssignTerritoriesPageComponent implements OnInit {
     // Adding the value here regardless of the alert because we need to tell Angular that something has changed
     // In order for the TerritoryCheckBox component to render correctly
     // Otherwise, even by not adding this, the TerritoryCheckBox would display as selected
-    value ? this.selectedTerritoriesModel.add(territoryId) : this.selectedTerritoriesModel.delete(territoryId);
+    if (value) {
+      this.selectedTerritoriesModel.add(territoryId);
+    } else {
+      this.selectedTerritoriesModel.delete(territoryId);
+    }
 
     if (value && importantAlert) {
-      this.openConfirmAssignmentDialog(importantAlert).subscribe(result => {
+      this.openConfirmAssignmentDialog(importantAlert).subscribe((result) => {
         if (!result) {
           this.selectedTerritoriesModel.delete(territoryId);
         }

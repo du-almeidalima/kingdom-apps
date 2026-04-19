@@ -17,8 +17,8 @@ export type TerritoryFilterSettings = {
   city: string;
   orderBy?: TerritoriesOrderBy;
   filters?: {
-    isBibleStudent?: boolean;
-    hasMoved?: boolean;
+    includeBibleStudent?: boolean;
+    includeMoved?: boolean;
     icon?: TerritoryIcon;
   };
 };
@@ -74,11 +74,11 @@ export const territoriesFilterPipe = (
           return false;
         }
 
-        if (filterSettings.filters?.isBibleStudent && !TerritoryAlertsBO.isBibleStudent(t)) {
+        if (!filterSettings.filters?.includeBibleStudent && TerritoryAlertsBO.isBibleStudent(t)) {
           return false;
         }
 
-        if (filterSettings.filters?.hasMoved && !TerritoryAlertsBO.hasRecentlyMoved(t)) {
+        if (!filterSettings.filters?.includeMoved && TerritoryAlertsBO.hasRecentlyMoved(t)) {
           return false;
         }
 

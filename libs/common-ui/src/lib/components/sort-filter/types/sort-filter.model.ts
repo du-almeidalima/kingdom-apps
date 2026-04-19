@@ -1,10 +1,5 @@
 import { Icons } from '../../icon/icon-type';
 
-export interface SortOption {
-  value: string;
-  label: string;
-}
-
 export type FilterType = 'select' | 'toggle' | 'text';
 
 export interface BaseFilterConfig {
@@ -32,17 +27,39 @@ export interface TextFilterConfig extends BaseFilterConfig {
 
 export type FilterConfig = SelectFilterConfig | ToggleFilterConfig | TextFilterConfig;
 
-export interface SortFilterConfig {
+/**
+ * Represents a single option for sorting.
+ */
+export type SortOption = {
+  value: string;
+  label: string;
+};
+
+/**
+ * Represents a single option for filtering.
+ */
+export type FilterOption = Record<string, FilterConfig>;
+
+/**
+ * Represents the configuration building the Sort and Filter with its options and initial state.
+ */
+export type SortFilterConfig<
+  TFilterOptions extends FilterOption = FilterOption,
+  TSortOptions extends SortOption[] = SortOption[]
+> = {
   sortConfigs?: {
     initial: SortOption['value'];
-    options: SortOption[];
+    options: TSortOptions;
   };
   filterConfigs?: {
-    initial?: Record<string, any>;
-    options: Record<string, FilterConfig>;
+    initial: Partial<{[key in keyof TFilterOptions]: any}> | undefined;
+    options: TFilterOptions;
   };
-}
+};
 
+/**
+ * Represents the state of the sort and filter.
+ */
 export interface SortFilterValue {
   sort?: string;
   filters?: Record<string, any>;
