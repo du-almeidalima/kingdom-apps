@@ -1,14 +1,18 @@
 {
+  "projects": {
+    "default": "du-ministry-maps"
+  },
   "targets": {
     "du-ministry-maps": {
       "hosting": {
-        "ministry-maps": [
+        "prod": [
           "du-ministry-maps"
+        ],
+        "beta": [
+          "du-ministry-maps-beta"
         ]
       }
     }
   },
-  "projects": {
-    "default": "du-ministry-maps"
-  }
+  "etags": {}
 }
