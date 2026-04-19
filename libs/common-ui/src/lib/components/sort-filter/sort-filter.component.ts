@@ -10,7 +10,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Dialog } from '@angular/cdk/dialog';
 import { IconComponent } from '../icon/icon.component';
 import { SortFilterConfig, SortFilterValue } from './types/sort-filter.model';
@@ -20,7 +20,7 @@ import { grey400 } from '../../styles/abstract/variables';
 @Component({
   selector: 'lib-sort-filter',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [IconComponent],
   styleUrls: ['./sort-filter.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `

@@ -1,18 +1,22 @@
 import { ChangeDetectionStrategy, Component, forwardRef, input, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { FormFieldComponent } from '../../form-field';
-import { LabelComponent } from '../../form-field';
-import { SelectComponent } from '../../form-field';
+
+import { FormFieldComponent, LabelComponent, SelectComponent } from '../../form-field';
 
 @Component({
   selector: 'lib-select-filter',
   standalone: true,
-  imports: [CommonModule, FormFieldComponent, LabelComponent, SelectComponent],
+  imports: [FormFieldComponent, LabelComponent, SelectComponent],
   template: `
     <lib-form-field>
       <label lib-label [for]="controlName()">{{ title() }}</label>
-      <select lib-select [id]="controlName()" [value]="value()" (change)="handleChange($event)" [disabled]="isDisabled()">
+      <select
+        lib-select
+        [id]="controlName()"
+        [value]="value()"
+        (change)="handleChange($event)"
+        [disabled]="isDisabled()"
+      >
         <option value="">{{ placeholder() || 'Selecione' }}</option>
         @for (option of options(); track option.value) {
         <option [value]="option.value">{{ option.label }}</option>

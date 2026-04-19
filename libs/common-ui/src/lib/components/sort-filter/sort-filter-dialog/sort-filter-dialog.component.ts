@@ -1,12 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { DialogComponent, DialogFooterComponent } from '../../dialog';
 import { ButtonComponent } from '../../button/button.component';
-import { SelectComponent } from '../../form-field';
-import { FormFieldComponent } from '../../form-field';
-import { LabelComponent } from '../../form-field';
+import { FormFieldComponent, LabelComponent, SelectComponent } from '../../form-field';
 import { FilterConfig, SortFilterConfig, SortFilterValue } from '../types/sort-filter.model';
 import { SelectFilterComponent } from '../filters/select-filter.component';
 import { ToggleFilterComponent } from '../filters/toggle-filter.component';
@@ -16,7 +14,6 @@ import { TextFilterComponent } from '../filters/text-filter.component';
   selector: 'lib-sort-filter-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     DialogComponent,
     DialogFooterComponent,

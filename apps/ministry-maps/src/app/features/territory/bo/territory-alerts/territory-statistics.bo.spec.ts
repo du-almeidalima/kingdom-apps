@@ -95,13 +95,13 @@ describe('TerritoryStatisticsBO', () => {
       // First call should call remote repo
       const firstCallResponse = await lastValueFrom(territoryStatisticsBO.getTerritories(undefined));
       expect(territoryRepository.getAllByCongregation).toHaveBeenCalled();
-      expect(firstCallResponse).toEqual(expect.objectContaining(mockTerritories));
+      expect(firstCallResponse).toEqual(mockTerritories);
       territoryRepositoryMock.mockClear();
 
       // Second call should use cache
       const secondCallResponse = await lastValueFrom(territoryStatisticsBO.getTerritories(undefined));
       expect(territoryRepository.getAllByCongregation).not.toHaveBeenCalled();
-      expect(secondCallResponse).toEqual(expect.objectContaining(mockTerritories));
+      expect(secondCallResponse).toEqual(mockTerritories);
     });
   });
 

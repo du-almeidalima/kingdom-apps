@@ -14,8 +14,8 @@ jest.mock('@angular/fire/firestore', () => ({
 describe('LoggerService', () => {
   let service: LoggerService;
   let metadata: object = { file: 'test.ts' };
-  const locationUrl = 'http://localhost-test.com';
-  const userAgent = 'Test User Agent';
+  const locationUrl = window.location.href;
+  const userAgent = navigator.userAgent;
 
   // Setup for all tests
   beforeEach(() => {
@@ -28,15 +28,6 @@ describe('LoggerService', () => {
     // Mock Implementations
     (addDoc as jest.Mock).mockResolvedValue({ id: 123 });
     (collection as jest.Mock).mockReturnValue({});
-
-    // Spy on the original window and navigator
-    Object.defineProperty(window, 'location', {
-      value: { href: locationUrl },
-    });
-
-    Object.defineProperty(navigator, 'userAgent', {
-      value: userAgent,
-    });
   });
 
   afterEach(() => {

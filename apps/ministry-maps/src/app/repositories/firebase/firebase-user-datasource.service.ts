@@ -37,11 +37,11 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
   private readonly deleteUserFn: (userId: string) => Observable<void>;
   private readonly loggerService = inject(LoggerService);
 
-  constructor(
-    private readonly firestore: Firestore,
-    private readonly functions: Functions,
-    private readonly congregationDatasourceService: FirebaseCongregationDatasourceService
-  ) {
+  private readonly firestore = inject(Firestore);
+  private readonly functions = inject(Functions);
+  private readonly congregationDatasourceService = inject(FirebaseCongregationDatasourceService);
+
+  constructor() {
     // USERS COLLECTION
     this.userCollection = collection(
       this.firestore,
@@ -184,7 +184,7 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
 
     // This is a little nested. However, it's to avoid performing multiple calls to FireStore to resolve the congregation ref
     // Once the Users have been fetched, we resolve the congregationRef used as a query param only once and map to all users.
-    return from(collectionData(q)).pipe(
+    return from(collectionData<User>(q)).pipe(
       switchMap((users) => {
         return FirebaseCongregationDatasourceService.resolveUserCongregationReference(congregationDocRef).pipe(
           map((congregation) => {

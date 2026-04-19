@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import {
   ButtonComponent,
-  CopyTextBlockComponent, DialogCloseDirective,
+  CopyTextBlockComponent,
+  DialogCloseDirective,
   DialogComponent,
-  DialogFooterComponent, IconComponent,
+  DialogFooterComponent,
+  IconComponent,
 } from '@kingdom-apps/common-ui';
 import { createSendWhatsAppLink } from '../../../../../shared/utils/share-utils';
 import { isMobileDevice } from '../../../../../shared/utils/user-agent';
@@ -15,7 +17,6 @@ import { isMobileDevice } from '../../../../../shared/utils/user-agent';
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: `./invite-create-dialog-copy-link.component.scss`,
   imports: [
-    CommonModule,
     CopyTextBlockComponent,
     DialogComponent,
     DialogFooterComponent,

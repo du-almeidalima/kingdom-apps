@@ -1,14 +1,12 @@
 import { ChangeDetectionStrategy, Component, forwardRef, input, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { FormFieldComponent } from '../../form-field';
-import { LabelComponent } from '../../form-field';
-import { InputComponent } from '../../form-field';
+
+import { FormFieldComponent, InputComponent, LabelComponent } from '../../form-field';
 
 @Component({
   selector: 'lib-text-filter',
   standalone: true,
-  imports: [CommonModule, FormFieldComponent, LabelComponent, InputComponent],
+  imports: [FormFieldComponent, LabelComponent, InputComponent],
   template: `
     <lib-form-field>
       <label lib-label [for]="controlName()">{{ title() }}</label>

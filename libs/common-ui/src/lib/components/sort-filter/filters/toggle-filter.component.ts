@@ -1,15 +1,14 @@
 import { ChangeDetectionStrategy, Component, forwardRef, input, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { FormFieldComponent } from '../../form-field';
-import { LabelComponent } from '../../form-field';
+
+import { FormFieldComponent, LabelComponent } from '../../form-field';
 import { IconComponent } from '../../icon/icon.component';
 import { Icons } from '../../icon/icon-type';
 
 @Component({
   selector: 'lib-toggle-filter',
   standalone: true,
-  imports: [CommonModule, FormFieldComponent, LabelComponent, IconComponent],
+  imports: [FormFieldComponent, LabelComponent, IconComponent],
   template: `
     <lib-form-field>
       <label [for]="controlName()" class="toggle-container" [class.toggle-container--disabled]="isDisabled()">

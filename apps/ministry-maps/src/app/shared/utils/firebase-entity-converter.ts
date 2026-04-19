@@ -1,9 +1,10 @@
-import { FirestoreDataConverter } from '@firebase/firestore';
 import {
   DocumentData,
   DocumentReference,
+  FirestoreDataConverter,
   QueryDocumentSnapshot,
-  SnapshotOptions
+  SnapshotOptions,
+  WithFieldValue,
 } from '@angular/fire/firestore';
 
 type CustomConverterFunction<T> = (data: any) => T | Partial<T>;
@@ -40,25 +41,25 @@ export const firebaseEntityConverterFactory = <T extends object>(
   customConverter?: CustomConverterFunction<T>
 ): FirestoreDataConverter<T> => {
   return {
-    toFirestore(modelObject: T): DocumentData {
-      removeUndefined(modelObject);
-      return modelObject;
+    toFirestore(modelObject: WithFieldValue<T>): DocumentData {
+      removeUndefined(modelObject as object);
+      return modelObject as DocumentData;
     },
-    fromFirestore(snapshot: QueryDocumentSnapshot<T>, options?: SnapshotOptions): T {
-      const data = snapshot.data(options);
+    fromFirestore(snapshot: QueryDocumentSnapshot, options?: SnapshotOptions): T {
+      const data = snapshot.data(options) as T;
 
       if (customConverter) {
         return {
           ...data,
           id: snapshot.id,
           ...customConverter(data),
-        };
+        } as T;
       }
 
       return {
         ...data,
         id: snapshot.id,
-      };
+      } as T;
     },
   };
 };
