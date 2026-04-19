@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, OnInit, Renderer2 } fro
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
-  selector: 'label[lib-label]',
+  selector: 'label[lib-label],span[lib-label]',
   template: `<ng-content></ng-content>`,
   styleUrls: ['./label.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

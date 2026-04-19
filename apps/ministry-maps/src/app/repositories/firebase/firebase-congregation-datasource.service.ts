@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   collection,
   CollectionReference,
@@ -27,8 +27,9 @@ import { FirebaseDatasource } from './firebase-datasource';
 export class FirebaseCongregationDatasourceService implements CongregationRepository, FirebaseDatasource<Congregation> {
   static readonly COLLECTION_NAME = 'congregations';
   private readonly congregationCollection: CollectionReference<Congregation>;
+  private readonly firestore = inject(Firestore);
 
-  constructor(private readonly firestore: Firestore) {
+  constructor() {
     this.congregationCollection = collection(
       this.firestore,
       FirebaseCongregationDatasourceService.COLLECTION_NAME

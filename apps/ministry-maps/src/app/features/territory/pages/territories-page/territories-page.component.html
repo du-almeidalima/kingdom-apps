@@ -33,7 +33,16 @@
     }
     <option [value]='ALL_OPTION'>Todas</option>
   </select>
-  <lib-search-input class='mt-5' (searched)='handleTerritorySearchTermChange($event)' />
+
+  <!-- Search, Filters, and Sort -->
+  <div class="flex mt-5 gap-5">
+    <lib-search-input class="flex-1" (searched)='handleTerritorySearchTermChange($event)' />
+    <lib-sort-filter
+      storeFilterState
+      [config]="sortFilterConfig"
+      (changed)="handleSortFilterChange($event)"
+    />
+  </div>
 
   @if (filteredTerritories$ | async; as territories) {
     <section class='territories-list mt-8 pb-56'
@@ -44,7 +53,7 @@
         <kingdom-apps-territory-list-item
           class='territory-list-item mb-3'
           cdkDrag
-          [cdkDragDisabled]='selectedCity === ALL_OPTION'
+          [cdkDragDisabled]='selectedCity === ALL_OPTION || sortBy !== TerritoriesOrderBy.SAVED_INDEX'
           [territory]='territory'
           (edit)='handleOpenManageTerritoryDialog($event)'
           (history)='handleOpenHistory($event)'
@@ -54,8 +63,18 @@
           (resolveStopVisiting)="handleResolveStopVisitingAlert($event)"
         >
           @if (selectedCity !== ALL_OPTION) {
-            <button lib-icon-button type='button' cdkDragHandle style='cursor: grab'>
-              <lib-icon icon='cursor-23' [fillColor]='greyButtonColor' />
+            <button
+              lib-icon-button
+              cdkDragHandle
+              [cdkDragHandleDisabled]="sortBy !== TerritoriesOrderBy.SAVED_INDEX"
+              type='button'
+              style='cursor: grab'
+              [title]="sortBy === TerritoriesOrderBy.SAVED_INDEX ? '' : 'Para ordernar manualmente, use a ordenação Ordem de Cadastro'"
+            >
+              <lib-icon
+                icon='cursor-23'
+                [fillColor]='sortBy === TerritoriesOrderBy.SAVED_INDEX ? greyButtonColor : disabledLight'
+              />
             </button>
           }
         </kingdom-apps-territory-list-item>

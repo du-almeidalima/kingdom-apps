@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { debounceTime, distinctUntilChanged, Subscription } from 'rxjs';
 
 import { grey400 } from '../../styles/abstract/variables';
@@ -11,23 +11,25 @@ import { IconComponent } from '../icon/icon.component';
   styleUrls: ['./search-input.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, IconComponent],
+  imports: [ReactiveFormsModule, IconComponent],
   template: `
-    <div class='search-input'>
+    <div class="search-input">
       <input
-        class='search-input__input'
-        type='search'
-        placeholder='Pesquisar Território'
-        aria-labelledby='search-icon'
-        [formControl]='searchControl'
-        #searchControlTemplate />
+        class="search-input__input"
+        type="search"
+        placeholder="Pesquisar Território"
+        aria-labelledby="search-icon"
+        [formControl]="searchControl"
+        #searchControlTemplate
+      />
       <lib-icon
-        icon='magnifier-lined'
-        class='search-input__icon'
-        id='search-icon'
-        aria-label='Pesquisar Território'
-        (click)='searchControlTemplate.focus()'
-        [fillColor]='black' />
+        icon="magnifier-lined"
+        class="search-input__icon"
+        id="search-icon"
+        aria-label="Pesquisar Território"
+        (click)="searchControlTemplate.focus()"
+        [fillColor]="black"
+      />
     </div>
   `,
 })
@@ -42,7 +44,7 @@ export class SearchInputComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.searchControlSubscription = this.searchControl.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged())
-      .subscribe(search => {
+      .subscribe((search) => {
         this.searched.emit(search);
       });
   }

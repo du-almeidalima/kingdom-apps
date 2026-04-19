@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { SectionComponent } from '../../../shared/components/section/section.component';
 import { UserStateService } from '../../../state/user.state.service';
 import { SelectComponent } from '@kingdom-apps/common-ui';
@@ -14,7 +14,7 @@ import { finalize } from 'rxjs';
   selector: 'kingdom-apps-change-congregation',
   styleUrl: './change-congregation.component.scss',
   standalone: true,
-  imports: [CommonModule, SectionComponent, FormsModule, SelectComponent],
+  imports: [SectionComponent, FormsModule, SelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <kingdom-apps-section title="Administrador" [isLoading]="isLoading()">
@@ -25,10 +25,12 @@ import { finalize } from 'rxjs';
         name="Cidade"
         [ngModel]="user()?.congregation?.id"
         (ngModelChange)="handleChangeCongregation($event)">
-        <option [value]="congregation.id" *ngFor="let congregation of congregations()">{{ congregation.name }}</option>
+        @for (congregation of congregations(); track congregation) {
+          <option [value]="congregation.id">{{ congregation.name }}</option>
+        }
       </select>
     </kingdom-apps-section>
-  `,
+    `,
 })
 export class ChangeCongregationComponent implements OnInit {
   userState = inject(UserStateService);

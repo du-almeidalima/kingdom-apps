@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   Auth,
   authState,
@@ -25,11 +25,9 @@ export enum FIREBASE_PROVIDERS {
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseAuthDatasourceService implements AuthRepository {
-  constructor(
-    private readonly auth: Auth,
-    private readonly userRepository: FirebaseUserDatasourceService,
-    private readonly firestore: Firestore
-  ) {}
+  private readonly firestore = inject(Firestore);
+  private readonly auth = inject(Auth);
+  private readonly userRepository = inject(FirebaseUserDatasourceService);
 
   /** Triggered by FireBase during Log-In and Log-Out events*/
   authStateChanged(): Observable<boolean> {

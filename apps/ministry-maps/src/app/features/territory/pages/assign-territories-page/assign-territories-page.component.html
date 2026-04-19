@@ -11,18 +11,13 @@
     }
     <option [value]='ALL_OPTION'>Todas</option>
   </select>
-  <!-- Filters -->
-  <div class='flex flex-row gap-3 mt-3'>
-    <lib-search-input class='flex-1' (searched)='handleTerritorySearchTermChange($event)' />
-    <select
-      lib-select
-      class='w-44'
-      name='Ordem'
-      [ngModel]='orderBy'
-      (ngModelChange)='handleTerritoryOrderByChange($event)'>
-      <option [value]='TerritoriesOrderBy.SAVED_INDEX'>Cadastro</option>
-      <option [value]='TerritoriesOrderBy.LAST_VISIT'>Última Visita</option>
-    </select>
+  <!-- Search, Filters, and Sort -->
+  <div class="flex mt-3 gap-3">
+    <lib-search-input class="flex-1" (searched)='handleTerritorySearchTermChange($event)' />
+    <lib-sort-filter
+      [config]="sortFilterConfig"
+      (changed)="handleSortFilterChange($event)"
+    />
   </div>
 
   <!-- Territories -->

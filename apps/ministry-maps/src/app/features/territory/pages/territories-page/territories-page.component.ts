@@ -1,10 +1,12 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
+import { TERRITORY_SORT_FILTER_CONFIG } from '../../config/territory-filter.config';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { UserStateService } from '../../../../state/user.state.service';
 import { finalize, map, Observable, of, shareReplay } from 'rxjs';
 import { Territory } from '../../../../../models/territory';
 import {
   AuthorizeDirective,
+  disabledLight,
   FloatingActionButtonComponent,
   green200,
   grey400,
@@ -12,6 +14,8 @@ import {
   IconComponent,
   SearchInputComponent,
   SelectComponent,
+  SortFilterComponent,
+  SortFilterValue,
   ToasterService,
   white200,
 } from '@kingdom-apps/common-ui';
@@ -67,23 +71,30 @@ import { TerritoryCsvExporterBO } from '../../bo/territory-csv-exporter/territor
     FloatingActionButtonComponent,
     AuthorizeDirective,
     CdkMenuModule,
+    SortFilterComponent,
   ],
   providers: [TerritoryBO, TerritoryCsvExporterBO],
 })
 export class TerritoriesPageComponent implements OnInit {
   private territories$: Observable<Territory[]> = of([]);
 
-  public readonly green200 = green200;
-  public readonly white200 = white200;
-  public readonly greyButtonColor = grey400;
-  public readonly RoleEnum = RoleEnum;
-  public readonly ALL_OPTION = ALL_OPTION;
+  protected readonly green200 = green200;
+  protected readonly white200 = white200;
+  protected readonly greyButtonColor = grey400;
+  protected readonly disabledLight = disabledLight;
+  protected readonly RoleEnum = RoleEnum;
+  protected readonly ALL_OPTION = ALL_OPTION;
+  protected readonly TerritoriesOrderBy = TerritoriesOrderBy;
 
   public cities: string[] = [];
   public selectedCity = ALL_OPTION;
   public searchTerm?: string | null;
+  public searchFilters: TerritoryFilterSettings['filters'] = TERRITORY_SORT_FILTER_CONFIG.filterConfigs?.initial;
+  public sortBy = TerritoriesOrderBy.SAVED_INDEX;
   public isLoading = false;
   public filteredTerritories$: Observable<Territory[]> = of([]);
+
+  public sortFilterConfig = TERRITORY_SORT_FILTER_CONFIG;
 
   @ViewChild(SearchInputComponent)
   searchInputComponent?: SearchInputComponent;
@@ -126,7 +137,12 @@ export class TerritoriesPageComponent implements OnInit {
     const searchSettings: TerritoryFilterSettings = {
       searchTerm: this.searchTerm,
       city: this.selectedCity,
-      orderBy: TerritoriesOrderBy.SAVED_INDEX,
+      orderBy: this.sortBy as TerritoriesOrderBy,
+      filters: {
+        includeBibleStudent: this.searchFilters?.includeBibleStudent,
+        includeMoved: this.searchFilters?.includeMoved,
+        icon: this.searchFilters?.icon,
+      },
     };
 
     this.filteredTerritories$ = territoriesFilterPipe(this.territories$, searchSettings);
@@ -134,6 +150,12 @@ export class TerritoriesPageComponent implements OnInit {
 
   handleTerritorySearchTermChange(searchTerm: string | null) {
     this.searchTerm = searchTerm;
+    this.filterTerritories();
+  }
+
+  handleSortFilterChange(value: SortFilterValue) {
+    this.searchFilters = value.filters ?? {};
+    this.sortBy = value.sort as TerritoriesOrderBy;
     this.filterTerritories();
   }
 
@@ -182,9 +204,9 @@ export class TerritoriesPageComponent implements OnInit {
           return t;
         })
       );
-    } catch (e) {
+    } catch {
       alert(
-        `Uma excessão ocorreu quando os territórios [${event.previousIndex} e ${event.previousIndex}] foram movidos!`
+        `Uma excessão ocorreu quando os territórios [${event.previousIndex} e ${event.currentIndex}] foram movidos!`
       );
     }
   }

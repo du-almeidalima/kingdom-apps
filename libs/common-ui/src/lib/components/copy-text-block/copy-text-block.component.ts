@@ -8,7 +8,7 @@ import {
   Output,
   signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Clipboard } from '@angular/cdk/clipboard';
 import { IconComponent } from '../icon/icon.component';
 import { green300, grey400 } from '../../styles/abstract/variables';
@@ -16,7 +16,7 @@ import { green300, grey400 } from '../../styles/abstract/variables';
 @Component({
   selector: 'lib-copy-text-block',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, IconComponent],
+  imports: [IconComponent],
   standalone: true,
   styleUrl: './copy-text-block.component.scss',
   template: `
@@ -25,14 +25,14 @@ import { green300, grey400 } from '../../styles/abstract/variables';
       <span class="copy-text-block__content">{{ text() }}</span>
       <button class="copy-text-block__button" (click)="handleCopyClick()">
         @if (isTextCopied()) {
-          <lib-icon icon="check-mark-circle-lined" class="h-8 w-8" [fillColor]="green300" />
+        <lib-icon icon="check-mark-circle-lined" class="h-8 w-8" [fillColor]="green300" />
         } @else {
-          <lib-icon icon="copy-lined" class="h-8 w-8" [fillColor]="grey400" />
+        <lib-icon icon="copy-lined" class="h-8 w-8" [fillColor]="grey400" />
         }
       </button>
     </div>
     @if (helpText()) {
-      <p class="t-caption mt-2">{{ helpText() }}</p>
+    <p class="t-caption mt-2">{{ helpText() }}</p>
     }
   `,
 })

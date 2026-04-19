@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 
@@ -20,11 +20,10 @@ export type TCreateLinkForm = FormGroup<{ role: FormControl<RoleEnum>; email: Fo
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './invite-create-dialog.component.scss',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     InviteCreateDialogCopyLinkComponent,
-    InviteCreateDialogFormComponent,
-  ],
+    InviteCreateDialogFormComponent
+],
   template: `
     @if (createdLink()) {
     <kingdom-apps-invite-create-dialog-copy-link [inviteLink]="createdLink()" [title]="title()" />

@@ -1,8 +1,8 @@
-import { inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 
 import { ToastConfig } from './toaster.models';
 import { ToasterContainerComponent } from './toaster-container.component';
-import { PortalService, AttachedComponent } from '../portal/portal.service';
+import { AttachedComponent, PortalService } from '../portal/portal.service';
 
 /**
  * Simple service to show toast notifications.
@@ -12,10 +12,7 @@ import { PortalService, AttachedComponent } from '../portal/portal.service';
  */
 @Injectable({ providedIn: 'root' })
 export class ToasterService {
-  /**
-   * Service used to attach the toaster container to the app.
-   */
-  private portal = inject(PortalService);
+  constructor(private readonly portal: PortalService) {}
 
   /**
    * The attached container component reference. It is created on demand.

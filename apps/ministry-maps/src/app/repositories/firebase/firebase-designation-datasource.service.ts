@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   collection,
   CollectionReference,
@@ -12,9 +12,7 @@ import { from, Observable, switchMap, take } from 'rxjs';
 
 import { Designation } from '../../../models/designation';
 import { FirebaseDesignationModel } from '../../../models/firebase/firebase-designation-territory-model';
-import {
-  firebaseEntityConverterFactory,
-} from '../../shared/utils/firebase-entity-converter';
+import { firebaseEntityConverterFactory } from '../../shared/utils/firebase-entity-converter';
 import { DesignationRepository } from '../designation.repository';
 import { FirebaseDatasource } from './firebase-datasource';
 
@@ -23,10 +21,10 @@ const convertHistoryDateFirebaseTimestampToDate = (data: FirebaseDesignationMode
     ...data,
     createdAt: data.createdAt && data.createdAt.toDate(),
     expiresAt: data.expiresAt && data.expiresAt.toDate(),
-    territories: data.territories.map(t => ({
+    territories: data.territories.map((t) => ({
       ...t,
       lastVisit: t.lastVisit && t.lastVisit.toDate(),
-      history: t.history.map(h => ({
+      history: t.history.map((h) => ({
         ...h,
         date: h.date.toDate(),
       })),
@@ -41,7 +39,9 @@ export class FirebaseDesignationDatasourceService implements DesignationReposito
   private readonly collectionName = 'designations';
   private readonly designationCollection: CollectionReference<Designation>;
 
-  constructor(private readonly firestore: Firestore) {
+  private readonly firestore = inject(Firestore);
+
+  constructor() {
     this.designationCollection = collection(this.firestore, this.collectionName).withConverter<Designation>(
       firebaseEntityConverterFactory(convertHistoryDateFirebaseTimestampToDate)
     );

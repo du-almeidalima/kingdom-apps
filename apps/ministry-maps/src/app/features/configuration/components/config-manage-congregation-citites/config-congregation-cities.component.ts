@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 
 import { ToasterService } from '@kingdom-apps/common-ui';
@@ -17,93 +17,108 @@ interface CityItem {
 
 @Component({
   selector: 'kingdom-apps-config-congregation-cities',
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   template: `
     <div class="max-w-4xl mx-auto p-6">
       <div class="mb-8">
         <h2 class="text-3xl font-semibold text-gray-900 mb-2">Manage Congregation Cities</h2>
-        <p class="text-gray-600" *ngIf="congregation">{{ congregation.name }}</p>
+        @if (congregation) {
+          <p class="text-gray-600">{{ congregation.name }}</p>
+        }
       </div>
-
+    
       <!-- Cities List -->
-      <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-6 overflow-hidden" *ngIf="congregation">
-        <div
-          class="px-6 py-4 border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors"
-          *ngFor="let city of cities; let i = index"
-        >
-          <div class="flex justify-between items-center gap-4" *ngIf="!city.isEditing">
-            <span class="flex-1 text-gray-900 font-medium">{{ city.currentName }}</span>
-            <div class="flex gap-2">
-              <button
-                class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-                (click)="editCity(city)"
-                [disabled]="hasEditingCities"
+      @if (congregation) {
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-6 overflow-hidden">
+          @for (city of cities; track city; let i = $index) {
+            <div
+              class="px-6 py-4 border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors"
               >
-                Edit
-              </button>
-              <button
-                class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-                (click)="deleteCity(i)"
-                [disabled]="hasEditingCities"
-              >
-                Delete
-              </button>
+              @if (!city.isEditing) {
+                <div class="flex justify-between items-center gap-4">
+                  <span class="flex-1 text-gray-900 font-medium">{{ city.currentName }}</span>
+                  <div class="flex gap-2">
+                    <button
+                      class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                      (click)="editCity(city)"
+                      [disabled]="hasEditingCities"
+                      >
+                      Edit
+                    </button>
+                    <button
+                      class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                      (click)="deleteCity(i)"
+                      [disabled]="hasEditingCities"
+                      >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              }
+              @if (city.isEditing) {
+                <div class="flex justify-between items-center gap-4 -mx-6 -my-4 px-6 py-4 bg-gray-50">
+                  <input
+                    type="text"
+                    [(ngModel)]="city.currentName"
+                    class="flex-1 px-3 py-2 border-2 rounded-md focus:outline-none focus:ring-0 transition-colors"
+                    [class.border-blue-500]="!city.isNew"
+                    [class.focus:border-blue-600]="!city.isNew"
+                    [class.border-green-500]="city.isNew"
+                    [class.focus:border-green-600]="city.isNew"
+                    placeholder="Enter city name"
+                    />
+                  <div class="flex gap-2">
+                    <button
+                      class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors text-sm font-medium"
+                      (click)="cancelEdit(city, i)"
+                      >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              }
             </div>
-          </div>
-
-          <div class="flex justify-between items-center gap-4 -mx-6 -my-4 px-6 py-4 bg-gray-50" *ngIf="city.isEditing">
-            <input
-              type="text"
-              [(ngModel)]="city.currentName"
-              class="flex-1 px-3 py-2 border-2 rounded-md focus:outline-none focus:ring-0 transition-colors"
-              [class.border-blue-500]="!city.isNew"
-              [class.focus:border-blue-600]="!city.isNew"
-              [class.border-green-500]="city.isNew"
-              [class.focus:border-green-600]="city.isNew"
-              placeholder="Enter city name"
-            />
-            <div class="flex gap-2">
-              <button
-                class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors text-sm font-medium"
-                (click)="cancelEdit(city, i)"
-              >
-                Cancel
-              </button>
+          }
+          @if (cities.length === 0) {
+            <div class="px-6 py-12 text-center text-gray-500">
+              <p>No cities configured yet. Add your first city below.</p>
             </div>
-          </div>
+          }
         </div>
-
-        <div class="px-6 py-12 text-center text-gray-500" *ngIf="cities.length === 0">
-          <p>No cities configured yet. Add your first city below.</p>
-        </div>
-      </div>
-
+      }
+    
       <!-- Action Buttons -->
       <div class="flex gap-4">
         <button
           class="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
           (click)="addCity()"
           [disabled]="hasEditingCities || isLoading"
-        >
+          >
           + Add City
         </button>
-
+    
         <button
           class="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
           (click)="saveChanges()"
           [disabled]="!hasChanges() || isLoading"
-        >
-          <span *ngIf="!isLoading">Save Changes</span>
-          <span *ngIf="isLoading">Saving...</span>
+          >
+          @if (!isLoading) {
+            <span>Save Changes</span>
+          }
+          @if (isLoading) {
+            <span>Saving...</span>
+          }
         </button>
       </div>
-
+    
       <!-- No Congregation State -->
-      <div class="p-12 text-center bg-red-50 border border-red-200 rounded-lg text-red-800" *ngIf="!congregation">
-        <p class="text-lg">No congregation found. Please ensure you are logged in.</p>
-      </div>
+      @if (!congregation) {
+        <div class="p-12 text-center bg-red-50 border border-red-200 rounded-lg text-red-800">
+          <p class="text-lg">No congregation found. Please ensure you are logged in.</p>
+        </div>
+      }
     </div>
-  `,
+    `,
 })
 export class ConfigCongregationCitiesComponent implements OnInit {
   private configurationBO = inject(ConfigurationBO);

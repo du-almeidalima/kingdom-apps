@@ -29,10 +29,10 @@ export class FirebaseInvitationLinkDataSourceService
   private readonly invitationLinkCollection: CollectionReference<InvitationLink>;
   private readonly loggerService = inject(LoggerService);
 
-  constructor(
-    private readonly firestore: Firestore,
-    private readonly congregationDatasourceService: FirebaseCongregationDatasourceService
-  ) {
+  private readonly firestore = inject(Firestore);
+  private readonly congregationDatasourceService = inject(FirebaseCongregationDatasourceService);
+
+  constructor() {
     // USERS COLLECTION
     this.invitationLinkCollection = collection(
       this.firestore,
@@ -51,7 +51,7 @@ export class FirebaseInvitationLinkDataSourceService
     const invitationLinkReference = doc(this.invitationLinkCollection, `${id}`);
 
     return from(getDoc(invitationLinkReference)).pipe(
-      switchMap(invitationLinkSnapshot => {
+      switchMap((invitationLinkSnapshot) => {
         if (!invitationLinkSnapshot?.exists()) {
           return of(undefined);
         }
@@ -63,16 +63,18 @@ export class FirebaseInvitationLinkDataSourceService
           name: '',
           locatedOn: '',
           cities: [],
-          settings: environment.congregationSettingsDefaultValues
+          settings: environment.congregationSettingsDefaultValues,
         };
 
         // Resolving FireBase Congregation Reference
         const congregationDocRef = this.congregationDatasourceService.createDocumentRef(invitationLink.congregation.id);
 
         return FirebaseCongregationDatasourceService.resolveUserCongregationReference(congregationDocRef).pipe(
-          map(congregation => {
+          map((congregation) => {
             if (!congregation) {
-              this.loggerService.error(`Could not find Congregation ID: ${invitationLink.congregation?.id} for Invitation Link ID: ${invitationLink.id}`);
+              this.loggerService.error(
+                `Could not find Congregation ID: ${invitationLink.congregation?.id} for Invitation Link ID: ${invitationLink.id}`
+              );
               // User with congregation deleted
               return { ...invitationLink, congregation: EMPTY_CONGREGATION };
             }

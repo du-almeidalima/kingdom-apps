@@ -1,0 +1,44 @@
+@use '../../styles/abstract/variables' as var;
+
+:host {
+  display: inline-block;
+}
+
+.sort-filter {
+  &__button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var.$light-grey-100;
+    background-color: var.$form-control-background-color;
+    height: var.$control-height;
+    width: var.$control-height;
+
+    anchor-name: --sort-filter-button;
+   }
+
+
+  &__badge {
+    position: absolute;
+    top: anchor(--sort-filter-button top);
+    left: anchor(--sort-filter-button left);
+    transform: translate(-25%, -50%);
+
+    min-width: 1.5rem;
+    height: 1.5rem;
+    padding: .5rem;
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var.$green-500;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+
+    color: white;
+    font-size: .85rem;
+    font-weight: 600;
+    pointer-events: none;
+  }
+}

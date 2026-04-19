@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   collection,
   collectionData,
@@ -16,7 +16,7 @@ import {
   runTransaction,
   setDoc,
   updateDoc,
-  where,
+  where
 } from '@angular/fire/firestore';
 import { combineLatest, EMPTY, forkJoin, from, map, Observable, of, switchMap } from 'rxjs';
 
@@ -25,8 +25,8 @@ import { TerritoryRepository, TerritoryRepositoryQueryOptions } from '../territo
 import { Territory } from '../../../models/territory';
 import { TerritoryVisitHistory } from '../../../models/territory-visit-history';
 import {
-  FirebaseTerritoryVisitHistoryModel,
   FirebaseTerritoryModel,
+  FirebaseTerritoryVisitHistoryModel
 } from '../../../models/firebase/firebase-territory-model';
 import { FirebaseDatasource } from './firebase-datasource';
 
@@ -60,7 +60,9 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
   private readonly historySubCollectionName = 'history';
   private readonly territoriesCollection: CollectionReference<Territory>;
 
-  constructor(private readonly firestore: Firestore) {
+  private readonly firestore = inject(Firestore);
+
+  constructor() {
     this.territoriesCollection = collection(
       this.firestore,
       FirebaseTerritoryDatasourceService.COLLECTION_NAME
@@ -74,43 +76,41 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
   getAllByCongregation(congregationId: string, options?: TerritoryRepositoryQueryOptions): Observable<Territory[]> {
     const q = query(this.territoriesCollection, where('congregationId', '==', congregationId));
 
-    return from(collectionData(q))
-      .pipe(
-        // Resolve Territory History
-        switchMap(territoriesSnapshot => {
-          if (!options?.getHistory) {
-            return of(territoriesSnapshot);
-          }
+    return from(collectionData<Territory>(q)).pipe(
+      // Resolve Territory History
+      switchMap((territoriesSnapshot) => {
+        if (!options?.getHistory) {
+          return of(territoriesSnapshot);
+        }
 
-          // Looping through each territory and resolving the history sub collection documents
-          const territories$ = territoriesSnapshot.map(territory => {
+        // Looping through each territory and resolving the history sub collection documents
+        const territories$ = territoriesSnapshot.map((territory) => {
+          const path = `${FirebaseTerritoryDatasourceService.COLLECTION_NAME}/${territory.id}/${this.historySubCollectionName}`;
+          const territoryVisitHistoryCollection = collection(this.firestore, path).withConverter<TerritoryVisitHistory>(
+            firebaseEntityConverterFactory(convertTerritoryHistoryFirebaseTimestampsToDate)
+          );
 
-            const path = `${FirebaseTerritoryDatasourceService.COLLECTION_NAME}/${territory.id}/${this.historySubCollectionName}`;
-            const territoryVisitHistoryCollection = collection(this.firestore, path).withConverter<TerritoryVisitHistory>(
-              firebaseEntityConverterFactory(convertTerritoryHistoryFirebaseTimestampsToDate)
-            );
+          return from(getDocs(territoryVisitHistoryCollection)).pipe(
+            map((territoryVisitHistorySnapshots) => {
+              return {
+                ...territory,
+                history: territoryVisitHistorySnapshots.docs.map((visitHistorySnapshot) => visitHistorySnapshot.data()),
+              };
+            })
+          );
+        });
 
-            return from(getDocs(territoryVisitHistoryCollection)).pipe(
-              map(territoryVisitHistorySnapshots => {
-                return {
-                  ...territory,
-                  history: territoryVisitHistorySnapshots.docs.map(visitHistorySnapshot => visitHistorySnapshot.data()),
-                };
-              })
-            );
-          });
-
-          // Combining all territoriesObservables into one array
-          return combineLatest(territories$);
-        })
-      );
+        // Combining all territoriesObservables into one array
+        return combineLatest(territories$);
+      })
+    );
   }
 
   getById(id: string): Observable<Territory | undefined> {
     const territoryDocReference = doc(this.territoriesCollection, `${id}`);
 
     return from(getDoc(territoryDocReference)).pipe(
-      map(territoryDocSnapshot => {
+      map((territoryDocSnapshot) => {
         return territoryDocSnapshot.data();
       })
     );
@@ -123,16 +123,16 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
       where('city', 'in', cities)
     );
 
-    return from(collectionData(q));
+    return from(collectionData<Territory>(q));
   }
 
   getAllInIds(ids: string[]) {
     const q = query(this.territoriesCollection, where(documentId(), 'in', ids));
 
     return from(getDocs(q)).pipe(
-      switchMap(territoriesSnapshot => {
+      switchMap((territoriesSnapshot) => {
         // Looping through each territory and resolving the history sub collection documents
-        const territories$ = territoriesSnapshot.docs.map(ts => {
+        const territories$ = territoriesSnapshot.docs.map((ts) => {
           const territory = ts.data();
 
           const path = `${FirebaseTerritoryDatasourceService.COLLECTION_NAME}/${territory.id}/${this.historySubCollectionName}`;
@@ -141,10 +141,10 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
           );
 
           return from(getDocs(territoryVisitHistoryCollection)).pipe(
-            map(territoryVisitHistorySnapshots => {
+            map((territoryVisitHistorySnapshots) => {
               return {
                 ...territory,
-                history: territoryVisitHistorySnapshots.docs.map(visitHistorySnapshot => visitHistorySnapshot.data()),
+                history: territoryVisitHistorySnapshots.docs.map((visitHistorySnapshot) => visitHistorySnapshot.data()),
               };
             })
           );
@@ -171,7 +171,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
 
     return newTerritory$.pipe(
       switchMap(() =>
-        from(getDoc(newTerritoryDocRef)).pipe(map(territorySnapshot => territorySnapshot.data() as Territory))
+        from(getDoc(newTerritoryDocRef)).pipe(map((territorySnapshot) => territorySnapshot.data() as Territory))
       )
     );
   }
@@ -199,8 +199,8 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
       console.warn('Aborting batch update, ,o territories to update');
     }
 
-    const transactionPromise = runTransaction(this.firestore, async transaction => {
-      return territories.map(territory => {
+    const transactionPromise = runTransaction(this.firestore, async (transaction) => {
+      return territories.map((territory) => {
         const territoryDocRef = doc(this.territoriesCollection, `${territory.id}`);
 
         // FIXME: I don't know why the converter is not getting this on the 'toFirestore'
@@ -223,8 +223,8 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
     const territoryHistoryCollection = collection(this.territoriesCollection, `${id}/history`);
 
     return from(getDocs(territoryHistoryCollection)).pipe(
-      map(snapshot => {
-        return snapshot.docs.map(historySnapshot => {
+      map((snapshot) => {
+        return snapshot.docs.map((historySnapshot) => {
           const firebaseHistory = historySnapshot.data();
 
           return {
@@ -252,7 +252,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
     );
 
     return from(getDocs(lastPositionIndexQuery)).pipe(
-      map(territories => {
+      map((territories) => {
         if (territories.empty) {
           return 0;
         }
@@ -275,7 +275,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
     const deleteHistory$ = from(deleteDoc(visitHistoryDocRef));
     // Since the History is also present in the 'recentHistory' array, we need to manually delete it from there as well
     const deleteRecentHistory$ = this.getById(territoryId).pipe(
-      switchMap(territory => {
+      switchMap((territory) => {
         const territoryCopy = structuredClone(territory);
 
         if (!territoryCopy) {
@@ -284,14 +284,14 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
 
         const updatedTerritory: Territory = {
           ...territoryCopy,
-          recentHistory: territoryCopy?.recentHistory?.filter(h => h.id !== historyId),
+          recentHistory: territoryCopy?.recentHistory?.filter((h) => h.id !== historyId),
         };
 
         return this.update(updatedTerritory);
       })
     );
 
-    return forkJoin([deleteRecentHistory$, deleteHistory$]).pipe(map(_ => undefined));
+    return forkJoin([deleteRecentHistory$, deleteHistory$]).pipe(map((_) => undefined));
   }
 
   /** Gets the {@link CollectionReference} of the Territory History sub-collection */

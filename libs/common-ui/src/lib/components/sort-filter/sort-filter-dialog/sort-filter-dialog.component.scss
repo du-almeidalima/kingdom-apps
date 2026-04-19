@@ -1,0 +1,10 @@
+:host {
+  display: block;
+  width: clamp(25rem, 35rem, 80vw);
+}
+
+section {
+  &:not(:last-child) {
+    margin-bottom: 2.4rem;
+  }
+}
