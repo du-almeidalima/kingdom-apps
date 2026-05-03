@@ -2,7 +2,7 @@
   "name": "Ministry Maps",
   "short_name": "Ministry Maps",
   "description": "Aplicativo Web para ajudar no trabalho de ministério das Testemunhas de Jeová.",
-  "theme_color": "#363332",
+  "theme_color": "#45C06C",
   "background_color": "#fafafa",
   "display": "standalone",
   "scope": "./",
