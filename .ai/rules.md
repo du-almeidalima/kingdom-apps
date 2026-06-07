@@ -108,7 +108,7 @@ More detailed rules are automatically loaded based on your current work:
   - `angular-components.md` - Component patterns
   - `angular-services.md` - Services, DI, state
   - `styling.md` - SCSS, Tailwind
-  - `testing.md` - Jest patterns
+  - `unit-testing.md` - Jest + ng-mocks patterns
 
 - **Backend Development** → `.ai/rules/backend/`
   - `firebase-functions.md` - Cloud Functions v2
