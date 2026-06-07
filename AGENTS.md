@@ -1,6 +1,12 @@
 # Kingdom Apps
 
-Detailed conventions (Standalone components, `inject()`, path aliases, kebab-case, etc.) live in `.ai/rules.md` and `.ai/rules/`.
+## Core Principles (Always Active)
+- **Standalone Components Only**: No NgModules.
+- **Use `inject()` Function**: NEVER use constructor injection.
+- **Path Aliases Required**: Use `@kingdom-apps/` aliases (e.g., `@kingdom-apps/common-ui`).
+- **File Naming**: Always `kebab-case`.
+- **Conventional Commits**: `feat:`, `fix:`, `refactor:`, etc.
+- **libs/common-ui**: UI components only, NO application-specific logic.
 
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->
@@ -25,6 +31,26 @@ Detailed conventions (Standalone components, `inject()`, path aliases, kebab-cas
 - The `nx-generate` skill handles generator discovery internally - don't call nx_docs just to look up generator syntax
 
 <!-- nx configuration end-->
+
+## Contextual Rules Index
+Refer to these rules based on your current task context.
+- **Frontend**: `.ai/rules/frontend/`
+  - `angular-components.md` - Component patterns
+  - `angular-services.md` - Services, DI, state
+  - `styling.md` - SCSS, Tailwind
+  - `unit-testing.md` - Jest + ng-mocks
+  - `e2e-testing.md` - Playwright + Firebase Emulator
+- **Backend**: `.ai/rules/backend/`
+  - `firebase-functions.md` - Cloud Functions v2
+  - `firestore.md` - Database patterns
+- **Architecture**: `.ai/rules/architecture/`
+  - `monorepo.md` - Nx structure
+  - `common-ui.md` - Shared library
+  - `repositories.md` - Data access pattern
+- **Workflow**: `.ai/rules/workflow/`
+  - `development.md` - Dev environment
+  - `git-commits.md` - Git standards
+  - `deployment.md` - Build & deploy
 
 ## Architecture
 

@@ -10,7 +10,7 @@ instruction: "Apply when working with Firebase Cloud Functions."
 ## Setup
 - **Language:** JavaScript (not TypeScript)
 - **Version:** Functions v2
-- **Runtime:** Node 20
+- **Runtime:** Node 22
 - **Location:** `functions/ministry-maps/`
 
 ## Function Example
