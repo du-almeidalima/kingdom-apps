@@ -1,10 +1,14 @@
+# Kingdom Apps
+
+Detailed conventions (Standalone components, `inject()`, path aliases, kebab-case, etc.) live in `.ai/rules.md` and `.ai/rules/`.
+
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->
 
 # General Guidelines for working with Nx
 
 - For navigating/exploring the workspace, invoke the `nx-workspace` skill first - it has patterns for querying projects, targets, and dependencies
-- When running tasks (for example build, lint, test, e2e, etc.), always prefer running the task through `nx` (i.e. `nx run`, `nx run-many`, `nx affected`) instead of using the underlying tooling directly
+- When running tasks (for example, build, lint, test, e2e, etc.), always prefer running the task through `nx` (i.e. `nx run`, `nx run-many`, `nx affected`) instead of using the underlying tooling directly
 - Prefix nx commands with the workspace's package manager (e.g., `pnpm nx build`, `npm exec nx test`) - avoids using globally installed CLI
 - You have access to the Nx MCP server and its tools, use them to help the user
 - For Nx plugin best practices, check `node_modules/@nx/<plugin>/PLUGIN.md`. Not all plugins have this file - proceed without it if unavailable.
@@ -21,3 +25,24 @@
 - The `nx-generate` skill handles generator discovery internally - don't call nx_docs just to look up generator syntax
 
 <!-- nx configuration end-->
+
+## Architecture
+
+- `apps/ministry-maps/` — Angular 21 PWA (Tailwind + SCSS, Jest)
+- `libs/common-ui/` — shared UI library (no app logic)
+- `functions/ministry-maps/` — Cloud Functions v2 (JS, Node 22, separate package.json/lockfile)
+- `tools/executors/firebase-emulator/seed/` — Firestore + Auth emulator seed data
+
+## Commands
+
+- `npm start` — Emulators + serve
+- `npx nx test <project>` — Single project tests
+- `npx nx affected -t test` — CI: test changed only
+- `npx nx graph` — Dependency graph
+
+## Gotchas
+
+- `npm ci` / `npm install` needs `--legacy-peer-deps` (Angular 21 + Firebase RC dep conflicts)
+- `NX_*` env vars injected via custom webpack DefinePlugin (not `process.env` at runtime); `.env.development` has emulator values
+- ESLint: flat config (`eslint.config.mjs`) for Angular; legacy `.eslintrc.js` for Functions
+- Firebase Hosting: `prod` → `du-ministry-maps`, `beta` → `du-ministry-maps-beta`
