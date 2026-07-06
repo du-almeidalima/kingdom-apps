@@ -39,38 +39,45 @@ npx firebase emulators:exec "npx nx serve ministry-maps" --project du-ministry-m
 
 ```
 apps/ministry-maps/e2e/
+├── README.md                      # full usage guide (authoritative)
+├── config/
+│   ├── emulator.config.ts         # ports, project id, REST clear URLs
+│   ├── firebase-admin.context.ts  # Admin SDK bootstrap (firestore, auth, collections)
+│   └── auth.config.ts             # role→uid map, default password
+├── firebase/
+│   ├── firestore-read.util.ts     # getDoc, getCollectionDocs, queryWhere, etc.
+│   ├── refs.util.ts               # DocumentReference builders (congregationRef, etc.)
+│   ├── reset.util.ts              # REST wipe of Firestore + Auth
+│   └── custom-token.util.ts       # mintCustomToken(uid) via Admin SDK
+├── seed/
+│   ├── types.ts                   # SeedDefinition / *Seed shapes
+│   ├── seeder.ts                  # writes a SeedDefinition to the emulators
+│   ├── default.seed.ts            # DEFAULT_SEED_IDS + buildDefaultSeed()
+│   └── factories/                 # typed entity builders (+ index barrel)
 ├── fixtures/
-│   └── database.fixture.ts        # import `test` & `expect` from here
-├── helpers/
-│   ├── admin-sdk.ts               # Admin SDK bootstrap + generic read helpers
-│   ├── reset.ts                   # REST wipe of Firestore + Auth
-│   ├── domain/                    # domain-specific DocumentReference helpers
-│   │   ├── congregation.helper.ts
-│   │   ├── territory.helper.ts
-│   │   ├── user.helper.ts
-│   │   ├── designation.helper.ts
-│   │   └── index.ts               # barrel
-│   └── seed/
-│       ├── types.ts               # SeedDefinition / *Seed shapes
-│       ├── seeder.ts              # writes a SeedDefinition to the emulators
-│       ├── default.seed.ts        # DEFAULT_SEED_IDS + buildDefaultSeed()
-│       └── factories/             # typed entity builders (+ index barrel)
+│   ├── database.fixture.ts        # auto resetAndSeed, seed, db
+│   ├── auth.fixture.ts            # signInAs(role) — custom-token auth
+│   └── index.ts                   # composed test + expect (IMPORT FROM HERE)
+├── page-objects/
+│   ├── base.page.ts               # shared navigation helpers
+│   └── territories.page.ts        # territories page locators
 └── tests/
     └── *.spec.ts                  # specs
 ```
 
-## Golden Rule — Always Import From the Fixture
+## Golden Rule — Always Import From `fixtures/index.ts`
 
-Never import `test`/`expect` directly from `@playwright/test`. Import from the database fixture so every spec gets the auto reset + seed and the `seed`/`db` helpers:
+Never import `test`/`expect` directly from `@playwright/test`. Import from the composed fixture so every spec gets auto reset + seed, `seed`/`db` helpers, and `signInAs`:
 
 ```typescript
-import { test, expect } from '../fixtures/database.fixture';
+import { test, expect } from '../fixtures';
 ```
 
-The fixture's auto `resetAndSeed` runs **before every test**: it wipes Firestore + Auth, then applies the default baseline. You get two extra fixtures:
+The auto `resetAndSeed` runs **before every test**: it wipes Firestore + Auth, then applies the default baseline. All other fixtures are available:
 
 - **`seed`** — build & write extra data on demand (`SeedApi`)
 - **`db`** — read Firestore back to assert state (`DbApi`)
+- **`signInAs`** — authenticate as a seeded role (`(role: 'admin' | 'publisher') => Promise<Page>`)
 
 ## The `db` Fixture (assertion / read helpers)
 
@@ -83,6 +90,7 @@ The fixture's auto `resetAndSeed` runs **before every test**: it wipes Firestore
 | `db.getDocSnapshot(collection, id)`      | Raw snapshot (inspect `DocumentReference` / `Timestamp`) |
 | `db.getCollectionDocs(collection)`       | All docs of a collection                                 |
 | `db.getSubcollectionDocs(coll, id, sub)` | All docs of a subcollection                              |
+| `db.queryWhere(collection, field, op, val)` | Query a collection with a `where` filter              |
 | `db.congregationRef(id)` etc.            | Typed `DocumentReference` helpers (`territoryRef`, `userRef`, `designationRef`, `territoryHistoryRef`) |
 
 ```typescript
@@ -154,22 +162,67 @@ export function buildTerritory(over: Partial<TerritorySeed> = {}): TerritorySeed
 
 ## Reset Between Tests
 
-`helpers/reset.ts` wipes both emulators via their REST endpoints (handles subcollections atomically, idempotent on an empty emulator):
+`firebase/reset.util.ts` wipes both emulators via their REST endpoints (handles subcollections atomically, idempotent on an empty emulator):
 
 - `clearFirestore()` → `DELETE .../databases/(default)/documents`
 - `clearAuth()` → `DELETE .../accounts`
 - `resetEmulators()` → both in parallel
 
-Emulator hosts/project id come from constants in `admin-sdk.ts` (`PROJECT_ID`, `FIRESTORE_EMULATOR_HOST`, `AUTH_EMULATOR_HOST`) — keep them in sync with `firebase.json`.
+Emulator configuration is centralized in `config/emulator.config.ts` — keep it in sync with `firebase.json`.
+
+## Configuration Layer
+
+| Module | Purpose |
+|--------|---------|
+| `config/emulator.config.ts` | Single source of truth for ports, hosts, and REST URLs. |
+| `config/firebase-admin.context.ts` | Admin SDK initialization (env vars, `ignoreUndefinedProperties`, exports). |
+| `config/auth.config.ts` | Maps test roles to seeded uids from `DEFAULT_SEED_IDS`. |
+
+## Auth Fixture (`signInAs`)
+
+The auth fixture establishes a **real Firebase session** against the Auth emulator using the **custom-token + storageState** strategy:
+
+1. `mintCustomToken(uid)` mints a custom token via the Admin SDK (Node context).
+2. The browser navigates to `/login` and waits for `window.__E2E__` — a development-only hook.
+3. `signInWithCustomToken(auth, token)` authenticates the user in the browser.
+4. The Angular auth guard resolves the Firestore user document and the router navigates away from `/login`.
+
+```typescript
+test('guarded route', async ({ signInAs, page }) => {
+  await signInAs('admin');
+  await page.goto('/territories');
+  // ...assertions on the guarded route
+});
+```
+
+### Dev-Only App Hook
+
+The `window.__E2E__ = { auth, signInWithCustomToken }` hook is **strictly gated** to
+`environment.env === 'development' && !environment.useCloud` in `app.config.ts`. It never ships to production.
+
+## Page Objects
+
+Page objects encapsulate navigation and locators in `page-objects/`. They use `data-testid` selectors for robustness:
+
+```typescript
+import { TerritoriesPage } from '../page-objects/territories.page';
+
+const territoriesPage = new TerritoriesPage(page);
+await territoriesPage.goto();
+await expect(territoriesPage.heading).toBeVisible();
+```
 
 ## Conventions
 
 - **No mocks** — assert real Firestore state, not just the DOM.
 - Admin SDK code runs **only** in Playwright's Node context, never in the browser.
-- kebab-case filenames; small, focused modules; put domain-specific reference helpers under `helpers/domain/`, keep `admin-sdk.ts` generic.
-- New specs go under `apps/ministry-maps/e2e/tests/` and import the fixture.
+- kebab-case filenames; small, focused modules.
+- New specs go under `apps/ministry-maps/e2e/tests/` and import from `../fixtures`.
+- Add `data-testid` attributes to app HTML for robust selectors.
 
 ## Out of Scope (current follow-ups)
 
-- Authenticated UI flows / logged-in `storageState` (the app uses `signInWithPopup`). Seeding **does** create matching Auth users so this is a future add-on.
-- Page objects and full feature suites beyond smoke coverage; CI pipeline wiring.
+- CI pipeline wiring (GitHub Actions).
+- Broad feature test suites beyond the smoke + territories proof tests.
+- Exercising the real `signInWithPopup` OAuth flow (the custom-token approach is used instead).
+- Cross-test session reuse (currently sign-in per test).

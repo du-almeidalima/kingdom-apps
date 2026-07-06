@@ -39,7 +39,7 @@ Refer to these rules based on your current task context.
   - `angular-services.md` - Services, DI, state
   - `styling.md` - SCSS, Tailwind
   - `unit-testing.md` - Jest + ng-mocks
-  - `e2e-testing.md` - Playwright + Firebase Emulator
+  - `e2e-testing.md` - Playwright + Firebase Emulator (see also `apps/ministry-maps/e2e/README.md`)
 - **Backend**: `.ai/rules/backend/`
   - `firebase-functions.md` - Cloud Functions v2
   - `firestore.md` - Database patterns

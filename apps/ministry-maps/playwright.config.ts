@@ -16,6 +16,8 @@ const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
  */
 export default defineConfig({
   ...nxE2EPreset(__filename, { testDir: './e2e' }),
+  /* Run tests sequentially so the shared emulator reset+seed stays deterministic. */
+  workers: 1,
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,

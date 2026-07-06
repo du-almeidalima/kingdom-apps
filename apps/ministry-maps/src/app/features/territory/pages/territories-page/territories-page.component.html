@@ -1,6 +1,6 @@
 <div class='container'>
   <div class="flex items-center justify-between mb-8">
-    <h2 class='t-headline2'>Territórios</h2>
+    <h2 class='t-headline2' data-testid="territories-heading">Territórios</h2>
     <!-- VERTICAL MENU -->
     <button
       lib-icon-button
@@ -46,6 +46,7 @@
 
   @if (filteredTerritories$ | async; as territories) {
     <section class='territories-list mt-8 pb-56'
+             data-testid="territories-list"
              cdkDropList
              (cdkDropListDropped)='handleTerritoryDrop($event, territories)'
     >

@@ -21,7 +21,7 @@ import { NgClass } from '@angular/common';
   styleUrls: ['./territory-list-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="territory-list-item" [ngClass]="{ 'territory-list-item--row-gap': !!territory.note }">
+      <div class="territory-list-item" data-testid="territory-list-item" [ngClass]="{ 'territory-list-item--row-gap': !!territory.note }">
       <lib-icon
         class="territory-list-item__icon"
         [ngClass]="{ 'territory-list-item__icon--large': isIconLarge }"
