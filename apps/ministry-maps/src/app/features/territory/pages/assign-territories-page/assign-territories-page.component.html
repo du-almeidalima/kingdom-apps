@@ -20,6 +20,121 @@
     />
   </div>
 
+  <!-- Team planning: capacity suggestion + distribution -->
+  <details class="assign-team-panel mt-3" open>
+    <summary>Equipe &amp; distribuição</summary>
+    <div class="flex flex-wrap gap-3 mt-2">
+      <label class="flex flex-col t-caption">Homens
+        <input type="number" min="0" name="men" [(ngModel)]="team.men" (ngModelChange)="recomputeSuggestion()" />
+      </label>
+      <label class="flex flex-col t-caption">Mulheres
+        <input type="number" min="0" name="women" [(ngModel)]="team.women" (ngModelChange)="recomputeSuggestion()" />
+      </label>
+      <label class="flex flex-col t-caption">Carros
+        <input type="number" min="0" name="cars" [(ngModel)]="team.cars" (ngModelChange)="recomputeSuggestion()" />
+      </label>
+      <label class="flex flex-col t-caption">Duração (min)
+        <input type="number" min="0" step="15" name="durationMin" [(ngModel)]="team.durationMin" (ngModelChange)="recomputeSuggestion()" />
+      </label>
+    </div>
+
+    <label class="assign-economize mt-2">
+      <input type="checkbox" name="economize" [(ngModel)]="team.economize" (ngModelChange)="onEconomizeChange()" />
+      Economizar carros (usar o mínimo, máx. 5 por carro)
+    </label>
+
+    @if (numGroups > 0 || groupUnplaced > 0) {
+      <p class="t-caption mt-2">Equipe: <strong>{{ groupText }}</strong> ({{ team.men + team.women }} pessoas)
+        @if (groupUnplaced) { <span class="assign-over"> · {{ groupUnplaced }} sem dupla</span> }
+      </p>
+    }
+
+    @if (suggestion && suggestion.suggestedTotal > 0) {
+      <p class="t-caption mt-1">
+        Sugestão: <strong>≈ {{ suggestion.suggestedTotal }} territórios</strong> (≈ {{ suggestion.perPair }}/grupo) ·
+        selecionados: <strong [class.assign-over]="selectionState === 'over'">{{ selectedTerritoriesModel.size }}</strong> / {{ suggestion.suggestedTotal }}
+      </p>
+      @if (selectionState === 'over') {
+        <button type="button" class="assign-trim-btn" (click)="trimToSuggested()">
+          Aparar para ≈ {{ suggestion.suggestedTotal }} (mais atrasados)
+        </button>
+      }
+    }
+    <div class="flex items-center flex-wrap gap-3 mt-3">
+      <button
+        type="button"
+        class="assign-optimize-btn"
+        [disabled]="selectedTerritoriesModel.size < 2 || numGroups < 1"
+        (click)="handleDistribute()">
+        Otimizar e distribuir
+      </button>
+      <button
+        type="button"
+        class="assign-auto-btn"
+        [disabled]="numGroups < 1 || team.cars < 1 || (suggestion?.suggestedTotal ?? 0) < 2"
+        (click)="handleAutoDistribute()"
+        title="Informe homens, mulheres e carros. Seleciona automaticamente os territórios mais atrasados e distribui entre os carros">
+        Distribuir automaticamente
+      </button>
+      @if (plan) {
+        <span class="t-caption">
+          ≈ {{ plan.totalKm }} km ·
+          @if (plan.carsLeftBehind > 0) {
+            <strong>usando {{ plan.effectiveCars }} de {{ plan.carsAvailable }} carros</strong> ({{ plan.carsLeftBehind }} de folga)
+          } @else {
+            {{ plan.effectiveCars }} carro(s)
+          }
+        </span>
+      }
+    </div>
+  </details>
+
+  <!-- Per-car distribution result -->
+  @if (plan) {
+    @if (plan.groupPlan.unplacedMen || plan.groupPlan.unplacedWomen) {
+      <p class="assign-warn mt-2">
+        {{ plan.groupPlan.unplacedMen }} homem(ns) e {{ plan.groupPlan.unplacedWomen }} mulher(es) sem dupla válida
+      </p>
+    }
+    @if (plan.seatWarning) {
+      <p class="assign-warn mt-2">
+        Faltam carros: precisa de {{ plan.carsNeeded }} carros para {{ plan.groupPlan.people }} pessoas (máx. 5/carro). Você tem {{ plan.carsAvailable }}.
+      </p>
+    }
+    @if (plan.carsLeftBehind > 0) {
+      <p class="t-caption mt-2">{{ plan.carsLeftBehind }} carro(s) de folga ({{ plan.effectiveCars }} bastam dentro do tempo).</p>
+    }
+    <div class="assign-pair-cards mt-3">
+      @for (car of plan.cars; track car.carIndex) {
+        <div class="assign-pair-card" [style.border-left-color]="carColor(car.carIndex)">
+          <div class="assign-pair-card__head">
+            <span class="assign-pair-dot" [style.background-color]="carColor(car.carIndex)"></span>
+            <strong>Carro {{ car.carIndex + 1 }}</strong>
+            <span class="t-caption">· {{ describeGroups(car) }} · {{ car.people }} pessoas</span>
+            @if (car.overCapacity) { <span class="assign-pair-nocar">sobrelotado</span> }
+            @if (car.noManWithWomen) { <span class="assign-pair-over">sem homem</span> }
+            @if (car.estMinutes > team.durationMin) { <span class="assign-pair-over">acima do tempo</span> }
+          </div>
+          <div class="assign-group-chips">
+            @for (grp of car.groups; track $index) {
+              <span class="assign-group-chip" [class.assign-group-chip--trio]="grp.kind === 'trio'">
+                {{ grp.kind === 'trio' ? 'Trio' : 'Dupla' }} {{ groupMakeup(grp) }}
+              </span>
+            }
+          </div>
+          <span class="t-caption">
+            {{ car.territories.length }} territórios (≈ {{ car.perGroupTerritories }}/dupla) · ≈ {{ car.totalKm }} km · ≈ {{ car.estMinutes }} min/dupla
+          </span>
+          <button type="button" class="assign-share-btn"
+                  [disabled]="isSharingCar !== null"
+                  (click)="shareForCar(car)">
+            {{ isSharingCar === car.carIndex ? 'Compartilhando…' : 'Compartilhar' }}
+          </button>
+        </div>
+      }
+    </div>
+  }
+
   <!-- Territories -->
   <form id='territory-form' (submit)='handleTerritoryFormSubmit()'>
     <div class='flex flex-col gap-5 mt-8 pb-56'>
@@ -27,6 +142,8 @@
         <kingdom-apps-territory-checkbox
           [territory]='territory'
           [name]='territory.id'
+          [orderIndex]='orderIndexOf(territory.id)'
+          [badgeColor]='carColorOf(territory.id)'
           [ngModel]='hasAlreadyBeenSelected(territory.id)'
           [disabled]='assignedTerritories.has(territory.id)'
           (ngModelChange)='handleTerritoryCheck($event, territory)'>
