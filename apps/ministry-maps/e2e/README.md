@@ -24,17 +24,16 @@ specs, and shuts everything down.
 ```
 apps/ministry-maps/e2e/
 ├── README.md                     ← this file
+├── tsconfig.json                 ← TS config for the suite (strict; drives type-checking + the editor)
 ├── config/                       ← composable configuration
 │   ├── emulator.config.ts        # ports, project id, REST clear URLs
 │   ├── firebase-admin.context.ts # Admin SDK bootstrap (firestore, auth, collections)
-│   └── auth.config.ts            # role→uid map, default password
+│   └── auth.config.ts            # ROLE_UIDS map, default password
 ├── firebase/                     ← utility layer (runs in Node)
 │   ├── firestore-read.util.ts    # getDoc, getCollectionDocs, queryWhere, etc.
-│   ├── refs.util.ts              # DocumentReference builders (congregationRef, etc.)
-│   ├── reset.util.ts             # REST wipe of Firestore + Auth emulators
-│   └── custom-token.util.ts      # mintCustomToken(uid) via Admin SDK
+│   └── reset.util.ts             # REST wipe of Firestore + Auth emulators
 ├── seed/                         ← composable data seeding
-│   ├── types.ts                  # SeedDefinition, *Seed types
+│   ├── types.ts                  # SeedDefinition (all fields optional), *Seed types
 │   ├── seeder.ts                 # write(def) → Firestore + Auth emulators
 │   ├── default.seed.ts           # DEFAULT_SEED_IDS + buildDefaultSeed()
 │   └── factories/                # buildCongregation, buildUser, buildTerritory, etc.
@@ -43,7 +42,6 @@ apps/ministry-maps/e2e/
 │   ├── auth.fixture.ts           # signInAs(role) — custom-token auth
 │   └── index.ts                  # composed test + expect (import from here!)
 ├── page-objects/                 ← page abstractions
-│   ├── base.page.ts              # shared navigation helpers
 │   └── territories.page.ts       # territories page locators
 └── tests/
     ├── smoke.spec.ts             # baseline integrity checks
@@ -56,7 +54,7 @@ apps/ministry-maps/e2e/
 |-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `emulator.config.ts`        | Single source of truth for ports (`8080`, `9099`, `5001`), project id (`du-ministry-maps`), and derived REST URLs. Keep in sync with `firebase.json`.         |
 | `firebase-admin.context.ts` | Sets env vars (`FIRESTORE_EMULATOR_HOST`, `FIREBASE_AUTH_EMULATOR_HOST`), initializes the Admin app once, and exports `firestore`, `auth`, and `Collections`. |
-| `auth.config.ts`            | Maps test roles (`admin`, `publisher`) to seeded uids from `DEFAULT_SEED_IDS`.                                                                                |
+| `auth.config.ts`            | `ROLE_UIDS: Record<TestRole, string>` — maps test roles (`admin`, `publisher`) to seeded uids from `DEFAULT_SEED_IDS` — plus `DEFAULT_PASSWORD`.              |
 
 ## Seeding (`seed/`)
 
@@ -84,17 +82,18 @@ test('on-demand seeding', async ({ seed, db }) => {
     ],
   });
 
-  await seed.write({
-    congregations: [],
-    users: [],
-    territories: [territory],
-    designations: [],
-  });
+  // SeedDefinition fields are all optional — pass only what you're adding.
+  await seed.write({ territories: [territory] });
 
   const stored = await db.getDoc(db.collections.territories, territory.id);
   expect(stored?.city).toBe('Campinas');
 });
 ```
+
+> `buildUser()` omits `password` by default, so seeded users fall back to
+> `DEFAULT_PASSWORD` (`config/auth.config.ts`) — the single source of truth
+> for the seeded password. Override `password` only when a test needs a
+> different one.
 
 ### Firestore Storage Contract (critical)
 
@@ -102,7 +101,10 @@ The seeder enforces the app's real storage shape:
 
 1. **`User.congregation`** is a `DocumentReference` — never a plain string.
 2. **Auth/Firestore uid parity** — `auth.createUser({ uid: userDocId })` with
-   the same id as the Firestore document.
+   the same id as the Firestore document. Under serial workers with a full
+   emulator wipe per test, a duplicate uid means the caller seeded the same
+   user twice: the seeder now **throws** (with the uid + email + underlying
+   message) instead of silently ignoring an "already exists" error.
 3. **Dates** are plain `Date`s — the Admin SDK auto-converts to `Timestamp`.
 4. **Territory history** lives in `territories/{id}/history` subcollection;
    `recentHistory` (latest 5, desc) and `lastVisit` are derived on the parent.
@@ -120,12 +122,14 @@ import { test, expect } from '../fixtures';
 
 ### Available Fixtures
 
-| Fixture        | Type                      | Description                                     |
-|----------------|---------------------------|-------------------------------------------------|
-| `resetAndSeed` | auto                      | Wipes + re-seeds before every test.             |
-| `seed`         | `SeedApi`                 | Factories, `write()`, `buildDefault()`, `ids`.  |
-| `db`           | `DbApi`                   | Firestore/Auth handles, refs, and read helpers. |
-| `signInAs`     | `(role) => Promise<Page>` | Signs into the app as a seeded user.            |
+| Fixture             | Type                      | Description                                               |
+|---------------------|---------------------------|-----------------------------------------------------------|
+| `resetAndSeed`      | auto                      | Wipes + re-seeds before every test.                       |
+| `seed`              | `SeedApi`                 | Factories, `write()`, `ids`.                              |
+| `db`                | `DbApi`                   | Firestore/Auth handles and read helpers.                  |
+| `role`              | option (`TestRole`)       | Identity for `authenticatedPage`; set via `test.use`.     |
+| `signInAs`          | `(role) => Promise<void>` | Imperatively signs the current `page` into a seeded user. |
+| `authenticatedPage` | `Page`                    | A `page` already signed in as the `role` option.          |
 
 ### `db` — Read / Assertion API
 
@@ -147,22 +151,42 @@ test('check Firestore', async ({ db, seed }) => {
 });
 ```
 
-### `signInAs` — Authenticated Pages
+### Authenticated Pages
+
+Two Playwright-idiomatic ways to reach guarded routes:
+
+**1. Declarative — the `role` option + `authenticatedPage` fixture** (preferred
+when a spec/file uses a single identity):
+
+```typescript
+test.use({ role: 'admin' }); // defaults to 'admin' if omitted
+
+test('guarded route', async ({ authenticatedPage }) => {
+  await authenticatedPage.goto('/territories');
+  // ...assertions on the guarded page
+});
+```
+
+**2. Imperative — the `signInAs` fixture** (when a test drives multiple
+identities). It signs the current `page` in and leaves it on `/login` with a
+live session; you navigate to the route you want:
 
 ```typescript
 test('guarded route', async ({ signInAs, page }) => {
-  await signInAs('admin');         // mints token, signs in, waits for redirect
+  await signInAs('admin');       // mints token + establishes the session
   await page.goto('/territories');
   // ...assertions on the guarded page
 });
 ```
 
-Supported roles: `'admin'` (ADMIN user), `'publisher'` (PUBLISHER user).
+`signInAs` resolves only once `auth.currentUser` is populated in the browser,
+so the auth guard resolves the user on your first navigation (no arbitrary
+waits). Supported roles: `'admin'` (ADMIN user), `'publisher'` (PUBLISHER user).
 
 ## Auth Strategy
 
 The E2E tests establish a **real Firebase session** against the **Auth emulator**
-using the **custom-token + storageState** approach:
+using the **custom-token** approach (no OAuth popup):
 
 1. The Playwright fixture calls `mintCustomToken(uid)` via the Admin SDK (Node
    context).
@@ -171,27 +195,69 @@ using the **custom-token + storageState** approach:
    emulator.
 3. It calls `signInWithCustomToken(auth, token)` in the browser, which
    authenticates the user against the emulator.
-4. The Angular auth guard sees the now-authenticated user, resolves their
-   Firestore document, and redirects away from `/login`.
+4. It waits until `auth.currentUser` is populated, confirming the session is
+   live. The page stays on `/login`; the spec then navigates to the guarded
+   route, where the Angular auth guard resolves the user's Firestore document.
+
+> Sign-in happens **per test, after `resetAndSeed`** — the reset wipes Auth and
+> revokes any prior token, so a fresh token is minted each time. Cross-test
+> session reuse (`storageState`) remains a future optimization, blocked today
+> by the per-test Auth emulator reset (a saved session would be invalidated by
+> the next test's wipe). It would take the shape of a per-role Playwright
+> setup project writing one `storageState` file per role.
 
 **Important:** The `window.__E2E__ = { auth, signInWithCustomToken }` hook is
 **strictly gated** to `environment.env === 'development' && !environment.useCloud`
-in `app.config.ts` — it never ships to production.
+in `app.config.ts` — it never ships to production. The login page itself never
+auto-navigates on an auth-state change, so `signInAs`/`authenticatedPage` can
+safely leave the page on `/login` after establishing the session; the caller
+navigates to the guarded route it wants to exercise.
+
+### Timeouts and Failure Messages
+
+The auth fixture waits on two conditions with explicit timeouts (10s each,
+`E2E_HOOK_TIMEOUT_MS` / `SESSION_SETTLE_TIMEOUT_MS` in `auth.fixture.ts`):
+
+1. **`window.__E2E__` appears after `goto('/login')`.** On timeout, the error
+   names the gating condition in `app.config.ts` and the `webServer` command,
+   so a stale/production build is easy to rule out.
+2. **`auth.currentUser` settles to the expected uid.** On timeout, the error
+   points at `ROLE_UIDS` (`config/auth.config.ts`) and the Auth emulator port,
+   so a bad role→uid mapping or a down emulator is easy to rule out.
+
+Both replace what used to be a bare, unbounded `waitForFunction` with no
+timeout and a generic `TimeoutError` on failure.
 
 ## Page Objects (`page-objects/`)
 
-Page objects encapsulate navigation and locators:
+Page objects encapsulate navigation and locators as `readonly` properties
+assigned in the constructor. Actions (`goto()`, `showAllCities()`) don't wait
+for anything beyond their own effect — synchronization is left to the
+caller's web-first, auto-retrying assertions rather than baked-in sleeps or
+per-call timeouts (those are governed globally by `expect: { timeout: 10_000 }`
+in `playwright.config.ts`):
 
 ```typescript
+import { expect, test } from '../fixtures';
 import { TerritoriesPage } from '../page-objects/territories.page';
 
 const territoriesPage = new TerritoriesPage(page);
 await territoriesPage.goto();
 await expect(territoriesPage.heading).toBeVisible();
-const count = await territoriesPage.count();
+
+await territoriesPage.showAllCities();
+await expect(territoriesPage.territoryItems).toHaveCount(3);
+await expect(territoriesPage.territoryByAddress('Rua Inventada, 999')).toBeVisible();
 ```
 
-Locators use `data-testid` attributes (not text content) for robustness.
+Locators use `data-testid` attributes (not text content) for robustness,
+including `territories-city-filter` on the city `<select>`.
+
+> **Pattern requirement:** `toHaveCount` is only a sound post-filter wait when
+> the count actually differs before and after the filter (e.g. the default
+> city renders 2 territories, "Todas" renders 3/4 — see `territories.spec.ts`).
+> If a filter wouldn't change the count, assert on an element unique to the
+> post-filter view instead (e.g. `territoryByAddress(...)`).
 
 ## Running Tests
 
@@ -204,6 +270,16 @@ npx playwright install chromium
 
 # Run with UI
 npx playwright test --ui --config apps/ministry-maps/playwright.config.ts
+
+# Isolation check: run every test twice back-to-back. Passing proves the
+# per-test reset+seed truly isolates tests (no cross-test state leakage, no
+# hidden timing dependence).
+npx playwright test --config apps/ministry-maps/playwright.config.ts --repeat-each=2
+
+# Type-check the suite. Playwright transpiles with esbuild (types are stripped,
+# never checked) and the ESLint rules here are syntactic only, so this is the
+# ONLY thing that type-checks the fixture/seed layer. Runs against e2e/tsconfig.json.
+npx nx typecheck-e2e ministry-maps
 ```
 
 ## Adding New Tests
@@ -212,7 +288,8 @@ npx playwright test --ui --config apps/ministry-maps/playwright.config.ts
 2. Create a spec in `tests/` importing from `../fixtures`.
 3. Use `seed.factories.*` for on-demand data via `seed.write()`.
 4. Assert both UI state (via page objects) and Firestore state (via `db.*`).
-5. For guarded routes, call `signInAs(role)` first.
+5. For guarded routes, use the `authenticatedPage` fixture (with
+   `test.use({ role })`) or call `signInAs(role)` first.
 
 ## Out of Scope (Future)
 

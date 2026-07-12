@@ -12,8 +12,8 @@ import {
 import { SeedDefinition } from './types';
 
 /**
- * Stable, well-known ids for the default baseline, so individual tests can
- * reference seeded entities deterministically (e.g. to assert their presence).
+ * Stable, well-known ids for the default baseline, so individual tests can reference seeded entities deterministically
+ * (e.g., to assert their presence).
  */
 export const DEFAULT_SEED_IDS = {
   congregation: 'seed-congregation',

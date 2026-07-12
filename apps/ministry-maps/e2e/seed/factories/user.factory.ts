@@ -6,7 +6,8 @@ import { UserSeed } from '../types';
 /**
  * Builds a realistic user seed. Defaults to a `PUBLISHER`; the `id` doubles as
  * the Auth emulator `uid`. Always provide a `congregationId` (directly or via
- * override) so the seeder can link the user to a congregation.
+ * override) so the seeder can link the user to a congregation. Omit
+ * `password` to use the seeder's `DEFAULT_PASSWORD` fallback.
  */
 export function buildUser(over: Partial<UserSeed> = {}): UserSeed {
   const id = over.id ?? `user-${randomUUID()}`;
@@ -18,7 +19,6 @@ export function buildUser(over: Partial<UserSeed> = {}): UserSeed {
     photoUrl: 'https://i.pravatar.cc/150?u=' + id,
     role: RoleEnum.PUBLISHER,
     congregationId: '',
-    password: 'test-password-123',
     ...over,
   };
 }

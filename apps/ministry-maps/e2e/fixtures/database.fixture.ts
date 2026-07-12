@@ -1,20 +1,13 @@
-import { test as base, expect } from '@playwright/test';
+import { expect, test as base } from '@playwright/test';
 
-import { firestore, auth, Collections } from '../config/firebase-admin.context';
+import { auth, firestore } from '../config/firebase-admin.context';
+import { Collections, TERRITORY_HISTORY_SUBCOLLECTION } from '../seed/collections';
 import {
-  TERRITORY_HISTORY_SUBCOLLECTION,
-  congregationRef,
-  territoryRef,
-  territoryHistoryRef,
-  userRef,
-  designationRef,
-} from '../firebase/refs.util';
-import {
+  getCollectionDocs,
   getDoc,
   getDocSnapshot,
-  getCollectionDocs,
   getSubcollectionDocs,
-  queryWhere,
+  queryWhere
 } from '../firebase/firestore-read.util';
 import { resetEmulators } from '../firebase/reset.util';
 import * as factories from '../seed/factories';
@@ -30,23 +23,17 @@ export interface SeedApi {
   factories: typeof factories;
   /** Writes a `SeedDefinition` to the emulators and returns the created ids. */
   write: typeof writeSeed;
-  /** Builds the default baseline definition (already applied before each test). */
-  buildDefault: typeof buildDefaultSeed;
   /** Well-known ids of the default baseline entities. */
   ids: typeof DEFAULT_SEED_IDS;
 }
 
 /** Admin SDK read helpers exposed to tests for asserting Firestore state. */
 export interface DbApi {
+  /** Raw Admin SDK handles — escape hatch for anything not covered below. */
   firestore: typeof firestore;
   auth: typeof auth;
   collections: typeof Collections;
   historySubcollection: typeof TERRITORY_HISTORY_SUBCOLLECTION;
-  congregationRef: typeof congregationRef;
-  territoryRef: typeof territoryRef;
-  territoryHistoryRef: typeof territoryHistoryRef;
-  userRef: typeof userRef;
-  designationRef: typeof designationRef;
   getDoc: typeof getDoc;
   getDocSnapshot: typeof getDocSnapshot;
   getCollectionDocs: typeof getCollectionDocs;
@@ -54,14 +41,36 @@ export interface DbApi {
   queryWhere: typeof queryWhere;
 }
 
+// Both APIs are stateless bundles of module-level functions/handles, so a single shared instance is safe; the fixtures
+// below only inject them.
+const seedApi: SeedApi = {
+  factories,
+  write: writeSeed,
+  ids: DEFAULT_SEED_IDS,
+};
+
+const dbApi: DbApi = {
+  firestore,
+  auth,
+  collections: Collections,
+  historySubcollection: TERRITORY_HISTORY_SUBCOLLECTION,
+  getDoc,
+  getDocSnapshot,
+  getCollectionDocs,
+  getSubcollectionDocs,
+  queryWhere,
+};
+
 interface DatabaseFixtures {
   /**
-   * Auto fixture: clears the Firestore + Auth emulators and applies the default
-   * seed before every test, guaranteeing a known, isolated baseline.
+   * Auto fixture: clears the Firestore + Auth emulators and applies the default seed before every test, guaranteeing a
+   * known, isolated baseline.
    *
-   * Note: the E2E emulator starts EMPTY (the Playwright `webServer` uses
-   * `firebase emulators:exec`, which does not `--import` any data), so this
-   * seeding is the sole source of test data.
+   * Fixtures whose SETUP depends on this state (e.g. `authenticatedPage`) must declare `resetAndSeed` as a dependency,
+   * so Playwright orders them after it.
+   *
+   * Note: the E2E emulator starts EMPTY (the Playwright `webServer` uses `firebase emulators:exec`, which does not
+   * `--import` any data), so this seeding is the sole source of test data.
    */
   resetAndSeed: void;
   seed: SeedApi;
@@ -78,30 +87,10 @@ export const test = base.extend<DatabaseFixtures>({
     { auto: true },
   ],
   seed: async ({}, use) => {
-    await use({
-      factories,
-      write: writeSeed,
-      buildDefault: buildDefaultSeed,
-      ids: DEFAULT_SEED_IDS,
-    });
+    await use(seedApi);
   },
   db: async ({}, use) => {
-    await use({
-      firestore,
-      auth,
-      collections: Collections,
-      historySubcollection: TERRITORY_HISTORY_SUBCOLLECTION,
-      congregationRef,
-      territoryRef,
-      territoryHistoryRef,
-      userRef,
-      designationRef,
-      getDoc,
-      getDocSnapshot,
-      getCollectionDocs,
-      getSubcollectionDocs,
-      queryWhere,
-    });
+    await use(dbApi);
   },
 });
 

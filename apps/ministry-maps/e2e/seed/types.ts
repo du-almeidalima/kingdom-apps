@@ -49,12 +49,12 @@ export interface TerritorySeed extends Omit<Territory, 'recentHistory' | 'lastVi
 /** A designation document. Mirrors the real {@link Designation} model 1:1. */
 export type DesignationSeed = Designation;
 
-/** A full set of entities to write to the emulators. */
+/** A set of entities to write to the emulators. All fields are optional so callers can pass just what they need. */
 export interface SeedDefinition {
-  congregations: CongregationSeed[];
-  users: UserSeed[];
-  territories: TerritorySeed[];
-  designations: DesignationSeed[];
+  congregations?: CongregationSeed[];
+  users?: UserSeed[];
+  territories?: TerritorySeed[];
+  designations?: DesignationSeed[];
 }
 
 /** Ids of everything created by a single {@link seed} call, for assertions. */

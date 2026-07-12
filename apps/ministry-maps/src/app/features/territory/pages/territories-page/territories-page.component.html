@@ -25,6 +25,7 @@
     lib-select
     class='w-full'
     name='Cidade'
+    data-testid="territories-city-filter"
     [ngModel]='selectedCity'
     (ngModelChange)='handleSelectedCityChange($event)'>
     @for (city of cities; track city) {

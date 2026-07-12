@@ -1,0 +1,26 @@
+{
+  // Dedicated config for the Playwright E2E suite. It exists so the E2E
+  // TypeScript is actually type-checked (Playwright transpiles with esbuild and
+  // never type-checks; ESLint here is syntactic only) and so the editor uses
+  // the right compiler options for these files instead of falling back to an
+  // inferred project with stale defaults — that fallback is what surfaced the
+  // `new Error(msg, { cause })` error (the two-arg Error overload needs the
+  // ES2022 lib, which the base config already provides).
+  //
+  // Lives inside `e2e/` (not the app root) so it's the nearest `tsconfig.json`
+  // the TS server finds when walking up from an E2E file. E2E is Node code
+  // (Playwright + firebase-admin), so it extends the workspace base directly
+  // and deliberately does NOT pull in the app's Angular compiler options.
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "noEmit": true,
+    // The base is lenient; the E2E layer is small and hand-typed, so hold it to
+    // a stricter bar to catch bugs in fixtures/seeders before runtime.
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["**/*.ts"]
+}

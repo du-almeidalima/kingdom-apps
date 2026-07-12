@@ -1,72 +1,39 @@
-import { Page, Locator } from '@playwright/test';
-
-import { BasePage } from './base.page';
+import { expect, Locator, Page } from '@playwright/test';
 
 /**
  * Page object for the `/territories` route.
  *
  * Uses `data-testid` selectors that were added to the app's HTML for robust,
- * locale-independent targeting.
+ * locale-independent targeting. Synchronization after actions (e.g. filtering)
+ * is left to the caller's web-first assertions rather than baked in here —
+ * `goto()` only waits for the initial list render.
  */
-export class TerritoriesPage extends BasePage {
-  constructor(page: Page) {
-    super(page);
+export class TerritoriesPage {
+  readonly heading: Locator;
+  readonly list: Locator;
+  readonly territoryItems: Locator;
+  readonly cityFilter: Locator;
+
+  constructor(private readonly page: Page) {
+    this.heading = page.getByTestId('territories-heading');
+    this.list = page.getByTestId('territories-list');
+    this.territoryItems = page.getByTestId('territory-list-item');
+    this.cityFilter = page.getByTestId('territories-city-filter');
   }
 
-  /** Navigate to the territories list page. */
+  /** Navigate to the territories list page and wait for the list to render. Does not touch the city filter. */
   async goto(): Promise<void> {
-    await super.goto('/territories');
-    // Wait for the async pipe to resolve and the list to render.
-    await this.list.waitFor({ state: 'visible', timeout: 15000 });
-    // Switch to "Todas" (All) to see territories from all cities.
-    await this.selectAllCities();
+    await this.page.goto('/territories');
+    await expect(this.list).toBeVisible();
   }
 
   /** Select the "Todas" city filter so all territories are shown. */
-  async selectAllCities(): Promise<void> {
-    const select = this.page.locator('select[lib-select]');
-    await select.waitFor({ state: 'visible', timeout: 10000 });
-    await select.selectOption('ALL');
-    // Wait for the list to update after filter change.
-    await this.page.waitForTimeout(500);
+  async showAllCities(): Promise<void> {
+    await this.cityFilter.selectOption('ALL');
   }
 
-  /** The page heading element. */
-  get heading(): Locator {
-    return this.page.locator('[data-testid="territories-heading"]');
-  }
-
-  /** The territories list container. */
-  get list(): Locator {
-    return this.page.locator('[data-testid="territories-list"]');
-  }
-
-  /** All rendered territory list-item elements. */
-  get territoryItems(): Locator {
-    return this.page.locator('[data-testid="territory-list-item"]');
-  }
-
-  /** Returns the count of rendered territory items. */
-  async count(): Promise<number> {
-    return this.territoryItems.count();
-  }
-
-  /**
-   * Returns an array of address strings visible in the rendered list.
-   * Each list item's address is in `h3 .t-body2`.
-   */
-  async addresses(): Promise<string[]> {
-    const count = await this.territoryItems.count();
-    const result: string[] = [];
-    for (let i = 0; i < count; i++) {
-      const address = await this.territoryItems
-        .nth(i)
-        .locator('h3 .t-body2')
-        .textContent();
-      if (address) {
-        result.push(address.trim());
-      }
-    }
-    return result;
+  /** Locator for the territory item whose address contains `address`. */
+  territoryByAddress(address: string): Locator {
+    return this.territoryItems.filter({ hasText: address });
   }
 }

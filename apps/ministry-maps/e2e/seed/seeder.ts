@@ -1,8 +1,7 @@
-import { Collections, auth, firestore } from '../config/firebase-admin.context';
-import { TERRITORY_HISTORY_SUBCOLLECTION, congregationRef } from '../firebase/refs.util';
+import { auth, firestore } from '../config/firebase-admin.context';
+import { Collections, TERRITORY_HISTORY_SUBCOLLECTION } from './collections';
+import { DEFAULT_PASSWORD } from '../config/auth.config';
 import { SeedDefinition, SeedResult, UserSeed } from './types';
-
-const DEFAULT_PASSWORD = 'test-password-123';
 
 /**
  * Writes a {@link SeedDefinition} to the Firestore + Auth emulators and returns
@@ -18,23 +17,30 @@ const DEFAULT_PASSWORD = 'test-password-123';
  * - `Date` values are persisted by the Admin SDK as Firestore `Timestamp`s.
  */
 export async function seed(def: SeedDefinition): Promise<SeedResult> {
+  const {
+    congregations = [],
+    users = [],
+    territories = [],
+    designations = [],
+  } = def;
+
   const batch = firestore.batch();
 
-  for (const congregation of def.congregations) {
+  for (const congregation of congregations) {
     batch.set(
       firestore.collection(Collections.congregations).doc(congregation.id),
       congregation,
     );
   }
 
-  for (const user of def.users) {
+  for (const user of users) {
     batch.set(
       firestore.collection(Collections.users).doc(user.id),
       toUserDocument(user),
     );
   }
 
-  for (const territory of def.territories) {
+  for (const territory of territories) {
     const { history, ...rest } = territory;
     const sortedHistory = [...history].sort(
       (a, b) => b.date.getTime() - a.date.getTime(),
@@ -57,7 +63,7 @@ export async function seed(def: SeedDefinition): Promise<SeedResult> {
     }
   }
 
-  for (const designation of def.designations) {
+  for (const designation of designations) {
     batch.set(
       firestore.collection(Collections.designations).doc(designation.id),
       designation,
@@ -65,13 +71,13 @@ export async function seed(def: SeedDefinition): Promise<SeedResult> {
   }
 
   await batch.commit();
-  await Promise.all(def.users.map(createAuthUser));
+  await Promise.all(users.map(createAuthUser));
 
   return {
-    congregationIds: def.congregations.map((c) => c.id),
-    userIds: def.users.map((u) => u.id),
-    territoryIds: def.territories.map((t) => t.id),
-    designationIds: def.designations.map((d) => d.id),
+    congregationIds: congregations.map((c) => c.id),
+    userIds: users.map((u) => u.id),
+    territoryIds: territories.map((t) => t.id),
+    designationIds: designations.map((d) => d.id),
   };
 }
 
@@ -83,16 +89,16 @@ function toUserDocument(user: UserSeed) {
     email: user.email,
     photoUrl: user.photoUrl,
     role: user.role,
-    congregation: congregationRef(user.congregationId),
+    congregation: firestore.doc(`${Collections.congregations}/${user.congregationId}`),
   };
 }
 
 /**
  * Creates the matching Auth emulator user (uid === Firestore user doc id).
  *
- * Handles the race condition from parallel test workers: if another worker
- * already created this uid between our `clearAuth` and this call, the
- * `already-exists` error is silently ignored.
+ * Runs under serial workers with a full emulator wipe before every test, so a
+ * duplicate uid here means the caller seeded the same user twice — a bug, not
+ * a race. Errors are rethrown with context rather than swallowed.
  */
 async function createAuthUser(user: UserSeed): Promise<unknown> {
   try {
@@ -104,14 +110,10 @@ async function createAuthUser(user: UserSeed): Promise<unknown> {
       password: user.password ?? DEFAULT_PASSWORD,
     });
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : String(error);
-
-    // The Auth emulator returns "The user with the provided uid already exists."
-    // This is expected when parallel workers share the emulator.
-    if (message.toLowerCase().includes('already exists')) {
-      return;
-    }
-    throw error;
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Failed to create Auth emulator user '${user.id}' (${user.email}): ${message}`,
+      { cause: error },
+    );
   }
 }

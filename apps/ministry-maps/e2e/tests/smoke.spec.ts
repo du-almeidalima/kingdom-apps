@@ -1,13 +1,13 @@
 import { DocumentReference, Timestamp } from 'firebase-admin/firestore';
 
 import { TerritoryIcon } from '../../src/models/territory';
-import { test, expect } from '../fixtures';
+import { expect, test } from '../fixtures';
 
 test.describe('E2E seeding smoke test', () => {
   test('renders the Login screen against the seeded emulator', async ({ page }) => {
     await page.goto('/');
 
-    expect(await page.locator('h1').innerText()).toContain('Login');
+    await expect(page.locator('h1')).toContainText('Login');
   });
 
   test('applies the default baseline to Firestore before each test', async ({ db }) => {
@@ -68,12 +68,7 @@ test.describe('E2E seeding smoke test', () => {
       icon: TerritoryIcon.OTHER,
     });
 
-    await seed.write({
-      congregations: [],
-      users: [],
-      territories: [extraTerritory],
-      designations: [],
-    });
+    await seed.write({ territories: [extraTerritory] });
 
     const stored = await db.getDoc(db.collections.territories, extraTerritory.id);
     expect(stored?.['city']).toBe('Campinas');

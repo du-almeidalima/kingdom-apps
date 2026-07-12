@@ -3,10 +3,14 @@
   "compilerOptions": {
     "outDir": "../dist/out-tsc/tools",
     "rootDir": ".",
-    "module": "commonjs",
-    "target": "es5",
-    "types": ["node"],
-    "importHelpers": false
+    // Tools run directly under Node (nx executors/scripts), so use Node's
+    // module resolution rather than the base's `bundler` mode (which targets
+    // the Angular apps). `nodenext` emits CommonJS here since the workspace
+    // package.json has no `"type": "module"`.
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "target": "ES2022",
+    "types": ["node"]
   },
   "include": ["**/*.ts"]
 }

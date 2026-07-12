@@ -5,7 +5,6 @@ test.describe('Territories page', () => {
   test('signs in as admin and loads /territories with the 3 default-seed territories', async ({
     signInAs,
     db,
-    seed,
     page,
   }) => {
     await signInAs('admin');
@@ -15,13 +14,15 @@ test.describe('Territories page', () => {
 
     await expect(territoriesPage.heading).toBeVisible();
 
-    const count = await territoriesPage.count();
-    expect(count).toBe(3);
+    // The default city ('São Paulo', 2 territories) differs from "Todas"
+    // (3 territories), so `toHaveCount` after `showAllCities()` is a sound
+    // signal that the filter actually applied (not a stale pre-filter render).
+    await territoriesPage.showAllCities();
+    await expect(territoriesPage.territoryItems).toHaveCount(3);
 
-    const addresses = await territoriesPage.addresses();
-    expect(addresses).toContain('Rua das Acácias, 45 - Pinheiros');
-    expect(addresses).toContain('Av. dos Autonomistas, 1200 - Centro');
-    expect(addresses).toContain('Rua Harmonia, 300 - Vila Madalena');
+    await expect(territoriesPage.territoryByAddress('Rua das Acácias, 45 - Pinheiros')).toBeVisible();
+    await expect(territoriesPage.territoryByAddress('Av. dos Autonomistas, 1200 - Centro')).toBeVisible();
+    await expect(territoriesPage.territoryByAddress('Rua Harmonia, 300 - Vila Madalena')).toBeVisible();
 
     const firestoreTerritories = await db.getCollectionDocs(db.collections.territories);
     expect(firestoreTerritories).toHaveLength(3);
@@ -34,23 +35,16 @@ test.describe('Territories page', () => {
       address: 'Rua Inventada, 999',
     });
 
-    await seed.write({
-      congregations: [],
-      users: [],
-      territories: [extraTerritory],
-      designations: [],
-    });
+    await seed.write({ territories: [extraTerritory] });
 
     await signInAs('admin');
 
     const territoriesPage = new TerritoriesPage(page);
     await territoriesPage.goto();
 
-    const count = await territoriesPage.count();
-    expect(count).toBe(4);
-
-    const addresses = await territoriesPage.addresses();
-    expect(addresses).toContain('Rua Inventada, 999');
+    await territoriesPage.showAllCities();
+    await expect(territoriesPage.territoryItems).toHaveCount(4);
+    await expect(territoriesPage.territoryByAddress('Rua Inventada, 999')).toBeVisible();
 
     const firestoreTerritories = await db.getCollectionDocs(db.collections.territories);
     expect(firestoreTerritories).toHaveLength(4);

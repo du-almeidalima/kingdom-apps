@@ -1,12 +1,12 @@
 import * as admin from 'firebase-admin';
 
-import {
-  EMULATOR_CONFIG,
-  FIRESTORE_EMULATOR_HOST,
-  AUTH_EMULATOR_HOST,
-} from './emulator.config';
+import { AUTH_EMULATOR_HOST, EMULATOR_CONFIG, FIRESTORE_EMULATOR_HOST } from './emulator.config';
 
-// Route the Admin SDK to the local emulators.
+// Route the Admin SDK to the local emulators. This must run before
+// `admin.initializeApp()`/`admin.firestore()`/`admin.auth()` below, which is
+// guaranteed here since both exports come from this same module — any other
+// module that needs `firestore`/`auth` triggers this file (and these env
+// mutations) first, standard practice for the Admin SDK emulator pattern.
 process.env.FIRESTORE_EMULATOR_HOST = FIRESTORE_EMULATOR_HOST;
 process.env.FIREBASE_AUTH_EMULATOR_HOST = AUTH_EMULATOR_HOST;
 
@@ -16,10 +16,6 @@ if (!admin.apps.length) {
     projectId: EMULATOR_CONFIG.projectId,
   });
 }
-
-// TODO: Is this necessary?
-/** Re-export the authenticated `app` for advanced usage. */
-export const app = admin.apps[0];
 
 /** Admin Firestore handle (points at the emulator). */
 export const firestore = admin.firestore();
@@ -32,12 +28,3 @@ firestore.settings({ ignoreUndefinedProperties: true });
 
 /** Admin Auth handle (points at the emulator). */
 export const auth = admin.auth();
-
-// TODO: These should be defined on the factories.
-/** Firestore collection names, mirrored from the app's datasource services. */
-export const Collections = {
-  congregations: 'congregations',
-  users: 'users',
-  territories: 'territories',
-  designations: 'designations',
-} as const;

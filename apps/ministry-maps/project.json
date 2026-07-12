@@ -100,6 +100,14 @@
         "tsConfig": "apps/ministry-maps/tsconfig.spec.json"
       }
     },
+    "typecheck-e2e": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "^default"],
+      "options": {
+        "command": "tsc --noEmit -p apps/ministry-maps/e2e/tsconfig.json"
+      }
+    },
     "deploy": {
       "executor": "@angular/fire:deploy",
       "options": {
