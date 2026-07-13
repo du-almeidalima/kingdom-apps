@@ -40,7 +40,14 @@ export class TerritoryBO {
 
     return territories$.pipe(
       switchMap(territories => {
-        const designationTerritories: DesignationTerritory[] = territories.map(t => {
+        // The batched Firestore "IN" fetch does not preserve request order; re-sort the
+        // fetched territories to match the caller's id order (i.e. the optimized route).
+        const orderIndex = new Map(territoriesIds.map((id, i) => [id, i]));
+        const orderedTerritories = [...territories].sort(
+          (a, b) => (orderIndex.get(a.id) ?? 0) - (orderIndex.get(b.id) ?? 0)
+        );
+
+        const designationTerritories: DesignationTerritory[] = orderedTerritories.map(t => {
           // This is not needed for the Designation Territory
           delete t['recentHistory'];
 
