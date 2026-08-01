@@ -291,6 +291,11 @@ npx nx typecheck-e2e ministry-maps
 5. For guarded routes, use the `authenticatedPage` fixture (with
    `test.use({ role })`) or call `signInAs(role)` first.
 
+> **What should I test?** The full behavioural use-case and journey catalog lives in
+> [`../docs`](../docs/README.md) (`UC-<AREA>-NN` entries, `J-NN` journeys, priorities, seed preconditions,
+> Firestore assertions, and the testability-gap list). Start from [`../docs/test-catalog.md`](../docs/test-catalog.md)
+> — test titles should reference the UC/J ID they implement.
+
 ## Out of Scope (Future)
 
 - CI pipeline wiring (GitHub Actions).

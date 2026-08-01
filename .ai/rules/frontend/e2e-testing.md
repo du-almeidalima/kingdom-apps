@@ -21,6 +21,8 @@ E2E tests run against a **real emulated Firebase**, never mocks. After a UI acti
 
 > The E2E emulator starts **EMPTY**. The Playwright `webServer` boots the emulators with `firebase emulators:exec`, which (unlike the dev target) does **not** `--import` seed data. Admin SDK seeding is therefore the **sole** source of test data.
 
+> **Use-case catalog:** what to test (every screen's use cases `UC-<AREA>-NN`, multi-role journeys `J-NN`, seed preconditions, Firestore assertions, priorities, and testability gaps) is documented in `apps/ministry-maps/docs/` — start from `apps/ministry-maps/docs/test-catalog.md` and reference the UC/J ID in test titles.
+
 ## Running E2E Tests
 
 ```bash
