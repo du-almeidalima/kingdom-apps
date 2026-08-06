@@ -22,10 +22,10 @@ scope here except where needed to explain what a created `invitation_links` doc 
 #### UC-USERS-01 — List is scoped to the signed-in user's congregation and ordered by role priority
 - **Actor:** Admin
 - **Route:** `/users`
-- **Preconditions (seed):** default baseline (`seed-user-admin` `ADMIN` + `seed-user-publisher-1..3` `PUBLISHER`)
+- **Preconditions (seed):** default baseline (8 users since WP-01: `seed-user-admin` `ADMIN`, `seed-user-publisher-1..3` `PUBLISHER`, plus `seed-user-elder` `ELDER`, `seed-user-organizer` `ORGANIZER`, `seed-user-superintendent` `SUPERINTENDENT`, `seed-user-app-admin` `APP_ADMIN`)
 - **Steps:** 1. sign in as admin → 2. open `/users`
-- **Expected UI:** all 4 baseline users render as `kingdom-apps-user-list-item` rows. `UsersPageComponent.sortUserFn` sorts by a fixed priority map — `APP_ADMIN`(1) → `SUPERINTENDENT`(2) → `ADMIN`(3) → `ELDER`(4) → `ORGANIZER`(5) → `PUBLISHER`(6), unknown role → 99 — so Carlos Almeida (`ADMIN`) always renders first; the 3 `PUBLISHER`s share the same priority (6), and `Array.prototype.sort` is stable, so they keep whatever relative order the Firestore query returned. In practice (no explicit `orderBy` in `getAllByCongregation`) the emulator returns Ana Souza, Pedro Lima, Mariana Costa in ascending document-id order, giving the visible order `Carlos Almeida, Ana Souza, Pedro Lima, Mariana Costa`
-- **Expected persistence:** `db.getDoc(db.collections.users, seed.ids.adminUser).role === 'ADMIN'`; `db.getCollectionDocs(db.collections.users)` has length `4`
+- **Expected UI:** all 8 baseline users render as `kingdom-apps-user-list-item` rows. `UsersPageComponent.sortUserFn` sorts by a fixed priority map — `APP_ADMIN`(1) → `SUPERINTENDENT`(2) → `ADMIN`(3) → `ELDER`(4) → `ORGANIZER`(5) → `PUBLISHER`(6), unknown role → 99 — and `Array.prototype.sort` is stable, so same-priority users keep whatever relative order the Firestore query returned. The baseline therefore renders in role-priority order: Daniel Ferreira (`APP_ADMIN`), Felipe Rodrigues (`SUPERINTENDENT`), Carlos Almeida (`ADMIN`), Marcos Oliveira (`ELDER`), Ricardo Santos (`ORGANIZER`), then the 3 `PUBLISHER`s (priority 6) — in practice (no explicit `orderBy` in `getAllByCongregation`) the emulator returns Ana Souza, Pedro Lima, Mariana Costa in ascending document-id order
+- **Expected persistence:** `db.getDoc(db.collections.users, seed.ids.adminUser).role === 'ADMIN'`; `db.getCollectionDocs(db.collections.users)` has length `8`
 - **Edge cases:** the tie-break order among same-role users is **not** a documented contract (no `orderBy` clause exists) — a test asserting the exact order of the 3 publishers is locking in incidental Firestore behaviour, not a guarantee; re-verify if the seeder or query changes
 - **Priority:** P0 · **Gaps:** no `data-testid` on the list or its container; select rows by name text
 
@@ -44,8 +44,8 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline; plus `buildCongregation()` (a second congregation) and `buildUser({ congregationId: <second congregation id>, role: 'ADMIN' })` in it
 - **Steps:** 1. sign in as admin (of `seed-congregation`) → 2. open `/users`
-- **Expected UI:** exactly the 4 baseline rows render; the foreign user never appears, regardless of its role
-- **Expected persistence:** `db.getCollectionDocs(db.collections.users)` returns `5` total docs; a query built as `db.queryWhere(db.collections.users, 'congregation', '==', db.firestore.collection('congregations').doc(seed.ids.congregation))` returns exactly the `4` baseline users
+- **Expected UI:** exactly the 8 baseline rows render; the foreign user never appears, regardless of its role
+- **Expected persistence:** `db.getCollectionDocs(db.collections.users)` returns `9` total docs; a query built as `db.queryWhere(db.collections.users, 'congregation', '==', db.firestore.collection('congregations').doc(seed.ids.congregation))` returns exactly the `8` baseline users
 - **Edge cases:** the scoping query (`getAllByCongregation`) compares `DocumentReference` equality only — it does not additionally filter by role, so even a foreign `APP_ADMIN` is excluded from this list (congregation scoping is unconditional)
 - **Priority:** P0 · **Gaps:** none
 
@@ -185,7 +185,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Preconditions (seed):** default baseline
 - **Steps:** 1. sign in as publisher → 2. `page.goto('/users')`
 - **Expected UI:** the URL becomes `/welcome` (`authGuard` step 2a: `role === PUBLISHER && path !== 'welcome'`)
-- **Expected persistence:** N/A (guard-only, no write); assert `db.getCollectionDocs(db.collections.users)` is unchanged (still `4` baseline docs) to prove no side effect
+- **Expected persistence:** N/A (guard-only, no write); assert `db.getCollectionDocs(db.collections.users)` is unchanged (still `8` baseline docs) to prove no side effect
 - **Edge cases:** this is the same redirect target as every other guarded admin route (`/territories`, `/home`) — publishers are locked out of `/users` uniformly
 - **Priority:** P0 · **Gaps:** none
 

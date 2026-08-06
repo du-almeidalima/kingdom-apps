@@ -149,16 +149,17 @@ publisher redirect is never reached because step 1 returns first.
 
 ## 6. Testing identities
 
-`signInAs(role)` mints a custom token for `ROLE_UIDS[role]`; today only:
+`signInAs(role)` mints a custom token for `ROLE_UIDS[role]`. One baseline user per role is seeded (HX-1,
+landed in WP-01):
 
 | Fixture role | uid | `RoleEnum` |
 |---|---|---|
 | `'admin'` | `seed-user-admin` | `ADMIN` |
 | `'publisher'` | `seed-user-publisher-1` | `PUBLISHER` |
-
-Every other role (`ELDER`, `ORGANIZER`, `SUPERINTENDENT`, `APP_ADMIN`) requires a **harness extension**:
-seed a user with that role and add it to `ROLE_UIDS` / `TestRole`. Listed in
-[`../test-catalog.md`](../test-catalog.md#harness-extensions-needed).
+| `'elder'` | `seed-user-elder` | `ELDER` |
+| `'organizer'` | `seed-user-organizer` | `ORGANIZER` |
+| `'superintendent'` | `seed-user-superintendent` | `SUPERINTENDENT` |
+| `'app_admin'` | `seed-user-app-admin` | `APP_ADMIN` |
 
 Sign-in through the UI uses `signInWithPopup` against a real OAuth provider and is **not automatable** —
 use `signInAs` (custom token) for everything except the login-screen rendering tests.

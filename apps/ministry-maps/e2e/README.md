@@ -54,15 +54,16 @@ apps/ministry-maps/e2e/
 |-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `emulator.config.ts`        | Single source of truth for ports (`8080`, `9099`, `5001`), project id (`du-ministry-maps`), and derived REST URLs. Keep in sync with `firebase.json`.         |
 | `firebase-admin.context.ts` | Sets env vars (`FIRESTORE_EMULATOR_HOST`, `FIREBASE_AUTH_EMULATOR_HOST`), initializes the Admin app once, and exports `firestore`, `auth`, and `Collections`. |
-| `auth.config.ts`            | `ROLE_UIDS: Record<TestRole, string>` — maps test roles (`admin`, `publisher`) to seeded uids from `DEFAULT_SEED_IDS` — plus `DEFAULT_PASSWORD`.              |
+| `auth.config.ts`            | `ROLE_UIDS: Record<TestRole, string>` — maps test roles (`admin`, `publisher`, `elder`, `organizer`, `superintendent`, `app_admin`) to seeded uids from `DEFAULT_SEED_IDS` — plus `DEFAULT_PASSWORD`.              |
 
 ## Seeding (`seed/`)
 
 ### The Default Baseline
 
 Before every test the database fixture resets the emulators and applies the
-**default baseline**: 1 congregation, 4 users (1 ADMIN + 3 PUBLISHERs), 3
-territories (with visit history), and 1 designation.
+**default baseline**: 1 congregation, 8 users (1 ADMIN, 3 PUBLISHERs, and 1 each
+of ELDER, ORGANIZER, SUPERINTENDENT and APP_ADMIN so `signInAs` covers every
+`RoleEnum`), 3 territories (with visit history), and 1 designation.
 
 ### Factory Usage
 
@@ -181,7 +182,10 @@ test('guarded route', async ({ signInAs, page }) => {
 
 `signInAs` resolves only once `auth.currentUser` is populated in the browser,
 so the auth guard resolves the user on your first navigation (no arbitrary
-waits). Supported roles: `'admin'` (ADMIN user), `'publisher'` (PUBLISHER user).
+waits). Supported roles: `'admin'` (ADMIN), `'publisher'` (PUBLISHER),
+`'elder'` (ELDER), `'organizer'` (ORGANIZER), `'superintendent'`
+(SUPERINTENDENT) and `'app_admin'` (APP_ADMIN) — each maps to a baseline user
+carrying the matching `RoleEnum` (see `ROLE_UIDS` in `config/auth.config.ts`).
 
 ## Auth Strategy
 

@@ -17,7 +17,8 @@ test.describe('E2E seeding smoke test', () => {
     const designations = await db.getCollectionDocs(db.collections.designations);
 
     expect(congregations).toHaveLength(1);
-    expect(users).toHaveLength(4);
+    // 8 users: 1 ADMIN + 3 PUBLISHERs + 1 each of ELDER / ORGANIZER / SUPERINTENDENT / APP_ADMIN.
+    expect(users).toHaveLength(8);
     expect(territories).toHaveLength(3);
     expect(designations).toHaveLength(1);
   });

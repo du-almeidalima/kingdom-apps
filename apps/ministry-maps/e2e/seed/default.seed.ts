@@ -19,13 +19,19 @@ export const DEFAULT_SEED_IDS = {
   congregation: 'seed-congregation',
   adminUser: 'seed-user-admin',
   publisherUsers: ['seed-user-publisher-1', 'seed-user-publisher-2', 'seed-user-publisher-3'],
+  elderUser: 'seed-user-elder',
+  organizerUser: 'seed-user-organizer',
+  superintendentUser: 'seed-user-superintendent',
+  appAdminUser: 'seed-user-app-admin',
   territories: ['seed-territory-1', 'seed-territory-2', 'seed-territory-3'],
   designation: 'seed-designation',
 } as const;
 
 /**
  * Builds the minimal, predictable baseline applied before every test:
- * 1 congregation, an ADMIN + 3 PUBLISHERs, 3 territories (with visit history), and 1 designation.
+ * 1 congregation, 8 users (an ADMIN, 3 PUBLISHERs, and one user per remaining role — ELDER, ORGANIZER,
+ * SUPERINTENDENT, APP_ADMIN — so `signInAs` covers the whole `RoleEnum`), 3 territories (with visit
+ * history), and 1 designation.
  * Built fresh on each call so callers never share a mutable state between tests.
  */
 export function buildDefaultSeed(): SeedDefinition {
@@ -53,6 +59,26 @@ export function buildDefaultSeed(): SeedDefinition {
       name: publisherNames[index],
       email: `${id}@example.com`,
       role: RoleEnum.PUBLISHER,
+      congregationId,
+    }),
+  );
+
+  // One user per remaining role so `signInAs` can authenticate as any `RoleEnum` (see `ROLE_UIDS`).
+  const roleUsers = [
+    { id: DEFAULT_SEED_IDS.elderUser, name: 'Marcos Oliveira', role: RoleEnum.ELDER },
+    { id: DEFAULT_SEED_IDS.organizerUser, name: 'Ricardo Santos', role: RoleEnum.ORGANIZER },
+    {
+      id: DEFAULT_SEED_IDS.superintendentUser,
+      name: 'Felipe Rodrigues',
+      role: RoleEnum.SUPERINTENDENT,
+    },
+    { id: DEFAULT_SEED_IDS.appAdminUser, name: 'Daniel Ferreira', role: RoleEnum.APP_ADMIN },
+  ].map(({ id, name, role }) =>
+    buildUser({
+      id,
+      name,
+      email: `${id}@example.com`,
+      role,
       congregationId,
     }),
   );
@@ -138,7 +164,7 @@ export function buildDefaultSeed(): SeedDefinition {
 
   return {
     congregations: [congregation],
-    users: [admin, ...publishers],
+    users: [admin, ...publishers, ...roleUsers],
     territories,
     designations: [designation],
   };

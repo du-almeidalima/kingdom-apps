@@ -283,12 +283,16 @@ Applied automatically before **every** test by the `resetAndSeed` auto fixture (
 | Congregation | `seed-congregation`        | `Congregação Jardim Primavera`, `São Paulo, SP`, cities `['São Paulo', 'Osasco']`, settings `{ designationAccessExpiryDays: 7, shouldDesignationBlockAfterExpired: true }`                       |
 | Admin user   | `seed-user-admin`          | `Carlos Almeida`, `carlos.almeida@example.com`, `ADMIN`                                                                                                                                          |
 | Publishers   | `seed-user-publisher-1..3` | `Ana Souza`, `Pedro Lima`, `Mariana Costa`, `PUBLISHER`, emails `seed-user-publisher-N@example.com`                                                                                              |
+| Elder        | `seed-user-elder`          | `Marcos Oliveira`, `ELDER`, `seed-user-elder@example.com`                                                                                                                                                                       |
+| Organizer    | `seed-user-organizer`      | `Ricardo Santos`, `ORGANIZER`, `seed-user-organizer@example.com`                                                                                                                                                                 |
+| Superintendent | `seed-user-superintendent` | `Felipe Rodrigues`, `SUPERINTENDENT`, `seed-user-superintendent@example.com`                                                                                                                                                   |
+| App Admin    | `seed-user-app-admin`      | `Daniel Ferreira`, `APP_ADMIN`, `seed-user-app-admin@example.com`                                                                                                                                                                |
 | Territory 1  | `seed-territory-1`         | São Paulo · `Rua das Acácias, 45 - Pinheiros` · `COUPLE` · `positionIndex 0` · 2 visits (`REVISIT` 2024-03-10, `SPOKE` 2024-02-20)                                                               |
 | Territory 2  | `seed-territory-2`         | Osasco · `Av. dos Autonomistas, 1200 - Centro` · `WOMAN` · `positionIndex 1` · 1 visit (`NOT_ANSWERED` 2024-03-05, `isResolved: false`)                                                          |
 | Territory 3  | `seed-territory-3`         | São Paulo · `Rua Harmonia, 300 - Vila Madalena` · `MAN` · `positionIndex 2` · `isBibleStudent: true`, `bibleInstructor: seed-user-publisher-1` · 1 visit (`SPOKE` 2024-03-12, `isRevisit: true`) |
 | Designation  | `seed-designation`         | `createdBy: seed-user-admin`, `createdAt 2024-03-01`, **`expiresAt 2024-03-08` (already expired)**, embeds a snapshot of `seed-territory-1`, `settings.shouldDesignationBlockAfterExpired: true` |
 
-Baseline counts: `congregations 1`, `users 4`, `territories 3`, `designations 1`, history docs `2 + 1 + 1`.
+Baseline counts: `congregations 1`, `users 8`, `territories 3`, `designations 1`, history docs `2 + 1 + 1`.
 
 > The baseline designation is **expired, blocking, and unopenable**: its embedded territory is built by
 > `buildDesignationTerritory` without a `history` field, which breaks the read converter (§4.2). Any
@@ -296,8 +300,9 @@ Baseline counts: `congregations 1`, `users 4`, `territories 3`, `designations 1`
 > entries) on every embedded territory; do not reuse `seed.ids.designation` as-is.
 
 Every seeded user gets an Auth emulator account with `DEFAULT_PASSWORD = 'test-password-123'`, and
-`signInAs` mints custom tokens for `ROLE_UIDS` — today only `admin` → `seed-user-admin` and
-`publisher` → `seed-user-publisher-1`.
+`signInAs` mints custom tokens for `ROLE_UIDS` — `admin` → `seed-user-admin`,
+`publisher` → `seed-user-publisher-1`, `elder` → `seed-user-elder`, `organizer` → `seed-user-organizer`,
+`superintendent` → `seed-user-superintendent`, `app_admin` → `seed-user-app-admin`.
 
 ### Factory defaults (only override what a use case cares about)
 
