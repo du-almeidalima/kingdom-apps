@@ -12,12 +12,14 @@
  * - `FirebaseTerritoryDatasourceService.COLLECTION_NAME` → 'territories'
  * - `FirebaseTerritoryDatasourceService['historySubCollectionName']` → 'history'
  * - `FirebaseDesignationDatasourceService['collectionName']` → 'designations'
+ * - `FirebaseInvitationLinkDataSourceService.COLLECTION_NAME` → 'invitation_links' (mind the underscore)
  */
 export const Collections = {
   congregations: 'congregations',
   users: 'users',
   territories: 'territories',
   designations: 'designations',
+  invitation_links: 'invitation_links',
 } as const;
 
 /** Subcollection that stores a territory's full visit history. */

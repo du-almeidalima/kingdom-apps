@@ -1,7 +1,7 @@
 import { auth, firestore } from '../config/firebase-admin.context';
 import { Collections, TERRITORY_HISTORY_SUBCOLLECTION } from './collections';
 import { DEFAULT_PASSWORD } from '../config/auth.config';
-import { SeedDefinition, SeedResult, UserSeed } from './types';
+import { InvitationLinkSeed, SeedDefinition, SeedResult, UserSeed } from './types';
 
 /**
  * Writes a {@link SeedDefinition} to the Firestore + Auth emulators and returns
@@ -14,6 +14,10 @@ import { SeedDefinition, SeedResult, UserSeed } from './types';
  *   app keys `users/{uid}` by the auth uid.
  * - Territory `history` is written to the `territories/{id}/history`
  *   subcollection; the parent doc gets `recentHistory` (latest 5) and `lastVisit`.
+ * - `InvitationLink.congregation` is written as a `DocumentReference` with the
+ *   doc's own `id` embedded in the body — the app's creation-time shape
+ *   (`FirebaseInvitationLinkDataSourceService.add`; consumption later rewrites
+ *   it as an embedded object, see `docs/domain/data-model.md` §2.6).
  * - `Date` values are persisted by the Admin SDK as Firestore `Timestamp`s.
  */
 export async function seed(def: SeedDefinition): Promise<SeedResult> {
@@ -22,6 +26,7 @@ export async function seed(def: SeedDefinition): Promise<SeedResult> {
     users = [],
     territories = [],
     designations = [],
+    invitationLinks = [],
   } = def;
 
   const batch = firestore.batch();
@@ -70,6 +75,13 @@ export async function seed(def: SeedDefinition): Promise<SeedResult> {
     );
   }
 
+  for (const invitationLink of invitationLinks) {
+    batch.set(
+      firestore.collection(Collections.invitation_links).doc(invitationLink.id),
+      toInvitationLinkDocument(invitationLink),
+    );
+  }
+
   await batch.commit();
   await Promise.all(users.map(createAuthUser));
 
@@ -78,6 +90,7 @@ export async function seed(def: SeedDefinition): Promise<SeedResult> {
     userIds: users.map((u) => u.id),
     territoryIds: territories.map((t) => t.id),
     designationIds: designations.map((d) => d.id),
+    invitationLinkIds: invitationLinks.map((i) => i.id),
   };
 }
 
@@ -90,6 +103,21 @@ function toUserDocument(user: UserSeed) {
     photoUrl: user.photoUrl,
     role: user.role,
     congregation: firestore.doc(`${Collections.congregations}/${user.congregationId}`),
+  };
+}
+
+/**
+ * Maps an {@link InvitationLinkSeed} to the stored document, mirroring the
+ * app's creation-time write: `congregation` as a `DocumentReference` and the
+ * doc's own `id` embedded in the body (a consumed invite keeps `isValid: false`
+ * + `usedAt`/`usedBy` as passed).
+ */
+function toInvitationLinkDocument(invitationLink: InvitationLinkSeed) {
+  const { congregationId, ...rest } = invitationLink;
+
+  return {
+    ...rest,
+    congregation: firestore.doc(`${Collections.congregations}/${congregationId}`),
   };
 }
 

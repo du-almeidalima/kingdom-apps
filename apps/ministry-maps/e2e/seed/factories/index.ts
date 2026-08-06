@@ -3,3 +3,4 @@ export { buildUser } from './user.factory';
 export { buildTerritory } from './territory.factory';
 export { buildVisitHistory } from './visit-history.factory';
 export { buildDesignation, buildDesignationTerritory } from './designation.factory';
+export { buildInvitationLink } from './invitation-link.factory';

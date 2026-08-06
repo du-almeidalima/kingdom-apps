@@ -1,6 +1,7 @@
 import { Congregation } from '../../src/models/congregation';
 import { Designation } from '../../src/models/designation';
 import { RoleEnum } from '../../src/models/enums/role';
+import { InvitationLink } from '../../src/models/invitation-link';
 import { Territory } from '../../src/models/territory';
 import { TerritoryVisitHistory } from '../../src/models/territory-visit-history';
 
@@ -49,12 +50,25 @@ export interface TerritorySeed extends Omit<Territory, 'recentHistory' | 'lastVi
 /** A designation document. Mirrors the real {@link Designation} model 1:1. */
 export type DesignationSeed = Designation;
 
+/**
+ * An invitation-link document in the app's creation-time shape
+ * (`docs/domain/data-model.md` §2.6). Typed against the real
+ * {@link InvitationLink} model with `congregationId` in place of the hydrated
+ * `congregation` — the seeder converts it to a `DocumentReference` on
+ * `/congregations/{id}` at write time (and embeds the doc's own `id` in the
+ * body, matching `FirebaseInvitationLinkDataSourceService.add`).
+ */
+export interface InvitationLinkSeed extends Omit<InvitationLink, 'congregation'> {
+  congregationId: string;
+}
+
 /** A set of entities to write to the emulators. All fields are optional so callers can pass just what they need. */
 export interface SeedDefinition {
   congregations?: CongregationSeed[];
   users?: UserSeed[];
   territories?: TerritorySeed[];
   designations?: DesignationSeed[];
+  invitationLinks?: InvitationLinkSeed[];
 }
 
 /** Ids of everything created by a single {@link seed} call, for assertions. */
@@ -63,4 +77,5 @@ export interface SeedResult {
   userIds: string[];
   territoryIds: string[];
   designationIds: string[];
+  invitationLinkIds: string[];
 }

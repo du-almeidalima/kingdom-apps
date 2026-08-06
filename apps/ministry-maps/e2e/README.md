@@ -109,6 +109,11 @@ The seeder enforces the app's real storage shape:
 3. **Dates** are plain `Date`s — the Admin SDK auto-converts to `Timestamp`.
 4. **Territory history** lives in `territories/{id}/history` subcollection;
    `recentHistory` (latest 5, desc) and `lastVisit` are derived on the parent.
+5. **Invitation links** (`invitation_links`, mind the underscore) are written in
+   the app's creation-time shape: `congregation` as a `DocumentReference` and
+   the doc's own `id` embedded in the body. Seed them via
+   `seed.write({ invitationLinks: [seed.factories.buildInvitationLink({ congregationId: seed.ids.congregation })] })`;
+   a consumed invite is just an override (`isValid: false, usedAt, usedBy`).
 
 ## Fixtures
 
