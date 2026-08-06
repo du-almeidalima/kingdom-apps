@@ -135,6 +135,7 @@ import { test, expect } from '../fixtures';
 | `db`                | `DbApi`                   | Firestore/Auth handles and read helpers.                  |
 | `role`              | option (`TestRole`)       | Identity for `authenticatedPage`; set via `test.use`.     |
 | `signInAs`          | `(role) => Promise<void>` | Imperatively signs the current `page` into a seeded user. |
+| `signInAsUser`      | `(uid) => Promise<void>`  | Signs the current `page` into **any** seeded user, by uid. |
 | `authenticatedPage` | `Page`                    | A `page` already signed in as the `role` option.          |
 
 ### `db` — Read / Assertion API
@@ -191,6 +192,25 @@ waits). Supported roles: `'admin'` (ADMIN), `'publisher'` (PUBLISHER),
 `'elder'` (ELDER), `'organizer'` (ORGANIZER), `'superintendent'`
 (SUPERINTENDENT) and `'app_admin'` (APP_ADMIN) — each maps to a baseline user
 carrying the matching `RoleEnum` (see `ROLE_UIDS` in `config/auth.config.ts`).
+
+For identities **outside** the baseline (e.g. the admin of a second, on-demand
+congregation), use `signInAsUser(uid)` — same session mechanics, but it mints
+the custom token for any seeded uid:
+
+```typescript
+test('second-congregation admin', async ({ seed, signInAsUser, page }) => {
+  const congregation = seed.factories.buildCongregation({ cities: ['Campinas'] });
+  const admin = seed.factories.buildUser({
+    role: RoleEnum.ADMIN,
+    congregationId: congregation.id,
+  });
+  await seed.write({ congregations: [congregation], users: [admin] });
+
+  await signInAsUser(admin.id);
+  await page.goto('/territories');
+  // ...scoped to the new congregation
+});
+```
 
 ## Auth Strategy
 

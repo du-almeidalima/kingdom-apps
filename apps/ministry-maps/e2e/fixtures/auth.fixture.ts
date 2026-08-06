@@ -35,7 +35,8 @@ const SESSION_SETTLE_TIMEOUT_MS = 10_000;
 
 /**
  * Establishes a real Firebase Auth emulator session in the given page by exchanging an Admin-minted custom token via
- * the dev-only `__E2E__` hook.
+ * the dev-only `__E2E__` hook. Works for **any** seeded uid — the role-named `signInAs` fixture and the
+ * arbitrary-uid `signInAsUser` fixture both delegate here.
  *
  * Sign-in happens per test, after the `resetAndSeed` auto fixture (the reset wipes Auth, revoking any previous token),
  * so a fresh token is minted here. The helper resolves only once `auth.currentUser` is populated, guaranteeing
@@ -46,9 +47,11 @@ const SESSION_SETTLE_TIMEOUT_MS = 10_000;
  *
  * Future upgrade path: a per-role `storageState` setup project would let specs skip this exchange entirely, but it's
  * blocked today by the per-test Auth emulator reset (any saved session would be invalidated by the next test's wipe).
+ *
+ * @param uid - Auth emulator uid to sign in as (`===` the seeded user's Firestore doc id).
+ * @param uidGuidance - actionable "Confirm …" clause for the settle-timeout error, naming where the uid came from.
  */
-async function establishSession(page: Page, role: TestRole): Promise<void> {
-  const uid = ROLE_UIDS[role];
+async function signInWithUid(page: Page, uid: string, uidGuidance: string): Promise<void> {
   const token = await auth.createCustomToken(uid);
 
   await page.goto('/login');
@@ -101,9 +104,8 @@ async function establishSession(page: Page, role: TestRole): Promise<void> {
     );
   } catch {
     throw new Error(
-      `auth.currentUser did not settle to uid '${uid}' (role '${role}') within ${SESSION_SETTLE_TIMEOUT_MS}ms. ` +
-        `Confirm '${role}' maps to a seeded uid in ROLE_UIDS (config/auth.config.ts) and that the Auth emulator ` +
-        `is reachable at ${AUTH_EMULATOR_HOST}.`,
+      `auth.currentUser did not settle to uid '${uid}' within ${SESSION_SETTLE_TIMEOUT_MS}ms. ` +
+        `Confirm ${uidGuidance} and that the Auth emulator is reachable at ${AUTH_EMULATOR_HOST}.`,
     );
   }
 }
@@ -126,6 +128,15 @@ interface AuthFixtures {
    */
   signInAs: (role: TestRole) => Promise<void>;
   /**
+   * Signs the current `page` in as **any** seeded user, by uid — required for
+   * identities outside the named `ROLE_UIDS` baseline (e.g. a second-congregation
+   * admin built with `buildUser` + `seed.write`). Same session mechanics as
+   * `signInAs`: the page is left on `/login` with a live session.
+   *
+   * @param uid - the seeded user's id (`===` its Auth emulator uid and Firestore doc id)
+   */
+  signInAsUser: (uid: string) => Promise<void>;
+  /**
    * A `page` already signed in as `role` (defaults to `'admin'`). Prefer this
    * over calling `signInAs` manually when a spec only needs a single identity.
    */
@@ -134,7 +145,8 @@ interface AuthFixtures {
 
 /**
  * Composed test object: extends the database fixture (reset+seed, `seed`, `db`) with Playwright-idiomatic
- * authentication (`role` option, `signInAs`, `authenticatedPage`). Specs import `test`/`expect` from `./index`.
+ * authentication (`role` option, `signInAs`, `signInAsUser`, `authenticatedPage`). Specs import
+ * `test`/`expect` from `./index`.
  */
 export const test = dbTest.extend<AuthOptions & AuthFixtures>({
   role: ['admin', { option: true }],
@@ -142,7 +154,23 @@ export const test = dbTest.extend<AuthOptions & AuthFixtures>({
   signInAs: async ({ page }, use) => {
     // No `resetAndSeed` dependency needed: the returned function runs inside
     // the test body, i.e. after all auto fixtures have already completed.
-    await use((role) => establishSession(page, role));
+    await use((role) =>
+      signInWithUid(
+        page,
+        ROLE_UIDS[role],
+        `'${role}' maps to a seeded uid in ROLE_UIDS (config/auth.config.ts)`,
+      ),
+    );
+  },
+
+  signInAsUser: async ({ page }, use) => {
+    await use((uid) =>
+      signInWithUid(
+        page,
+        uid,
+        `'${uid}' belongs to a user seeded into the current test (the seeder creates an Auth emulator account with uid === user doc id)`,
+      ),
+    );
   },
 
   authenticatedPage: async ({ page, role, resetAndSeed }, use) => {
@@ -150,7 +178,11 @@ export const test = dbTest.extend<AuthOptions & AuthFixtures>({
     // wipe+seed — declaring `resetAndSeed` makes Playwright guarantee that
     // ordering instead of it being an accident of registration order.
     void resetAndSeed;
-    await establishSession(page, role);
+    await signInWithUid(
+      page,
+      ROLE_UIDS[role],
+      `'${role}' maps to a seeded uid in ROLE_UIDS (config/auth.config.ts)`,
+    );
     await use(page);
   },
 });

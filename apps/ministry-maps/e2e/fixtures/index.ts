@@ -8,6 +8,7 @@
  * - `seed` — `SeedApi` (factories, write, ids)
  * - `db` — `DbApi` (Firestore/Auth handles, read helpers)
  * - `signInAs` — imperatively signs the current `page` into a role
+ * - `signInAsUser` — imperatively signs the current `page` into any seeded uid
  * - `authenticatedPage` — a `page` already signed in as the `role` option
  * - `role` — option (`test.use({ role })`) driving `authenticatedPage`
  *
