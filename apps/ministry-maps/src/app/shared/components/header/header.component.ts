@@ -15,7 +15,7 @@ import { RouterLink } from '@angular/router';
   styleUrls: ['./header.component.scss'],
   template: `
     <lib-header [logoBackgroundColor]="headerLogoBackgroundColor" initials="MM" [headerLink]="FeatureRoutes.HOME">
-      <div class="header-container">
+      <div class="header-container" data-testid="header-nav">
         <p class="header-container__app-name">Ministry Maps</p>
         @if (userStateService.isLoggedIn) {
         <a

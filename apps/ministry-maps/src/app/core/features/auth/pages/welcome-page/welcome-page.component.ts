@@ -8,7 +8,7 @@ import { User } from '../../../../../../models/user';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class='container'>
-      <h2 class='t-headline1 mb-12'>Bem-Vindo {{ userName }}!</h2>
+      <h2 class='t-headline1 mb-12' data-testid="welcome-heading">Bem-Vindo {{ userName }}!</h2>
       <p class='t-body1 mb-5'>Sua conta foi criada com sucesso!</p>
       <p class='t-body1'>
         Sua conta está ligada a congregação {{user?.congregation?.name}}. Agora um dos administradores de sua congregação

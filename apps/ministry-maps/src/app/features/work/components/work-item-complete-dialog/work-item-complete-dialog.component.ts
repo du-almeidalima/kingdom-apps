@@ -29,7 +29,7 @@ type WorkItemCompleteForm = ControlsOf<WorkItemCompleteDialogData>;
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./work-item-complete-dialog.component.scss'],
   template: `
-    <lib-dialog [title]="isEdit ? 'Editar Visita' : 'Concluir Visita'">
+    <lib-dialog [title]="isEdit ? 'Editar Visita' : 'Concluir Visita'" data-testid="work-complete-dialog">
       <form id="work-item-complete" [formGroup]="form" (ngSubmit)="handleFormSubmit()" tabindex="0">
         <!-- Visit Outcome -->
         <h3 class="mb-4 t-headline4">Resultado da visita</h3>
@@ -74,7 +74,7 @@ type WorkItemCompleteForm = ControlsOf<WorkItemCompleteDialogData>;
           </label>
           <input lib-input formControlName="name" type="text" id="publisher-name" autocomplete="publisher-name" />
           @if (isNameRequired && form.controls.name.invalid) {
-          <span class="form-control-error">Por favor, coloque o seu nome</span>
+          <span class="form-control-error" data-testid="work-complete-name-error">Por favor, coloque o seu nome</span>
           }
         </lib-form-field>
 
@@ -95,8 +95,8 @@ type WorkItemCompleteForm = ControlsOf<WorkItemCompleteDialogData>;
       </form>
       <lib-dialog-footer class="sticky bottom-0 left-0 right-0">
         <div class="flex justify-end gap-4">
-          <button lib-button libDialogClose>Cancelar</button>
-          <button lib-button btnType="primary" type="submit" form="work-item-complete" [disabled]="form.invalid">
+          <button lib-button libDialogClose data-testid="work-complete-cancel">Cancelar</button>
+          <button lib-button btnType="primary" type="submit" form="work-item-complete" [disabled]="form.invalid" data-testid="work-complete-submit">
             {{ isEdit ? 'Atualizar' : 'Concluir' }}
           </button>
         </div>

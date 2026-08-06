@@ -27,7 +27,7 @@ import { NgClass } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./work-item.component.scss'],
   template: `
-    <div class="work-item">
+    <div class="work-item" data-testid="work-item">
       <!-- Checkbox -->
       <label
         class="work-item__checkbox-container"
@@ -38,6 +38,7 @@ import { NgClass } from '@angular/common';
           <button
             lib-icon-button
             type="button"
+            data-testid="work-item-undo"
             [disabled]="disabled"
             [hoverBackgroundColor]="disabledButtonBackgroundColor"
             (click)="handleUndo()">
@@ -47,6 +48,7 @@ import { NgClass } from '@angular/common';
           <input
             class="work-item__checkbox"
             type="checkbox"
+            data-testid="work-item-checkbox"
             [id]="territory.id"
             [disabled]="disabled"
             (click)="handleCheck($event)" />
@@ -73,17 +75,17 @@ import { NgClass } from '@angular/common';
           <span class="work-item__city">{{ territory.city }}</span>
           <div class="work-item__buttons-container">
             @if (territory.status === DesignationStatusEnum.DONE) {
-              <button lib-icon-button [disabled]="disabled" (click)="handleEdit()">
+              <button lib-icon-button data-testid="work-item-edit" [disabled]="disabled" (click)="handleEdit()">
                 <lib-icon [fillColor]="disabled ? disabledColor : buttonIconColor" icon="pencil-lined" />
               </button>
             }
             @if (territory.mapsLink) {
-              <button lib-icon-button [disabled]="blocked" (click)="handleOpenMaps(territory.mapsLink)">
+              <button lib-icon-button data-testid="work-item-maps" [disabled]="blocked" (click)="handleOpenMaps(territory.mapsLink)">
                 <lib-icon [fillColor]="blocked ? disabledColor : buttonIconColor" icon="map-5" />
               </button>
             }
             @if (territory.history && territory.history.length > 0) {
-              <button lib-icon-button (click)="handleOpenHistory()">
+              <button lib-icon-button data-testid="work-item-history" (click)="handleOpenHistory()">
                 <lib-icon [fillColor]="buttonIconColor" icon="time-17" />
               </button>
             }
