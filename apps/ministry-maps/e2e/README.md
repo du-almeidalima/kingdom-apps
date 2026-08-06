@@ -32,6 +32,12 @@ apps/ministry-maps/e2e/
 ├── firebase/                     ← utility layer (runs in Node)
 │   ├── firestore-read.util.ts    # getDoc, getCollectionDocs, queryWhere, etc.
 │   └── reset.util.ts             # REST wipe of Firestore + Auth emulators
+├── utils/                        ← shared browser-interaction helpers (pure Playwright + Node)
+│   ├── window-open-stub.util.ts  # stubWindowOpen/getOpenedUrls — window.open recorder
+│   ├── whatsapp-link.util.ts     # captureWhatsAppPopup — whatsapp:// popup URL decoder
+│   ├── csv-download.util.ts      # downloadCsv — BOM-aware CSV download reader
+│   ├── native-dialog.util.ts     # acceptNextDialog/dismissNextDialog — native confirm() handlers
+│   └── cdk-drag.util.ts          # dragRowByMouse — CDK drag-drop via the low-level mouse API
 ├── seed/                         ← composable data seeding
 │   ├── types.ts                  # SeedDefinition (all fields optional), *Seed types
 │   ├── seeder.ts                 # write(def) → Firestore + Auth emulators
@@ -287,6 +293,21 @@ including `territories-city-filter` on the city `<select>`.
 > city renders 2 territories, "Todas" renders 3/4 — see `territories.spec.ts`).
 > If a filter wouldn't change the count, assert on an element unique to the
 > post-filter view instead (e.g. `territoryByAddress(...)`).
+
+## Browser-Interaction Utilities (`utils/`)
+
+Canonical helpers for the browser-level techniques catalogued in
+[`../docs/testability-gaps.md`](../docs/testability-gaps.md) §2 — use them
+instead of copying boilerplate into specs. All are pure Playwright + Node (no
+`test`/`expect` imports), so they also work from fixtures.
+
+| Helper | Technique | Serves |
+|---|---|---|
+| `stubWindowOpen(page)` / `getOpenedUrls(page)` | Records `window.open` URLs via `addInitScript` — the robust option when `waitForEvent('popup')` can't work (custom protocols, `_self` navigation) | UC-USERS-14, UC-WORK-19 (Firefox/Safari branch) |
+| `captureWhatsAppPopup(page, trigger)` | Wraps `waitForEvent('popup')` around the trigger, decodes the `whatsapp://send?text=…` URL → `{ whatsappUrl, text, sharedUrl }` | UC-ASSIGN-19, J-01 |
+| `downloadCsv(page, trigger)` | Wraps `waitForEvent('download')`, reads the file from `download.path()` — keeps the `\uFEFF` BOM for the caller to assert | UC-TERR-34, J-08 |
+| `acceptNextDialog(page)` / `dismissNextDialog(page)` | One-shot native `confirm()` handlers — register **before** the click | UC-CFG-10, J-05 |
+| `dragRowByMouse(page, source, target)` | CDK drag-drop via hover → `mouse.down()` → stepped `mouse.move()` → `mouse.up()` (`dragTo()` does not work) | UC-TERR-21 |
 
 ## Running Tests
 
