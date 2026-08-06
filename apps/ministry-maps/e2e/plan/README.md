@@ -107,14 +107,14 @@ the per-test reset+seed isolates tests (no cross-test leakage, no hidden timing 
 | # | Work package | Covers | Depends on | Size | Status |
 |---|---|---|---|---|---|
 | **Phase 0 — Harness foundations** ([details](./phase-0-foundations.md)) | | | | | |
-| WP-01 | HX-1: extra `signInAs` roles (elder, organizer, superintendent, app_admin) | unblocks 15+ rows | — | M | ⬜ |
-| WP-02 | HX-2: `invitation_links` seed support | UC-AUTH-14/16, J-03 | — | M | ⬜ |
-| WP-03 | HX-3: `signInAsUser(uid)` arbitrary-uid identity | UC-ASSIGN-03/04/14, UC-TERR-04, UC-STAT-13, J-08 | — | S | ⬜ |
-| WP-04 | HX-5: shared spec utilities (window.open stub, whatsapp decoder, CSV reader, confirm registrar, CDK drag) | UC-TERR-21/34, UC-ASSIGN-19, UC-USERS-14, UC-WORK-19, UC-CFG-10 | — | M | ⬜ |
+| WP-01 | HX-1: extra `signInAs` roles (elder, organizer, superintendent, app_admin) | unblocks 15+ rows | — | M | 🔄 |
+| WP-02 | HX-2: `invitation_links` seed support | UC-AUTH-14/16, J-03 | — | M | 🔄 |
+| WP-03 | HX-3: `signInAsUser(uid)` arbitrary-uid identity | UC-ASSIGN-03/04/14, UC-TERR-04, UC-STAT-13, J-08 | — | S | 🔄 |
+| WP-04 | HX-5: shared spec utilities (window.open stub, whatsapp decoder, CSV reader, confirm registrar, CDK drag) | UC-TERR-21/34, UC-ASSIGN-19, UC-USERS-14, UC-WORK-19, UC-CFG-10 | — | M | 🔄 |
 | **Phase 1 — Selectors & shared page objects** ([details](./phase-1-selectors-and-shared-pos.md)) | | | | | |
-| WP-05 | testids batch A: auth screens, home/header, `/work/:id`, `/territories/assign` | phase-2 specs | — | M | ⬜ |
-| WP-06 | testids batch B: territories dialogs, statistics, users, profile, configuration | phase-3/4 specs | — | M | ⬜ |
-| WP-07 | shared POs: `ConfirmDialog`, `HistoryDialog`, `SortFilterDialog`, `HeaderComponent`, `ToastComponent` | all areas | — | M | ⬜ |
+| WP-05 | testids batch A: auth screens, home/header, `/work/:id`, `/territories/assign` | phase-2 specs | — | M | 🔄 |
+| WP-06 | testids batch B: territories dialogs, statistics, users, profile, configuration | phase-3/4 specs | — | M | 🔄 |
+| WP-07 | shared POs: `ConfirmDialog`, `HistoryDialog`, `SortFilterDialog`, `HeaderComponent`, `ToastComponent` | all areas | — | M | 🔄 |
 | **Phase 2 — Core user paths** ([details](./phase-2-core-user-paths.md)) | | | | | |
 | WP-08 | `tests/auth.spec.ts` | UC-AUTH-01…03, 08…13, 22, 23 (+ owns 9 redirect-leg rows) | WP-05 | L | ⬜ |
 | WP-09 | `tests/invite-sign-in.spec.ts` | UC-AUTH-14, 15, 16 | WP-02, WP-05 | M | ⬜ |
