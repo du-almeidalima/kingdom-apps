@@ -23,7 +23,7 @@ export type TPeriodOption = {
   template: `
     <section class="parent-grid select-period mt-8">
       <h2 class="h2-period">Por período</h2>
-      <select lib-select name="Periodo" [formControl]="statisticsPeriodControl">
+      <select lib-select name="Periodo" data-testid="statistics-period-filter" [formControl]="statisticsPeriodControl">
         @for (period of periods; track period) {
           <option [value]="period.value">{{ period.label }}</option>
         }
@@ -31,10 +31,10 @@ export type TPeriodOption = {
     </section>
 
     <section class="parent-grid mt-4">
-      <div class="statistics-item p-4 mb-3">
+      <div class="statistics-item p-4 mb-3" data-testid="statistic-tile-revisits">
         Revisitas: <span>{{ statistics().revisitCount }}</span>
       </div>
-      <div class="statistics-item p-4 mb-3">
+      <div class="statistics-item p-4 mb-3" data-testid="statistic-tile-visits">
         Visitas: <span>{{ statistics().visitCount }}</span>
       </div>
     </section>

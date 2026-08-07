@@ -6,13 +6,14 @@
       lib-icon-button
       [cdkMenuTriggerFor]="menu"
       type="button"
+      data-testid="territories-overflow-menu"
       *libAuthorize="[RoleEnum.APP_ADMIN, RoleEnum.SUPERINTENDENT, RoleEnum.ADMIN]">
       <lib-icon [fillColor]="greyButtonColor" icon="menu-dot-vertical-filled"></lib-icon>
     </button>
 
     <ng-template #menu>
       <menu class="menu" cdkMenu>
-        <li class="menu__item" cdkMenuItem (cdkMenuItemTriggered)="handleExportTerritories()">
+        <li class="menu__item" data-testid="territories-export-item" cdkMenuItem (cdkMenuItemTriggered)="handleExportTerritories()">
           <button lib-icon-button type="button">
             <lib-icon [fillColor]="greyButtonColor" icon="download-20"></lib-icon>
           </button>
@@ -68,6 +69,7 @@
             <button
               lib-icon-button
               cdkDragHandle
+              data-testid="territory-item-drag-handle"
               [cdkDragHandleDisabled]="sortBy !== TerritoriesOrderBy.SAVED_INDEX"
               type='button'
               style='cursor: grab'
@@ -85,6 +87,7 @@
   }
 
   <button lib-floating-action-button title='Adicionar Território'
+          data-testid="territories-add-button"
           [backgroundColor]='green200'
           (click)='handleOpenManageTerritoryDialog()'>
     <lib-icon icon='plus-lined' [fillColor]='white200'></lib-icon>

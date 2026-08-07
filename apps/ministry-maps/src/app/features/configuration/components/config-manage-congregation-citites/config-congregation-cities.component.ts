@@ -26,30 +26,33 @@ interface CityItem {
           <p class="text-gray-600">{{ congregation.name }}</p>
         }
       </div>
-    
+
       <!-- Cities List -->
       @if (congregation) {
-        <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-6 overflow-hidden">
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-6 overflow-hidden" data-testid="config-cities-list">
           @for (city of cities; track city; let i = $index) {
             <div
-              class="px-6 py-4 border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors"
-              >
+               class="px-6 py-4 border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors"
+               data-testid="config-city-row"
+               >
               @if (!city.isEditing) {
                 <div class="flex justify-between items-center gap-4">
                   <span class="flex-1 text-gray-900 font-medium">{{ city.currentName }}</span>
                   <div class="flex gap-2">
                     <button
-                      class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-                      (click)="editCity(city)"
-                      [disabled]="hasEditingCities"
-                      >
+                       class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                       data-testid="config-edit-city"
+                       (click)="editCity(city)"
+                       [disabled]="hasEditingCities"
+                       >
                       Edit
                     </button>
                     <button
-                      class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-                      (click)="deleteCity(i)"
-                      [disabled]="hasEditingCities"
-                      >
+                       class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                       data-testid="config-delete-city"
+                       (click)="deleteCity(i)"
+                       [disabled]="hasEditingCities"
+                       >
                       Delete
                     </button>
                   </div>
@@ -61,6 +64,7 @@ interface CityItem {
                     type="text"
                     [(ngModel)]="city.currentName"
                     class="flex-1 px-3 py-2 border-2 rounded-md focus:outline-none focus:ring-0 transition-colors"
+                    data-testid="config-city-input"
                     [class.border-blue-500]="!city.isNew"
                     [class.focus:border-blue-600]="!city.isNew"
                     [class.border-green-500]="city.isNew"
@@ -69,9 +73,9 @@ interface CityItem {
                     />
                   <div class="flex gap-2">
                     <button
-                      class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors text-sm font-medium"
-                      (click)="cancelEdit(city, i)"
-                      >
+                       class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors text-sm font-medium"
+                       (click)="cancelEdit(city, i)"
+                       >
                       Cancel
                     </button>
                   </div>
@@ -86,19 +90,21 @@ interface CityItem {
           }
         </div>
       }
-    
+
       <!-- Action Buttons -->
       <div class="flex gap-4">
         <button
           class="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+          data-testid="config-add-city"
           (click)="addCity()"
           [disabled]="hasEditingCities || isLoading"
           >
           + Add City
         </button>
-    
+
         <button
           class="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+          data-testid="config-save"
           (click)="saveChanges()"
           [disabled]="!hasChanges() || isLoading"
           >
@@ -110,10 +116,10 @@ interface CityItem {
           }
         </button>
       </div>
-    
+
       <!-- No Congregation State -->
       @if (!congregation) {
-        <div class="p-12 text-center bg-red-50 border border-red-200 rounded-lg text-red-800">
+        <div class="p-12 text-center bg-red-50 border border-red-200 rounded-lg text-red-800" data-testid="config-no-congregation-banner">
           <p class="text-lg">No congregation found. Please ensure you are logged in.</p>
         </div>
       }

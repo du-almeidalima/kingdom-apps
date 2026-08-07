@@ -18,9 +18,9 @@ import { DatePipe, SlicePipe } from '@angular/common';
   styleUrls: ['./history-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <lib-dialog title="Histórico de Visitas">
+    <lib-dialog title="Histórico de Visitas" data-testid="history-dialog">
       @for (history of data; track history.id) {
-        <div class="work-item-history">
+        <div class="work-item-history" data-testid="history-dialog-row">
           <div class="work-item-history__header">
             <lib-icon
               class="work-item-history__icon"
@@ -49,7 +49,7 @@ import { DatePipe, SlicePipe } from '@angular/common';
       }
       <lib-dialog-footer class="sticky bottom-0 left-0 right-0">
         <div class="flex justify-end gap-4">
-          <button lib-button btnType="primary" type="submit" form="work-item-complete" (click)="handleCancel()">
+          <button lib-button btnType="primary" type="submit" form="work-item-complete" data-testid="history-dialog-close" (click)="handleCancel()">
             Fechar
           </button>
         </div>

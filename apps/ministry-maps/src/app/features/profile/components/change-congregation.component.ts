@@ -23,6 +23,7 @@ import { finalize } from 'rxjs';
         lib-select
         class="w-full"
         name="Cidade"
+        data-testid="profile-congregation-select"
         [ngModel]="user()?.congregation?.id"
         (ngModelChange)="handleChangeCongregation($event)">
         @for (congregation of congregations(); track congregation) {

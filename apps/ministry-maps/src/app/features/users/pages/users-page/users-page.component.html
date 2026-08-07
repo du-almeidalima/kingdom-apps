@@ -1,6 +1,6 @@
 <main class="container">
   <h2 class="t-headline2 mb-8" data-testid="users-heading">Pessoas</h2>
-  <ul class="list-none">
+  <ul class="list-none" data-testid="users-list">
     @for (user of users; track user.id) {
       <li class="[&:not(:first-child)]:mt-3">
         <kingdom-apps-user-list-item

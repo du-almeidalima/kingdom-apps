@@ -42,12 +42,12 @@ export type UserEditDialogData = {
     InputComponent,
   ],
   template: `
-    <lib-dialog title="Editar Usuário">
+    <lib-dialog title="Editar Usuário" data-testid="user-edit-dialog">
       <form id="move-alert-resolution-form" [formGroup]="form" (ngSubmit)="handleFormSubmit()" tabindex="0">
         <!-- NAME -->
         <lib-form-field class="mt-5">
           <label lib-label for="user-name">Nome</label>
-          <input lib-input formControlName="name" type="text" id="user-name" />
+          <input lib-input formControlName="name" type="text" id="user-name" data-testid="user-edit-name-input" />
         </lib-form-field>
         <!-- ROLE -->
         <lib-form-field class="mt-5">
@@ -103,7 +103,7 @@ export type UserEditDialogData = {
       <lib-dialog-footer>
         <div class="flex flex-nowrap justify-end gap-4">
           <button lib-button libDialogClose>Cancelar</button>
-          <button lib-button btnType="primary" type="submit" form="move-alert-resolution-form">
+          <button lib-button btnType="primary" type="submit" form="move-alert-resolution-form" data-testid="user-edit-save">
             @if (isSubmitting()) {
             <lib-spinner class="login-button__spinner" height="1.75rem" width="1.75rem" [color]="white" />
             } @else {

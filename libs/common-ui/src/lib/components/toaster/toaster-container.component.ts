@@ -33,7 +33,7 @@ type ToastItem = {
               <lib-icon [icon]="t.icon" [fillColor]="t.iconColor" />
             </div>
           }
-          <span class="toast__message">{{ t.message }}</span>
+          <span class="toast__message" data-testid="toast-message">{{ t.message }}</span>
         </div>
       }
     </div>
