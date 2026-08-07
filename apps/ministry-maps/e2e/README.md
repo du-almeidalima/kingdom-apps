@@ -48,7 +48,12 @@ apps/ministry-maps/e2e/
 │   ├── auth.fixture.ts           # signInAs(role) — custom-token auth
 │   └── index.ts                  # composed test + expect (import from here!)
 ├── page-objects/                 ← page abstractions
-│   └── territories.page.ts       # territories page locators
+│   ├── territories.page.ts       # territories page locators
+│   ├── confirm-dialog.page.ts    # shared confirm-dialog overlay
+│   ├── history-dialog.page.ts    # shared visit-history dialog
+│   ├── sort-filter-dialog.page.ts # shared sort/filter trigger + dialog
+│   ├── header.page.ts            # app header (logo, profile link)
+│   └── toast.page.ts             # toaster notification overlay
 └── tests/
     ├── smoke.spec.ts             # baseline integrity checks
     └── territories.spec.ts       # authenticated territory list proof
@@ -293,6 +298,30 @@ including `territories-city-filter` on the city `<select>`.
 > city renders 2 territories, "Todas" renders 3/4 — see `territories.spec.ts`).
 > If a filter wouldn't change the count, assert on an element unique to the
 > post-filter view instead (e.g. `territoryByAddress(...)`).
+
+### Shared Page Objects (WP-07)
+
+Cross-feature UI constructs have dedicated page objects so area specs don't
+duplicate locator logic:
+
+| Page Object | Constructor Arg | Key Locators / Actions | Used By |
+|---|---|---|---|
+| `ConfirmDialogPage` | `page` | `dialog`, `title`, `confirm()`, `cancel()` | TERR-20, WORK-17, ASSIGN-07/08, USERS-08/09, PROF-09/10 |
+| `HistoryDialogPage` | `page` | `dialog`, `rows`, `close()` | TERR-26, WORK-09, J-02 |
+| `SortFilterDialogPage` | `page` | `trigger`, `badge`, `open()`, `apply()`, `selectSort()`, `toggleByTitle()`, `selectFilterByTitle()` | TERR-09…13, ASSIGN-05…10 |
+| `HeaderPage` | `page` | `nav`, `profileLink`, `logo`, `appName`, `goToProfile()`, `goToHome()` | NAV-*, PROF-01 |
+| `ToastPage` | `page` | `message`, `expectText(text)` | CFG-*, USERS-10, ASSIGN-12 |
+
+```typescript
+import { ConfirmDialogPage } from '../page-objects/confirm-dialog.page';
+import { ToastPage } from '../page-objects/toast.page';
+
+const confirmDialog = new ConfirmDialogPage(page);
+await confirmDialog.confirm();
+
+const toast = new ToastPage(page);
+await toast.expectText('Salvo com sucesso');
+```
 
 ## Browser-Interaction Utilities (`utils/`)
 
