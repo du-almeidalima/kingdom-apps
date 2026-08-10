@@ -116,11 +116,11 @@ the per-test reset+seed isolates tests (no cross-test leakage, no hidden timing 
 | WP-06 | testids batch B: territories dialogs, statistics, users, profile, configuration | phase-3/4 specs | — | M | ✅ |
 | WP-07 | shared POs: `ConfirmDialog`, `HistoryDialog`, `SortFilterDialog`, `HeaderComponent`, `ToastComponent` | all areas | — | M | ✅ |
 | **Phase 2 — Core user paths** ([details](./phase-2-core-user-paths.md)) | | | | | |
-| WP-08 | `tests/auth.spec.ts` | UC-AUTH-01…03, 08…13, 22, 23 (+ owns 9 redirect-leg rows) | WP-05 | L | ⬜ |
-| WP-09 | `tests/invite-sign-in.spec.ts` | UC-AUTH-14, 15, 16 | WP-02, WP-05 | M | ⬜ |
-| WP-10 | `tests/work-designation.spec.ts` — open & complete | UC-WORK-01…14 | WP-05 | L | ⬜ |
-| WP-11 | `tests/work-designation.spec.ts` — correct/reverse/affordances/expiry | UC-WORK-15…23 | WP-05, WP-04 | L | ⬜ |
-| WP-12 | `tests/navigation.spec.ts` | UC-NAV-01…05, 08, 09, 11…14 | WP-05, WP-03 (NAV-08) | M | ⬜ |
+| WP-08 | `tests/auth.spec.ts` | UC-AUTH-01…03, 08…13, 22, 23 (+ owns 9 redirect-leg rows) | WP-05 | L | ✅ |
+| WP-09 | `tests/invite-sign-in.spec.ts` | UC-AUTH-14, 15, 16 | WP-02, WP-05 | M | ✅ |
+| WP-10 | `tests/work-designation.spec.ts` — open & complete | UC-WORK-01…14 | WP-05 | L | ✅ |
+| WP-11 | `tests/work-designation.spec.ts` — correct/reverse/affordances/expiry | UC-WORK-15…23 | WP-05, WP-04 | L | ✅ |
+| WP-12 | `tests/navigation.spec.ts` | UC-NAV-01…05, 08, 09, 11…14 | WP-05, WP-03 (NAV-08) | M | ✅ |
 | **Phase 3 — Territories admin** ([details](./phase-3-territories-admin.md)) | | | | | |
 | WP-13 | `tests/territories.spec.ts` — list/search/sort extensions | UC-TERR-01…08, 33 | WP-03 (TERR-04) | M | ⬜ |
 | WP-14 | `tests/territories-filters.spec.ts` | UC-TERR-09…13 | WP-06, WP-07 | M | ⬜ |

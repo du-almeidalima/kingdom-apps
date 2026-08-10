@@ -53,10 +53,21 @@ apps/ministry-maps/e2e/
 │   ├── history-dialog.page.ts    # shared visit-history dialog
 │   ├── sort-filter-dialog.page.ts # shared sort/filter trigger + dialog
 │   ├── header.page.ts            # app header (logo, profile link)
-│   └── toast.page.ts             # toaster notification overlay
+│   ├── toast.page.ts             # toaster notification overlay
+│   ├── login.page.ts             # login screen
+│   ├── welcome.page.ts           # publisher welcome screen
+│   ├── no-account.page.ts        # no-account screen
+│   ├── sign-in.page.ts            # invite sign-in screen
+│   ├── home.page.ts              # home hub
+│   ├── work.page.ts              # receiving designation page
+│   └── work-item-complete-dialog.page.ts # visit completion/edit dialog
 └── tests/
     ├── smoke.spec.ts             # baseline integrity checks
-    └── territories.spec.ts       # authenticated territory list proof
+    ├── territories.spec.ts       # authenticated territory list proof
+    ├── auth.spec.ts              # auth rendering, guards, and session lifecycle
+    ├── invite-sign-in.spec.ts    # valid, missing, and consumed invite states
+    ├── work-designation.spec.ts  # receive, complete, edit, undo, and expiry paths
+    └── navigation.spec.ts        # shell, home hub, and router behavior
 ```
 
 ## Configuration (`config/`)

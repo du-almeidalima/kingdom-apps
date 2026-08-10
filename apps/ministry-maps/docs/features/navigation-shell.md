@@ -95,7 +95,7 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Route:** `/nao-existe`
 - **Preconditions (seed):** none
 - **Steps:** 1. Navigate to a non-existent path
-- **Expected UI:** The shell renders with an empty router outlet; browser URL stays at `/nao-existe`; console shows `Error: Cannot match any routes`
+- **Expected UI:** The shell renders with an empty router outlet; **current browser reality** is that the URL settles at `/` after the failed navigation; console shows `Error: Cannot match any routes`
 - **Expected persistence:** none
 - **Edge cases:** none
 - **Priority:** P2 · **Gaps:** no 404 page exists; test should assert empty outlet and console error presence
