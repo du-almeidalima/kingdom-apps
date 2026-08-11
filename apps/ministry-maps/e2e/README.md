@@ -65,14 +65,23 @@ apps/ministry-maps/e2e/
 │   ├── sign-in.page.ts            # invite sign-in screen
 │   ├── home.page.ts              # home hub
 │   ├── work.page.ts              # receiving designation page
-│   └── work-item-complete-dialog.page.ts # visit completion/edit dialog
+│   ├── work-item-complete-dialog.page.ts # visit completion/edit dialog
+│   ├── users.page.ts             # /users list locators
+│   ├── user-edit-dialog.page.ts  # user edit overlay
+│   ├── invite-create-dialog.page.ts # invite link creation overlay
+│   ├── profile.page.ts           # /profile locators
+│   └── configuration.page.ts     # /configuration locators
 └── tests/
     ├── smoke.spec.ts             # baseline integrity checks
     ├── territories.spec.ts       # authenticated territory list proof
     ├── auth.spec.ts              # auth rendering, guards, and session lifecycle
     ├── invite-sign-in.spec.ts    # valid, missing, and consumed invite states
     ├── work-designation.spec.ts  # receive, complete, edit, undo, and expiry paths
-    └── navigation.spec.ts        # shell, home hub, and router behavior
+    ├── navigation.spec.ts        # shell, home hub, and router behavior
+    ├── users.spec.ts             # user management & role editing specs
+    ├── users-invites.spec.ts     # invitation link creation & sharing specs
+    ├── profile.spec.ts           # profile identity, congregation switch & logout specs
+    └── configuration.spec.ts     # congregation city management & territory cascade specs
 ```
 
 ## Configuration (`config/`)

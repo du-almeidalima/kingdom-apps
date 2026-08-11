@@ -132,10 +132,10 @@ the per-test reset+seed isolates tests (no cross-test leakage, no hidden timing 
 | WP-20 | `tests/territories-statistics.spec.ts` — static & counting rules | UC-STAT-01…03, 10…12 | WP-06 | M | ✅ |
 | WP-21 | `tests/territories-statistics.spec.ts` — periods & boundaries | UC-STAT-04…09, 13, 14, 15, 18, 19 | WP-06, WP-01, WP-03 | M | ✅ |
 | **Phase 4 — People & configuration** ([details](./phase-4-people-and-configuration.md)) | | | | | |
-| WP-22 | `tests/users.spec.ts` | UC-USERS-01…09, 15 | WP-06, WP-07, WP-01 | L | ⬜ |
-| WP-23 | `tests/users-invites.spec.ts` | UC-USERS-10, 11, 13, 14 | WP-06, WP-04 | M | ⬜ |
-| WP-24 | `tests/profile.spec.ts` | UC-PROF-01…10 | WP-06, WP-07, WP-01 | M | ⬜ |
-| WP-25 | `tests/configuration.spec.ts` | UC-CFG-01…13 | WP-06, WP-04, WP-07 | L | ⬜ |
+| WP-22 | `tests/users.spec.ts` | UC-USERS-01…09, 15 | WP-06, WP-07, WP-01 | L | ✅ |
+| WP-23 | `tests/users-invites.spec.ts` | UC-USERS-10, 11, 13, 14 | WP-06, WP-04 | M | ✅ |
+| WP-24 | `tests/profile.spec.ts` | UC-PROF-01…10 | WP-06, WP-07, WP-01 | M | ✅ |
+| WP-25 | `tests/configuration.spec.ts` | UC-CFG-01…13 | WP-06, WP-04, WP-07 | L | ✅ |
 | **Phase 5 — Journeys** ([details](./phase-5-journeys.md)) | | | | | |
 | WP-26 | `tests/journey-admin-assign-work.spec.ts` | J-01 | WP-10/11, WP-15, WP-18/19 | L | ⬜ |
 | WP-27 | `tests/journey-visit-feedback.spec.ts` | J-02 | WP-01, WP-10, WP-16, WP-20 | M | ⬜ |

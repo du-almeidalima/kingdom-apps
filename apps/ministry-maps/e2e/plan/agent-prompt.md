@@ -182,7 +182,7 @@ test(e2e): extend signInAs with elder/organizer/superintendent/app_admin roles (
 
 ## ASSIGNMENT
 
-**Your work package(s):** `phase 3`
+**Your work package(s):** `phase 4`
 
 Start at §2 (mandatory reading) and follow the execution loop in §6. Implement only the assigned
 package(s).

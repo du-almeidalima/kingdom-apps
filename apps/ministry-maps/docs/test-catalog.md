@@ -190,21 +190,21 @@ Suggested spec files are proposals — keep one feature area per file and mirror
 
 | ID          | Title                                                 | Actor     | Pri | Covered | Spec file               | Page object          | Seed work                     | Blockers                   |
 |-------------|-------------------------------------------------------|-----------|-----|---------|-------------------------|----------------------|-------------------------------|----------------------------|
-| UC-USERS-01 | List scoped + role-priority order                     | Admin     | P0  | —       | `users.spec.ts`         | `UsersPage`          | —                             | testid                     |
-| UC-USERS-02 | Row: initials, name, role badge                       | Admin     | P1  | —       | `users.spec.ts`         | `UsersPage`          | —                             | testid                     |
-| UC-USERS-03 | Foreign-congregation user hidden                      | Admin     | P0  | —       | `users.spec.ts`         | `UsersPage`          | foreign user                  | —                          |
-| UC-USERS-04 | Edit dialog fields; SUPERINTENDENT only for APP_ADMIN | Admin     | P1  | —       | `users.spec.ts`         | `UserEditDialog`     | app-admin identity (2nd half) | HX-1, testid               |
-| UC-USERS-05 | ⚠ Form disabled for non-APP_ADMIN; `Salvar` no-ops   | Admin     | P0  | —       | `users.spec.ts`         | `UserEditDialog`     | —                             | ⚠                         |
-| UC-USERS-06 | APP_ADMIN edit persists                               | App Admin | P1  | —       | `users.spec.ts`         | `UserEditDialog`     | app-admin identity            | HX-1                       |
-| UC-USERS-07 | Editing own account not special-cased                 | Admin     | P2  | —       | `users.spec.ts`         | `UserEditDialog`     | —                             | —                          |
-| UC-USERS-08 | Delete confirm + doc removal                          | Admin     | P0  | —       | `users.spec.ts`         | `ConfirmDialog`      | —                             | testid                     |
-| UC-USERS-09 | ⚠ Auth account survives deletion                     | Admin     | P0  | —       | `users.spec.ts`         | `ConfirmDialog`      | —                             | ⚠                         |
-| UC-USERS-10 | Invite FAB is ADMIN-only                              | Admin     | P0  | —       | `users-invites.spec.ts` | `UsersPage`          | —                             | title selector             |
-| UC-USERS-11 | Create invite (defaults; reference congregation)      | Admin     | P0  | —       | `users-invites.spec.ts` | `InviteCreateDialog` | read `invitation_links` raw   | HX-2 (for factory), testid |
+| UC-USERS-01 | List scoped + role-priority order                     | Admin     | P0  | ✅ `users.spec.ts`         | `users.spec.ts`         | `UsersPage`          | —                             | testid                     |
+| UC-USERS-02 | Row: initials, name, role badge                       | Admin     | P1  | ✅ `users.spec.ts`         | `users.spec.ts`         | `UsersPage`          | —                             | testid                     |
+| UC-USERS-03 | Foreign-congregation user hidden                      | Admin     | P0  | ✅ `users.spec.ts`         | `users.spec.ts`         | `UsersPage`          | foreign user                  | —                          |
+| UC-USERS-04 | Edit dialog fields; SUPERINTENDENT only for APP_ADMIN | Admin     | P1  | ✅ `users.spec.ts`         | `users.spec.ts`         | `UserEditDialog`     | app-admin identity (2nd half) | HX-1, testid               |
+| UC-USERS-05 | ⚠ Form disabled for non-APP_ADMIN; `Salvar` no-ops   | Admin     | P0  | ✅ `users.spec.ts`         | `users.spec.ts`         | `UserEditDialog`     | —                             | ⚠                         |
+| UC-USERS-06 | APP_ADMIN edit persists                               | App Admin | P1  | ✅ `users.spec.ts`         | `users.spec.ts`         | `UserEditDialog`     | app-admin identity            | HX-1                       |
+| UC-USERS-07 | Editing own account not special-cased                 | Admin     | P2  | ✅ `users.spec.ts`         | `users.spec.ts`         | `UserEditDialog`     | —                             | —                          |
+| UC-USERS-08 | Delete confirm + doc removal                          | Admin     | P0  | ✅ `users.spec.ts`         | `users.spec.ts`         | `ConfirmDialog`      | —                             | testid                     |
+| UC-USERS-09 | ⚠ Auth account survives deletion                     | Admin     | P0  | ✅ `users.spec.ts`         | `users.spec.ts`         | `ConfirmDialog`      | —                             | ⚠                         |
+| UC-USERS-10 | Invite FAB is ADMIN-only                              | Admin     | P0  | ✅ `users-invites.spec.ts` | `users-invites.spec.ts` | `UsersPage`          | —                             | title selector             |
+| UC-USERS-11 | Create invite (defaults; reference congregation)      | Admin     | P0  | ✅ `users-invites.spec.ts` | `users-invites.spec.ts` | `InviteCreateDialog` | read `invitation_links` raw   | HX-2 (for factory), testid |
 | UC-USERS-12 | No-congregation guard (unreachable)                   | —         | P2  | —       | unit-only               | —                    | —                             | not E2E-reachable          |
-| UC-USERS-13 | Link = `environment.baseUrl` + clipboard copy         | Admin     | P1  | —       | `users-invites.spec.ts` | `InviteCreateDialog` | —                             | clipboard permissions      |
-| UC-USERS-14 | `Enviar` → whatsapp link                              | Admin     | P2  | —       | `users-invites.spec.ts` | `InviteCreateDialog` | —                             | window.open stub           |
-| UC-USERS-15 | ORGANIZER/ELDER: list only                            | Organizer | P1  | —       | `users.spec.ts`         | `UsersPage`          | organizer/elder identity      | HX-1                       |
+| UC-USERS-13 | Link = `environment.baseUrl` + clipboard copy         | Admin     | P1  | ✅ `users-invites.spec.ts` | `users-invites.spec.ts` | `InviteCreateDialog` | —                             | clipboard permissions      |
+| UC-USERS-14 | `Enviar` → whatsapp link                              | Admin     | P2  | ✅ `users-invites.spec.ts` | `users-invites.spec.ts` | `InviteCreateDialog` | —                             | window.open stub           |
+| UC-USERS-15 | ORGANIZER/ELDER: list only                            | Organizer | P1  | ✅ `users.spec.ts`         | `users.spec.ts`         | `UsersPage`          | organizer/elder identity      | HX-1                       |
 | UC-USERS-16 | Publisher → `/welcome`                                | Publisher | P0  | ✅ `auth.spec.ts` (matrix leg) | `users.spec.ts`         | —                    | —                             | (dup. of UC-AUTH-12 leg)   |
 | UC-USERS-17 | Anonymous → `/login`                                  | Anonymous | P0  | ✅ `auth.spec.ts` (matrix leg) | `users.spec.ts`         | —                    | —                             | (dup. of UC-AUTH-11 leg)   |
 
@@ -212,34 +212,34 @@ Suggested spec files are proposals — keep one feature area per file and mirror
 
 | ID         | Title                                      | Actor            | Pri | Covered | Spec file         | Page object                     | Seed work                                  | Blockers |
 |------------|--------------------------------------------|------------------|-----|---------|-------------------|---------------------------------|--------------------------------------------|----------|
-| UC-PROF-01 | Identity card (ADMIN)                      | Admin            | P0  | —       | `profile.spec.ts` | `ProfilePage`                   | —                                          | testid   |
-| UC-PROF-02 | Identity card (PUBLISHER)                  | Publisher        | P1  | —       | `profile.spec.ts` | `ProfilePage`                   | —                                          | —        |
-| UC-PROF-03 | ⚠ Anonymous placeholders, no redirect     | Anonymous        | P1  | —       | `profile.spec.ts` | `ProfilePage`                   | —                                          | ⚠       |
-| UC-PROF-04 | Switch card hidden for ADMIN/PUBLISHER     | Admin, Publisher | P1  | —       | `profile.spec.ts` | `ProfilePage`                   | —                                          | —        |
-| UC-PROF-05 | Switch lists congregations by name         | Superintendent   | P1  | —       | `profile.spec.ts` | `ProfilePage`                   | 2nd congregation + superintendent identity | HX-1     |
-| UC-PROF-06 | Switch persists + re-scopes (no reload)    | Superintendent   | P1  | —       | `profile.spec.ts` | `ProfilePage`                   | idem                                       | HX-1     |
-| UC-PROF-07 | ⚠ No-congregation no-op (dead guard)      | Superintendent   | P2  | —       | `profile.spec.ts` | `ProfilePage`                   | congregation-less user (raw)               | HX-1, ⚠ |
-| UC-PROF-08 | ⚠ Non-privileged switch throws, swallowed | Any (downgraded) | P2  | —       | `profile.spec.ts` | `ProfilePage`                   | mid-session role mutation (raw)            | HX-1, ⚠ |
-| UC-PROF-09 | Logout confirm → `/login`                  | Admin            | P0  | —       | `profile.spec.ts` | `ProfilePage` + `ConfirmDialog` | —                                          | testid   |
-| UC-PROF-10 | Logout cancel stays                        | Admin            | P1  | —       | `profile.spec.ts` | `ProfilePage` + `ConfirmDialog` | —                                          | —        |
+| UC-PROF-01 | Identity card (ADMIN)                      | Admin            | P0  | ✅ `profile.spec.ts` | `profile.spec.ts` | `ProfilePage`                   | —                                          | testid   |
+| UC-PROF-02 | Identity card (PUBLISHER)                  | Publisher        | P1  | ✅ `profile.spec.ts` | `profile.spec.ts` | `ProfilePage`                   | —                                          | —        |
+| UC-PROF-03 | ⚠ Anonymous placeholders, no redirect     | Anonymous        | P1  | ✅ `profile.spec.ts` | `profile.spec.ts` | `ProfilePage`                   | —                                          | ⚠       |
+| UC-PROF-04 | Switch card hidden for ADMIN/PUBLISHER     | Admin, Publisher | P1  | ✅ `profile.spec.ts` | `profile.spec.ts` | `ProfilePage`                   | —                                          | —        |
+| UC-PROF-05 | Switch lists congregations by name         | Superintendent   | P1  | ✅ `profile.spec.ts` | `profile.spec.ts` | `ProfilePage`                   | 2nd congregation + superintendent identity | HX-1     |
+| UC-PROF-06 | Switch persists + re-scopes (no reload)    | Superintendent   | P1  | ✅ `profile.spec.ts` | `profile.spec.ts` | `ProfilePage`                   | idem                                       | HX-1     |
+| UC-PROF-07 | ⚠ No-congregation no-op (dead guard)      | Superintendent   | P2  | ✅ `profile.spec.ts` | `profile.spec.ts` | `ProfilePage`                   | congregation-less user (raw)               | HX-1, ⚠ |
+| UC-PROF-08 | ⚠ Non-privileged switch throws, swallowed | Any (downgraded) | P2  | ✅ `profile.spec.ts` | `profile.spec.ts` | `ProfilePage`                   | mid-session role mutation (raw)            | HX-1, ⚠ |
+| UC-PROF-09 | Logout confirm → `/login`                  | Admin            | P0  | ✅ `profile.spec.ts` | `profile.spec.ts` | `ProfilePage` + `ConfirmDialog` | —                                          | testid   |
+| UC-PROF-10 | Logout cancel stays                        | Admin            | P1  | ✅ `profile.spec.ts` | `profile.spec.ts` | `ProfilePage` + `ConfirmDialog` | —                                          | —        |
 
 ## UC-CFG — configuration (cities) → [`features/configuration-cities.md`](./features/configuration-cities.md)
 
 | ID        | Title                                       | Actor     | Pri | Covered | Spec file               | Page object         | Seed work | Blockers               |
 |-----------|---------------------------------------------|-----------|-----|---------|-------------------------|---------------------|-----------|------------------------|
-| UC-CFG-01 | Cities list renders                         | Admin     | P0  | —       | `configuration.spec.ts` | `ConfigurationPage` | —         | testid                 |
-| UC-CFG-02 | Add city row (local only)                   | Admin     | P0  | —       | `configuration.spec.ts` | `ConfigurationPage` | —         | —                      |
-| UC-CFG-03 | Rename inline                               | Admin     | P0  | —       | `configuration.spec.ts` | `ConfigurationPage` | —         | —                      |
-| UC-CFG-04 | Cancel edit (revert/remove)                 | Admin     | P1  | —       | `configuration.spec.ts` | `ConfigurationPage` | —         | —                      |
-| UC-CFG-05 | Single-edit constraint; save mid-edit       | Admin     | P1  | —       | `configuration.spec.ts` | `ConfigurationPage` | —         | —                      |
-| UC-CFG-06 | Empty name → toast, no write                | Admin     | P0  | —       | `configuration.spec.ts` | `ConfigurationPage` | —         | toast selector         |
-| UC-CFG-07 | Duplicate name → toast, no write            | Admin     | P0  | —       | `configuration.spec.ts` | `ConfigurationPage` | —         | toast selector         |
-| UC-CFG-08 | Save: congregation + batch territory rename | Admin     | P0  | —       | `configuration.spec.ts` | `ConfigurationPage` | —         | ⚠ (non-atomic note)   |
-| UC-CFG-09 | New city skips territory batch              | Admin     | P1  | —       | `configuration.spec.ts` | `ConfigurationPage` | —         | —                      |
-| UC-CFG-10 | ⚠ Delete city → orphan territories         | Admin     | P1  | —       | `configuration.spec.ts` | `ConfigurationPage` | —         | native `confirm()`, ⚠ |
-| UC-CFG-11 | ⚠ Stale filter until reload                | Admin     | P1  | —       | `configuration.spec.ts` | `ConfigurationPage` | —         | ⚠                     |
-| UC-CFG-12 | ⚠ Anonymous: no-congregation banner        | Anonymous | P1  | —       | `configuration.spec.ts` | `ConfigurationPage` | —         | ⚠                     |
-| UC-CFG-13 | ⚠ Every role can edit (unenforced gating)  | Publisher | P0  | —       | `configuration.spec.ts` | `ConfigurationPage` | —         | ⚠                     |
+| UC-CFG-01 | Cities list renders                         | Admin     | P0  | ✅ `configuration.spec.ts` | `configuration.spec.ts` | `ConfigurationPage` | —         | testid                 |
+| UC-CFG-02 | Add city row (local only)                   | Admin     | P0  | ✅ `configuration.spec.ts` | `configuration.spec.ts` | `ConfigurationPage` | —         | —                      |
+| UC-CFG-03 | Rename inline                               | Admin     | P0  | ✅ `configuration.spec.ts` | `configuration.spec.ts` | `ConfigurationPage` | —         | —                      |
+| UC-CFG-04 | Cancel edit (revert/remove)                 | Admin     | P1  | ✅ `configuration.spec.ts` | `configuration.spec.ts` | `ConfigurationPage` | —         | —                      |
+| UC-CFG-05 | Single-edit constraint; save mid-edit       | Admin     | P1  | ✅ `configuration.spec.ts` | `configuration.spec.ts` | `ConfigurationPage` | —         | —                      |
+| UC-CFG-06 | Empty name → toast, no write                | Admin     | P0  | ✅ `configuration.spec.ts` | `configuration.spec.ts` | `ConfigurationPage` | —         | toast selector         |
+| UC-CFG-07 | Duplicate name → toast, no write            | Admin     | P0  | ✅ `configuration.spec.ts` | `configuration.spec.ts` | `ConfigurationPage` | —         | toast selector         |
+| UC-CFG-08 | Save: congregation + batch territory rename | Admin     | P0  | ✅ `configuration.spec.ts` | `configuration.spec.ts` | `ConfigurationPage` | —         | ⚠ (non-atomic note)   |
+| UC-CFG-09 | New city skips territory batch              | Admin     | P1  | ✅ `configuration.spec.ts` | `configuration.spec.ts` | `ConfigurationPage` | —         | —                      |
+| UC-CFG-10 | ⚠ Delete city → orphan territories         | Admin     | P1  | ✅ `configuration.spec.ts` | `configuration.spec.ts` | `ConfigurationPage` | —         | native `confirm()`, ⚠ |
+| UC-CFG-11 | ⚠ Stale filter until reload                | Admin     | P1  | ✅ `configuration.spec.ts` | `configuration.spec.ts` | `ConfigurationPage` | —         | ⚠                     |
+| UC-CFG-12 | ⚠ Anonymous: no-congregation banner        | Anonymous | P1  | ✅ `configuration.spec.ts` | `configuration.spec.ts` | `ConfigurationPage` | —         | ⚠                     |
+| UC-CFG-13 | ⚠ Every role can edit (unenforced gating)  | Publisher | P0  | ✅ `configuration.spec.ts` | `configuration.spec.ts` | `ConfigurationPage` | —         | ⚠                     |
 
 ## Journeys → [`journeys/`](./journeys/README.md)
 

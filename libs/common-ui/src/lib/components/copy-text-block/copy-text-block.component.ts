@@ -22,7 +22,7 @@ import { green300, grey400 } from '../../styles/abstract/variables';
   template: `
     <!-- LINK CONTAINER -->
     <div class="copy-text-block">
-      <span class="copy-text-block__content">{{ text() }}</span>
+      <span class="copy-text-block__content" data-testid="copy-text-block-content">{{ text() }}</span>
       <button class="copy-text-block__button" data-testid="copy-text-block-button" (click)="handleCopyClick()">
         @if (isTextCopied()) {
         <lib-icon icon="check-mark-circle-lined" class="h-8 w-8" [fillColor]="green300" />

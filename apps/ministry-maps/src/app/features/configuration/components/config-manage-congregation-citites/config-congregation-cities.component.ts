@@ -23,7 +23,7 @@ interface CityItem {
       <div class="mb-8">
         <h2 class="text-3xl font-semibold text-gray-900 mb-2">Manage Congregation Cities</h2>
         @if (congregation) {
-          <p class="text-gray-600">{{ congregation.name }}</p>
+          <p class="text-gray-600" data-testid="config-congregation-subtitle">{{ congregation.name }}</p>
         }
       </div>
 
