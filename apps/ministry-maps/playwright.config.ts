@@ -24,6 +24,11 @@ export default defineConfig({
    * rewrite needed, since reset/seed only flows through the database fixture.
    */
   workers: 1,
+  /*
+   * This avoids spinning up a server whenever a test fail. consider using `npx playwright show-report` or adding the
+   * `--reporter=html` flag
+   */
+  reporter: [['html', { open: 'never' }]],
   fullyParallel: false,
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
@@ -41,9 +46,10 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npx firebase emulators:exec "npx nx serve ministry-maps" --project du-ministry-maps',
+    command:
+      'fuser -k 8080/tcp 9099/tcp 4200/tcp 2>/dev/null || true; npx firebase emulators:exec "npx nx serve ministry-maps" --project du-ministry-maps',
     url: 'http://localhost:4200',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     cwd: workspaceRoot,
     // Emulators + Angular compile might take a moment
     timeout: 120000,

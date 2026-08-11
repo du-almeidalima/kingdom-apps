@@ -83,6 +83,12 @@
       "defaultConfiguration": "development",
       "continuous": true
     },
+    "e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "fuser -k 8080/tcp 9099/tcp 4200/tcp 2>/dev/null || true; playwright test --config=apps/ministry-maps/playwright.config.ts"
+      }
+    },
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
       "options": {
