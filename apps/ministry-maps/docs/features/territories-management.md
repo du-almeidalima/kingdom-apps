@@ -49,9 +49,9 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 - **Route:** `/territories`
 - **Preconditions (seed):** congregation with `cities: []` and 0 territories
 - **Steps:** 1. sign in as a user of that congregation → 2. open `/territories`
-- **Expected UI:** `ngOnInit` runs `this.selectedCity = this.cities.length >= 0 ? this.cities[0] : ALL_OPTION` — since an array's `length` is **always** `>= 0`, `cities[0]` (i.e. `undefined`) is assigned instead of falling back to `ALL_OPTION`. `cityFilter(t, undefined)` then calls `undefined.toLowerCase()` and throws inside the `map()` in `territoriesFilterPipe`, which errors the `filteredTerritories$` observable. **Today's reality:** the `@if (filteredTerritories$ | async; as territories)` block never receives a value, so the whole `territories-list` section is silently absent (no error banner, no empty city `<select>` either since `cities` is `[]`)
+- **Expected UI:** `ngOnInit` runs `this.selectedCity = this.cities.length >= 0 ? this.cities[0] : ALL_OPTION` — since an array's `length` is **always** `>= 0`, `cities[0]` (i.e. `undefined`) is assigned instead of falling back to `ALL_OPTION`. `cityFilter(t, undefined)` then calls `undefined.toLowerCase()` and throws inside the `map()` in `territoriesFilterPipe`, which errors the `filteredTerritories$` observable. **Today's reality (verified):** the error aborts rendering of the **entire** page content — the router outlet renders an empty `<main>` with no heading, no city `<select>` and no `territories-list` section (no error banner either)
 - **Expected persistence:** `db.getDoc(db.collections.congregations, id)` has `cities: []`; `db.getCollectionDocs(db.collections.territories)` is empty
-- **Edge cases:** assert `data-testid="territories-list"` is **not** present/visible today, and that the city `<select>` only contains the `Todas` option — do not assert a graceful empty state, that is not current behaviour
+- **Edge cases:** assert `data-testid="territories-heading"`, `territories-city-filter` and `territories-list` are **all** absent (empty outlet), and that the congregation doc has `cities: []` — do not assert a graceful empty state, that is not current behaviour
 - **Priority:** P1 · **Gaps:** `⚠ suspected defect` — condition should be `cities.length > 0`; consolidate in `testability-gaps.md`
 
 ### Search
@@ -178,7 +178,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 - **Preconditions (seed):** default baseline
 - **Steps:** 1. open the create dialog → 2. tick `Estudando a Bíblia` → 3. type a name into `Instrutor` (placeholder `Nome do Instrutor`) → 4. untick, then re-tick `Estudando a Bíblia`
 - **Expected UI:** `Instrutor` only renders while the checkbox is checked; after step 4 the field is visible again but **empty** — `isBibleStudent.valueChanges` calls `bibleInstructor.reset()` whenever the emitted value is truthy, wiping whatever was typed
-- **Expected persistence:** submitting right after step 3 (without unchecking) would persist `bibleInstructor` as typed; submitting after step 4 persists `bibleInstructor: undefined`
+- **Expected persistence:** submitting right after step 3 (without unchecking) would persist `bibleInstructor` as typed; submitting after step 4 persists `bibleInstructor: null` (the form control's `reset()` value is serialized as `null` by the Firestore write)
 - **Edge cases:** on **edit** of an existing bible-student territory the field is correctly pre-filled, because `patchValue` runs before the listener is attached — the data loss only happens from interactively toggling within one dialog session
 - **Priority:** P2 · **Gaps:** `⚠ suspected defect` — listener should reset on the *false* transition, not the *true* one
 

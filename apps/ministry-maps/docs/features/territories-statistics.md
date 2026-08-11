@@ -139,9 +139,9 @@ This document describes the behavioural use cases for the `/territories/statisti
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** congregation with 0 territories
 - **Steps:** 1. navigate to statistics
-- **Expected UI:** "Territórios: 0", "Pessoas: 0", "Estudos bíblicos: 0", "Mudaram: 0", "Visitas: 0", "Revisitas: 0"
-- **Expected persistence:** `db.getCollectionDocs(db.collections.territories)` is empty
-- **Priority:** P2 · **Gaps:** no data-testids
+- **Expected UI:** ⚠ **Defect** — page hangs in loading state forever: the `statistics-heading` and disabled `statistics-city-filter` render, but the `statistics-loading` spinner is the only branch shown; the static/dynamic sections never appear. Root cause: `FirebaseTerritoryDatasourceService.getAllByCongregation({ getHistory: true })` builds `combineLatest([])` for an empty snapshot, which never emits; `finalize` never flips `isLoading`. See `testability-gaps.md` §3 #42.
+- **Expected persistence:** `db.getCollectionDocs(db.collections.territories)` is empty (scoped to the congregation)
+- **Priority:** P2 · **Gaps:** no data-testids (now present); ⚠ suspected defect
 
 #### UC-STAT-14 — Loading state
 - **Actor:** Admin

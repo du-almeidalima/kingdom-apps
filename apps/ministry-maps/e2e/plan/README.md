@@ -88,10 +88,10 @@ fault injection), UC-USERS-12 (unit-test-only by nature).
 ## 4. Verification commands
 
 ```bash
-npx playwright install chromium                  # one-time
-npx nx typecheck-e2e ministry-maps               # FAST gate — run after every WP (type-checks fixtures/seeds/specs)
-npx nx e2e ministry-maps                         # full suite (boots emulators + serve via webServer)
-npx nx e2e ministry-maps -- tests/<file>.spec.ts # single spec, if your nx version forwards args;
+npx playwright install chromium                             # one-time
+npx nx typecheck-e2e ministry-maps                          # FAST gate — run after every WP (type-checks fixtures/seeds/specs)
+npx nx e2e ministry-maps --no-tui                           # full suite (boots emulators + serve via webServer)
+npx nx e2e ministry-maps --no-tui -- tests/<file>.spec.ts   # single spec, if your nx version forwards args;
 # fallback: npx playwright test tests/<file>.spec.ts --config apps/ministry-maps/playwright.config.ts
 ```
 
@@ -122,15 +122,15 @@ the per-test reset+seed isolates tests (no cross-test leakage, no hidden timing 
 | WP-11 | `tests/work-designation.spec.ts` — correct/reverse/affordances/expiry | UC-WORK-15…23 | WP-05, WP-04 | L | ✅ |
 | WP-12 | `tests/navigation.spec.ts` | UC-NAV-01…05, 08, 09, 11…14 | WP-05, WP-03 (NAV-08) | M | ✅ |
 | **Phase 3 — Territories admin** ([details](./phase-3-territories-admin.md)) | | | | | |
-| WP-13 | `tests/territories.spec.ts` — list/search/sort extensions | UC-TERR-01…08, 33 | WP-03 (TERR-04) | M | ⬜ |
-| WP-14 | `tests/territories-filters.spec.ts` | UC-TERR-09…13 | WP-06, WP-07 | M | ⬜ |
-| WP-15 | `tests/territories-crud.spec.ts` | UC-TERR-14…22 | WP-06, WP-07, WP-04 (drag) | L | ⬜ |
-| WP-16 | `tests/territories-alerts.spec.ts` | UC-TERR-23…32 | WP-06, WP-07 | L | ⬜ |
-| WP-17 | `tests/territories-export.spec.ts` + role gating | UC-TERR-34, 35, 36 | WP-04, WP-01 | M | ⬜ |
-| WP-18 | `tests/territories-assign.spec.ts` — selection | UC-ASSIGN-01…11 | WP-05, WP-07, WP-03 (03/04) | L | ⬜ |
-| WP-19 | `tests/territories-assign.spec.ts` — creation & share | UC-ASSIGN-12…20, 22 | WP-04, WP-01, WP-03 (14) | L | ⬜ |
-| WP-20 | `tests/territories-statistics.spec.ts` — static & counting rules | UC-STAT-01…03, 10…12 | WP-06 | M | ⬜ |
-| WP-21 | `tests/territories-statistics.spec.ts` — periods & boundaries | UC-STAT-04…09, 13, 14, 15, 18, 19 | WP-06, WP-01, WP-03 | M | ⬜ |
+| WP-13 | `tests/territories.spec.ts` — list/search/sort extensions | UC-TERR-01…08, 33 | WP-03 (TERR-04) | M | ✅ |
+| WP-14 | `tests/territories-filters.spec.ts` | UC-TERR-09…13 | WP-06, WP-07 | M | ✅ |
+| WP-15 | `tests/territories-crud.spec.ts` | UC-TERR-14…22 | WP-06, WP-07, WP-04 (drag) | L | ✅ |
+| WP-16 | `tests/territories-alerts.spec.ts` | UC-TERR-23…32 | WP-06, WP-07 | L | ✅ |
+| WP-17 | `tests/territories-export.spec.ts` + role gating | UC-TERR-34, 35, 36 | WP-04, WP-01 | M | ✅ |
+| WP-18 | `tests/territories-assign.spec.ts` — selection | UC-ASSIGN-01…11 | WP-05, WP-07, WP-03 (03/04) | L | ✅ |
+| WP-19 | `tests/territories-assign.spec.ts` — creation & share | UC-ASSIGN-12…20, 22 | WP-04, WP-01, WP-03 (14) | L | ✅ |
+| WP-20 | `tests/territories-statistics.spec.ts` — static & counting rules | UC-STAT-01…03, 10…12 | WP-06 | M | ✅ |
+| WP-21 | `tests/territories-statistics.spec.ts` — periods & boundaries | UC-STAT-04…09, 13, 14, 15, 18, 19 | WP-06, WP-01, WP-03 | M | ✅ |
 | **Phase 4 — People & configuration** ([details](./phase-4-people-and-configuration.md)) | | | | | |
 | WP-22 | `tests/users.spec.ts` | UC-USERS-01…09, 15 | WP-06, WP-07, WP-01 | L | ⬜ |
 | WP-23 | `tests/users-invites.spec.ts` | UC-USERS-10, 11, 13, 14 | WP-06, WP-04 | M | ⬜ |

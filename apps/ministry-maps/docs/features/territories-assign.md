@@ -53,9 +53,12 @@ This document describes the behavioural use cases for the `/territories/assign` 
   `<select>` then binds `[ngModel]='selectedCity'` to `undefined`, so **no** `<option>` appears selected (only the synthetic `Todas` option exists in the DOM, since `cities` is empty); `fetchTerritories(id,
   undefined)` takes the `getAllByCongregationAndCities(id, [undefined])` branch (because `undefined !==
   'ALL'`), which Firestore rejects when the query executes — the resulting observable errors, so
-  `filteredTerritories$ | async` never emits and the `@for` block renders zero rows, same outward symptom as UC-ASSIGN-03 but for a different, buggier reason
+  `filteredTerritories$ | async` never emits and the `@for` block renders zero checkbox rows. **Verified
+  reality:** unlike `/territories` (whose whole page collapses — see UC-TERR-04), this page still renders
+  its heading, city `<select>` (with only `Todas`), search box and submit FAB; only the checkbox list is
+  empty, so the FAB is permanently disabled
 - **Expected persistence:** `db.getDoc(db.collections.congregations, id).cities` is `[]`; assert `db.getCollectionDocs(db.collections.designations)` unchanged, same as UC-ASSIGN-03
-- **Edge cases:** mirrors [`territories-management.md#UC-TERR-04`](./territories-management.md); test today must assert **no** `<option>` is selected and zero checkbox rows render — do not assert a graceful fallback
+- **Edge cases:** shares the root cause with [`territories-management.md#UC-TERR-04`](./territories-management.md) but the outward symptom is milder here (the page shell survives); test today must assert the city `<select>` exposes only `Todas`, zero checkbox rows render, and the FAB stays disabled — do not assert a graceful fallback
 - **Priority:** P2 · **Gaps:** `⚠ suspected defect` (shared root cause with `UC-TERR-04`); same harness extension as UC-ASSIGN-03
 
 ### Search, sort and filter

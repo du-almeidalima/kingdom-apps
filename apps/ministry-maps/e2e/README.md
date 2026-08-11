@@ -11,13 +11,14 @@ assertions use the Firebase Admin SDK in Playwright's Node context.
 npx playwright install chromium
 
 # Run all E2E tests (boots emulators, serves app, runs specs)
-npx nx e2e ministry-maps
+npx nx e2e ministry-maps --no-tui
 ```
 
-The Playwright `webServer` in `playwright.config.ts` runs:
-`firebase emulators:exec "nx serve ministry-maps" --project du-ministry-maps`
-— it starts the emulators, serves the app at `http://localhost:4200`, runs the
-specs, and shuts everything down.
+The Playwright `webServer` in `playwright.config.ts` runs two independent servers in parallel:
+1. `npx firebase emulators:start --project du-ministry-maps`
+2. `npx nx serve ministry-maps`
+
+Playwright supervises both directly. It starts the emulators and the app at `http://localhost:4200`, runs the specs, and forcefully shuts down both process groups (using SIGINT for Firebase) when finished.
 
 ## Architecture
 
@@ -49,6 +50,10 @@ apps/ministry-maps/e2e/
 │   └── index.ts                  # composed test + expect (import from here!)
 ├── page-objects/                 ← page abstractions
 │   ├── territories.page.ts       # territories page locators
+│   ├── territory-manage-dialog.page.ts # create/edit territory dialog
+│   ├── territory-alerts.page.ts   # territory alert-resolution dialogs
+│   ├── assign-territories.page.ts # /territories/assign locators
+│   ├── statistics.page.ts        # /territories/statistics locators
 │   ├── confirm-dialog.page.ts    # shared confirm-dialog overlay
 │   ├── history-dialog.page.ts    # shared visit-history dialog
 │   ├── sort-filter-dialog.page.ts # shared sort/filter trigger + dialog
@@ -353,7 +358,7 @@ instead of copying boilerplate into specs. All are pure Playwright + Node (no
 
 ```bash
 # Complete suite
-npx nx e2e ministry-maps
+npx nx e2e ministry-maps --no-tui
 
 # Install/update browsers
 npx playwright install chromium

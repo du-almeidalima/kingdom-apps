@@ -1,5 +1,12 @@
 import { Page } from '@playwright/test';
 
+declare global {
+  interface Window {
+    /** Recorder used by {@link captureWhatsAppPopup} to capture attempted share URLs. */
+    __whatsappOpenedUrls?: string[];
+  }
+}
+
 /** A captured WhatsApp share attempt. */
 export interface WhatsAppShareCapture {
   /** The full `whatsapp://send?text=…` URL the app tried to open. */
@@ -18,17 +25,13 @@ export interface WhatsAppShareCapture {
 }
 
 /**
- * Captures a `whatsapp://send?text=…` share by wrapping
- * `page.waitForEvent('popup')` around the action that triggers
- * `window.open('whatsapp://…')` (UC-ASSIGN-19; see `docs/testability-gaps.md`
- * §2.3).
+ * Captures a `whatsapp://send?text=…` share by recording the URL passed to
+ * `window.open` (UC-ASSIGN-19; see `docs/testability-gaps.md` §2.3).
  *
  * Custom-protocol caveat: `whatsapp://` has no registered handler in headless
- * Chromium, so the browser surfaces a `popup` event carrying the attempted URL
- * but performs no real navigation — reading `popup.url()` is the whole point;
- * do not wait for the popup to load. This works for the **desktop UA** path
- * (`window.open`); the mobile UA path navigates the same tab instead
- * (`window.location.href = …`) and must be intercepted differently.
+ * Chromium, so it does not produce a reliable Playwright `popup` event. The
+ * recorder is installed in the current document and on future navigations, then
+ * the helper waits for the desktop UA path to call `window.open`.
  *
  * ```ts
  * const { whatsappUrl, sharedUrl } = await captureWhatsAppPopup(page, () =>
@@ -42,9 +45,18 @@ export async function captureWhatsAppPopup(
   page: Page,
   trigger: () => Promise<void>,
 ): Promise<WhatsAppShareCapture> {
-  const [popup] = await Promise.all([page.waitForEvent('popup'), trigger()]);
+  await page.addInitScript(installWhatsAppRecorder);
+  await page.evaluate(installWhatsAppRecorder);
+  await trigger();
 
-  const whatsappUrl = popup.url();
+  await page.waitForFunction(() =>
+    (window.__whatsappOpenedUrls ?? []).some((url) => url.startsWith('whatsapp://send?text=')),
+  );
+
+  const whatsappUrl = await page.evaluate(() => {
+    const urls = (window.__whatsappOpenedUrls ?? []).filter((url) => url.startsWith('whatsapp://send?text='));
+    return urls[urls.length - 1] ?? '';
+  });
   // `whatsapp://send?text=…` parses fine with the URL API (host `send`); the
   // app percent-encodes almost nothing, but `searchParams.get` decodes what
   // little is encoded (e.g. the invite message's `%0a` newlines).
@@ -52,4 +64,12 @@ export async function captureWhatsAppPopup(
   const sharedUrl = text.match(/https?:\/\/\S+/)?.[0] ?? '';
 
   return { whatsappUrl, text, sharedUrl };
+}
+
+function installWhatsAppRecorder(): void {
+  window.__whatsappOpenedUrls = [];
+  window.open = (url?: string | URL) => {
+    window.__whatsappOpenedUrls?.push(String(url));
+    return null;
+  };
 }
