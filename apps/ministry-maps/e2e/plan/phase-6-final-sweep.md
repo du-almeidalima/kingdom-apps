@@ -13,7 +13,7 @@ Close-out work once every other box is checked.
 
 1. **Full-suite verification**
    - `npx nx typecheck-e2e ministry-maps` green.
-   - `npx nx e2e ministry-maps` green **twice back-to-back** (isolation proof — the suite's own
+   - `npx nx e2e ministry-maps --no-tui` green **twice back-to-back** (isolation proof — the suite's own
      README requirement).
    - `npx nx test ministry-maps` + `npx nx lint ministry-maps` green (app side, post-testid batches).
    - Spec count sanity: count implemented `UC-*` titles across `tests/` and compare against the
@@ -61,7 +61,7 @@ Close-out work once every other box is checked.
 
 ## After the sweep (out of scope for this plan, recorded for the roadmap)
 
-- CI wiring (GitHub Actions) for `nx e2e ministry-maps` — listed in `e2e/README.md` §Out of Scope.
+- CI wiring (GitHub Actions) for `nx e2e ministry-maps --no-tui` — listed in `e2e/README.md` §Out of Scope.
 - Auth-emulator popup automation to convert the 8 OAuth manual legs into specs (decision needed:
   fragility vs coverage).
 - Defect fixes from `docs/testability-gaps.md` §3 — each is a **product decision**; when one lands,

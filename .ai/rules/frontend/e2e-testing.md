@@ -26,8 +26,8 @@ E2E tests run against a **real emulated Firebase**, never mocks. After a UI acti
 ## Running E2E Tests
 
 ```bash
-npx nx e2e ministry-maps            # boots emulators + serve via webServer, runs all specs
-npx nx typecheck-e2e ministry-maps  # type-checks the suite (tsc --noEmit against e2e/tsconfig.json)
+npx nx e2e ministry-maps --no-tui     # boots emulators + serve via webServer, runs all specs
+npx nx typecheck-e2e ministry-maps    # type-checks the suite (tsc --noEmit against e2e/tsconfig.json)
 ```
 
 > **Type-check the suite.** Playwright transpiles with esbuild (types stripped, never checked) and the ESLint rules here are syntactic only, so `typecheck-e2e` is the ONLY thing that type-checks the fixture/seed layer. `e2e/tsconfig.json` is a dedicated `strict` config extending the workspace base;

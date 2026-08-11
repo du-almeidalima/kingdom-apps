@@ -137,9 +137,9 @@ assignment, **stop and report** (see §7).
    `page.getByTestId(...)`/`getByRole(...)`, no baked-in waits beyond the object's own effect. 4. Write
    specs translating each catalog entry 1:1 (seed → steps → UI assertion → persistence assertion).
    5. `npx nx typecheck-e2e ministry-maps` → fix. 6. Run your spec file
-   (`npx nx e2e ministry-maps -- tests/<file>.spec.ts`, fallback
+   (`npx nx e2e ministry-maps --no-tui -- tests/<file>.spec.ts`, fallback
    `npx playwright test tests/<file>.spec.ts --config apps/ministry-maps/playwright.config.ts`) → fix.
-   7. Full suite `npx nx e2e ministry-maps` → green. 8. (Only if you touched app code — WP-05/06:
+   7. Full suite `npx nx e2e ministry-maps  --no-tui` → green. 8. (Only if you touched app code — WP-05/06:
    `npx nx test ministry-maps` and `npx nx lint ministry-maps` green.) 9. Bookkeeping (§4.5).
    10. Commit.
 
@@ -182,7 +182,7 @@ test(e2e): extend signInAs with elder/organizer/superintendent/app_admin roles (
 
 ## ASSIGNMENT
 
-**Your work package(s):** `{{FILL IN — e.g. WP-10}}`
+**Your work package(s):** `phase 3`
 
 Start at §2 (mandatory reading) and follow the execution loop in §6. Implement only the assigned
 package(s).
