@@ -137,14 +137,14 @@ the per-test reset+seed isolates tests (no cross-test leakage, no hidden timing 
 | WP-24 | `tests/profile.spec.ts` | UC-PROF-01…10 | WP-06, WP-07, WP-01 | M | ✅ |
 | WP-25 | `tests/configuration.spec.ts` | UC-CFG-01…13 | WP-06, WP-04, WP-07 | L | ✅ |
 | **Phase 5 — Journeys** ([details](./phase-5-journeys.md)) | | | | | |
-| WP-26 | `tests/journey-admin-assign-work.spec.ts` | J-01 | WP-10/11, WP-15, WP-18/19 | L | ⬜ |
-| WP-27 | `tests/journey-visit-feedback.spec.ts` | J-02 | WP-01, WP-10, WP-16, WP-20 | M | ⬜ |
-| WP-28 | `tests/journey-invite-onboarding.spec.ts` | J-03 | WP-02, WP-09, WP-23 | M | ⬜ |
-| WP-29 | `tests/journey-moved-alert.spec.ts` | J-04 | WP-01, WP-11, WP-16, WP-20 | M | ⬜ |
-| WP-30 | `tests/journey-city-rename.spec.ts` | J-05 | WP-25, WP-13 | M | ⬜ |
-| WP-31 | `tests/journey-expired-designation.spec.ts` | J-06 | WP-11 | M | ⬜ |
-| WP-32 | `tests/journey-statistics-reconciliation.spec.ts` | J-07 | WP-20/21 | M | ⬜ |
-| WP-33 | `tests/journey-empty-system.spec.ts` | J-08 | WP-03, WP-13, WP-18, WP-20, WP-17 | M | ⬜ |
+| WP-26 | `tests/journey-admin-assign-work.spec.ts` | J-01 | WP-10/11, WP-15, WP-18/19 | L | ✅ |
+| WP-27 | `tests/journey-visit-feedback.spec.ts` | J-02 | WP-01, WP-10, WP-16, WP-20 | M | ✅ |
+| WP-28 | `tests/journey-invite-onboarding.spec.ts` | J-03 | WP-02, WP-09, WP-23 | M | ✅ |
+| WP-29 | `tests/journey-moved-alert.spec.ts` | J-04 | WP-01, WP-11, WP-16, WP-20 | M | ✅ |
+| WP-30 | `tests/journey-city-rename.spec.ts` | J-05 | WP-25, WP-13 | M | ✅ |
+| WP-31 | `tests/journey-expired-designation.spec.ts` | J-06 | WP-11 | M | ✅ |
+| WP-32 | `tests/journey-statistics-reconciliation.spec.ts` | J-07 | WP-20/21 | M | ✅ |
+| WP-33 | `tests/journey-empty-system.spec.ts` | J-08 | WP-03, WP-13, WP-18, WP-20, WP-17 | M | ✅ |
 | **Phase 6 — Final sweep** ([details](./phase-6-final-sweep.md)) | | | | | |
 | WP-34 | suite hygiene, coverage marks, manual checklist, HX-4 decision | all | everything | S | ⬜ |
 

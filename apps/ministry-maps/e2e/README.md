@@ -1,8 +1,8 @@
 # E2E Testing Foundation — Ministry Maps
 
 End-to-end tests for the `ministry-maps` Angular PWA, running against the
-**real Firebase emulators** (Firestore + Auth) with **no mocks**. Seeding and
-assertions use the Firebase Admin SDK in Playwright's Node context.
+**real Firebase emulators** (Firestore + Auth + Functions) with **no mocks**.
+Seeding and assertions use the Firebase Admin SDK in Playwright's Node context.
 
 ## Quick Start
 
@@ -14,11 +14,12 @@ npx playwright install chromium
 npx nx e2e ministry-maps --no-tui
 ```
 
-The Playwright `webServer` in `playwright.config.ts` runs two independent servers in parallel:
-1. `npx firebase emulators:start --project du-ministry-maps`
-2. `npx nx serve ministry-maps`
-
-Playwright supervises both directly. It starts the emulators and the app at `http://localhost:4200`, runs the specs, and forcefully shuts down both process groups (using SIGINT for Firebase) when finished.
+The Playwright `webServer` starts one supervisor (`e2e/scripts/e2e-servers.mjs`).
+The supervisor starts Firestore, Auth, and Functions (with the Emulator UI
+disabled for unattended runs) alongside the Angular app at
+`http://localhost:4200`, waits for every required port, and shuts everything
+down in order. It also sweeps stale listeners before and after a run, so a
+cancelled agent or CI job cannot poison the next run.
 
 ## Architecture
 
@@ -26,6 +27,9 @@ Playwright supervises both directly. It starts the emulators and the app at `htt
 apps/ministry-maps/e2e/
 ├── README.md                     ← this file
 ├── tsconfig.json                 ← TS config for the suite (strict; drives type-checking + the editor)
+├── global-setup.ts               ← readiness gate for Firestore, Auth, and Functions
+├── scripts/
+│   └── e2e-servers.mjs            ← emulator + Angular supervisor and cleanup
 ├── config/                       ← composable configuration
 │   ├── emulator.config.ts        # ports, project id, REST clear URLs
 │   ├── firebase-admin.context.ts # Admin SDK bootstrap (firestore, auth, collections)
@@ -372,8 +376,12 @@ npx nx e2e ministry-maps --no-tui
 # Install/update browsers
 npx playwright install chromium
 
-# Run with UI
+# Run with the Playwright UI
 npx playwright test --ui --config apps/ministry-maps/playwright.config.ts
+
+# Fast edit/re-run loop: keep the stack alive in a separate terminal
+npx nx run ministry-maps:e2e-servers
+E2E_REUSE_SERVERS=1 npx playwright test --config apps/ministry-maps/playwright.config.ts
 
 # Isolation check: run every test twice back-to-back. Passing proves the
 # per-test reset+seed truly isolates tests (no cross-test state leakage, no
@@ -402,7 +410,6 @@ npx nx typecheck-e2e ministry-maps
 
 ## Out of Scope (Future)
 
-- CI pipeline wiring (GitHub Actions).
 - Broad feature test suites beyond the smoke + territories proof.
 - Exercising the real `signInWithPopup` OAuth flow.
 - Cross-test session reuse (currently sign-in per test).

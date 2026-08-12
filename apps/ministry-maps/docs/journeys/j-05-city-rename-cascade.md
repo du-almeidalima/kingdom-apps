@@ -54,8 +54,14 @@ client cache was stale.
    `page.once('dialog', dialog => dialog.accept())` — the `Delete` button calls the browser's native
    `confirm('Are you sure you want to delete this city?')`, which a locator can never see and which hangs
    the test if unhandled (UC-CFG-10).
-10. Click `Delete` on the `Osasco` row → the row disappears immediately (local splice) → click
-    `Save Changes` → toast `Cities updated successfully!`.
+10. Click `Delete` on the `Osasco` row → the row disappears immediately (local splice). **⚠ `Save Changes`
+    is disabled after a plain delete** — `hasChanges()` only inspects the *remaining* cities
+    (`city.isNew || city.currentName !== city.originalName`), and none of them changed (UC-CFG-04 defect).
+    To persist the delete, combine it with a trailing-space touch on the remaining city: click `Edit` on
+    `São Paulo Centro`, set its input to `São Paulo Centro ` (trailing space → `currentName !== originalName`
+    → `hasChanges()` true → Save enabled), then click `Save Changes`. `saveChanges()` trims the name, so the
+    persisted value is unchanged `São Paulo Centro`; only the `Osasco` removal is new. Toast:
+    `Cities updated successfully!`.
 
 ⟶ **HAND-OFF (Firestore):** `db.getDoc(db.collections.congregations, seed.ids.congregation).cities`
 deep-equals `['São Paulo Centro']`; **but** `db.getDoc(db.collections.territories, 'seed-territory-2')
@@ -68,12 +74,14 @@ returns its baseline visit.
 
 11. `page.goto('/territories')` → `page.reload()` (apply the reload lesson from leg 2).
 12. Assert the city `<select>` now offers only `São Paulo Centro` and `Todas`; assert
-    `Rua ...` of `seed-territory-2` (`Av. dos Autonomistas, 1200 - Centro`) appears under **neither**
-    option — its `city` value matches no `<option>`, and the `Todas` view fetches all congregation
-    territories but the pipe groups/sorts them by city against the select's known cities — verify the
-    observable outcome for your assertion: the address is **not listed in any selectable city view**.
+    `Av. dos Autonomistas, 1200 - Centro` (`seed-territory-2`) is **NOT listed under the only selectable
+    city** (`São Paulo Centro`) — its `city` value (`Osasco`) matches no `<option>`. Note (observed reality):
+    the orphan **does** still render under `Todas`, because that view fetches every congregation territory
+    and the grouping pipe does not filter out cities absent from the select — so the non-negotiable
+    "unreachable" assertion is the per-city view, not the `Todas` view.
 13. Contrast with the backend: `db.queryWhere(db.collections.territories, 'congregationId', '==',
-    seed.ids.congregation)` still returns **3** docs — the orphan is invisible in the UI, not deleted.
+    seed.ids.congregation)` still returns **3** docs — the orphan is unreachable via city selection, but
+    alive in Firestore (not deleted).
 
 ⟶ **FINAL SWEEP (Firestore):** `congregations/{id}.cities === ['São Paulo Centro']`; territories =
 3 docs with cities `São Paulo Centro`, `Osasco` (orphan), `São Paulo Centro`; no history doc was lost at

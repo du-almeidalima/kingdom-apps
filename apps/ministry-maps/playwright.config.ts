@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices, ReporterDescription } from '@playwright/test';
 import { nxE2EPreset } from '@nx/playwright/preset';
 import { workspaceRoot } from '@nx/devkit';
 
@@ -6,13 +6,38 @@ import { workspaceRoot } from '@nx/devkit';
 const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
 
 /**
- * See https://playwright.dev/docs/test-configuration.
+ * `openHtmlReport: 'never'` is load-bearing for unattended runs: the default
+ * (`'on-failure'`) makes Playwright serve the report and block until the
+ * browser tab is closed, so a failing run never returns to the shell — fatal
+ * for CI and for agents, which then wait forever. Read the report afterwards
+ * with `nx run ministry-maps:e2e-report`.
  *
- * `retries`/`reporter`/`forbidOnly` are already set by `nxE2EPreset` (CI-aware
- * defaults) — no need to override them here.
+ * Everything else the preset gives us (retries/forbidOnly on CI, blob reports
+ * on CI, report + artifact paths under `dist/.playwright/…` instead of the repo
+ * root) is kept as-is.
+ */
+const nxPreset = nxE2EPreset(__filename, { testDir: './e2e', openHtmlReport: 'never' });
+
+/**
+ * Set `E2E_REUSE_SERVERS=1` to run the specs against a stack you already
+ * started yourself (`nx run ministry-maps:e2e-servers`) instead of booting a
+ * throwaway one per run — the fast local edit/re-run loop. Off by default so
+ * unattended runs always get a known-clean stack.
+ */
+const reuseExistingServer = process.env['E2E_REUSE_SERVERS'] === '1';
+
+/**
+ * `list` streams per-test progress to the terminal; without it the html
+ * reporter alone leaves a run completely silent until it ends.
+ */
+const reporter: ReporterDescription[] = [['list'], ...(nxPreset.reporter as ReporterDescription[])];
+
+/**
+ * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  ...nxE2EPreset(__filename, { testDir: './e2e' }),
+  ...nxPreset,
+  reporter,
   /*
    * Run tests sequentially against the single shared emulator instance so
    * reset+seed stays deterministic. `fullyParallel` is explicit because the nx
@@ -24,12 +49,14 @@ export default defineConfig({
    * rewrite needed, since reset/seed only flows through the database fixture.
    */
   workers: 1,
-  /*
-   * This avoids spinning up a server whenever a test fail. consider using `npx playwright show-report` or adding the
-   * `--reporter=html` flag
-   */
-  reporter: [['html', { open: 'never' }]],
   fullyParallel: false,
+  /*
+   * Playwright only waits for the `webServer` `url` (the Angular dev server).
+   * This gate additionally proves every emulator is answering before the first
+   * spec runs, so a slow/failed emulator boot fails once, loudly, instead of
+   * as a wall of confusing fixture errors.
+   */
+  globalSetup: './e2e/global-setup.ts',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,
@@ -44,15 +71,26 @@ export default defineConfig({
    * round-trips.
    */
   expect: { timeout: 10_000 },
-  /* Run your local dev server before starting the tests */
+  /*
+   * One supervisor owns the whole stack (emulators + dev server) — see
+   * `e2e/scripts/e2e-servers.mjs` for why Playwright cannot be trusted to stop
+   * the emulators itself. It also frees the ports before starting, so a run
+   * that was killed outright can never block the next one.
+   *
+   * `gracefulShutdown` is what lets the supervisor do its ordered teardown:
+   * without it Playwright SIGKILLs the group immediately and the Firebase CLI
+   * never gets to stop its detached emulator JARs.
+   */
   webServer: {
-    command:
-      'fuser -k 8080/tcp 9099/tcp 4200/tcp 2>/dev/null || true; npx firebase emulators:exec "npx nx serve ministry-maps" --project du-ministry-maps',
-    url: 'http://localhost:4200',
-    reuseExistingServer: false,
+    command: 'node apps/ministry-maps/e2e/scripts/e2e-servers.mjs',
+    url: baseURL,
+    reuseExistingServer,
     cwd: workspaceRoot,
-    // Emulators + Angular compile might take a moment
-    timeout: 120000,
+    // Emulator boot + a cold Angular compile.
+    timeout: 180_000,
+    gracefulShutdown: { signal: 'SIGTERM', timeout: 30_000 },
+    stdout: 'pipe',
+    stderr: 'pipe',
   },
   projects: [
     // Browsers

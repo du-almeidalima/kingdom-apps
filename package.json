@@ -2,7 +2,13 @@
   "name": "@kingdom-apps/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "start": "nx run-many --targets=serve --projects=firebase-emulator,ministry-maps --parallel=2",
+    "e2e": "nx e2e ministry-maps",
+    "e2e:ui": "nx run ministry-maps:e2e-ui",
+    "e2e:report": "nx run ministry-maps:e2e-report",
+    "e2e:servers": "nx run ministry-maps:e2e-servers"
+  },
   "private": true,
   "dependencies": {
     "@angular/cdk": "21.2.7",
@@ -55,6 +61,7 @@
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-playwright": "^1.6.2",
     "firebase-admin": "^13.10.0",
+    "firebase-tools": "^14.27.0",
     "jest": "30.3.0",
     "jest-environment-jsdom": "30.3.0",
     "jest-preset-angular": "16.1.4",

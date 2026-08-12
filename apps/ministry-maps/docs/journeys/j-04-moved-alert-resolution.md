@@ -32,6 +32,9 @@ const designation = seed.factories.buildDesignation({
       congregationId: seed.ids.congregation,
       city: 'São Paulo',
       address: 'Rua da Mudança, 404 - Moema',
+      note: 'Portaria 24h.', // on the snapshot too — the work write-back overwrites the
+      // territory doc with the designation snapshot fields; an empty snapshot note
+      // would clobber the seeded note and hide the Mudou badge (UC-TERR-27).
       history: [],                      // REQUIRED (UC-WORK-04)
     }),
   ],

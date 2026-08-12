@@ -53,6 +53,13 @@ Thumbs.db
 .firebase
 *-debug.log
 .runtimeconfig.json
+/firebase.e2e.json
+
+# Playwright (the nx preset writes to dist/, these are only produced by ad-hoc runs)
+/test-results
+/playwright-report
+/blob-report
+/playwright/.cache
 
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
@@ -60,3 +67,9 @@ Thumbs.db
 .nx/polygraph
 .claude/worktrees
 .claude/settings.local.json
+
+# Playwright artifacts
+playwright-report/
+test-results/
+**/playwright-report/
+**/test-results/

@@ -31,6 +31,10 @@ const designation = seed.factories.buildDesignation({
       congregationId: seed.ids.congregation,
       city: 'São Paulo',
       address: 'Rua do Feedback, 77 - Bela Vista',
+      note: 'Casa com portão azul.', // REQUIRED on the snapshot too — the work write-back
+      // (work-page.component.ts handleTerritoryUpdated) overwrites the territory doc
+      // with the designation territory fields, so an empty snapshot note would clobber
+      // the seeded note and hide the Revisita badge after completion (UC-TERR-27).
       history: [],                    // REQUIRED — the factory default omits it and crashes the page (UC-WORK-04)
     }),
   ],
