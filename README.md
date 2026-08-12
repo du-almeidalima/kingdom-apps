@@ -1,73 +1,101 @@
 # Kingdom Apps
 
-Welcome to the Kingdom Apps monorepo!
+Kingdom Apps is an Nx monorepo for applications that support ministry and congregation workflows. It is an independent project and is not affiliated with or endorsed by Jehovah's Witnesses or any related legal entity.
 
-This monorepo contains projects aimed to help the ministry and congregation work.
-Although its purpose is related to Jehovah's Witnesses organization work, this is not associated by any means with the
-Jehovah Witness and any of its trademarks.
+## Workspace
 
-## Structure
+| Path                                | Purpose                                                                |
+|-------------------------------------|------------------------------------------------------------------------|
+| `apps/ministry-maps`                | Angular PWA for managing territories, designations, users, and visits. |
+| `libs/common-ui`                    | Reusable, application-agnostic Angular UI.                             |
+| `functions/ministry-maps`           | Firebase Functions v2 codebase with its own dependencies and lockfile. |
+| `tools/executors/firebase-emulator` | Nx target and seed data for local Firebase emulators.                  |
 
-This monorepo is divided into Apps and Libs.
-
-- **Apps** are the deployable applications that the end user is going to use; that includes the Ministry Maps project.
-- **Libs** are shareable code that applications can import and use, those are not deployable and shouldn't contain application-specific logic.
+See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for system boundaries and runtime details.
 
 ## Prerequisites
 
-To run and deploy the Kingdom Apps monorepo, you will need:
+- Node.js 22 (see [`.nvmrc`](./.nvmrc)) and npm.
+- Java 21 for the Firebase Emulator Suite.
 
-- Node.js - 22
-- NPM - 10+
-- [Firebase Tools](https://github.com/firebase/firebase-tools) - `npm install -g firebase-tools`
+Nx and Firebase Tools are workspace dependencies; global installations are not required.
 
-> **Note:** `npm install` / `npm ci` needs `--legacy-peer-deps` due to Angular 21 + Firebase RC dependency conflicts.
+## Setup
 
-## Projects
-
-- Ministry Maps: PWA application to manage territory and designations for the ministry service.
-
-## Development
-
-### Local Development (with Firebase Emulators)
-
-Run the Firebase emulators in one terminal:
+With Node.js 22 active (`nvm use` if you use nvm):
 
 ```bash
-nx serve firebase-emulator
+npm ci --legacy-peer-deps
+npm ci --prefix functions/ministry-maps
 ```
 
-And the Angular dev server in another:
+Install Chromium once before running E2E tests:
 
 ```bash
-nx serve ministry-maps
+npx playwright install chromium
 ```
 
-The app will be available at http://localhost:4200/ and auto-reload on source changes.  
-The Firebase Emulator UI is available at http://127.0.0.1:4000/.
+## CodeGraph (optional)
 
-### Cloud Mode
+CodeGraph provides a machine-local semantic index for navigating the codebase. Install and initialize
+it once from the repository root:
 
-To connect to Firebase in the cloud instead of the emulators, set `NX_USE_CLOUD=true` in your `.env` file and run `nx serve ministry-maps`. Be sure to clear cached data from your browser when switching between local and cloud mode (this includes localStorage).
-
-### Seeding Data
-
-Firebase Emulator doesn't persist any data.
-Everytime it's served, it uses the backed-up data in:
-
-```
-tools 
-└───executors
-    └───firebase-emulator
-        └───seed
+```bash
+npm install --global @colbymchenry/codegraph
+codegraph init
+codegraph status
 ```
 
-To update the **seed** data back-up, run the command:
+Use it during development to locate symbols and understand code paths:
 
-`firebase emulators:export tools/executors/firebase-emulator/seed`
+```bash
+codegraph explore "where is Firebase authentication configured?"
+```
 
-> **_NOTE:_** Anytime a change that requires DB data to work is made, please, run the above command and add it to the Pull Request before merging your feature.
+Run `codegraph status` before use and `codegraph sync` when the index is stale, such as after pulling
+substantial code changes. The index and its runtime files are local development artifacts and must not
+be committed.
 
-## Understand this workspace
+## Local development
 
-Run `nx graph` to see a diagram of the dependencies of the projects.
+Start the Angular dev server and the Auth, Firestore, and Functions emulators together:
+
+```bash
+npm start
+```
+
+- App: <http://localhost:4200/>
+- Firebase Emulator UI: <http://127.0.0.1:4000/>
+
+Local values come from `apps/ministry-maps/.env.development`. To use Firebase cloud services, supply the real `NX_FIREBASE_*` values and set `NX_USE_CLOUD=true`; clear browser site data when switching between cloud and emulator modes.
+
+### Emulator seed data
+
+The `firebase-emulator:serve` target imports `tools/executors/firebase-emulator/seed` at startup and exports back to it on graceful shutdown. To snapshot the running emulators immediately:
+
+```bash
+npx firebase emulators:export tools/executors/firebase-emulator/seed --force
+```
+
+Commit intentional seed changes that application or test behavior depends on.
+
+## Common commands
+
+| Task                      | Command                              |
+|---------------------------|--------------------------------------|
+| Start app and emulators   | `npm start`                          |
+| Build the app             | `npx nx build ministry-maps`         |
+| Test the app              | `npx nx test ministry-maps`          |
+| Test affected projects    | `npx nx affected -t test`            |
+| Lint the app              | `npx nx lint ministry-maps`          |
+| Type-check E2E tests      | `npx nx typecheck-e2e ministry-maps` |
+| Run E2E tests             | `npm run e2e`                        |
+| Open Playwright UI        | `npm run e2e:ui`                     |
+| View project dependencies | `npx nx graph`                       |
+
+## Documentation
+
+- [`AGENTS.md`](./AGENTS.md) — repository rules for coding agents.
+- [`apps/ministry-maps/docs/README.md`](./apps/ministry-maps/docs/README.md) — product behavior, domain model, test catalog, and developer follow-ups.
+- [`apps/ministry-maps/e2e/README.md`](./apps/ministry-maps/e2e/README.md) — Playwright/Firebase harness and test workflow.
+- [`.ai/rules/`](./.ai/rules) — context-specific implementation and workflow guidance.

@@ -9,10 +9,6 @@ human) can open one work package in a fresh session and complete it without re-r
 **Source of truth for HOW to execute:** this folder — sequencing, dependencies, page-object allocation,
 and done criteria.
 
-> **Dispatching work to agents?** Use [`agent-prompt.md`](./agent-prompt.md) — the standard,
-> copy-paste-ready briefing (reading list, harness vocabulary, coordination protocol, hard rules).
-> Fill in its `ASSIGNMENT` line with a WP number and give every agent **disjoint** work packages.
-
 > **Status legend for the tracking table below:** ⬜ not started · 🔄 in progress · ✅ merged.
 > When you finish a work package: check its box here, flip the `Covered` marks in
 > [`../../docs/test-catalog.md`](../../docs/test-catalog.md), and commit with the message format in §4.

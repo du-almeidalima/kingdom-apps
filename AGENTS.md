@@ -1,12 +1,20 @@
-# Kingdom Apps
+# Kingdom Apps — Agent Guide
 
-## Core Principles (Always Active)
-- **Standalone Components Only**: No NgModules.
-- **Use `inject()` Function**: NEVER use constructor injection.
-- **Path Aliases Required**: Use `@kingdom-apps/` aliases (e.g., `@kingdom-apps/common-ui`).
-- **File Naming**: Always `kebab-case`.
-- **Conventional Commits**: `feat:`, `fix:`, `refactor:`, etc.
-- **libs/common-ui**: UI components only, NO application-specific logic.
+This file contains repository-wide instructions for coding agents. Use [`README.md`](./README.md) for
+setup and [`ARCHITECTURE.md`](./ARCHITECTURE.md) for system boundaries.
+
+## Core Rules
+
+- **Standalone Angular only:** new and modified components must be standalone; do not add NgModules.
+  Existing feature-routing NgModules are migration debt, not examples to copy.
+- **Use `inject()`:** do not add constructor injection. Avoid unrelated migrations of legacy code.
+- **Use path aliases:** cross-project imports must use configured `@kingdom-apps/*` aliases (currently
+  `@kingdom-apps/common-ui`).
+- **Use `kebab-case`:** apply it to every new file name.
+- **Keep `common-ui` generic:** no Ministry Maps domain models, business logic, or feature-specific UI.
+- **Use conventional commits:** `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, and similar types.
+- **Preserve scope:** make the smallest change that satisfies the task; do not refactor unrelated
+  legacy code.
 
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->
@@ -33,42 +41,67 @@
 <!-- nx configuration end-->
 
 ## Contextual Rules Index
-Refer to these rules based on your current task context.
-- **Frontend**: `.ai/rules/frontend/`
-  - `angular-components.md` - Component patterns
-  - `angular-services.md` - Services, DI, state
-  - `styling.md` - SCSS, Tailwind
-  - `unit-testing.md` - Jest + ng-mocks
-  - `e2e-testing.md` - Playwright + Firebase Emulator (see also `apps/ministry-maps/e2e/README.md`)
-- **Backend**: `.ai/rules/backend/`
-  - `firebase-functions.md` - Cloud Functions v2
-  - `firestore.md` - Database patterns
-- **Architecture**: `.ai/rules/architecture/`
-  - `monorepo.md` - Nx structure
-  - `common-ui.md` - Shared library
-  - `repositories.md` - Data access pattern
-- **Workflow**: `.ai/rules/workflow/`
-  - `development.md` - Dev environment
-  - `git-commits.md` - Git standards
-  - `deployment.md` - Build & deploy
 
-## Architecture
+Read only the rules relevant to the files being changed:
 
-- `apps/ministry-maps/` — Angular 21 PWA (Tailwind + SCSS, Jest)
-- `libs/common-ui/` — shared UI library (no app logic)
-- `functions/ministry-maps/` — Cloud Functions v2 (JS, Node 22, separate package.json/lockfile)
-- `tools/executors/firebase-emulator/seed/` — Firestore + Auth emulator seed data
+| Context | Rules |
+|---|---|
+| Angular components, services, styling | `.ai/rules/frontend/angular-components.md`, `angular-services.md`, `styling.md` |
+| Unit tests | `.ai/rules/frontend/unit-testing.md` |
+| E2E tests | `.ai/rules/frontend/e2e-testing.md` and `apps/ministry-maps/e2e/README.md` |
+| Firebase Functions or Firestore | `.ai/rules/backend/firebase-functions.md`, `firestore.md` |
+| Monorepo, shared UI, repositories | `.ai/rules/architecture/monorepo.md`, `common-ui.md`, `repositories.md` |
+| Development, commits, deployment | `.ai/rules/workflow/development.md`, `git-commits.md`, `deployment.md` |
 
-## Commands
+For Ministry Maps behavior or data changes, also read the relevant material under
+`apps/ministry-maps/docs/`.
 
-- `npm start` — Emulators + serve
-- `npx nx test <project>` — Single project tests
-- `npx nx affected -t test` — CI: test changed only
-- `npx nx graph` — Dependency graph
+## Verification
+
+Use Nx through the workspace package manager. Run the focused target first, then every relevant
+downstream target required by the change.
+
+| Change | Minimum relevant checks |
+|---|---|
+| `apps/ministry-maps` | `npx nx test ministry-maps`, `npx nx lint ministry-maps`, `npx nx build ministry-maps` |
+| `libs/common-ui` | `npx nx test common-ui`, `npx nx lint common-ui` |
+| E2E | `npx nx typecheck-e2e ministry-maps`, then the relevant `npx nx e2e ministry-maps` scope |
+| `functions/ministry-maps` | `npm --prefix functions/ministry-maps run lint` plus an emulator-backed behavior check |
+| Documentation only | Validate changed links and commands; run `git diff --check` |
+
+Add or update tests for behavior changes. Do not weaken, skip, or delete a failing test to make a
+change pass.
 
 ## Gotchas
 
-- `npm ci` / `npm install` needs `--legacy-peer-deps` (Angular 21 + Firebase RC dep conflicts)
-- `NX_*` env vars injected via custom webpack DefinePlugin (not `process.env` at runtime); `.env.development` has emulator values
-- ESLint: flat config (`eslint.config.mjs`) for Angular; legacy `.eslintrc.js` for Functions
-- Firebase Hosting: `prod` → `du-ministry-maps`, `beta` → `du-ministry-maps-beta`
+- Root `npm ci` / `npm install` needs `--legacy-peer-deps` because of Angular 21 and Firebase RC peer
+  dependencies.
+- `functions/ministry-maps` has a separate package manifest and lockfile; install its dependencies
+  separately when needed.
+- `NX_*` values are injected at build time by webpack, not read dynamically in the browser.
+- Angular uses the root flat ESLint config; Functions uses `functions/ministry-maps/.eslintrc.js`.
+- Local Firebase seed data is imported and exported by the `firebase-emulator:serve` target.
+
+<!-- CODEGRAPH_START -->
+## CodeGraph
+
+Use CodeGraph before generic text search or opening several files when locating or understanding code:
+
+1. Run `codegraph status` at the repository root. Do not infer readiness from `.codegraph/`; the
+   directory can exist before an index does.
+2. If the index is usable, prefer the `codegraph_explore` MCP tool when available. Otherwise run
+   `codegraph explore "<symbol names or question>"` from the shell.
+3. If the index is stale, run `codegraph sync` and check its status again. If CodeGraph is unavailable
+   or cannot provide the needed result, fall back to the normal repository search tools.
+
+Name concrete symbols or files in queries when possible. The index is machine-local and intentionally
+ignored by Git; never commit its database, daemon files, sockets, or logs.
+
+For an explicit environment-setup task, the portable one-time setup is:
+
+```bash
+npm install --global @colbymchenry/codegraph
+codegraph init
+codegraph status
+```
+<!-- CODEGRAPH_END -->

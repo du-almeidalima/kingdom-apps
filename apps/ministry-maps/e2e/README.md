@@ -1,8 +1,6 @@
 # E2E Testing Foundation — Ministry Maps
 
-End-to-end tests for the `ministry-maps` Angular PWA, running against the
-**real Firebase emulators** (Firestore + Auth + Functions) with **no mocks**.
-Seeding and assertions use the Firebase Admin SDK in Playwright's Node context.
+End-to-end tests for the `ministry-maps` Angular PWA, running against the **real Firebase emulators** (Firestore + Auth + Functions) with **no mocks**. Seeding and assertions use the Firebase Admin SDK in Playwright's Node context.
 
 ## Quick Start
 
@@ -14,12 +12,8 @@ npx playwright install chromium
 npx nx e2e ministry-maps --no-tui
 ```
 
-The Playwright `webServer` starts one supervisor (`e2e/scripts/e2e-servers.mjs`).
-The supervisor starts Firestore, Auth, and Functions (with the Emulator UI
-disabled for unattended runs) alongside the Angular app at
-`http://localhost:4200`, waits for every required port, and shuts everything
-down in order. It also sweeps stale listeners before and after a run, so a
-cancelled agent or CI job cannot poison the next run.
+The Playwright `webServer` starts one supervisor (`e2e/scripts/e2e-servers.mjs`). The supervisor starts Firestore, Auth, and Functions (with the Emulator UI disabled for unattended runs) alongside the Angular app at
+`http://localhost:4200`, waits for every required port, and shuts everything down in order. It also sweeps stale listeners before and after a run, so a cancelled agent or CI job cannot poison the next run.
 
 ## Architecture
 
@@ -104,25 +98,22 @@ apps/ministry-maps/e2e/
 
 ## Configuration (`config/`)
 
-| Module                      | Purpose                                                                                                                                                       |
-|-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `emulator.config.ts`        | Single source of truth for ports (`8080`, `9099`, `5001`), project id (`du-ministry-maps`), and derived REST URLs. Keep in sync with `firebase.json`.         |
-| `firebase-admin.context.ts` | Sets env vars (`FIRESTORE_EMULATOR_HOST`, `FIREBASE_AUTH_EMULATOR_HOST`), initializes the Admin app once, and exports `firestore`, `auth`, and `Collections`. |
-| `auth.config.ts`            | `ROLE_UIDS: Record<TestRole, string>` — maps test roles (`admin`, `publisher`, `elder`, `organizer`, `superintendent`, `app_admin`) to seeded uids from `DEFAULT_SEED_IDS` — plus `DEFAULT_PASSWORD`.              |
+| Module                      | Purpose                                                                                                                                                                                               |
+|-----------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `emulator.config.ts`        | Single source of truth for ports (`8080`, `9099`, `5001`), project id (`du-ministry-maps`), and derived REST URLs. Keep in sync with `firebase.json`.                                                 |
+| `firebase-admin.context.ts` | Sets env vars (`FIRESTORE_EMULATOR_HOST`, `FIREBASE_AUTH_EMULATOR_HOST`), initializes the Admin app once, and exports `firestore`, `auth`, and `Collections`.                                         |
+| `auth.config.ts`            | `ROLE_UIDS: Record<TestRole, string>` — maps test roles (`admin`, `publisher`, `elder`, `organizer`, `superintendent`, `app_admin`) to seeded uids from `DEFAULT_SEED_IDS` — plus `DEFAULT_PASSWORD`. |
 
 ## Seeding (`seed/`)
 
 ### The Default Baseline
 
-Before every test the database fixture resets the emulators and applies the
-**default baseline**: 1 congregation, 8 users (1 ADMIN, 3 PUBLISHERs, and 1 each
-of ELDER, ORGANIZER, SUPERINTENDENT and APP_ADMIN so `signInAs` covers every
+Before every test the database fixture resets the emulators and applies the **default baseline**: 1 congregation, 8 users (1 ADMIN, 3 PUBLISHERs, and 1 each of ELDER, ORGANIZER, SUPERINTENDENT and APP_ADMIN so `signInAs` covers every
 `RoleEnum`), 3 territories (with visit history), and 1 designation.
 
 ### Factory Usage
 
-Each factory returns a fully-typed `*Seed` payload with realistic Brazilian
-defaults and accepts a `Partial` override:
+Each factory returns a fully-typed `*Seed` payload with realistic Brazilian defaults and accepts a `Partial` override:
 
 ```typescript
 import { test, expect } from '../fixtures';
@@ -155,26 +146,18 @@ test('on-demand seeding', async ({ seed, db }) => {
 The seeder enforces the app's real storage shape:
 
 1. **`User.congregation`** is a `DocumentReference` — never a plain string.
-2. **Auth/Firestore uid parity** — `auth.createUser({ uid: userDocId })` with
-   the same id as the Firestore document. Under serial workers with a full
-   emulator wipe per test, a duplicate uid means the caller seeded the same
-   user twice: the seeder now **throws** (with the uid + email + underlying
-   message) instead of silently ignoring an "already exists" error.
+2. **Auth/Firestore uid parity** — `auth.createUser({ uid: userDocId })` with the same id as the Firestore document. Under serial workers with a full emulator wipe per test, a duplicate uid means the caller seeded the same user twice: the seeder now **throws** (with the uid + email + underlying message) instead of silently ignoring an "already exists" error.
 3. **Dates** are plain `Date`s — the Admin SDK auto-converts to `Timestamp`.
 4. **Territory history** lives in `territories/{id}/history` subcollection;
    `recentHistory` (latest 5, desc) and `lastVisit` are derived on the parent.
-5. **Invitation links** (`invitation_links`, mind the underscore) are written in
-   the app's creation-time shape: `congregation` as a `DocumentReference` and
-   the doc's own `id` embedded in the body. Seed them via
-   `seed.write({ invitationLinks: [seed.factories.buildInvitationLink({ congregationId: seed.ids.congregation })] })`;
-   a consumed invite is just an override (`isValid: false, usedAt, usedBy`).
+5. **Invitation links** (`invitation_links`, mind the underscore) are written in the app's creation-time shape: `congregation` as a `DocumentReference` and the doc's own `id` embedded in the body. Seed them via
+   `seed.write({ invitationLinks: [seed.factories.buildInvitationLink({ congregationId: seed.ids.congregation })] })`; a consumed invite is just an override (`isValid: false, usedAt, usedBy`).
 
 ## Fixtures
 
 ### Importing
 
-All specs **must** import `test` and `expect` from `fixtures/index.ts` (never
-directly from `@playwright/test`):
+All specs **must** import `test` and `expect` from `fixtures/index.ts` (never directly from `@playwright/test`):
 
 ```typescript
 import { test, expect } from '../fixtures';
@@ -182,15 +165,15 @@ import { test, expect } from '../fixtures';
 
 ### Available Fixtures
 
-| Fixture             | Type                      | Description                                               |
-|---------------------|---------------------------|-----------------------------------------------------------|
-| `resetAndSeed`      | auto                      | Wipes + re-seeds before every test.                       |
-| `seed`              | `SeedApi`                 | Factories, `write()`, `ids`.                              |
-| `db`                | `DbApi`                   | Firestore/Auth handles and read helpers.                  |
-| `role`              | option (`TestRole`)       | Identity for `authenticatedPage`; set via `test.use`.     |
-| `signInAs`          | `(role) => Promise<void>` | Imperatively signs the current `page` into a seeded user. |
+| Fixture             | Type                      | Description                                                |
+|---------------------|---------------------------|------------------------------------------------------------|
+| `resetAndSeed`      | auto                      | Wipes + re-seeds before every test.                        |
+| `seed`              | `SeedApi`                 | Factories, `write()`, `ids`.                               |
+| `db`                | `DbApi`                   | Firestore/Auth handles and read helpers.                   |
+| `role`              | option (`TestRole`)       | Identity for `authenticatedPage`; set via `test.use`.      |
+| `signInAs`          | `(role) => Promise<void>` | Imperatively signs the current `page` into a seeded user.  |
 | `signInAsUser`      | `(uid) => Promise<void>`  | Signs the current `page` into **any** seeded user, by uid. |
-| `authenticatedPage` | `Page`                    | A `page` already signed in as the `role` option.          |
+| `authenticatedPage` | `Page`                    | A `page` already signed in as the `role` option.           |
 
 ### `db` — Read / Assertion API
 
@@ -216,8 +199,7 @@ test('check Firestore', async ({ db, seed }) => {
 
 Two Playwright-idiomatic ways to reach guarded routes:
 
-**1. Declarative — the `role` option + `authenticatedPage` fixture** (preferred
-when a spec/file uses a single identity):
+**1. Declarative — the `role` option + `authenticatedPage` fixture** (preferred when a spec/file uses a single identity):
 
 ```typescript
 test.use({ role: 'admin' }); // defaults to 'admin' if omitted
@@ -228,9 +210,7 @@ test('guarded route', async ({ authenticatedPage }) => {
 });
 ```
 
-**2. Imperative — the `signInAs` fixture** (when a test drives multiple
-identities). It signs the current `page` in and leaves it on `/login` with a
-live session; you navigate to the route you want:
+**2. Imperative — the `signInAs` fixture** (when a test drives multiple identities). It signs the current `page` in and leaves it on `/login` with a live session; you navigate to the route you want:
 
 ```typescript
 test('guarded route', async ({ signInAs, page }) => {
@@ -240,16 +220,11 @@ test('guarded route', async ({ signInAs, page }) => {
 });
 ```
 
-`signInAs` resolves only once `auth.currentUser` is populated in the browser,
-so the auth guard resolves the user on your first navigation (no arbitrary
-waits). Supported roles: `'admin'` (ADMIN), `'publisher'` (PUBLISHER),
+`signInAs` resolves only once `auth.currentUser` is populated in the browser, so the auth guard resolves the user on your first navigation (no arbitrary waits). Supported roles: `'admin'` (ADMIN), `'publisher'` (PUBLISHER),
 `'elder'` (ELDER), `'organizer'` (ORGANIZER), `'superintendent'`
-(SUPERINTENDENT) and `'app_admin'` (APP_ADMIN) — each maps to a baseline user
-carrying the matching `RoleEnum` (see `ROLE_UIDS` in `config/auth.config.ts`).
+(SUPERINTENDENT) and `'app_admin'` (APP_ADMIN) — each maps to a baseline user carrying the matching `RoleEnum` (see `ROLE_UIDS` in `config/auth.config.ts`).
 
-For identities **outside** the baseline (e.g. the admin of a second, on-demand
-congregation), use `signInAsUser(uid)` — same session mechanics, but it mints
-the custom token for any seeded uid:
+For identities **outside** the baseline (e.g. the admin of a second, on-demand congregation), use `signInAsUser(uid)` — same session mechanics, but it mints the custom token for any seeded uid:
 
 ```typescript
 test('second-congregation admin', async ({ seed, signInAsUser, page }) => {
@@ -271,16 +246,10 @@ test('second-congregation admin', async ({ seed, signInAsUser, page }) => {
 The E2E tests establish a **real Firebase session** against the **Auth emulator**
 using the **custom-token** approach (no OAuth popup):
 
-1. The Playwright fixture calls `auth.createCustomToken(uid)` via the Admin SDK
-   (Node context).
-2. It navigates the browser to `/login` and waits for `window.__E2E__` — a
-   development-only hook exposed by the app when connected to the Auth
-   emulator.
-3. It calls `signInWithCustomToken(auth, token)` in the browser, which
-   authenticates the user against the emulator.
-4. It waits until `auth.currentUser` is populated, confirming the session is
-   live. The page stays on `/login`; the spec then navigates to the guarded
-   route, where the Angular auth guard resolves the user's Firestore document.
+1. The Playwright fixture calls `auth.createCustomToken(uid)` via the Admin SDK (Node context).
+2. It navigates the browser to `/login` and waits for `window.__E2E__` — a development-only hook exposed by the app when connected to the Auth emulator.
+3. It calls `signInWithCustomToken(auth, token)` in the browser, which authenticates the user against the emulator.
+4. It waits until `auth.currentUser` is populated, confirming the session is live. The page stays on `/login`; the spec then navigates to the guarded route, where the Angular auth guard resolves the user's Firestore document.
 
 > Sign-in happens **per test, after `resetAndSeed`** — the reset wipes Auth and
 > revokes any prior token, so a fresh token is minted each time. Cross-test
@@ -289,35 +258,22 @@ using the **custom-token** approach (no OAuth popup):
 > the next test's wipe). It would take the shape of a per-role Playwright
 > setup project writing one `storageState` file per role.
 
-**Important:** The `window.__E2E__ = { auth, signInWithCustomToken }` hook is
-**strictly gated** to `environment.env === 'development' && !environment.useCloud`
-in `app.config.ts` — it never ships to production. The login page itself never
-auto-navigates on an auth-state change, so `signInAs`/`authenticatedPage` can
-safely leave the page on `/login` after establishing the session; the caller
-navigates to the guarded route it wants to exercise.
+**Important:** The `window.__E2E__ = { auth, signInWithCustomToken }` hook is **strictly gated** to `environment.env === 'development' && !environment.useCloud`
+in `app.config.ts` — it never ships to production. The login page itself never auto-navigates on an auth-state change, so `signInAs`/`authenticatedPage` can safely leave the page on `/login` after establishing the session; the caller navigates to the guarded route it wants to exercise.
 
 ### Timeouts and Failure Messages
 
 The auth fixture waits on two conditions with explicit timeouts (10s each,
 `E2E_HOOK_TIMEOUT_MS` / `SESSION_SETTLE_TIMEOUT_MS` in `auth.fixture.ts`):
 
-1. **`window.__E2E__` appears after `goto('/login')`.** On timeout, the error
-   names the gating condition in `app.config.ts` and the `webServer` command,
-   so a stale/production build is easy to rule out.
-2. **`auth.currentUser` settles to the expected uid.** On timeout, the error
-   points at `ROLE_UIDS` (`config/auth.config.ts`) and the Auth emulator port,
-   so a bad role→uid mapping or a down emulator is easy to rule out.
+1. **`window.__E2E__` appears after `goto('/login')`.** On timeout, the error names the gating condition in `app.config.ts` and the `webServer` command, so a stale/production build is easy to rule out.
+2. **`auth.currentUser` settles to the expected uid.** On timeout, the error points at `ROLE_UIDS` (`config/auth.config.ts`) and the Auth emulator port, so a bad role→uid mapping or a down emulator is easy to rule out.
 
-Both replace what used to be a bare, unbounded `waitForFunction` with no
-timeout and a generic `TimeoutError` on failure.
+Both replace what used to be a bare, unbounded `waitForFunction` with no timeout and a generic `TimeoutError` on failure.
 
 ## Page Objects (`page-objects/`)
 
-Page objects encapsulate navigation and locators as `readonly` properties
-assigned in the constructor. Actions (`goto()`, `showAllCities()`) don't wait
-for anything beyond their own effect — synchronization is left to the
-caller's web-first, auto-retrying assertions rather than baked-in sleeps or
-per-call timeouts (those are governed globally by `expect: { timeout: 10_000 }`
+Page objects encapsulate navigation and locators as `readonly` properties assigned in the constructor. Actions (`goto()`, `showAllCities()`) don't wait for anything beyond their own effect — synchronization is left to the caller's web-first, auto-retrying assertions rather than baked-in sleeps or per-call timeouts (those are governed globally by `expect: { timeout: 10_000 }`
 in `playwright.config.ts`):
 
 ```typescript
@@ -333,8 +289,7 @@ await expect(territoriesPage.territoryItems).toHaveCount(3);
 await expect(territoriesPage.territoryByAddress('Rua Inventada, 999')).toBeVisible();
 ```
 
-Locators use `data-testid` attributes (not text content) for robustness,
-including `territories-city-filter` on the city `<select>`.
+Locators use `data-testid` attributes (not text content) for robustness, including `territories-city-filter` on the city `<select>`.
 
 > **Pattern requirement:** `toHaveCount` is only a sound post-filter wait when
 > the count actually differs before and after the filter (e.g. the default
@@ -344,16 +299,15 @@ including `territories-city-filter` on the city `<select>`.
 
 ### Shared Page Objects (WP-07)
 
-Cross-feature UI constructs have dedicated page objects so area specs don't
-duplicate locator logic:
+Cross-feature UI constructs have dedicated page objects so area specs don't duplicate locator logic:
 
-| Page Object | Constructor Arg | Key Locators / Actions | Used By |
-|---|---|---|---|
-| `ConfirmDialogPage` | `page` | `dialog`, `title`, `confirm()`, `cancel()` | TERR-20, WORK-17, ASSIGN-07/08, USERS-08/09, PROF-09/10 |
-| `HistoryDialogPage` | `page` | `dialog`, `rows`, `close()` | TERR-26, WORK-09, J-02 |
-| `SortFilterDialogPage` | `page` | `trigger`, `badge`, `open()`, `apply()`, `selectSort()`, `toggleByTitle()`, `selectFilterByTitle()` | TERR-09…13, ASSIGN-05…10 |
-| `HeaderPage` | `page` | `nav`, `profileLink`, `logo`, `appName`, `goToProfile()`, `goToHome()` | NAV-*, PROF-01 |
-| `ToastPage` | `page` | `message`, `expectText(text)` | CFG-*, USERS-10, ASSIGN-12 |
+| Page Object            | Constructor Arg | Key Locators / Actions                                                                              | Used By                                                 |
+|------------------------|-----------------|-----------------------------------------------------------------------------------------------------|---------------------------------------------------------|
+| `ConfirmDialogPage`    | `page`          | `dialog`, `title`, `confirm()`, `cancel()`                                                          | TERR-20, WORK-17, ASSIGN-07/08, USERS-08/09, PROF-09/10 |
+| `HistoryDialogPage`    | `page`          | `dialog`, `rows`, `close()`                                                                         | TERR-26, WORK-09, J-02                                  |
+| `SortFilterDialogPage` | `page`          | `trigger`, `badge`, `open()`, `apply()`, `selectSort()`, `toggleByTitle()`, `selectFilterByTitle()` | TERR-09…13, ASSIGN-05…10                                |
+| `HeaderPage`           | `page`          | `nav`, `profileLink`, `logo`, `appName`, `goToProfile()`, `goToHome()`                              | NAV-*, PROF-01                                          |
+| `ToastPage`            | `page`          | `message`, `expectText(text)`                                                                       | CFG-*, USERS-10, ASSIGN-12                              |
 
 ```typescript
 import { ConfirmDialogPage } from '../page-objects/confirm-dialog.page';
@@ -369,17 +323,16 @@ await toast.expectText('Salvo com sucesso');
 ## Browser-Interaction Utilities (`utils/`)
 
 Canonical helpers for the browser-level techniques catalogued in
-[`../docs/testability-gaps.md`](../docs/testability-gaps.md) §2 — use them
-instead of copying boilerplate into specs. All are pure Playwright + Node (no
+[`../docs/testability-gaps.md`](../docs/testability-gaps.md) §2 — use them instead of copying boilerplate into specs. All are pure Playwright + Node (no
 `test`/`expect` imports), so they also work from fixtures.
 
-| Helper | Technique | Serves |
-|---|---|---|
-| `stubWindowOpen(page)` / `getOpenedUrls(page)` | Records `window.open` URLs via `addInitScript` — the robust option when `waitForEvent('popup')` can't work (custom protocols, `_self` navigation) | UC-USERS-14, UC-WORK-19 (Firefox/Safari branch) |
-| `captureWhatsAppPopup(page, trigger)` | Wraps `waitForEvent('popup')` around the trigger, decodes the `whatsapp://send?text=…` URL → `{ whatsappUrl, text, sharedUrl }` | UC-ASSIGN-19, J-01 |
-| `downloadCsv(page, trigger)` | Wraps `waitForEvent('download')`, reads the file from `download.path()` — keeps the `\uFEFF` BOM for the caller to assert | UC-TERR-34, J-08 |
-| `acceptNextDialog(page)` / `dismissNextDialog(page)` | One-shot native `confirm()` handlers — register **before** the click | UC-CFG-10, J-05 |
-| `dragRowByMouse(page, source, target)` | CDK drag-drop via hover → `mouse.down()` → stepped `mouse.move()` → `mouse.up()` (`dragTo()` does not work) | UC-TERR-21 |
+| Helper                                               | Technique                                                                                                                                         | Serves                                          |
+|------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------|
+| `stubWindowOpen(page)` / `getOpenedUrls(page)`       | Records `window.open` URLs via `addInitScript` — the robust option when `waitForEvent('popup')` can't work (custom protocols, `_self` navigation) | UC-USERS-14, UC-WORK-19 (Firefox/Safari branch) |
+| `captureWhatsAppPopup(page, trigger)`                | Wraps `waitForEvent('popup')` around the trigger, decodes the `whatsapp://send?text=…` URL → `{ whatsappUrl, text, sharedUrl }`                   | UC-ASSIGN-19, J-01                              |
+| `downloadCsv(page, trigger)`                         | Wraps `waitForEvent('download')`, reads the file from `download.path()` — keeps the `\uFEFF` BOM for the caller to assert                         | UC-TERR-34, J-08                                |
+| `acceptNextDialog(page)` / `dismissNextDialog(page)` | One-shot native `confirm()` handlers — register **before** the click                                                                              | UC-CFG-10, J-05                                 |
+| `dragRowByMouse(page, source, target)`               | CDK drag-drop via hover → `mouse.down()` → stepped `mouse.move()` → `mouse.up()` (`dragTo()` does not work)                                       | UC-TERR-21                                      |
 
 ## Running Tests
 
@@ -424,7 +377,6 @@ npx nx typecheck-e2e ministry-maps
 
 ## Out of Scope (Future)
 
-- Fault-injecting targeted Firestore read/write failures (HX-4 is deliberately
-  deferred; see `docs/test-catalog.md`).
+- Fault-injecting targeted Firestore read/write failures (HX-4 is deliberately deferred; see `docs/test-catalog.md`).
 - Exercising the real `signInWithPopup` OAuth flow (manual regression only).
 - Cross-test session reuse (currently sign-in per test).

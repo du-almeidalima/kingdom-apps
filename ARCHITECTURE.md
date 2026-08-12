@@ -1,48 +1,76 @@
 # Kingdom Apps — Architecture
 
-**Monorepo managed by Nx 22.6.5** (npm, Node 22, `--legacy-peer-deps`).
+This document records stable system boundaries. See [`README.md`](./README.md) for setup and
+commands. The current baseline is Angular 21, Nx 22, and Node.js 22.
 
-## Projects
+## System topology
 
-| Project                   | Stack                                    | Purpose                                                    |
-|---------------------------|------------------------------------------|------------------------------------------------------------|
-| `apps/ministry-maps`      | Angular 21 PWA, Tailwind, SCSS, Jest     | Territory management SPA                                   |
-| `libs/common-ui`          | Angular 21 standalone components         | Shared UI library (buttons, dialogs, icons, etc.)          |
-| `functions/ministry-maps` | Node 22, Firebase Functions v2, plain JS | Serverless backend (single `deleteUser` callable function) |
-
-## Dependency Wiring
-
-```
-ministry-maps (app)  —imports→  common-ui (lib)
-ministry-maps (app)  —calls→    functions/ministry-maps (via @angular/fire)
+```text
+Angular PWA ──imports──> common-ui
+     │
+     ├──> Firebase Auth
+     ├──> Cloud Firestore
+     ├──> Remote Config
+     └──> callable Functions ──> Firebase Admin SDK
 ```
 
-TypeScript path alias `@kingdom-apps/common-ui` maps to `libs/common-ui/src/index.ts`.
+There is no custom API server. The browser uses Firebase directly; privileged operations belong in
+Cloud Functions or another trusted backend.
 
-## Architecture Patterns
+## Workspace units
 
-1. **No custom API server** — the Angular app connects directly to Firebase (Auth, Firestore, Functions, Remote Config). In dev, all calls route to local emulators (Auth:9099, Firestore:8080, Functions:5001).
-2. **Repository pattern** — abstract interfaces (`UserRepository`, `TerritoryRepository`, etc.) with Firebase datasource implementations, wired via Angular DI providers in `app.config.ts`.
-3. **Standalone components** — `bootstrapApplication()`, no NgModules, lazy-loaded routes for features (home, territories, work, users, profile, configuration).
-4. **State management** — lightweight `BehaviorSubject`-based services, with `AuthUserStateService` shared via `common-ui`.
-5. **Role-based auth** — 6 roles (`APP_ADMIN`, `ADMIN`, `ELDER`, `ORGANIZER`, `SUPERINTENDENT`, `PUBLISHER`), enforced via route guards and an `authorize` structural directive.
-6. **PWA** — service worker (`ngsw-config.json`), manifest, offline support via `@angular/pwa`.
-7. **CI/CD** — GitHub Actions → `nx affected -t test` → `nx affected -t deploy` → Firebase Hosting.
+| Path | Nx project | Responsibility |
+|---|---|---|
+| `apps/ministry-maps` | `ministry-maps` | Angular PWA, unit tests, and Playwright E2E suite. |
+| `libs/common-ui` | `common-ui` | Generic UI components, directives, styles, and non-domain UI state. |
+| `functions/ministry-maps` | — | Separate Node 22 Firebase Functions v2 codebase. |
+| `tools/executors/firebase-emulator` | `firebase-emulator` | Local emulator orchestration and baseline seed. |
 
-## Firebase Services
+`functions/ministry-maps` is deployed by Firebase rather than Nx and has its own `package.json` and
+lockfile.
 
-| Service                | Usage                                                                                            |
-|------------------------|--------------------------------------------------------------------------------------------------|
-| **Auth**               | Google + Microsoft OAuth providers                                                               |
-| **Cloud Firestore**    | Primary DB: `users`, `congregations`, `territories`, `designations`, `invitation_links`, `notes` |
-| **Cloud Functions v2** | One callable: `deleteUser` (validates role, deletes Auth user)                                   |
-| **Remote Config**      | Feature flags / remote settings                                                                  |
-| **Hosting**            | Two targets: `du-ministry-maps` (prod), `du-ministry-maps-beta` (beta)                           |
+## Frontend structure
 
-## Build & Dev
+- **Bootstrap and components:** the app uses `bootstrapApplication()` and standalone components.
+  Legacy route NgModules remain under the home, territory, users, and work features; do not add new
+  NgModules.
+- **Feature loading:** top-level features are lazy-loaded from `app-routes.ts`.
+- **Data access:** repository abstractions are registered in `repositories-providers.ts`; Firebase
+  datasource services implement them.
+- **State:** focused services use RxJS subjects and Angular signals rather than a global store.
+- **Shared UI:** cross-project imports use `@kingdom-apps/common-ui`, whose public API is
+  `libs/common-ui/src/index.ts`. Ministry Maps domain logic stays in the app.
+- **PWA:** production builds register the Angular service worker configured by `ngsw-config.json`.
 
-- Env vars prefixed `NX_*` injected via webpack `DefinePlugin` (not `process.env`).
-- `.env.development` holds emulator values; GitHub secrets for CI deploys.
-- Dev: `npm start` runs emulators + `nx serve` concurrently.
-- Firebase Emulator Suite: Firestore (8080), Auth (9099), Functions (5001), Hosting (5000), UI (4000).
-- Seed data: `tools/executors/firebase-emulator/seed/`.
+## Firebase boundary
+
+| Service | Usage |
+|---|---|
+| Auth | Google and Microsoft OAuth; emulator custom-token sign-in is exposed only in local development. |
+| Cloud Firestore | Primary application data, accessed through AngularFire repositories. |
+| Cloud Functions v2 | The `deleteUser` callable performs privileged Firebase Auth deletion. |
+| Remote Config | Runtime configuration; no local emulator is wired in `app.config.ts`. |
+| Hosting | `prod` targets `du-ministry-maps`; `beta` targets `du-ministry-maps-beta`. |
+
+The application models six roles: `APP_ADMIN`, `ADMIN`, `ELDER`, `ORGANIZER`, `SUPERINTENDENT`, and
+`PUBLISHER`. Route guards and `libAuthorize` control client navigation and visibility; they are not a
+backend security boundary. Firestore security rules are not versioned in this repository.
+
+The authoritative collection shapes and invariants are documented in
+[`apps/ministry-maps/docs/domain/data-model.md`](./apps/ministry-maps/docs/domain/data-model.md).
+
+## Environments
+
+- `NX_*` values are embedded at build time by `apps/ministry-maps/webpack.config.js`; they are not
+  read dynamically from the deployed browser environment.
+- Local development connects Auth (`9099`), Firestore (`8080`), and Functions (`5001`) to emulators.
+  The Emulator UI runs on `4000`.
+- `apps/ministry-maps/.env.development` contains local defaults. CI supplies deployment values through
+  GitHub secrets and variables.
+- Emulator seed data lives in `tools/executors/firebase-emulator/seed`.
+
+## CI/CD
+
+GitHub Actions runs affected unit tests, a separate full emulator-backed E2E job, and deployment of
+affected deployable projects on pushes to `main`. The E2E job intentionally does not gate deployment.
+Firebase Hosting serves the production PWA from `dist/apps/ministry-maps`.
