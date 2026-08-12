@@ -146,7 +146,7 @@ the per-test reset+seed isolates tests (no cross-test leakage, no hidden timing 
 | WP-32 | `tests/journey-statistics-reconciliation.spec.ts` | J-07 | WP-20/21 | M | ✅ |
 | WP-33 | `tests/journey-empty-system.spec.ts` | J-08 | WP-03, WP-13, WP-18, WP-20, WP-17 | M | ✅ |
 | **Phase 6 — Final sweep** ([details](./phase-6-final-sweep.md)) | | | | | |
-| WP-34 | suite hygiene, coverage marks, manual checklist, HX-4 decision | all | everything | S | 🔄 |
+| WP-34 | suite hygiene, coverage marks, manual checklist, HX-4 decision | all | everything | S | ✅ |
 
 **Dependency notes:** phases are ordered but WPs inside a phase can be parallelised across agents as
 long as the *Depends on* column is respected. WP-01/WP-02/WP-03/WP-04 are mutually independent. The two

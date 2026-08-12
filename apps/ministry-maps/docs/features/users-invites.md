@@ -34,7 +34,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline
 - **Steps:** 1. open `/users` → 2. inspect the Carlos Almeida row
-- **Expected UI:** the figure caption shows initials `CA` (`getUserInitials`: first letter of the first two space-separated name tokens — a single-word name instead yields its first two characters, e.g. `'Maria'` → `MA`; a missing/`undefined` name falls back to `XX`); the `<h2>` shows `Carlos Almeida`; the badge shows the `getTranslatedRole` label `Admin` with CSS class `user-item__privilege-badge--admin` (`role.toLowerCase()`)
+- **Expected UI:** the figure caption shows initials `CA` (`getUserInitials`: first letter of the first two space-separated name tokens — a single-word name instead yields its first two characters without uppercasing the second, e.g. `'Maria'` → `Ma`; a missing/`undefined` name falls back to `XX`); the `<h2>` shows `Carlos Almeida`; the badge shows the `getTranslatedRole` label `Admin` with CSS class `user-item__privilege-badge--admin` (`role.toLowerCase()`)
 - **Expected persistence:** `db.getDoc(db.collections.users, seed.ids.adminUser)` has `name === 'Carlos Almeida'` and `role === 'ADMIN'`
 - **Edge cases:** the badge class is derived from the raw enum value lower-cased, not from the pt-BR label — a role added to `RoleEnum` without a matching SCSS class (`user-item__privilege-badge--<value>`) renders text with no badge styling, not an error
 - **Priority:** P1 · **Gaps:** no `data-testid` on the initials figure or badge; select via row text

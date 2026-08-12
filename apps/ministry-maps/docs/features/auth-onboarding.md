@@ -48,7 +48,7 @@ English vocabulary in [`../domain/glossary.md`](../domain/glossary.md).
 - **Preconditions (seed):** default baseline; do not sign in
 - **Steps:** 1. `page.goto('/')`
 - **Expected UI:** the root path `''` redirects to `/home` (`pathMatch: 'full'`), `/home`'s `authGuard` finds no user and `resolveUserFromAuthProvider()` emits `undefined`, producing `UrlTree(['login'])`; the final URL is `/login` and the page renders a `lib-card` containing the only `<h1>` on the page with exact text `Login`
-- **Expected persistence:** N/A — no Firestore write; assert `db.getCollectionDocs(db.collections.users)` is unchanged (still the 4 baseline users)
+- **Expected persistence:** N/A — no Firestore write; assert `db.getCollectionDocs(db.collections.users)` is unchanged (still the 8 baseline users)
 - **Edge cases:** while the guard's user resolution is in flight, the app shell shows the full-viewport `.spinner` instead of the `<router-outlet>` (`AuthService.isAuthenticating` signal, see UC-AUTH-23) — assertions must target the settled state, e.g. `await expect(page).toHaveURL(/\/login/)` then the `h1`
 - **Priority:** P0 · **Gaps:** none — **already covered** by `e2e/tests/smoke.spec.ts` ("renders the Login screen against the seeded emulator"); do not duplicate, extend that spec if more assertions are wanted
 
@@ -104,7 +104,7 @@ English vocabulary in [`../domain/glossary.md`](../domain/glossary.md).
 - **Preconditions (seed):** default baseline; the popup account's uid must not exist in `users`
 - **Steps (manual):** 1. open `/login` → 2. complete the popup with any unknown Google account
 - **Expected UI:** `handleUserAuthentication` finds no user doc and — because the login page passes `createUser = false` (the default) — **deletes the just-created Firebase Auth account** (`providerUser.delete()`, which also signs the user out), then emits a falsy value; the login page navigates to `/no-account`; the `/no-account` content of UC-AUTH-10 renders
-- **Expected persistence:** no `users` doc is ever created (collection still has the 4 baseline users); `db.auth.getUser(<uid>)` throws `auth/user-not-found` — the Auth account is **gone**, not merely signed out (this deletion is deliberate: uninvited popup sign-ins must not pollute the Auth user base)
+- **Expected persistence:** no `users` doc is ever created (collection still has the 8 baseline users); `db.auth.getUser(<uid>)` throws `auth/user-not-found` — the Auth account is **gone**, not merely signed out (this deletion is deliberate: uninvited popup sign-ins must not pollute the Auth user base)
 - **Edge cases:** the deletion happens **only** on the `/login` path — the same unknown account presented to `/sign-in/:inviteId` is treated per UC-AUTH-17/18 instead; do not conflate the two paths in one spec
 - **Priority:** P0 · **Gaps:** **manual-only leg** — the observable approximation is a direct `page.goto('/no-account')` (UC-AUTH-10) plus the unit-tested deletion contract (`firebase-auth-datasource.service.spec.ts` covers "should delete user after log in that doesn't exist in the database"); there is no harness hook to simulate a popup-completed unknown account
 

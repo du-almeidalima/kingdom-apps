@@ -5,12 +5,14 @@ Every use case (`UC-*`) and journey (`J-*`) in this artifact, one row each, with
 **How to read it:**
 
 - **Pri** — P0 first (see [`README.md` §Priorities](./README.md#priorities)).
-- **Covered** — `✅` = an existing spec already asserts this (extend that spec, do not duplicate);
+- **Covered** — `✅` = an existing spec asserts this (including an explicitly accepted `test.fixme` or a leg owned by a shared matrix; do not duplicate);
   `◐` = partially covered (the uncovered legs are named in the feature doc).
-- **Page object** — the page object the spec should introduce (only `TerritoriesPage` exists today); use the exact names so multiple specs share them.
+- **Page object** — the shared abstraction used or proposed by the spec; the current inventory is documented in [`../e2e/README.md`](../e2e/README.md).
 - **Seed work** — anything beyond "default baseline".
 - **Blockers** — what must exist **before** the spec can be written. `HX-n` refers to
   [Harness extensions needed](#harness-extensions-needed); `testid` = missing `data-testid`(s) named in the feature doc; `✋` = manual-only leg (OAuth popup); `⚠` = locks in a suspected defect (assert today's reality — see [`testability-gaps.md`](./testability-gaps.md#documented-current-behaviour-vs-suspected-defects)).
+
+The row-level **Blockers** column preserves authoring prerequisites for traceability; the harness-extension section records whether each prerequisite has since landed.
 
 Suggested spec files are proposals — keep one feature area per file and mirror the feature-doc structure.
 
@@ -258,63 +260,64 @@ Suggested spec files are proposals — keep one feature area per file and mirror
 
 ## Harness extensions needed
 
-Everything the suite must gain **before** the blocked rows above can be automated. Ordered by how much they unblock. When one lands, update `e2e/` and then flip the corresponding `HX-n` blockers in this catalog.
+The planning prerequisites are retained here for traceability. HX-1, HX-2, HX-3, and HX-5 are delivered; HX-4 is deliberately deferred.
 
 ### HX-1 — Additional `signInAs` roles (`elder`, `organizer`, `superintendent`, `app_admin`)
 
+- **Status:** ✅ Delivered by WP-01.
 - **What:** seed one user per role in `default.seed.ts` (ids e.g. `seed-user-elder`), extend
   `DEFAULT_SEED_IDS`, add entries to `ROLE_UIDS` and the `TestRole` union in `e2e/config/auth.config.ts`.
-- **Blocks:** UC-NAV-08 (a custom `GUEST`-like role), UC-TERR-35/36, UC-ASSIGN-22, UC-STAT-15, UC-USERS-04/06/15, UC-PROF-05/06/07/08, J-02, J-04.
-- **Notes:** cheap and high-value; `app_admin` also unlocks the only working path of the user-edit dialog (UC-USERS-06).
+- **Unblocked:** UC-NAV-08, UC-TERR-35/36, UC-ASSIGN-22, UC-STAT-15, UC-USERS-04/06/15, UC-PROF-05/06/07/08, J-02, J-04.
 
 ### HX-2 — `invitation_links` seed support
 
+- **Status:** ✅ Delivered by WP-02.
 - **What:** add `invitation_links: 'invitation_links'` to `e2e/seed/collections.ts` (mind the **underscore**), a `buildInvitationLink` factory (fields per
   [`domain/data-model.md` §2.6](./domain/data-model.md#26-invitationlink--srcmodelsinvitation-linkts) —
   `congregation` written as a `DocumentReference`, `id` embedded in the body, `isValid: true` default), an `invitationLinks` field on `SeedDefinition`, and seeder support in `e2e/seed/seeder.ts`.
-- **Blocks:** UC-AUTH-14/16 (automatable legs), UC-AUTH-17/18/19/20 (✋ legs — seed only), J-03.
-- **Notes:** until it lands, specs write invites via `db.firestore.collection('invitation_links')` — every affected entry already documents that workaround.
+- **Unblocked:** UC-AUTH-14/16 and J-03; the OAuth-popup legs remain manual for an unrelated browser-provider boundary.
 
 ### HX-3 — Second-congregation / arbitrary-uid identity
 
+- **Status:** ✅ Delivered by WP-03 as `signInAsUser(uid)`.
 - **What:** a way to `signInAs` a user outside the default baseline — either `signInAsUser(uid)` (mint a custom token for any seeded uid) or named extra `ROLE_UIDS` entries. A multi-congregation seed helper (`buildCongregation` + admin + Auth user in one call) would pair naturally with it.
-- **Blocks:** UC-TERR-04, UC-ASSIGN-03/04/14, UC-STAT-13, **J-08 (hard blocker — the journey is about congregation scoping)**.
-- **Notes:** the seeder already creates Auth users with `uid === doc id`, so the token minting itself is a one-line reuse of the existing fixture logic.
+- **Unblocked:** UC-TERR-04, UC-ASSIGN-03/04/14, UC-STAT-13, and J-08.
 
 ### HX-4 — Fault-injection hook (Firestore read/write failures)
 
+- **Decision (WP-34):** **deliberately deferred**. No production-side test hook or emulator fault shim is added during the final sweep.
 - **What:** a supported way to make a specific Firestore call fail from a test (emulator rules toggle, network interception of the Firestore channel, or a dedicated app-side test hook).
-- **Blocks:** UC-ASSIGN-21, UC-AUTH-21, the failure window of UC-CFG-08.
-- **Notes:** likely the most expensive extension; those three entries are marked **blocked**, not
-  "write a brittle spec". If it never lands, they stay as documented risks (and unit-test candidates).
+- **Remains blocked:** UC-ASSIGN-21 and UC-AUTH-21. UC-CFG-08's happy path is covered; its partial-failure window remains a documented risk and unit/integration-test candidate.
 
 ### HX-5 — Browser-interaction helpers (not fixture extensions, but shared spec utilities)
 
+- **Status:** ✅ Delivered by WP-04 under `e2e/utils/`.
 - **What:** small helpers under `e2e/`: (a) a `window.open` recorder installed via `page.addInitScript`
   (for UC-USERS-14 and the Firefox/Safari branch of UC-WORK-19); (b) a WhatsApp-popup URL decoder (`page.waitForEvent('popup')` + `text=` param extraction, for UC-ASSIGN-19 / J-01); (c) a CSV download reader (`page.waitForEvent('download')` + `download.path()` + BOM-aware read, for UC-TERR-34 / J-08); (d) a native-`confirm()` auto-accept registrar (UC-CFG-10 / J-05); (e) a CDK mouse-drag sequence (UC-TERR-21).
-- **Blocks:** nothing hard — each entry documents the inline technique already; these helpers exist to avoid five copies of the same boilerplate.
 
 ---
 
 ## Coverage summary
 
-| Area      | Entries | P0     | P1     | P2     | Already covered | Blocked (HX/✋)             |
-|-----------|---------|--------|--------|--------|-----------------|-----------------------------|
-| UC-AUTH   | 23      | 12     | 8      | 3      | 1 ✅ + 2 ◐      | 8 ✋, 1 HX-4                |
-| UC-NAV    | 14      | 8      | 4      | 2      | 0               | 1 HX-1                      |
-| UC-TERR   | 37      | 8      | 21     | 8      | 1 ✅ + 2 ◐      | 2 HX-1, 1 HX-3              |
-| UC-ASSIGN | 24      | 12     | 7      | 5      | 0               | 1 HX-1, 3 HX-3, 1 HX-4      |
-| UC-STAT   | 19      | 5      | 10     | 4      | 0               | 1 HX-1, 1 HX-3              |
-| UC-WORK   | 23      | 7      | 13     | 3      | 0               | 0 (all automatable today)   |
-| UC-USERS  | 17      | 9      | 5      | 3      | 0               | 3 HX-1, 1 HX-2, 1 unit-only |
-| UC-PROF   | 10      | 2      | 6      | 2      | 0               | 4 HX-1                      |
-| UC-CFG    | 13      | 7      | 6      | 0      | 0               | 0                           |
-| Journeys  | 8       | 3      | 5      | 0      | 0               | HX-1/2/3 per row            |
-| **Total** | **188** | **73** | **85** | **30** | **2 ✅ + 4 ◐**  |                             |
+| Area      | Entries | P0     | P1     | P2     | Covered | Intentionally not automated |
+|-----------|---------|--------|--------|--------|---------|-----------------------------|
+| UC-AUTH   | 23      | 12     | 8      | 3      | 14 ✅   | 8 ✋, 1 HX-4                |
+| UC-NAV    | 14      | 8      | 4      | 2      | 14 ✅   | —                           |
+| UC-TERR   | 37      | 8      | 21     | 8      | 37 ✅   | —                           |
+| UC-ASSIGN | 24      | 12     | 7      | 5      | 23 ✅   | 1 HX-4                      |
+| UC-STAT   | 19      | 5      | 10     | 4      | 19 ✅   | —                           |
+| UC-WORK   | 23      | 7      | 13     | 3      | 23 ✅   | —                           |
+| UC-USERS  | 17      | 9      | 5      | 3      | 16 ✅   | 1 unit-only                 |
+| UC-PROF   | 10      | 2      | 6      | 2      | 10 ✅   | —                           |
+| UC-CFG    | 13      | 7      | 6      | 0      | 13 ✅   | —                           |
+| Journeys  | 8       | 3      | 5      | 0      | 8 ✅    | —                           |
+| **Total** | **188** | **73** | **85** | **30** | **177 ✅** | **11**                   |
+
+Coverage arithmetic: 169 of 180 UC rows plus all 8 journeys are covered. The 11 exceptions are exactly the eight manual OAuth-popup rows, `UC-AUTH-21` and `UC-ASSIGN-21` (HX-4 deferred), and `UC-USERS-12` (unit-only). `UC-PROF-07` is an explicitly accepted `test.fixme` and remains covered; redirect duplicates are owned once by the matrices in `auth.spec.ts`.
 
 ## Sources
 
 - every `docs/features/*.md` and `docs/journeys/*.md` (row content)
-- `apps/ministry-maps/e2e/tests/smoke.spec.ts`, `e2e/tests/territories.spec.ts` (coverage marks)
-- `apps/ministry-maps/e2e/page-objects/territories.page.ts` (the one existing page object)
-- `apps/ministry-maps/e2e/seed/collections.ts`, `e2e/config/auth.config.ts` (HX-1/HX-2 targets)
+- `apps/ministry-maps/e2e/tests/*.spec.ts` (coverage marks)
+- `apps/ministry-maps/e2e/page-objects/*.page.ts` and `e2e/utils/` (shared test abstractions)
+- `apps/ministry-maps/e2e/seed/`, `e2e/fixtures/`, and `e2e/config/auth.config.ts` (harness-extension status)

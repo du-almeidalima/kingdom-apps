@@ -98,7 +98,7 @@ test.describe('Assign territories — listing & selection (WP-18)', () => {
     expect(await db.getCollectionDocs(db.collections.designations)).toHaveLength(1);
   });
 
-  // TODO: User reviewed, this is technically a defect, but it's not a priority as it's not a common use case data wise.
+  // Known low-priority defect: an empty cities array is not a common production data shape.
   test('UC-ASSIGN-04 — empty `cities` collapses selection (⚠ defect)', async ({ seed, signInAsUser, db, page }) => {
     const congregation = seed.factories.buildCongregation({ cities: [] });
     const admin = seed.factories.buildUser({
@@ -327,7 +327,7 @@ test.describe('Assign territories — listing & selection (WP-18)', () => {
 
 // ─── WP-19: assign creation & share ───────────────────────────────────────────
 
-// TODO: User review, this is something that needs to be implemented and addressed
+// Known UX gap: UC-ASSIGN-12 locks the absence of selected-count feedback.
 test.describe('Assign territories — creation & share (WP-19)', () => {
   test.use({ role: 'admin' });
 
@@ -442,7 +442,7 @@ test.describe('Assign territories — creation & share (WP-19)', () => {
     }).toPass();
   });
 
-  // TODO: User reviewed, this is not a defect, the expected logic is to only grab the latest 5 visits
+  // The five-entry cap is intentional; the defect assertion concerns slicing an unordered read.
   test('UC-ASSIGN-16 — embedded snapshot: status PENDING, recentHistory stripped, history capped at 5 (⚠ defect)', async ({
     authenticatedPage,
     seed,
@@ -585,8 +585,7 @@ test.describe('Assign territories — creation & share (WP-19)', () => {
     }).toPass();
   });
 
-  // TODO: This should be addressed in the future. Ideally, there should be a little panel/drawer/sheet that displays
-  //  the designations done and allow the user to reselect them
+  // Known UX gap: completed designations cannot be copied from this flow (UC-ASSIGN-20).
   test('UC-ASSIGN-20 — there is no clipboard/copy affordance on this screen (⚠ gap)', async ({ authenticatedPage }) => {
     // Grant clipboard permissions so a copy would be observable if it existed.
     await authenticatedPage.context().grantPermissions(['clipboard-read', 'clipboard-write']);

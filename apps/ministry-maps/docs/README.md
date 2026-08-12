@@ -63,7 +63,7 @@ test('UC-TERR-01 — list shows only the congregation territories', async ({ pag
   await seed.write({ territories: [seed.factories.buildTerritory({ congregationId: seed.ids.congregation })] });
   await signInAs('admin');
   // ...
-  const territories = await db.getCollectionDocs(db.collections.TERRITORIES);
+  const territories = await db.getCollectionDocs(db.collections.territories);
   expect(territories).toHaveLength(4);
 });
 ```
@@ -71,13 +71,14 @@ test('UC-TERR-01 — list shows only the congregation territories', async ({ pag
 Available today:
 
 - `seed.factories` — `buildCongregation`, `buildUser`, `buildTerritory`, `buildVisitHistory`,
-  `buildDesignation`, `buildDesignationTerritory`
-- `seed.write(definition)` — writes a `SeedDefinition` (`congregations`, `users`, `territories`, `designations`)
+  `buildDesignation`, `buildDesignationTerritory`, `buildInvitationLink`
+- `seed.write(definition)` — writes a `SeedDefinition` (`congregations`, `users`, `territories`,
+  `designations`, `invitationLinks`)
 - `seed.ids` — `DEFAULT_SEED_IDS` (see [`domain/data-model.md`](./domain/data-model.md#default-e2e-baseline-seed))
 - `db.*` read helpers — exact signatures (get these right, the docs use them verbatim):
 
   ```ts
-  db.collections            // { congregations, users, territories, designations } — lowercase keys
+  db.collections            // { congregations, users, territories, designations, invitation_links }
   db.historySubcollection   // 'history'
   db.getDoc(collection, id)                            // → data | undefined
   db.getDocSnapshot(collection, id)                    // → DocumentSnapshot (inspect Timestamp / DocumentReference)
@@ -86,12 +87,12 @@ Available today:
   db.queryWhere(collection, field, operator, value)     // → data[]
   db.firestore / db.auth                               // raw Admin SDK escape hatch
   ```
-- `signInAs('admin' | 'publisher')` and the `authenticatedPage` fixture
+- `signInAs('admin' | 'publisher' | 'elder' | 'organizer' | 'superintendent' | 'app_admin')`,
+  `signInAsUser(uid)`, and the `authenticatedPage` fixture
 - `resetAndSeed` — automatic per-test wipe + default seed (the emulator starts **empty**)
 
-Anything not in that list (an ELDER identity, an invitation-link factory, …) is a **harness extension**;
-it is listed in [`test-catalog.md`](./test-catalog.md#harness-extensions-needed). Add it to the harness,
-do not inline ad-hoc Admin-SDK writes in a spec.
+The exact live surface is maintained in [`../e2e/README.md`](../e2e/README.md). Delivered and deferred
+harness extensions are recorded in [`test-catalog.md`](./test-catalog.md#harness-extensions-needed).
 
 ---
 

@@ -21,7 +21,7 @@ and **§4.2** first — they already document the dual-history contract and the 
 
 | Flag         | Formula                                                                    | Drives                                                                                                  |
 |--------------|----------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
-| `isDisabled` | `designation.expiresAt.getTime() < Date.now()`                             | the info note (`@if (isDisabled)`); the checkbox/edit/undo `disabled` input on `kingdom-apps-work-item` |
+| `isDisabled` | `designation?.expiresAt ? designation.expiresAt.getTime() < Date.now() : false` | the info note (`@if (isDisabled)`); the checkbox/edit/undo `disabled` input on `kingdom-apps-work-item` |
 | `isBlocked`  | `isDisabled && !!designation.settings?.shouldDesignationBlockAfterExpired` | only the maps button's `disabled` input on `kingdom-apps-work-item`                                     |
 
 Read that table before writing any expiry test (UC-WORK-20/21): the naming suggests `isBlocked` gates everything, but it only ever gates the maps affordance.

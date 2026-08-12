@@ -50,7 +50,7 @@ apps/ministry-maps/e2e/
 │   └── factories/                # buildCongregation, buildUser, buildTerritory, etc.
 ├── fixtures/                     ← Playwright fixture wiring
 │   ├── database.fixture.ts       # resetAndSeed (auto), seed, db
-│   ├── auth.fixture.ts           # signInAs(role) — custom-token auth
+│   ├── auth.fixture.ts           # role/signInAs/signInAsUser/authenticatedPage
 │   └── index.ts                  # composed test + expect (import from here!)
 ├── page-objects/                 ← page abstractions
 │   ├── territories.page.ts       # territories page locators
@@ -77,15 +77,29 @@ apps/ministry-maps/e2e/
 │   └── configuration.page.ts     # /configuration locators
 └── tests/
     ├── smoke.spec.ts             # baseline integrity checks
-    ├── territories.spec.ts       # authenticated territory list proof
     ├── auth.spec.ts              # auth rendering, guards, and session lifecycle
     ├── invite-sign-in.spec.ts    # valid, missing, and consumed invite states
-    ├── work-designation.spec.ts  # receive, complete, edit, undo, and expiry paths
     ├── navigation.spec.ts        # shell, home hub, and router behavior
+    ├── territories.spec.ts       # territory list, search, and sort
+    ├── territories-filters.spec.ts # territory sort/filter dialog
+    ├── territories-crud.spec.ts  # territory create, edit, delete, and reorder
+    ├── territories-alerts.spec.ts # territory badges, history, and alerts
+    ├── territories-export.spec.ts # CSV export and role gating
+    ├── territories-assign.spec.ts # designation selection, creation, and sharing
+    ├── territories-statistics.spec.ts # territory metrics and period filters
+    ├── work-designation.spec.ts  # receive, complete, edit, undo, and expiry paths
     ├── users.spec.ts             # user management & role editing specs
     ├── users-invites.spec.ts     # invitation link creation & sharing specs
     ├── profile.spec.ts           # profile identity, congregation switch & logout specs
-    └── configuration.spec.ts     # congregation city management & territory cascade specs
+    ├── configuration.spec.ts     # congregation city management & territory cascade specs
+    ├── journey-admin-assign-work.spec.ts
+    ├── journey-visit-feedback.spec.ts
+    ├── journey-invite-onboarding.spec.ts
+    ├── journey-moved-alert.spec.ts
+    ├── journey-city-rename.spec.ts
+    ├── journey-expired-designation.spec.ts
+    ├── journey-statistics-reconciliation.spec.ts
+    └── journey-empty-system.spec.ts
 ```
 
 ## Configuration (`config/`)
@@ -257,8 +271,8 @@ test('second-congregation admin', async ({ seed, signInAsUser, page }) => {
 The E2E tests establish a **real Firebase session** against the **Auth emulator**
 using the **custom-token** approach (no OAuth popup):
 
-1. The Playwright fixture calls `mintCustomToken(uid)` via the Admin SDK (Node
-   context).
+1. The Playwright fixture calls `auth.createCustomToken(uid)` via the Admin SDK
+   (Node context).
 2. It navigates the browser to `/login` and waits for `window.__E2E__` — a
    development-only hook exposed by the app when connected to the Auth
    emulator.
@@ -410,6 +424,7 @@ npx nx typecheck-e2e ministry-maps
 
 ## Out of Scope (Future)
 
-- Broad feature test suites beyond the smoke + territories proof.
-- Exercising the real `signInWithPopup` OAuth flow.
+- Fault-injecting targeted Firestore read/write failures (HX-4 is deliberately
+  deferred; see `docs/test-catalog.md`).
+- Exercising the real `signInWithPopup` OAuth flow (manual regression only).
 - Cross-test session reuse (currently sign-in per test).

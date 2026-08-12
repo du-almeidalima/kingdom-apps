@@ -84,7 +84,7 @@ shape-drift caveat in [`../domain/data-model.md §2.6`](../domain/data-model.md#
     The closest automated coverage of this leg's building blocks is UC-AUTH-15 (missing invite → same
     error-block anatomy) plus the unit tests in `firebase-auth-datasource.service.spec.ts`.
 
-⟶ **FINAL SWEEP (Firestore):** `db.getCollectionDocs(db.collections.users)` still has the 4 baseline docs
+⟶ **FINAL SWEEP (Firestore):** `db.getCollectionDocs(db.collections.users)` still has the 8 baseline docs
 (no invitee doc was created by any automated leg); the first invite doc is consumed, the second (if the
 manual leg ran) still valid.
 

@@ -19,7 +19,7 @@ instruction: "Apply these rules when writing or maintaining end-to-end (E2E) tes
 
 E2E tests run against a **real emulated Firebase**, never mocks. After a UI action you can (and should) assert persistence directly in Firestore via the Admin SDK. Every test starts from a **known, repeatable baseline** that is wiped and re-seeded automatically before each test, so tests are deterministic and order-independent.
 
-> The E2E emulator starts **EMPTY**. The Playwright `webServer` boots the emulators with `firebase emulators:exec`, which (unlike the dev target) does **not** `--import` seed data. Admin SDK seeding is therefore the **sole** source of test data.
+> The E2E emulators start **EMPTY**. Playwright's `webServer` runs the dedicated stack supervisor in `e2e/scripts/e2e-servers.mjs`; Admin SDK seeding is the sole source of test data.
 
 > **Use-case catalog:** what to test (every screen's use cases `UC-<AREA>-NN`, multi-role journeys `J-NN`, seed preconditions, Firestore assertions, priorities, and testability gaps) is documented in `apps/ministry-maps/docs/` — start from `apps/ministry-maps/docs/test-catalog.md` and reference the UC/J ID in test titles.
 
@@ -35,8 +35,10 @@ npx nx typecheck-e2e ministry-maps    # type-checks the suite (tsc --noEmit agai
 The `e2e` target is auto-inferred by `@nx/playwright/plugin` (no `project.json` target). The `webServer` runs:
 
 ```
-npx firebase emulators:exec "npx nx serve ministry-maps" --project du-ministry-maps
+node apps/ministry-maps/e2e/scripts/e2e-servers.mjs
 ```
+
+The supervisor owns Firestore, Auth, Functions, and the Angular dev server, verifies readiness, and tears the stack down in order.
 
 > Playwright browsers must be installed once: `npx playwright install chromium`.
 
@@ -60,12 +62,13 @@ apps/ministry-maps/e2e/
 │   └── factories/                 # typed entity builders (+ index barrel)
 ├── fixtures/
 │   ├── database.fixture.ts        # auto resetAndSeed, seed, db
-│   ├── auth.fixture.ts            # signInAs(role) — custom-token auth
+│   ├── auth.fixture.ts            # role/signInAs/signInAsUser/authenticatedPage
 │   └── index.ts                   # composed test + expect (IMPORT FROM HERE)
 ├── page-objects/
-│   └── territories.page.ts        # territories page locators
+│   └── *.page.ts                  # route and shared-component abstractions
+├── utils/                         # browser-level interaction helpers
 └── tests/
-    └── *.spec.ts                  # specs
+    └── *.spec.ts                  # use-case and journey specs
 ```
 
 ## Golden Rule — Always Import From `fixtures/index.ts`
@@ -80,14 +83,19 @@ The auto `resetAndSeed` runs **before every test**: it wipes Firestore + Auth, t
 
 - **`seed`** — build & write extra data on demand (`SeedApi`)
 - **`db`** — read Firestore back to assert state (`DbApi`)
-- **`signInAs`** — authenticate as a seeded role (`(role: 'admin' | 'publisher') => Promise<void>`); the page stays on `/login` with a live session, and the caller navigates to the guarded route it wants
+- **`role`** — option fixture selecting the identity used by `authenticatedPage`
+- **`signInAs`** — authenticate as any seeded role (`admin`, `publisher`, `elder`, `organizer`, `superintendent`, `app_admin`)
+- **`signInAsUser`** — authenticate as any on-demand seeded uid
+- **`authenticatedPage`** — a page signed in as the configured `role`
+
+Both sign-in helpers leave the page on `/login`; the caller navigates to the guarded route it wants.
 
 ## The `db` Fixture (assertion / read helpers)
 
 | Member                                      | Purpose                                                                    |
 |---------------------------------------------|----------------------------------------------------------------------------|
 | `db.firestore` / `db.auth`                  | Raw Admin SDK handles                                                      |
-| `db.collections`                            | Collection names (`congregations`, `users`, `territories`, `designations`) |
+| `db.collections`                            | Collection names (`congregations`, `users`, `territories`, `designations`, `invitation_links`) |
 | `db.historySubcollection`                   | `'history'` subcollection name on a territory                              |
 | `db.getDoc(collection, id)`                 | Document data, or `undefined`                                              |
 | `db.getDocSnapshot(collection, id)`         | Raw snapshot (inspect `DocumentReference` / `Timestamp`)                   |
@@ -108,7 +116,7 @@ test('default baseline is applied', async ({ db }) => {
 
 | Member            | Purpose                                                                                                                                   |
 |-------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
-| `seed.factories`  | Typed builders (`buildCongregation`, `buildUser`, `buildTerritory`, `buildVisitHistory`, `buildDesignation`, `buildDesignationTerritory`) |
+| `seed.factories`  | Typed builders for congregations, users, territories, histories, designations, designation territories, and invitation links |
 | `seed.write(def)` | Writes a `SeedDefinition` to the emulators; returns created ids                                                                           |
 | `seed.ids`        | Well-known ids of the default baseline (`DEFAULT_SEED_IDS`)                                                                               |
 
@@ -122,7 +130,7 @@ test('admin user belongs to the seeded congregation', async ({ db, seed }) => {
 });
 ```
 
-`DEFAULT_SEED_IDS`: `congregation`, `adminUser`, `publisherUsers[]`, `territories[]`, `designation`.
+`DEFAULT_SEED_IDS`: `congregation`, `adminUser`, `publisherUsers[]`, `elderUser`, `organizerUser`, `superintendentUser`, `appAdminUser`, `territories[]`, `designation`.
 
 ### Seeding extra data inside a test
 

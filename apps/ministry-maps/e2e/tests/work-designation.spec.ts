@@ -586,7 +586,10 @@ test.describe('Work designation — conditional affordances', () => {
     await historyDialog.close();
 
     const storedDesignation = await db.getDoc(db.collections.designations, designationId);
-    const storedTerritories = (storedDesignation?.['territories'] ?? []) as Array<Record<string, unknown>>;
+    expect(storedDesignation).toBeDefined();
+    const storedTerritories = (storedDesignation as Record<string, unknown>)['territories'] as Array<
+      Record<string, unknown>
+    >;
     expect(storedTerritories.find(territory => territory['id'] === t1Id)?.['history']).toEqual([]);
     expect((storedTerritories.find(territory => territory['id'] === t2Id)?.['history'] as unknown[]).length).toBe(1);
   });
@@ -656,7 +659,10 @@ test.describe('Work designation — conditional affordances', () => {
     expect(openedUrls.some(url => url.includes('maps.google.com'))).toBe(true);
 
     const storedDesignation = await db.getDoc(db.collections.designations, designationId);
-    const storedTerritories = (storedDesignation?.['territories'] ?? []) as Array<Record<string, unknown>>;
+    expect(storedDesignation).toBeDefined();
+    const storedTerritories = (storedDesignation as Record<string, unknown>)['territories'] as Array<
+      Record<string, unknown>
+    >;
     expect(storedTerritories.find(territory => territory['id'] === t1Id)?.['mapsLink']).toBeUndefined();
     expect(storedTerritories.find(territory => territory['id'] === t2Id)?.['mapsLink']).toBe(mapsUrl);
   });
