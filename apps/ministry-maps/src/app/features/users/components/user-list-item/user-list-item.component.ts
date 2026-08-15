@@ -14,9 +14,9 @@ import { getTranslatedRole, RoleEnum } from '../../../../../models/enums/role';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, CdkMenu, CdkMenuItem, IconComponent, CdkMenuTrigger, IconButtonComponent, AuthorizeDirective],
   template: `
-    <div class="user-item">
+    <div class="user-item" data-testid="user-list-item">
       <!-- INITIALS -->
-      <figure class="user-initials-figure">
+      <figure class="user-initials-figure" data-testid="user-item-initials">
         <figcaption>{{ initials() }}</figcaption>
       </figure>
       <!-- TITLE -->
@@ -25,6 +25,7 @@ import { getTranslatedRole, RoleEnum } from '../../../../../models/enums/role';
           <h2 class="t-headline4 t-medium-emphasis">{{ this.user().name }}</h2>
           <span
             class="user-item__privilege-badge"
+            data-testid="user-item-role-badge"
             [ngClass]="'user-item__privilege-badge--' + user().role.toLowerCase()">
             {{ role() }}
           </span>
@@ -35,6 +36,7 @@ import { getTranslatedRole, RoleEnum } from '../../../../../models/enums/role';
           lib-icon-button
           [cdkMenuTriggerFor]="menu"
           type="button"
+          data-testid="user-item-menu"
           *libAuthorize="[RoleEnum.APP_ADMIN, RoleEnum.SUPERINTENDENT, RoleEnum.ADMIN]">
           <lib-icon [fillColor]="greyButtonColor" icon="menu-dot-vertical-filled"></lib-icon>
         </button>

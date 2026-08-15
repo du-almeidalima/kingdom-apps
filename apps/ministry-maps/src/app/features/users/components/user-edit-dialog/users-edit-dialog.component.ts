@@ -42,19 +42,19 @@ export type UserEditDialogData = {
     InputComponent,
   ],
   template: `
-    <lib-dialog title="Editar Usuário">
+    <lib-dialog title="Editar Usuário" data-testid="user-edit-dialog">
       <form id="move-alert-resolution-form" [formGroup]="form" (ngSubmit)="handleFormSubmit()" tabindex="0">
         <!-- NAME -->
         <lib-form-field class="mt-5">
           <label lib-label for="user-name">Nome</label>
-          <input lib-input formControlName="name" type="text" id="user-name" />
+          <input lib-input formControlName="name" type="text" id="user-name" data-testid="user-edit-name-input" />
         </lib-form-field>
         <!-- ROLE -->
         <lib-form-field class="mt-5">
           <label lib-label for="user-name">Permissão</label>
           <kingdom-apps-icon-radio formControlName="role" [value]="RoleEnum.PUBLISHER" class="mt-3">
             <div class="radio-option">
-              <span class="radio-option__title">Publicador</span>
+              <span class="radio-option__title" data-testid="user-edit-role-title">Publicador</span>
               <span class="radio-option__description">
                 Permisão mais básica, apenas está associado a uma congregação.
               </span>
@@ -62,7 +62,7 @@ export type UserEditDialogData = {
           </kingdom-apps-icon-radio>
           <kingdom-apps-icon-radio formControlName="role" [value]="RoleEnum.ORGANIZER" class="mt-3">
             <div class="radio-option">
-              <span class="radio-option__title">Organizador</span>
+              <span class="radio-option__title" data-testid="user-edit-role-title">Organizador</span>
               <span class="radio-option__description">
                 Indicada para Publicadores qualificados ou Servos Ministeriais; Pode designar e atualizar territórios.
               </span>
@@ -70,7 +70,7 @@ export type UserEditDialogData = {
           </kingdom-apps-icon-radio>
           <kingdom-apps-icon-radio formControlName="role" [value]="RoleEnum.ELDER" class="mt-3">
             <div class="radio-option">
-              <span class="radio-option__title">Ancião</span>
+              <span class="radio-option__title" data-testid="user-edit-role-title">Ancião</span>
               <span class="radio-option__description">
                 Tem todas as permissões de um Organizador, mas também pode adicionar/remover territórios e ver pessoas
                 da congregação.
@@ -79,7 +79,7 @@ export type UserEditDialogData = {
           </kingdom-apps-icon-radio>
           <kingdom-apps-icon-radio formControlName="role" [value]="RoleEnum.ADMIN" class="mt-3">
             <div class="radio-option">
-              <span class="radio-option__title">Administrador</span>
+              <span class="radio-option__title" data-testid="user-edit-role-title">Administrador</span>
               <span class="radio-option__description">
                 Permissões geralmente dada ao SS. Tem acesso total aos mapas da congregação além de poder adicionar,
                 excluir e alterar permissões de usuários.
@@ -89,7 +89,7 @@ export type UserEditDialogData = {
           @if (canEditAdminRoles) {
           <kingdom-apps-icon-radio formControlName="role" [value]="RoleEnum.SUPERINTENDENT" class="mt-3">
             <div class="radio-option">
-              <span class="radio-option__title">Superintendente</span>
+              <span class="radio-option__title" data-testid="user-edit-role-title">Superintendente</span>
               <span class="radio-option__description">
                 Tem as mesmas permissões de um Ancião, mas pode mudar de congregações.
               </span>
@@ -103,7 +103,7 @@ export type UserEditDialogData = {
       <lib-dialog-footer>
         <div class="flex flex-nowrap justify-end gap-4">
           <button lib-button libDialogClose>Cancelar</button>
-          <button lib-button btnType="primary" type="submit" form="move-alert-resolution-form">
+          <button lib-button btnType="primary" type="submit" form="move-alert-resolution-form" data-testid="user-edit-save">
             @if (isSubmitting()) {
             <lib-spinner class="login-button__spinner" height="1.75rem" width="1.75rem" [color]="white" />
             } @else {

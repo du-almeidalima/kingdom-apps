@@ -21,7 +21,7 @@ import { NgClass } from '@angular/common';
   styleUrls: ['./territory-list-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="territory-list-item" [ngClass]="{ 'territory-list-item--row-gap': !!territory.note }">
+      <div class="territory-list-item" data-testid="territory-list-item" [ngClass]="{ 'territory-list-item--row-gap': !!territory.note }">
       <lib-icon
         class="territory-list-item__icon"
         [ngClass]="{ 'territory-list-item__icon--large': isIconLarge }"
@@ -39,10 +39,11 @@ import { NgClass } from '@angular/common';
       <div class="territory-list-item__notes">
         <span class="t-caption">Notas: {{ territory.note }}</span>
         @if (hasRecentlyMoved) {
-        <span class="territory-alert-badge territory-alert-badge--moved" title="Essa pessoa se mudou"> Mudou </span>
+        <span class="territory-alert-badge territory-alert-badge--moved" data-testid="territory-alert-badge" title="Essa pessoa se mudou"> Mudou </span>
         } @if (hasRecentlyRevisit) {
         <span
           class="territory-alert-badge territory-alert-badge--revisit"
+          data-testid="territory-alert-badge"
           title="Essa pessoa foi marcada como revisita recentemente"
         >
           Revisita
@@ -50,6 +51,7 @@ import { NgClass } from '@angular/common';
         } @if (hasRecentlyAskedToStopVisiting) {
         <span
           class="territory-alert-badge territory-alert-badge--stop-visiting"
+          data-testid="territory-alert-badge"
           title="Essa pessoa disse que não quer ser visitada por uma Testemunha de Jeová"
         >
           Não quer visitas
@@ -57,6 +59,7 @@ import { NgClass } from '@angular/common';
         } @if (isBibleStudent) {
         <span
           class="territory-alert-badge territory-alert-badge--bible-student"
+          data-testid="territory-alert-badge"
           title="Essa pessoa é um estudante da Bíblia"
         >
           Estudante
@@ -67,7 +70,7 @@ import { NgClass } from '@angular/common';
       <!-- RIGHT SIDE MENU -->
       <div class="territory-list-item__menu-button">
         <!-- VERTICAL MENU -->
-        <button lib-icon-button [cdkMenuTriggerFor]="menu" type="button">
+        <button lib-icon-button [cdkMenuTriggerFor]="menu" type="button" data-testid="territory-item-menu">
           <lib-icon [fillColor]="greyButtonColor" icon="menu-dot-vertical-filled"></lib-icon>
         </button>
 
@@ -85,7 +88,7 @@ import { NgClass } from '@angular/common';
               <span>Editar</span>
             </li>
             <li class="menu__item" cdkMenuItem (cdkMenuItemTriggered)="history.emit(territory)">
-              <button lib-icon-button type="button">
+              <button lib-icon-button type="button" data-testid="territory-history-button">
                 <lib-icon [fillColor]="greyButtonColor" icon="time-17"></lib-icon>
               </button>
               <span>Histórico</span>

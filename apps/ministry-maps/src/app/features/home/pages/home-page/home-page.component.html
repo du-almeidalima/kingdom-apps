@@ -1,7 +1,7 @@
 <div class='container'>
-  <h2 class='t-headline2 mb-8'>Bem-Vindo {{ userName }}!</h2>
+  <h2 class='t-headline2 mb-8' data-testid="home-heading">Bem-Vindo {{ userName }}!</h2>
   <!-- Territories -->
-  <lib-card [customStyle]='{ padding: 0 }'>
+  <lib-card data-testid="home-card-territories" [customStyle]='{ padding: 0 }'>
     <lib-card-header
       icon='task-list-lined'
       title='Designar Territórios'
@@ -30,7 +30,7 @@
     </lib-card-body>
   </lib-card>
   <!-- Users -->
-  <lib-card class="mt-5" [customStyle]='{ padding: 0 }'>
+  <lib-card class="mt-5" data-testid="home-card-people" [customStyle]='{ padding: 0 }'>
     <lib-card-header
       icon='user-29'
       title='Pessoas'

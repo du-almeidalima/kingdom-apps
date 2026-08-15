@@ -18,12 +18,12 @@ export type ConfirmDialogData = {
   styleUrls: ['./confirm-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <lib-dialog [title]="title">
+    <lib-dialog [title]="title" data-testid="confirm-dialog">
       <p class="t-body1" [innerHTML]="bodyText"></p>
       <lib-dialog-footer>
         <div class="flex justify-end gap-4">
-          <button lib-button (click)="handleCancel(false)" [tabIndex]="1">Cancelar</button>
-          <button lib-button btnType="primary" (click)="handleCancel(true)">Confirmar</button>
+          <button lib-button data-testid="confirm-dialog-cancel" (click)="handleCancel(false)" [tabIndex]="1">Cancelar</button>
+          <button lib-button btnType="primary" data-testid="confirm-dialog-confirm" (click)="handleCancel(true)">Confirmar</button>
         </div>
       </lib-dialog-footer>
     </lib-dialog>

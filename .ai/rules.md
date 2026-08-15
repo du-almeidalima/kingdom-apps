@@ -11,11 +11,11 @@ instruction: "This is the main overview for Kingdom Apps. More specific rules ar
 
 ## Technology Stack Summary
 
-- **Frontend:** Angular 19+ (Standalone Components), TypeScript 5.7+, RxJS, Signals
+- **Frontend:** Angular 21+ (Standalone Components), TypeScript 5.9+, RxJS, Signals
 - **Styling:** Tailwind CSS + SCSS (7-1 Architecture)
 - **Backend:** Firebase (Cloud Functions v2, Firestore, Auth, Remote Config)
-- **Monorepo:** Nx 20.5+
-- **Testing:** Jest with jest-preset-angular
+- **Monorepo:** Nx 22.6.5+
+- **Testing:** Jest with jest-preset-angular (unit); Playwright + Firebase Emulators (E2E)
 - **PWA:** Angular Service Worker
 
 ## Project Structure
@@ -34,71 +34,9 @@ kingdom-apps/
     └── rules/                  # Contextual rules (auto-loaded)
 ```
 
-## Core Principles
+## Core Principles & Commands
 
-1. **Standalone Components Only** - No NgModules for new components
-2. **Use `inject()` Function** - NOT constructor injection
-3. **Path Aliases Required** - `@kingdom-apps/common-ui` (never relative paths)
-4. **Firebase Emulators Default** - For local development
-5. **Conventional Commits** - `feat:`, `fix:`, `refactor:`, etc.
-6. **SCSS 7-1 Architecture** - `abstract/`, `base/`, `components/`
-7. **Nx Affected Commands** - For efficiency
-8. **libs/common-ui** - UI components only, NO application-specific logic
-
-## Essential Commands
-
-```bash
-# Development
-npm start                        # Start dev server with emulators
-nx serve ministry-maps           # Serve app
-nx test ministry-maps            # Run tests
-nx lint ministry-maps            # Lint code
-
-# Firebase Emulators
-firebase emulators:export tools/executors/firebase-emulator/seed  # Save DB state
-
-# Nx
-nx affected -t test              # Test affected
-nx affected -t lint              # Lint affected
-nx graph                         # Visualize dependencies
-```
-
-## Critical Rules
-
-### Always Use `inject()` Not Constructor Injection
-```typescript
-// ✅ CORRECT
-export class MyComponent {
-  private readonly myService = inject(MyService);
-}
-
-// ❌ WRONG
-export class MyComponent {
-  constructor(private myService: MyService) {}
-}
-```
-
-### Always Use Path Aliases
-```typescript
-// ✅ CORRECT
-import { ButtonComponent } from '@kingdom-apps/common-ui';
-
-// ❌ WRONG
-import { ButtonComponent } from '../../libs/common-ui/src/...';
-```
-
-### File Naming: Always kebab-case
-- `my-component.component.ts`
-- `my-service.service.ts`
-- `entity-name.bo.ts`
-
-### Commit Messages: Conventional Commits
-```
-feat(territory): add assignment feature
-fix(auth): resolve login redirect
-refactor(common-ui): simplify button API
-infra(firebase): update seed data
-```
+See the root `AGENTS.md` for project core principles and essential CLI commands.
 
 ## Contextual Rules
 
@@ -108,7 +46,8 @@ More detailed rules are automatically loaded based on your current work:
   - `angular-components.md` - Component patterns
   - `angular-services.md` - Services, DI, state
   - `styling.md` - SCSS, Tailwind
-  - `testing.md` - Jest patterns
+  - `unit-testing.md` - Jest + ng-mocks patterns
+  - `e2e-testing.md` - Playwright + Firebase Emulator seeding
 
 - **Backend Development** → `.ai/rules/backend/`
   - `firebase-functions.md` - Cloud Functions v2

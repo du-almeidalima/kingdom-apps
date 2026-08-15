@@ -60,12 +60,12 @@ type TerritoryForm = {
     DialogCloseDirective,
   ],
   template: `
-    <lib-dialog title="{{ isEdit ? 'Editar Território' : 'Adicionar Território' }}">
+    <lib-dialog title="{{ isEdit ? 'Editar Território' : 'Adicionar Território' }}" data-testid="territory-manage-dialog">
       <form [formGroup]="form" (ngSubmit)="handleSubmission()" id="territory-form">
         <!-- City -->
         <lib-form-field>
           <label lib-label for="territory-city">Cidade</label>
-          <select lib-select formControlName="city" id="territory-city">
+          <select lib-select formControlName="city" id="territory-city" data-testid="territory-city-select">
             @for (city of data.cities; track city) {
             <option [value]="city">
               {{ city }}
@@ -76,7 +76,7 @@ type TerritoryForm = {
         <!-- Icon -->
         <lib-form-field class="mt-5">
           <label lib-label for="territory-icon">Ícone</label>
-          <select lib-select formControlName="icon" id="territory-icon">
+          <select lib-select formControlName="icon" id="territory-icon" data-testid="territory-icon-select">
             @for (territoryIcon of territoryIcons; track territoryIcon) {
             <option [value]="territoryIcon">
               {{ territoryIcon | territoryIconTranslator }}
@@ -92,7 +92,7 @@ type TerritoryForm = {
         <!-- People Quantity -->
         <lib-form-field class="mt-5">
           <label lib-label for="people-quantity">Quantidade de pessoas</label>
-          <input lib-input type="number" libOnlyNumbers formControlName="peopleQuantity" id="people-quantity"/>
+          <input lib-input type="number" libOnlyNumbers formControlName="peopleQuantity" id="people-quantity" data-testid="territory-people-input"/>
         </lib-form-field>
         <!-- Note  -->
         <lib-form-field class="mt-5">
@@ -115,13 +115,14 @@ type TerritoryForm = {
             type="text"
             id="territory-maps-link"
             autocomplete="off"
+            data-testid="territory-maps-link-input"
             placeholder="https://goo.gl/maps/* ou https://maps.app.goo.gl/*"
           />
         </lib-form-field>
         <!-- Revisit -->
         <lib-form-field class="mt-4" orientation="horizontal">
           <label lib-label for="bible-student-checkbox">Estudando a Bíblia</label>
-          <input formControlName="isBibleStudent" type="checkbox" id="bible-student-checkbox" />
+          <input formControlName="isBibleStudent" type="checkbox" id="bible-student-checkbox" data-testid="territory-bible-student-checkbox" />
         </lib-form-field>
         @if (this.form.controls.isBibleStudent.value) {
         <!-- Bible Instructor -->
@@ -132,6 +133,7 @@ type TerritoryForm = {
             formControlName="bibleInstructor"
             type="text"
             id="bible-instructor"
+            data-testid="territory-instructor-input"
             placeholder="Nome do Instrutor"
           />
         </lib-form-field>
@@ -139,12 +141,13 @@ type TerritoryForm = {
       </form>
       <lib-dialog-footer>
         <div class="flex justify-end gap-4">
-          <button lib-button libDialogClose>Cancelar</button>
+          <button lib-button libDialogClose data-testid="territory-cancel">Cancelar</button>
           <button
             lib-button
             btnType="primary"
             type="submit"
             form="territory-form"
+            data-testid="territory-submit"
             [disabled]="!this.form.valid || isSubmitting"
           >
             @if (isSubmitting) {

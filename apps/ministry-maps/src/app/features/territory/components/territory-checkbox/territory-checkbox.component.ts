@@ -26,6 +26,7 @@ import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
   template: `
     <label
       class="territory-checkbox"
+      data-testid="assign-territory-checkbox"
       [for]="territory.id"
       [ngClass]="{
         'territory-checkbox--disabled': disabled,

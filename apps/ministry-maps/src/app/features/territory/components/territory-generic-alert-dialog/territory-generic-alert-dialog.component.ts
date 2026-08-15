@@ -27,7 +27,7 @@ export type TerritoryGenericAlertDialogData = {
   selector: 'kingdom-apps-territory-generic-alert-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <lib-dialog [title]="data.title">
+    <lib-dialog [title]="data.title" data-testid="alert-resolve-dialog">
       <p class="t-body2 mb-5">{{ data.message }}</p>
       <!-- REPORTS -->
       <div class="overflow-y-auto" style="max-height: 30dvh">
@@ -51,7 +51,7 @@ export type TerritoryGenericAlertDialogData = {
       <lib-dialog-footer>
         <div class="flex flex-nowrap justify-end gap-4">
           <button lib-button libDialogClose>Cancelar</button>
-          <button lib-button btnType="primary" (click)="handleResolveAlert()">
+          <button lib-button btnType="primary" data-testid="alert-resolve-save" (click)="handleResolveAlert()">
             @if (!isSubmitting) {
               <div class="flex gap-1.5 items-center">
                 <lib-icon class="h-7 w-7" icon="check-mark-circle-lined" />

@@ -32,7 +32,7 @@ export enum MoveResolutionActionsEnum {
   selector: 'kingdom-apps-territory-move-alert-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <lib-dialog title="Morador Mudou">
+    <lib-dialog title="Morador Mudou" data-testid="alert-resolve-dialog">
       <p class="t-body2 mb-5">Recentemente um publicador reportou que esse morador não está mais nesse endereço:</p>
       <!-- REPORTS -->
       <div class="overflow-y-auto" style="max-height: 30dvh">
@@ -49,15 +49,15 @@ export enum MoveResolutionActionsEnum {
       <!-- ACTION -->
       <p class="t-body2 my-5">O que você quer fazer?</p>
       <form id="move-alert-resolution-form" [formGroup]="form" (ngSubmit)="handleFormSubmit()">
-        <kingdom-apps-icon-radio formControlName="action" [value]="MoveResolutionActions.MARK_AS_RESOLVED" class="mt-3">
+        <kingdom-apps-icon-radio formControlName="action" data-testid="alert-resolve-radio" [value]="MoveResolutionActions.MARK_AS_RESOLVED" class="mt-3">
           <lib-icon class="icon-radio__icon" icon="check-mark-circle-lined" [fillColor]="iconColor" />
           Remover Marcação
         </kingdom-apps-icon-radio>
-        <kingdom-apps-icon-radio formControlName="action" [value]="MoveResolutionActions.DELETE_TERRITORY" class="mt-3">
+        <kingdom-apps-icon-radio formControlName="action" data-testid="alert-resolve-radio" [value]="MoveResolutionActions.DELETE_TERRITORY" class="mt-3">
           <lib-icon class="icon-radio__icon" icon="trash-can-lined" [fillColor]="iconColor" />
           Apagar Endereço
         </kingdom-apps-icon-radio>
-        <kingdom-apps-icon-radio formControlName="action" [value]="MoveResolutionActions.EDIT_TERRITORY" class="mt-3">
+        <kingdom-apps-icon-radio formControlName="action" data-testid="alert-resolve-radio" [value]="MoveResolutionActions.EDIT_TERRITORY" class="mt-3">
           <lib-icon class="icon-radio__icon" icon="pencil-lined" [fillColor]="iconColor" />
           Editar Endereço
         </kingdom-apps-icon-radio>
@@ -67,7 +67,7 @@ export enum MoveResolutionActionsEnum {
       <lib-dialog-footer>
         <div class="flex flex-nowrap justify-end gap-4">
           <button lib-button lib-dialog-close>Cancelar</button>
-          <button lib-button btnType="primary" type="submit" form="move-alert-resolution-form">
+          <button lib-button btnType="primary" type="submit" form="move-alert-resolution-form" data-testid="alert-resolve-save">
             @if (!isSubmitting) {
               <span>Salvar</span>
             } @else {

@@ -6,7 +6,7 @@ import { NgOptimizedImage } from '@angular/common';
   styleUrls: ['./no-account-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="container">
+    <div class="container" data-testid="no-account-container">
       <h2 class="t-headline1">Olá!</h2>
       <div class="img-container">
         <img class="image" alt="MM Image" ngSrc="assets/images/map-image.png" priority="1" fill="contain" />

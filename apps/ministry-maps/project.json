@@ -83,6 +83,28 @@
       "defaultConfiguration": "development",
       "continuous": true
     },
+    "e2e-servers": {
+      "executor": "nx:run-commands",
+      "continuous": true,
+      "options": {
+        "command": "node apps/ministry-maps/e2e/scripts/e2e-servers.mjs",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "e2e-ui": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "playwright test --ui --config=apps/ministry-maps/playwright.config.ts",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "e2e-report": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "playwright show-report dist/.playwright/apps/ministry-maps/playwright-report",
+        "cwd": "{workspaceRoot}"
+      }
+    },
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
       "options": {
@@ -98,6 +120,14 @@
       "options": {
         "jestConfig": "apps/ministry-maps/jest.config.ts",
         "tsConfig": "apps/ministry-maps/tsconfig.spec.json"
+      }
+    },
+    "typecheck-e2e": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "^default"],
+      "options": {
+        "command": "tsc --noEmit -p apps/ministry-maps/e2e/tsconfig.json"
       }
     },
     "deploy": {

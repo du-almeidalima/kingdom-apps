@@ -2,7 +2,13 @@
   "name": "@kingdom-apps/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "start": "nx run-many --targets=serve --projects=firebase-emulator,ministry-maps --parallel=2",
+    "e2e": "nx e2e ministry-maps",
+    "e2e:ui": "nx run ministry-maps:e2e-ui",
+    "e2e:report": "nx run ministry-maps:e2e-report",
+    "e2e:servers": "nx run ministry-maps:e2e-servers"
+  },
   "private": true,
   "dependencies": {
     "@angular/cdk": "21.2.7",
@@ -33,12 +39,15 @@
     "@angular/pwa": "21.2.7",
     "@eslint/js": "^9.8.0",
     "@nx/angular": "22.6.5",
+    "@nx/devkit": "22.6.5",
     "@nx/eslint": "22.6.5",
     "@nx/eslint-plugin": "22.6.5",
     "@nx/jest": "22.6.5",
     "@nx/js": "22.6.5",
+    "@nx/playwright": "^22.6.5",
     "@nx/web": "22.6.5",
     "@nx/workspace": "22.6.5",
+    "@playwright/test": "^1.36.0",
     "@schematics/angular": "21.2.7",
     "@swc-node/register": "1.11.1",
     "@swc/core": "1.15.8",
@@ -50,9 +59,13 @@
     "autoprefixer": "^10.4.0",
     "eslint": "^9.28.0",
     "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-playwright": "^1.6.2",
+    "firebase-admin": "^13.10.0",
+    "firebase-tools": "^14.27.0",
     "jest": "30.3.0",
     "jest-environment-jsdom": "30.3.0",
     "jest-preset-angular": "16.1.4",
+    "jest-util": "30.3.0",
     "ng-mocks": "^14.13.2",
     "nx": "22.6.5",
     "postcss": "^8.4.5",
@@ -63,7 +76,6 @@
     "tslib": "^2.3.0",
     "typescript": "5.9.3",
     "typescript-eslint": "^8.33.1",
-    "whatwg-fetch": "^3.6.20",
-    "jest-util": "30.3.0"
+    "whatwg-fetch": "^3.6.20"
   }
 }

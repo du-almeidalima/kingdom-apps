@@ -1,7 +1,12 @@
 import { ApplicationConfig, isDevMode, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import { connectAuthEmulator, getAuth, provideAuth } from '@angular/fire/auth';
+import {
+  connectAuthEmulator,
+  getAuth,
+  provideAuth,
+  signInWithCustomToken,
+} from '@angular/fire/auth';
 import {
   connectFirestoreEmulator,
   initializeFirestore,
@@ -32,6 +37,12 @@ export const appConfig: ApplicationConfig = {
 
       if (environment.env === 'development' && !environment.useCloud) {
         connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+
+        // Expose the Auth instance and signInWithCustomToken on `window` so the
+        // E2E test fixture can establish a real Firebase session in the browser
+        // without driving the OAuth popup. This code is NEVER reached in
+        // production builds (gated by env + !useCloud above).
+        (window as any).__E2E__ = { auth, signInWithCustomToken };
       }
 
       return auth;

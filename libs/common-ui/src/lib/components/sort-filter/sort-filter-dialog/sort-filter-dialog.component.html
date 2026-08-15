@@ -1,4 +1,4 @@
-<lib-dialog title="Ordenar e Filtrar">
+<lib-dialog title="Ordenar e Filtrar" data-testid="sort-filter-dialog">
   <form [formGroup]="form" (ngSubmit)="handleApply()">
     <!-- SORT -->
     @if (data.sortConfigs?.options?.length) {
@@ -24,6 +24,7 @@
             @switch (entry[1].filterType) {
               @case ('select') {
                 <lib-select-filter
+                  data-testid="sort-filter-select"
                   [title]="entry[1].title"
                   [controlName]="entry[1].controlName"
                   [placeholder]="entry[1].placeholder || ''"
@@ -33,6 +34,7 @@
               }
               @case ('toggle') {
                 <lib-toggle-filter
+                  data-testid="sort-filter-toggle"
                   [title]="entry[1].title"
                   [controlName]="entry[1].controlName"
                   [icon]="entry[1].icon"
@@ -42,6 +44,7 @@
               }
               @case ('text') {
                 <lib-text-filter
+                  data-testid="sort-filter-text"
                   [title]="entry[1].title"
                   [controlName]="entry[1].controlName"
                   [placeholder]="entry[1].placeholder || ''"
@@ -58,7 +61,7 @@
   <lib-dialog-footer>
     <div class="flex flex-nowrap justify-end gap-4">
       <button lib-button (click)="handleCancel()">Cancelar</button>
-      <button lib-button btnType="primary" (click)="handleApply()">Aplicar</button>
+      <button lib-button btnType="primary" data-testid="sort-filter-apply" (click)="handleApply()">Aplicar</button>
     </div>
   </lib-dialog-footer>
 </lib-dialog>

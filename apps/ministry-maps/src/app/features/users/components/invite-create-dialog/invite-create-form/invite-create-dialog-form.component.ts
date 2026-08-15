@@ -37,12 +37,12 @@ import { IconRadioComponent } from '../../../../../shared/components/visit-outco
     }
   `,
   template: `
-    <lib-dialog [title]="title()">
+    <lib-dialog [title]="title()" data-testid="invite-create-dialog">
       <form id="invite-link-create-form" [formGroup]="form()" (ngSubmit)="formSubmit.emit()" tabindex="0">
         <!-- Email -->
         <lib-form-field class="mt-5">
           <label lib-label for="user-email">Email (opcional)</label>
-          <input lib-input formControlName="email" type="email" id="user-email" />
+          <input lib-input formControlName="email" type="email" id="user-email" data-testid="invite-email-input" />
           <span class="t-medium-emphasis"> Para criar um link que só possa ser usado com esse email. </span>
         </lib-form-field>
         <!-- ROLE -->
@@ -80,7 +80,7 @@ import { IconRadioComponent } from '../../../../../shared/components/visit-outco
       <lib-dialog-footer>
         <div class="flex flex-nowrap justify-end gap-4">
           <button lib-button libDialogClose>Cancelar</button>
-          <button lib-button btnType="primary" type="submit" form="invite-link-create-form">
+          <button lib-button btnType="primary" type="submit" form="invite-link-create-form" data-testid="invite-submit">
             @if (!isSubmitting()) {
               <span>Criar Link</span>
             } @else {

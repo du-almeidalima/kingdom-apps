@@ -25,11 +25,11 @@ import { grey400 } from '../../styles/abstract/variables';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div>
-      <button class="sort-filter__button" type="button" (click)="handleOpenDialog()">
+      <button class="sort-filter__button" type="button" data-testid="sort-filter-trigger" (click)="handleOpenDialog()">
         <lib-icon [fillColor]="iconColor()" class="h-8 w-8" icon="filter-down-lined" />
       </button>
       @if (activeFilterCount() > 0) {
-      <span class="sort-filter__badge">{{ activeFilterCount() }}</span>
+      <span class="sort-filter__badge" data-testid="sort-filter-badge">{{ activeFilterCount() }}</span>
       }
     </div>
   `,

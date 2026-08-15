@@ -1,11 +1,11 @@
 <div class='container'>
-  <lib-card>
+  <lib-card data-testid="sign-in-card">
     <h1 class='mb-10'>Cadastrar</h1>
     <div class="img-container">
       <img class="image" alt="MM Image" ngSrc="assets/images/map-image.png" priority="1" fill="contain">
     </div>
     @if (errorCode) {
-      <p class="t-body1 mt-10">
+      <p class="t-body1 mt-10" data-testid="sign-in-error">
         @switch (errorCode) {
           @case ('INVALID_LINK') {
             Esse link de convite não é mais válido.

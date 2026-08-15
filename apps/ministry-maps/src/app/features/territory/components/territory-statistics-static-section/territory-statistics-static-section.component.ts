@@ -14,16 +14,16 @@ import { TerritoryStatisticsBO } from '../../bo/territory-statistics/territory-s
   template: `
     <h2 class="mt-8">Gerais</h2>
     <section class="parent-grid mt-4">
-      <div class="statistics-item p-4 mb-3">
+      <div class="statistics-item p-4 mb-3" data-testid="statistic-tile-territories">
         Territórios: <span>{{ statistics().territoryCount }}</span>
       </div>
-      <div class="statistics-item p-4 mb-3">
+      <div class="statistics-item p-4 mb-3" data-testid="statistic-tile-people">
         Pessoas: <span>{{ statistics().peopleCount }}</span>
       </div>
-      <div class="statistics-item p-4 mb-3">
+      <div class="statistics-item p-4 mb-3" data-testid="statistic-tile-bible-studies">
         Estudos bíblicos: <span>{{ statistics().bibleStudiesCount }}</span>
       </div>
-      <div class="statistics-item p-4 mb-3">
+      <div class="statistics-item p-4 mb-3" data-testid="statistic-tile-moved">
         Mudaram: <span>{{ statistics().movedCount }}</span>
       </div>
     </section>
