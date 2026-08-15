@@ -7,6 +7,7 @@ import {
   DocumentReference,
   Firestore,
   setDoc,
+  Timestamp,
 } from '@angular/fire/firestore';
 import { from, Observable, switchMap, take } from 'rxjs';
 
@@ -21,6 +22,7 @@ const convertHistoryDateFirebaseTimestampToDate = (data: FirebaseDesignationMode
     ...data,
     createdAt: data.createdAt && data.createdAt.toDate(),
     expiresAt: data.expiresAt && data.expiresAt.toDate(),
+    expireAt: data.expireAt && data.expireAt.toDate(),
     territories: data.territories.map((t) => ({
       ...t,
       lastVisit: t.lastVisit && t.lastVisit.toDate(),
@@ -36,6 +38,10 @@ const convertHistoryDateFirebaseTimestampToDate = (data: FirebaseDesignationMode
   providedIn: 'root',
 })
 export class FirebaseDesignationDatasourceService implements DesignationRepository, FirebaseDatasource<Designation> {
+  // TTL retention: 6 months
+  private static readonly TTL_DAYS = 180;
+  private static readonly MS_PER_DAY = 24 * 60 * 60 * 1000;
+
   private readonly collectionName = 'designations';
   private readonly designationCollection: CollectionReference<Designation>;
 
@@ -62,7 +68,14 @@ export class FirebaseDesignationDatasourceService implements DesignationReposito
   add(designation: Designation): Observable<Designation> {
     // Creating a reference to the new document, so we can get the id
     const newDesignationDocRef = doc(this.designationCollection);
-    const newDesignation$ = from(setDoc(newDesignationDocRef, { ...designation, id: newDesignationDocRef.id }));
+    const expireAt = Timestamp.fromDate(
+      new Date(
+        Date.now() + FirebaseDesignationDatasourceService.TTL_DAYS * FirebaseDesignationDatasourceService.MS_PER_DAY
+      )
+    );
+    const newDesignation$ = from(
+      setDoc(newDesignationDocRef, { ...designation, id: newDesignationDocRef.id, expireAt })
+    );
 
     return newDesignation$.pipe(
       switchMap(() => {

@@ -20,6 +20,7 @@ export const Collections = {
   territories: 'territories',
   designations: 'designations',
   invitation_links: 'invitation_links',
+  logs: 'logs',
 } as const;
 
 /** Subcollection that stores a territory's full visit history. */

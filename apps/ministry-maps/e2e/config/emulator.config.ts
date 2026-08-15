@@ -23,3 +23,9 @@ export const FIRESTORE_CLEAR_URL = `http://${EMULATOR_CONFIG.firestore.host}:${E
 
 /** REST endpoint that wipes every Auth account. */
 export const AUTH_CLEAR_URL = `http://${EMULATOR_CONFIG.auth.host}:${EMULATOR_CONFIG.auth.port}/emulator/v1/projects/${EMULATOR_CONFIG.projectId}/accounts`;
+
+/** Base URL for Firestore v1 REST API documents. */
+export const FIRESTORE_DOCUMENTS_URL = `http://${EMULATOR_CONFIG.firestore.host}:${EMULATOR_CONFIG.firestore.port}/v1/projects/${EMULATOR_CONFIG.projectId}/databases/(default)/documents`;
+
+/** Auth REST endpoint to exchange a custom token for an ID token. */
+export const AUTH_SIGN_IN_CUSTOM_TOKEN_URL = `http://${EMULATOR_CONFIG.auth.host}:${EMULATOR_CONFIG.auth.port}/identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=any`;

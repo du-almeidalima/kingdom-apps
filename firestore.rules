@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Publicly accessible collections. Anyone (even unauthenticated users) can read and write.
+    // Needed for the anonymous /work/:id designation links shared over WhatsApp.
+    match /designations/{document=**} {
+      allow read, write: if true;
+    }
+
+    // 2. Territories: readable by anonymous publishers holding a designation link.
+    // Visit feedback updates the territory (lastVisit) and manages history entries (create, edit, undo).
+    // Creating or deleting territories is reserved for authenticated users.
+    // History is fully writable anonymously (deliberate decision): the revert-visit flow
+    // (undoLastVisitChanges) deletes/updates history from the anonymous /work page, and the
+    // equivalent data is already publicly writable via designations.territories[].history.
+    match /territories/{territoryId} {
+      allow read, update: if true;
+      allow create, delete: if request.auth != null;
+
+      match /history/{historyId} {
+        allow read, write: if true;
+      }
+    }
+
+    // 3. Invitation links: read anonymously so invite links can be validated before sign-in.
+    // Congregations are also anonymously readable: the invite validation chain resolves the
+    // invite's congregation reference pre-auth, and a denial would silently break the flow.
+    match /invitation_links/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    match /congregations/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // 4. Logs: writable by anyone (client logging), readable only by APP_ADMIN users.
+    match /logs/{document=**} {
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'APP_ADMIN';
+      allow write: if true;
+    }
+
+    // 5. Default authenticated access. Acts as a catch-all for all other collections.
+    // `logs` is excluded so rule 4 stays the only read granter for it (rules only union grants).
+    match /{collectionId}/{document=**} {
+      allow read, write: if request.auth != null && collectionId != 'logs';
+    }
+  }
+}

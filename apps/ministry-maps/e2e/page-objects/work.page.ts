@@ -8,6 +8,9 @@ export class WorkPage {
   readonly allDone: Locator;
   readonly territoriesHeading: Locator;
   readonly completedHeading: Locator;
+  readonly notFound: Locator;
+  readonly notFoundHeading: Locator;
+  readonly notFoundIcon: Locator;
 
   constructor(public readonly page: Page) {
     this.loading = page.getByTestId('work-loading');
@@ -17,6 +20,9 @@ export class WorkPage {
     this.allDone = page.getByTestId('work-all-done');
     this.territoriesHeading = page.getByRole('heading', { name: 'Territórios' });
     this.completedHeading = page.getByRole('heading', { name: 'Concluídos' });
+    this.notFound = page.getByTestId('work-designation-not-found');
+    this.notFoundHeading = page.getByTestId('designation-not-found-heading');
+    this.notFoundIcon = page.getByTestId('designation-not-found-icon');
   }
 
   itemByAddress(address: string): Locator {

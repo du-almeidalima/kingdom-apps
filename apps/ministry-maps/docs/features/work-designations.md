@@ -295,6 +295,16 @@ Read that table before writing any expiry test (UC-WORK-20/21): the naming sugge
 - **Edge cases:** this only happens because the designation's embedded `history` does not carry the territory's pre-existing visits — a designation created by the app immediately after those 5 visits (same session) might embed them and avoid this; this catalog covers only what the seeded, decoupled scenario above produces
 - **Priority:** P0 · **Gaps:** `⚠ suspected defect` — `update()`'s "last 5, ascending" recompute silently drops history the caller doesn't know about; test must assert the overwrite (`length === 1`), which is the opposite of a "5-entry cap" and is the actual regression risk this entry exists to lock in
 
+#### UC-WORK-24 — Non-existent designation id renders designation not-found screen
+
+- **Actor:** Anonymous
+- **Route:** `/work/:id`
+- **Preconditions (seed):** none (do not seed a designation with this id)
+- **Steps:** 1. `page.goto('/work/<non-existent-id>')`
+- **Expected UI:** `isNotFound` becomes `true`; the `<kingdom-apps-designation-not-found>` component renders with heading `Designação não encontrada` (`data-testid="designation-not-found-heading"`) and body copy explaining that the designation may have expired or been removed, instructing the publisher to contact their Group Overseer (SG); neither the `Territórios` nor the `Concluídos` section renders.
+- **Expected persistence:** `db.getDoc(db.collections.designations, '<non-existent-id>')` is `undefined`
+- **Priority:** P0 · **Gaps:** none (`data-testid="work-designation-not-found"`, `data-testid="designation-not-found-heading"`, `data-testid="designation-not-found-icon"` present)
+
 ## Testability gaps (summary)
 
 - **Zero `data-testid`s exist on `/work/:id`** — the four app-wide ids (`territories-heading`, `territories-list`,

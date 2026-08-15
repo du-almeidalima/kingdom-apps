@@ -187,6 +187,7 @@ Suggested spec files are proposals — keep one feature area per file and mirror
 | UC-WORK-21 | Expired + non-blocking: checkbox still disabled ⚠ | Publisher | P1  | ✅ `work-designation.spec.ts` | `work-designation.spec.ts` | `WorkPage`               | expired non-blocking designation      | ⚠                       |
 | UC-WORK-22 | All done → `Parabéns!` state                       | Publisher | P1  | ✅ `work-designation.spec.ts` | `work-designation.spec.ts` | `WorkPage`               | 1-territory designation               | —                        |
 | UC-WORK-23 | Write-back overwrites `recentHistory` ⚠           | Publisher | P0  | ✅ `work-designation.spec.ts` | `work-designation.spec.ts` | `WorkItemCompleteDialog` | 5-visit territory + fresh designation | ⚠                       |
+| UC-WORK-24 | Non-existent designation id renders not-found screen | Anonymous | P0  | ✅ `work-not-found.spec.ts`   | `work-not-found.spec.ts`   | `WorkPage`               | —                                     | —                        |
 
 ## UC-USERS — users & invites → [`features/users-invites.md`](./features/users-invites.md)
 
@@ -243,6 +244,25 @@ Suggested spec files are proposals — keep one feature area per file and mirror
 | UC-CFG-12 | ⚠ Anonymous: no-congregation banner        | Anonymous | P1  | ✅ `configuration.spec.ts` | `configuration.spec.ts` | `ConfigurationPage` | —         | ⚠                     |
 | UC-CFG-13 | ⚠ Every role can edit (unenforced gating)  | Publisher | P0  | ✅ `configuration.spec.ts` | `configuration.spec.ts` | `ConfigurationPage` | —         | ⚠                     |
 
+## UC-TTL — Firestore TTL data retention policies
+
+| ID        | Title                                                     | Actor | Pri | Covered                   | Spec file              | Page object             | Seed work | Blockers |
+|-----------|-----------------------------------------------------------|-------|-----|---------------------------|------------------------|-------------------------|-----------|----------|
+| UC-TTL-01 | Designation creation sets 180-day expireAt TTL timestamp  | Admin | P0  | ✅ `firestore-ttl.spec.ts` | `firestore-ttl.spec.ts` | `AssignTerritoriesPage` | —         | —        |
+| UC-TTL-02 | Client log creation sets 180-day expireAt TTL timestamp   | Admin | P1  | ✅ `firestore-ttl.spec.ts` | `firestore-ttl.spec.ts` | `AssignTerritoriesPage` | —         | —        |
+
+## UC-RULES — Firestore security rules
+
+| ID          | Title                                                                             | Actor                 | Pri | Covered                     | Spec file                 | Page object | Seed work    | Blockers |
+|-------------|-----------------------------------------------------------------------------------|-----------------------|-----|-----------------------------|---------------------------|-------------|--------------|----------|
+| UC-RULES-01 | Anonymous read access to public collections (200 allowed)                         | Anonymous             | P0  | ✅ `firestore-rules.spec.ts` | `firestore-rules.spec.ts` | —           | invite doc   | —        |
+| UC-RULES-02 | Anonymous read access to non-public collections is denied (403)                   | Anonymous             | P0  | ✅ `firestore-rules.spec.ts` | `firestore-rules.spec.ts` | —           | log doc      | —        |
+| UC-RULES-03 | Logs read access: PUBLISHER denied (403) vs APP_ADMIN allowed (200)               | Publisher, App Admin  | P0  | ✅ `firestore-rules.spec.ts` | `firestore-rules.spec.ts` | —           | log doc      | —        |
+| UC-RULES-04 | Anonymous write to logs allowed (200), write to invitation_links denied (403)     | Anonymous             | P0  | ✅ `firestore-rules.spec.ts` | `firestore-rules.spec.ts` | —           | invite doc   | —        |
+| UC-RULES-05 | Territory write matrix: anonymous update allowed (200), create/delete denied (403)| Anonymous             | P0  | ✅ `firestore-rules.spec.ts` | `firestore-rules.spec.ts` | —           | —            | —        |
+| UC-RULES-06 | Territory history write matrix: anonymous create, update, delete allowed (200)    | Anonymous            | P0  | ✅ `firestore-rules.spec.ts` | `firestore-rules.spec.ts` | —           | history doc  | —        |
+| UC-RULES-07 | Authenticated user can read and write non-public collections (200 allowed)        | Admin                 | P0  | ✅ `firestore-rules.spec.ts` | `firestore-rules.spec.ts` | —           | —            | —        |
+
 ## Journeys → [`journeys/`](./journeys/README.md)
 
 | ID   | Title                                                 | Identities        | Pri | Covered                                        | Spec file                                   | Page objects                                                                                                 | Seed work                            | Blockers                                         |
@@ -255,6 +275,7 @@ Suggested spec files are proposals — keep one feature area per file and mirror
 | J-06 | Expired designation, both modes                       | anon              | P1  | ✅ `journey-expired-designation.spec.ts`       | `journey-expired-designation.spec.ts`       | `WorkPage`                                                                                                   | 2 expired designations + territories | ⚠ (UC-WORK-21)                                  |
 | J-07 | Statistics reconciliation                             | Admin             | P1  | ✅ `journey-statistics-reconciliation.spec.ts` | `journey-statistics-reconciliation.spec.ts` | `StatisticsPage`                                                                                             | clock-relative visits                | testid                                           |
 | J-08 | Empty-system journey                                  | Admin (2nd cong.) | P1  | ✅ `journey-empty-system.spec.ts`              | `journey-empty-system.spec.ts`              | `TerritoriesPage` ✅, `AssignTerritoriesPage`, `StatisticsPage`, overflow menu PO                            | empty congregation + identity        | **HX-3 (hard blocker)**                          |
+| J-09 | TTL-purged designation renders not-found screen       | anon              | P0  | ✅ `work-not-found.spec.ts`                   | `work-not-found.spec.ts`                    | `WorkPage`                                                                                                   | designation + territory              | —                                                |
 
 ---
 
@@ -306,14 +327,16 @@ The planning prerequisites are retained here for traceability. HX-1, HX-2, HX-3,
 | UC-TERR   | 37      | 8      | 21     | 8      | 37 ✅      | —                           |
 | UC-ASSIGN | 24      | 12     | 7      | 5      | 23 ✅      | 1 HX-4                      |
 | UC-STAT   | 19      | 5      | 10     | 4      | 19 ✅      | —                           |
-| UC-WORK   | 23      | 7      | 13     | 3      | 23 ✅      | —                           |
+| UC-WORK   | 24      | 8      | 13     | 3      | 24 ✅      | —                           |
 | UC-USERS  | 17      | 9      | 5      | 3      | 16 ✅      | 1 unit-only                 |
 | UC-PROF   | 10      | 2      | 6      | 2      | 10 ✅      | —                           |
 | UC-CFG    | 13      | 7      | 6      | 0      | 13 ✅      | —                           |
-| Journeys  | 8       | 3      | 5      | 0      | 8 ✅       | —                           |
-| **Total** | **188** | **73** | **85** | **30** | **177 ✅** | **11**                      |
+| UC-TTL    | 2       | 1      | 1      | 0      | 2 ✅       | —                           |
+| UC-RULES  | 7       | 7      | 0      | 0      | 7 ✅       | —                           |
+| Journeys  | 9       | 4      | 5      | 0      | 9 ✅       | —                           |
+| **Total** | **199** | **83** | **86** | **30** | **188 ✅** | **11**                      |
 
-Coverage arithmetic: 169 of 180 UC rows plus all 8 journeys are covered. The 11 exceptions are exactly the eight manual OAuth-popup rows, `UC-AUTH-21` and `UC-ASSIGN-21` (HX-4 deferred), and `UC-USERS-12` (unit-only). `UC-PROF-07` is an explicitly accepted `test.fixme` and remains covered; redirect duplicates are owned once by the matrices in `auth.spec.ts`.
+Coverage arithmetic: 179 of 190 UC rows plus all 9 journeys are covered. The 11 exceptions are exactly the eight manual OAuth-popup rows, `UC-AUTH-21` and `UC-ASSIGN-21` (HX-4 deferred), and `UC-USERS-12` (unit-only). `UC-PROF-07` is an explicitly accepted `test.fixme` and remains covered; redirect duplicates are owned once by the matrices in `auth.spec.ts`.
 
 ## Sources
 

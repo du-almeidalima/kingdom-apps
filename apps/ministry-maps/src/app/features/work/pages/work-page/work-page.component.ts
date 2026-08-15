@@ -9,17 +9,19 @@ import { DesignationStatusEnum } from '../../../../../models/enums/designation-s
 import { WorkBO } from '../../bo/work.bo';
 import { NoteComponent } from '@kingdom-apps/common-ui';
 import { WorkItemComponent } from '../../components/work-item/work-item.component';
+import { DesignationNotFoundComponent } from '../../components/designation-not-found/designation-not-found.component';
 
 @Component({
   selector: 'kingdom-apps-work-page',
   templateUrl: './work-page.component.html',
   styleUrls: ['./work-page.component.scss'],
   providers: [WorkBO],
-  imports: [NoteComponent, WorkItemComponent],
+  imports: [NoteComponent, WorkItemComponent, DesignationNotFoundComponent],
 })
 export class WorkPageComponent implements OnInit, OnDestroy {
   private designationTerritorySubscription: Subscription | undefined;
   isLoading = false;
+  isNotFound = false;
   designation: Designation | undefined;
   territories: Designation['territories'] = [];
   doneTerritories: Designation['territories'] = [];
@@ -45,7 +47,10 @@ export class WorkPageComponent implements OnInit, OnDestroy {
           this.isLoading = false;
         })
       )
-      .subscribe(designation => {
+      .subscribe((designation) => {
+        // Designations deleted by the Firestore TTL policy (or otherwise missing) resolve to undefined.
+        this.isNotFound = !designation;
+
         if (designation?.territories) {
           this.isDisabled = this.shouldDisableDesignation(designation);
           this.isBlocked = this.isDisabled && !!designation.settings?.shouldDesignationBlockAfterExpired;
@@ -54,7 +59,7 @@ export class WorkPageComponent implements OnInit, OnDestroy {
           this.territories = [];
           this.doneTerritories = [];
 
-          designation.territories.forEach(t => {
+          designation.territories.forEach((t) => {
             if (t.status === DesignationStatusEnum.PENDING) {
               this.territories.push(t);
             } else {
@@ -106,14 +111,14 @@ export class WorkPageComponent implements OnInit, OnDestroy {
     this.workBO
       .undoLastVisitChanges(this.designation, designationTerritory)
       .pipe(
-        catchError(err => {
+        catchError((err) => {
           // TODO: Create a component to display errors
           alert('Um erro aconteceu ao reverter visita, por favor tente novamente. Erro: ' + JSON.stringify(err));
 
           return of(undefined);
         })
       )
-      .subscribe(_ => {
+      .subscribe(() => {
         // TODO: Add a success message here
         console.log(
           'Successfully reverted last visit for designation: ' +
