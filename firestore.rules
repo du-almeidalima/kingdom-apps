@@ -2,18 +2,15 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // 1. Publicly accessible collections. Anyone (even unauthenticated users) can read and write.
-    // Needed for the anonymous /work/:id designation links shared over WhatsApp.
+    // Public: the anonymous /work/:id designation links shared over WhatsApp.
     match /designations/{document=**} {
       allow read, write: if true;
     }
 
-    // 2. Territories: readable by anonymous publishers holding a designation link.
-    // Visit feedback updates the territory (lastVisit) and manages history entries (create, edit, undo).
-    // Creating or deleting territories is reserved for authenticated users.
-    // History is fully writable anonymously (deliberate decision): the revert-visit flow
-    // (undoLastVisitChanges) deletes/updates history from the anonymous /work page, and the
-    // equivalent data is already publicly writable via designations.territories[].history.
+    // Territories: anonymous publishers holding a designation link read/update them and manage
+    // visit history (create, edit, undo). Creating or deleting territories requires auth.
+    // History is deliberately writable by anyone: the revert-visit flow runs anonymously, and the
+    // same data is already public via designations.territories[].history.
     match /territories/{territoryId} {
       allow read, update: if true;
       allow create, delete: if request.auth != null;
@@ -23,9 +20,9 @@ service cloud.firestore {
       }
     }
 
-    // 3. Invitation links: read anonymously so invite links can be validated before sign-in.
-    // Congregations are also anonymously readable: the invite validation chain resolves the
-    // invite's congregation reference pre-auth, and a denial would silently break the flow.
+    // Readable pre-auth so invite links can be validated before sign-in (the validation chain
+    // also resolves the congregation reference). Invites are consumed only by the
+    // provisionUserFromInvite Cloud Function, which bypasses rules via the Admin SDK.
     match /invitation_links/{document=**} {
       allow read: if true;
       allow write: if request.auth != null;
@@ -36,17 +33,84 @@ service cloud.firestore {
       allow write: if request.auth != null;
     }
 
-    // 4. Logs: writable by anyone (client logging), readable only by APP_ADMIN users.
+    // Logs: writable by anyone (client logging), readable by APP_ADMIN only.
     match /logs/{document=**} {
-      allow read: if request.auth != null
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'APP_ADMIN';
+      allow read: if callerRoleIn(['APP_ADMIN']);
       allow write: if true;
     }
 
-    // 5. Default authenticated access. Acts as a catch-all for all other collections.
-    // `logs` is excluded so rule 4 stays the only read granter for it (rules only union grants).
+    // Users: profiles are created only by the provisionUserFromInvite Cloud Function (Admin SDK
+    // bypasses rules), so a role can never be forged from the client.
+    // DEPLOY ORDER: functions first, then these rules — otherwise new signups break in between.
+    match /users/{userId} {
+      allow create: if false;
+
+      allow get: if isSelf(userId)
+        || (callerRoleIn(['ORGANIZER', 'ELDER', 'ADMIN', 'SUPERINTENDENT', 'APP_ADMIN'])
+          && sameCongregationAsCaller(resource.data));
+      allow list: if callerRoleIn(['ORGANIZER', 'ELDER', 'ADMIN', 'SUPERINTENDENT', 'APP_ADMIN'])
+        && sameCongregationAsCaller(resource.data);
+
+      // Self: role is immutable; congregation changes only for SUPERINTENDENT/APP_ADMIN
+      // (ProfileBO.CHANGE_CONGREGATION_ALLOWED). ADMIN/SUPERINTENDENT may edit same-congregation
+      // users but never touch a protected role in either direction. APP_ADMIN is unrestricted.
+      allow update: if (
+          isSelf(userId)
+          && unchanged('role')
+          && (unchanged('congregation') || isProtectedRole(resource.data.role))
+        ) || (
+          callerRoleIn(['ADMIN', 'SUPERINTENDENT'])
+          && sameCongregationAsCaller(resource.data)
+          && !isProtectedRole(resource.data.role)
+          && !isProtectedRole(request.resource.data.role)
+          && unchanged('congregation')
+        ) || callerRoleIn(['APP_ADMIN']);
+
+      // Mirrors the deleteUser Cloud Function: ADMIN/SUPERINTENDENT delete same-congregation
+      // users but never protected roles; APP_ADMIN deletes anyone.
+      allow delete: if (
+          callerRoleIn(['ADMIN', 'SUPERINTENDENT'])
+          && sameCongregationAsCaller(resource.data)
+          && !isProtectedRole(resource.data.role)
+        ) || callerRoleIn(['APP_ADMIN']);
+    }
+
+    // Catch-all for every other collection. `logs` and `users` are excluded so the dedicated
+    // rules above stay their only granters (rules union grants, they never subtract).
     match /{collectionId}/{document=**} {
-      allow read, write: if request.auth != null && collectionId != 'logs';
+      allow read, write: if request.auth != null && collectionId != 'logs' && collectionId != 'users';
+    }
+
+    // ── Helpers ─────────────────────────────────────────────────────────────────
+    // get() calls made during rules evaluation bypass security rules.
+
+    function isSelf(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function callerRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    /** True when the caller's role is one of `roles`. */
+    function callerRoleIn(roles) {
+      return request.auth != null && callerRole() in roles;
+    }
+
+    /** SUPERINTENDENT and APP_ADMIN profiles are only manageable by APP_ADMIN. */
+    function isProtectedRole(role) {
+      return role in ['SUPERINTENDENT', 'APP_ADMIN'];
+    }
+
+    /** True when the user `data` belongs to the caller's congregation (stored as a reference). */
+    function sameCongregationAsCaller(data) {
+      return request.auth != null
+        && data.congregation == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.congregation;
+    }
+
+    /** True when `field` is unchanged by the pending update (update rules only). */
+    function unchanged(field) {
+      return request.resource.data[field] == resource.data[field];
     }
   }
 }
