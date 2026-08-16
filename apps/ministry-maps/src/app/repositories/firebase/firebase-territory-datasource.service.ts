@@ -18,7 +18,7 @@ import {
   updateDoc,
   where
 } from '@angular/fire/firestore';
-import { combineLatest, EMPTY, forkJoin, from, map, Observable, of, switchMap } from 'rxjs';
+import { combineLatest, defer, EMPTY, forkJoin, from, map, Observable, of, switchMap } from 'rxjs';
 
 import { firebaseEntityConverterFactory, removeUndefined } from '../../shared/utils/firebase-entity-converter';
 import { TerritoryRepository, TerritoryRepositoryQueryOptions } from '../territories.repository';
@@ -191,7 +191,8 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
     // FIXME: I don't know why the converter is not getting this on the 'toFirestore'
     removeUndefined(territoryCopy);
 
-    return from(updateDoc(territoryDocRef, territoryCopy));
+    // defer: lazy, so concat/forkJoin/retry can re-subscribe the write.
+    return defer(() => from(updateDoc(territoryDocRef, territoryCopy)));
   }
 
   batchUpdate(territories: Territory[]): Observable<void> {
@@ -240,7 +241,8 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
     const territoryVisitHistoryCollection = this.getTerritoryHistoryCollection(territoryId);
     const visitHistoryDocRef = doc(territoryVisitHistoryCollection, visitHistory.id);
 
-    return from(setDoc(visitHistoryDocRef, visitHistory));
+    // defer: lazy, so concat/forkJoin/retry can re-subscribe the write.
+    return defer(() => from(setDoc(visitHistoryDocRef, visitHistory)));
   }
 
   getNextPositionIndexForCity(city: string): Observable<number> {

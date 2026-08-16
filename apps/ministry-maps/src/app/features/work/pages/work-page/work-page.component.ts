@@ -96,7 +96,28 @@ export class WorkPageComponent implements OnInit, OnDestroy {
       );
     }
 
-    concat([designationTerritoryUpdate$, territoryUpdate$, visitHistoryUpdate$]).pipe(retry(2));
+    // The observables must be spread out: `concat([a$, b$])` would emit them as values and
+    // never subscribe the writes.
+    concat(designationTerritoryUpdate$, territoryUpdate$, visitHistoryUpdate$)
+      .pipe(
+        retry(2),
+        catchError(err => {
+          // TODO: Create a component to display errors
+          alert('Um erro aconteceu ao salvar a visita, por favor tente novamente. Erro: ' + JSON.stringify(err));
+
+          return of(undefined);
+        })
+      )
+      .subscribe(() => {
+        // TODO: Add a success message here
+        console.log(
+          'Successfully saved visit for designation: ' +
+            this.designation?.id +
+            ' and territory: ' +
+            designationTerritory.id +
+            ''
+        );
+      });
   }
 
   handleLastVisitReverted(designationTerritory: DesignationTerritory) {

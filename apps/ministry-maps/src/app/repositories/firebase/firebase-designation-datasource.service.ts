@@ -9,7 +9,7 @@ import {
   setDoc,
   Timestamp,
 } from '@angular/fire/firestore';
-import { from, Observable, switchMap, take } from 'rxjs';
+import { from, Observable, switchMap, take, defer } from 'rxjs';
 
 import { Designation } from '../../../models/designation';
 import { FirebaseDesignationModel } from '../../../models/firebase/firebase-designation-territory-model';
@@ -88,6 +88,7 @@ export class FirebaseDesignationDatasourceService implements DesignationReposito
   update(designationTerritory: Designation): Observable<void> {
     const designationDocReference = doc(this.designationCollection, `${designationTerritory.id}`);
 
-    return from(setDoc(designationDocReference, designationTerritory));
+    // defer: lazy, so concat/forkJoin/retry can re-subscribe the write.
+    return defer(() => from(setDoc(designationDocReference, designationTerritory)));
   }
 }
