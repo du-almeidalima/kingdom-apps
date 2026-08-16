@@ -224,4 +224,109 @@ test.describe('Firestore Security Rules', () => {
     const updatedUser = await db.getDoc(db.collections.users, seed.ids.adminUser);
     expect(updatedUser?.['name']).toBe('Admin Name Updated');
   });
+
+  test('UC-RULES-08 — Users read matrix: self and elevated same-congregation allowed, others denied', async ({
+    seed,
+  }) => {
+    const publisherToken = await mintIdToken(seed.ids.publisherUsers[0]);
+    const organizerToken = await mintIdToken(seed.ids.organizerUser);
+
+    // Publisher reads own profile -> 200
+    expect(await readDocAs(`users/${seed.ids.publisherUsers[0]}`, publisherToken)).toBe(200);
+
+    // Publisher reads someone else -> 403
+    expect(await readDocAs(`users/${seed.ids.adminUser}`, publisherToken)).toBe(403);
+
+    // Elevated role (ORGANIZER) reads same-congregation user -> 200
+    expect(await readDocAs(`users/${seed.ids.publisherUsers[0]}`, organizerToken)).toBe(200);
+  });
+
+  test('UC-RULES-09 — Users documents can never be created client-side (403 for everyone)', async ({
+    db,
+    seed,
+  }) => {
+    const publisherToken = await mintIdToken(seed.ids.publisherUsers[0]);
+
+    // Anonymous forged create -> 403
+    expect(await createDocAs('users/anon-forged', { role: 'ADMIN' })).toBe(403);
+
+    // Authenticated forged create (role escalation attempt) -> 403
+    expect(await createDocAs('users/authed-forged', { role: 'ADMIN' }, publisherToken)).toBe(403);
+
+    expect(await db.getDoc(db.collections.users, 'anon-forged')).toBeUndefined();
+    expect(await db.getDoc(db.collections.users, 'authed-forged')).toBeUndefined();
+  });
+
+  test('UC-RULES-10 — Self-update matrix: name allowed (200), role escalation denied (403)', async ({
+    db,
+    seed,
+  }) => {
+    const publisherToken = await mintIdToken(seed.ids.publisherUsers[0]);
+
+    // Publisher updates own name -> 200
+    expect(
+      await updateDocAs(`users/${seed.ids.publisherUsers[0]}`, { name: 'Ana Souza Renomeada' }, publisherToken)
+    ).toBe(200);
+    const stored = await db.getDoc(db.collections.users, seed.ids.publisherUsers[0]);
+    expect(stored?.['name']).toBe('Ana Souza Renomeada');
+
+    // Publisher self-escalates to ADMIN -> 403
+    expect(
+      await updateDocAs(`users/${seed.ids.publisherUsers[0]}`, { role: 'ADMIN' }, publisherToken)
+    ).toBe(403);
+    const roleStored = await db.getDoc(db.collections.users, seed.ids.publisherUsers[0]);
+    expect(roleStored?.['role']).toBe('PUBLISHER');
+  });
+
+  test('UC-RULES-11 — ADMIN edit matrix: same-congregation edits allowed (200), protected targets and role grants denied (403)', async ({
+    db,
+    seed,
+  }) => {
+    const adminToken = await mintIdToken(seed.ids.adminUser);
+    const publisherToken = await mintIdToken(seed.ids.publisherUsers[0]);
+
+    // ADMIN renames a same-congregation publisher -> 200
+    expect(
+      await updateDocAs(`users/${seed.ids.publisherUsers[0]}`, { name: 'Ana Editada Pelo Admin' }, adminToken)
+    ).toBe(200);
+
+    // ADMIN touches a SUPERINTENDENT profile -> 403
+    expect(
+      await updateDocAs(`users/${seed.ids.superintendentUser}`, { name: 'Felipe Hackeado' }, adminToken)
+    ).toBe(403);
+
+    // ADMIN grants SUPERINTENDENT to a publisher -> 403
+    expect(
+      await updateDocAs(`users/${seed.ids.publisherUsers[0]}`, { role: 'SUPERINTENDENT' }, adminToken)
+    ).toBe(403);
+    const stored = await db.getDoc(db.collections.users, seed.ids.publisherUsers[0]);
+    expect(stored?.['role']).toBe('PUBLISHER');
+
+    // Publisher edits another user -> 403
+    expect(
+      await updateDocAs(`users/${seed.ids.adminUser}`, { name: 'Carlos Hackeado' }, publisherToken)
+    ).toBe(403);
+    const adminStored = await db.getDoc(db.collections.users, seed.ids.adminUser);
+    expect(adminStored?.['name']).toBe('Carlos Almeida');
+  });
+
+  test('UC-RULES-12 — Users delete matrix: ADMIN same-congregation allowed (200), protected targets and non-admins denied (403)', async ({
+    db,
+    seed,
+  }) => {
+    const adminToken = await mintIdToken(seed.ids.adminUser);
+    const publisherToken = await mintIdToken(seed.ids.publisherUsers[0]);
+
+    // ADMIN deletes a same-congregation publisher -> 200
+    expect(await deleteDocAs(`users/${seed.ids.publisherUsers[1]}`, adminToken)).toBe(200);
+    expect(await db.getDoc(db.collections.users, seed.ids.publisherUsers[1])).toBeUndefined();
+
+    // ADMIN deletes a SUPERINTENDENT -> 403
+    expect(await deleteDocAs(`users/${seed.ids.superintendentUser}`, adminToken)).toBe(403);
+    expect(await db.getDoc(db.collections.users, seed.ids.superintendentUser)).toBeDefined();
+
+    // Publisher deletes anyone -> 403
+    expect(await deleteDocAs(`users/${seed.ids.adminUser}`, publisherToken)).toBe(403);
+    expect(await db.getDoc(db.collections.users, seed.ids.adminUser)).toBeDefined();
+  });
 });

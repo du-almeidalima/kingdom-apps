@@ -49,8 +49,8 @@ release/build, browser, tester, and date with the results.
 
 - **Preconditions (seed):** valid invite as in UC-AUTH-14 with `email: 'novo.irmao@example.com'`, `role: 'ORGANIZER'`; the popup account's email must be exactly `novo.irmao@example.com` and must not already exist in `users`
 - **Steps (manual):** 1. open `/sign-in/invite-valid` → 2. click `Entrar com uma conta do Google` → 3. complete the popup with the matching account
-- **Expected UI:** `signInWithProvider(provider, true, { role: 'ORGANIZER', email: 'novo.irmao@example.com', congregation })` runs; the email check passes (compared case-insensitively on both sides); a new `users/{uid}` doc is written; the invite is consumed fire-and-forget; because the new user's role is `ORGANIZER` (not `PUBLISHER`), the page navigates to **`/home`** — a `PUBLISHER`-role invite would land on `/welcome` instead
-- **Expected persistence:** the new `users/{uid}` doc equals `{ id: <auth uid>, email: <popup email>, name: <Google display name, or 'Unidentified'>, photoUrl: <popup photo or ''>, role: 'ORGANIZER', congregation: DocumentReference('congregations/seed-congregation') }` (assert the reference via the raw snapshot); the invite doc now has `isValid: false`, `usedAt` ≈ now, `usedBy: 'novo.irmao@example.com'` (the **email**, read from `UserStateService.currentUser` at consumption time); consumption is a full-document `setDoc` overwrite (no merge) — no other invite fields change
+- **Expected UI:** `signInWithProvider(provider, true, { inviteId, role: 'ORGANIZER', email: 'novo.irmao@example.com', congregation })` runs; the client-side email check passes (compared case-insensitively on both sides); the user profile is provisioned **server-side** by the `provisionUserFromInvite` Cloud Function (client-side `users` creation is denied by the Firestore rules); the invite is consumed atomically in the same transaction; because the new user's role is `ORGANIZER` (not `PUBLISHER`), the page navigates to **`/home`** — a `PUBLISHER`-role invite would land on `/welcome` instead
+- **Expected persistence:** the callable creates `users/{uid}` with the invite's role + congregation (reference) and the auth token's email/name/photo; the invite doc gets `isValid: false`, `usedAt` ≈ now (server timestamp), `usedBy: 'novo.irmao@example.com'` via a field-level `transaction.update` — only those three fields change (no full-doc overwrite)
 - **Result:** ☐ Pass ☐ Fail
 
 ### UC-AUTH-18 — A mismatched invite email deletes the Auth account and surfaces INVALID_EMAIL
@@ -69,12 +69,12 @@ release/build, browser, tester, and date with the results.
 - **Expected persistence:** same contract as UC-AUTH-17, with the popup account's own email/name on the new doc
 - **Result:** ☐ Pass ☐ Fail
 
-### UC-AUTH-20 — An existing user redeeming an invite keeps their existing doc and role; the invite is still consumed
+### UC-AUTH-20 — An existing user redeeming an invite keeps their existing doc and role; the invite stays valid
 
 - **Preconditions (seed):** valid invite with `role: 'PUBLISHER'` and **no** email restriction; the popup account is the admin's (`carlos.almeida@example.com`, existing `ADMIN` doc)
 - **Steps (manual):** 1. open the link → 2. complete the popup with the existing account
-- **Expected UI:** `handleUserAuthentication` finds the existing doc and returns it **as-is** — the invite's role/congregation are **not** applied; the page still calls `consumeInviteLink` and navigates by the **existing** role (`ADMIN` → `/home`, not `/welcome`)
-- **Expected persistence:** the existing `users/{uid}` doc is byte-for-byte unchanged (role stays `ADMIN`); the invite doc flips to `isValid: false` with `usedAt`/`usedBy: 'carlos.almeida@example.com'`
+- **Expected UI:** `handleUserAuthentication` finds the existing doc and returns it **as-is** — the invite's role/congregation are **not** applied; the `provisionUserFromInvite` callable is never reached (the existing profile short-circuits), so the invite **stays valid**; the page navigates by the **existing** role (`ADMIN` → `/home`, not `/welcome`)
+- **Expected persistence:** the existing `users/{uid}` doc is byte-for-byte unchanged (role stays `ADMIN`); the invite doc is **untouched** (`isValid` still `true` — no `usedAt`/`usedBy`)
 - **Result:** ☐ Pass ☐ Fail
 
 ## Not verifiable without fault injection

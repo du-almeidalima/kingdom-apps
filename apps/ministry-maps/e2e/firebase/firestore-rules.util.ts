@@ -57,13 +57,11 @@ function formatFirestoreDocumentPayload(data: Record<string, unknown>): string {
 }
 
 /**
- * Mints an ID token for the given `uid` against the Auth emulator.
- *
- * 1. Generates a custom token with Admin SDK `auth.createCustomToken(uid)`.
- * 2. Exchanges the custom token for a real ID token via the Auth emulator REST endpoint.
+ * Mints an ID token for `uid` via the Auth emulator (custom token → REST exchange).
+ * `claims` surface as token claims, e.g. `{ email }` like a real Google sign-in token.
  */
-export async function mintIdToken(uid: string): Promise<string> {
-  const customToken = await auth.createCustomToken(uid);
+export async function mintIdToken(uid: string, claims?: Record<string, unknown>): Promise<string> {
+  const customToken = await auth.createCustomToken(uid, claims);
 
   const response = await fetch(AUTH_SIGN_IN_CUSTOM_TOKEN_URL, {
     method: 'POST',
@@ -137,6 +135,9 @@ export async function createDocAs(
 
 /**
  * Attempts to update an existing document at `path` via PATCH on the Firestore REST v1 API.
+ * The payload fields are sent as an update mask, mirroring the SDK's partial-update semantics:
+ * without a mask a REST PATCH is a full-document replace, so rules would evaluate
+ * `request.resource.data` as ONLY the sent fields (untouched fields look deleted).
  * Returns the HTTP response status (200 = allowed, 403 = permission denied).
  */
 export async function updateDocAs(
@@ -144,7 +145,10 @@ export async function updateDocAs(
   data: Record<string, unknown> = {},
   idToken?: string,
 ): Promise<number> {
-  const url = getDocumentUrl(path);
+  const mask = Object.keys(data)
+    .map(field => `updateMask.fieldPaths=${encodeURIComponent(field)}`)
+    .join('&');
+  const url = `${getDocumentUrl(path)}?${mask}`;
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };

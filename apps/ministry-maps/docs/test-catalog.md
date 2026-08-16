@@ -201,7 +201,7 @@ Suggested spec files are proposals — keep one feature area per file and mirror
 | UC-USERS-06 | APP_ADMIN edit persists                               | App Admin | P1  | ✅ `users.spec.ts`             | `users.spec.ts`         | `UserEditDialog`     | app-admin identity            | HX-1                       |
 | UC-USERS-07 | Editing own account not special-cased                 | Admin     | P2  | ✅ `users.spec.ts`             | `users.spec.ts`         | `UserEditDialog`     | —                             | —                          |
 | UC-USERS-08 | Delete confirm + doc removal                          | Admin     | P0  | ✅ `users.spec.ts`             | `users.spec.ts`         | `ConfirmDialog`      | —                             | testid                     |
-| UC-USERS-09 | ⚠ Auth account survives deletion                     | Admin     | P0  | ✅ `users.spec.ts`             | `users.spec.ts`         | `ConfirmDialog`      | —                             | ⚠                         |
+| UC-USERS-09 | Delete also removes Auth account (callable)          | Admin     | P0  | ✅ `users.spec.ts`             | `users.spec.ts`         | `ConfirmDialog`      | —                             | functions emulator         |
 | UC-USERS-10 | Invite FAB is ADMIN-only                              | Admin     | P0  | ✅ `users-invites.spec.ts`     | `users-invites.spec.ts` | `UsersPage`          | —                             | title selector             |
 | UC-USERS-11 | Create invite (defaults; reference congregation)      | Admin     | P0  | ✅ `users-invites.spec.ts`     | `users-invites.spec.ts` | `InviteCreateDialog` | read `invitation_links` raw   | HX-2 (for factory), testid |
 | UC-USERS-12 | No-congregation guard (unreachable)                   | —         | P2  | —                              | unit-only               | —                    | —                             | not E2E-reachable          |
@@ -210,6 +210,12 @@ Suggested spec files are proposals — keep one feature area per file and mirror
 | UC-USERS-15 | ORGANIZER/ELDER: list only                            | Organizer | P1  | ✅ `users.spec.ts`             | `users.spec.ts`         | `UsersPage`          | organizer/elder identity      | HX-1                       |
 | UC-USERS-16 | Publisher → `/welcome`                                | Publisher | P0  | ✅ `auth.spec.ts` (matrix leg) | `users.spec.ts`         | —                    | —                             | (dup. of UC-AUTH-12 leg)   |
 | UC-USERS-17 | Anonymous → `/login`                                  | Anonymous | P0  | ✅ `auth.spec.ts` (matrix leg) | `users.spec.ts`         | —                    | —                             | (dup. of UC-AUTH-11 leg)   |
+| UC-USERS-18 | `provisionUserFromInvite`: valid invite provisions + consumes atomically | Invitee | P0 | ✅ `provision-user.spec.ts` | `provision-user.spec.ts` | — | invite + auth user, minted token w/ email claim | functions emulator |
+| UC-USERS-19 | Callable idempotent on re-login (invite untouched)    | Invitee   | P0  | ✅ `provision-user.spec.ts`   | `provision-user.spec.ts` | —                    | idem                          | —                          |
+| UC-USERS-20 | Consumed invite cannot provision another caller       | Attacker  | P0  | ✅ `provision-user.spec.ts`   | `provision-user.spec.ts` | —                    | idem + 2nd auth user          | —                          |
+| UC-USERS-21 | Email-pinned invite rejects different email           | Attacker  | P0  | ✅ `provision-user.spec.ts`   | `provision-user.spec.ts` | —                    | idem                          | —                          |
+| UC-USERS-22 | Unauthenticated callable call rejected                | Anonymous | P0  | ✅ `provision-user.spec.ts`   | `provision-user.spec.ts` | —                    | —                             | —                          |
+| UC-USERS-23 | Invite can never grant APP_ADMIN                      | Admin     | P0  | ✅ `provision-user.spec.ts`   | `provision-user.spec.ts` | —                    | APP_ADMIN invite              | —                          |
 
 ## UC-PROF — profile → [`features/profile.md`](./features/profile.md)
 
@@ -262,6 +268,11 @@ Suggested spec files are proposals — keep one feature area per file and mirror
 | UC-RULES-05 | Territory write matrix: anonymous update allowed (200), create/delete denied (403)| Anonymous             | P0  | ✅ `firestore-rules.spec.ts` | `firestore-rules.spec.ts` | —           | —            | —        |
 | UC-RULES-06 | Territory history write matrix: anonymous create, update, delete allowed (200)    | Anonymous            | P0  | ✅ `firestore-rules.spec.ts` | `firestore-rules.spec.ts` | —           | history doc  | —        |
 | UC-RULES-07 | Authenticated user can read and write non-public collections (200 allowed)        | Admin                 | P0  | ✅ `firestore-rules.spec.ts` | `firestore-rules.spec.ts` | —           | —            | —        |
+| UC-RULES-08 | Users read matrix: self + elevated same-congregation (200), others 403             | Publisher, Organizer  | P0  | ✅ `firestore-rules.spec.ts` | `firestore-rules.spec.ts` | —           | —            | —        |
+| UC-RULES-09 | Users docs can never be created client-side (403 for everyone)                    | Anonymous, Publisher  | P0  | ✅ `firestore-rules.spec.ts` | `firestore-rules.spec.ts` | —           | —            | —        |
+| UC-RULES-10 | Users self-update: name 200, role escalation 403                                   | Publisher             | P0  | ✅ `firestore-rules.spec.ts` | `firestore-rules.spec.ts` | —           | —            | —        |
+| UC-RULES-11 | Users ADMIN edit matrix: same-congregation 200, protected targets/role grants 403  | Admin                 | P0  | ✅ `firestore-rules.spec.ts` | `firestore-rules.spec.ts` | —           | —            | —        |
+| UC-RULES-12 | Users delete matrix: ADMIN same-congregation 200, protected targets/non-admins 403 | Admin, Publisher      | P0  | ✅ `firestore-rules.spec.ts` | `firestore-rules.spec.ts` | —           | —            | —        |
 
 ## Journeys → [`journeys/`](./journeys/README.md)
 
@@ -328,15 +339,15 @@ The planning prerequisites are retained here for traceability. HX-1, HX-2, HX-3,
 | UC-ASSIGN | 24      | 12     | 7      | 5      | 23 ✅      | 1 HX-4                      |
 | UC-STAT   | 19      | 5      | 10     | 4      | 19 ✅      | —                           |
 | UC-WORK   | 24      | 8      | 13     | 3      | 24 ✅      | —                           |
-| UC-USERS  | 17      | 9      | 5      | 3      | 16 ✅      | 1 unit-only                 |
+| UC-USERS  | 23      | 15     | 5      | 3      | 22 ✅      | 1 unit-only                 |
 | UC-PROF   | 10      | 2      | 6      | 2      | 10 ✅      | —                           |
 | UC-CFG    | 13      | 7      | 6      | 0      | 13 ✅      | —                           |
 | UC-TTL    | 2       | 1      | 1      | 0      | 2 ✅       | —                           |
-| UC-RULES  | 7       | 7      | 0      | 0      | 7 ✅       | —                           |
+| UC-RULES  | 12      | 12     | 0      | 0      | 12 ✅      | —                           |
 | Journeys  | 9       | 4      | 5      | 0      | 9 ✅       | —                           |
-| **Total** | **199** | **83** | **86** | **30** | **188 ✅** | **11**                      |
+| **Total** | **205** | **89** | **86** | **30** | **194 ✅** | **11**                      |
 
-Coverage arithmetic: 179 of 190 UC rows plus all 9 journeys are covered. The 11 exceptions are exactly the eight manual OAuth-popup rows, `UC-AUTH-21` and `UC-ASSIGN-21` (HX-4 deferred), and `UC-USERS-12` (unit-only). `UC-PROF-07` is an explicitly accepted `test.fixme` and remains covered; redirect duplicates are owned once by the matrices in `auth.spec.ts`.
+Coverage arithmetic: 190 of 201 UC rows plus all 9 journeys are covered. The 11 exceptions are exactly the eight manual OAuth-popup rows, `UC-AUTH-21` and `UC-ASSIGN-21` (HX-4 deferred), and `UC-USERS-12` (unit-only). `UC-PROF-07` is an explicitly accepted `test.fixme` and remains covered; redirect duplicates are owned once by the matrices in `auth.spec.ts`.
 
 ## Sources
 
