@@ -35,6 +35,7 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
 
   private readonly userCollection: CollectionReference<User, FirebaseUserModel>;
   private readonly deleteUserFn: (userId: string) => Observable<void>;
+  private readonly provisionFromInviteFn: (data: { inviteId: string }) => Observable<unknown>;
   private readonly loggerService = inject(LoggerService);
 
   private readonly firestore = inject(Firestore);
@@ -50,6 +51,7 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
 
     // FUNCTIONS
     this.deleteUserFn = httpsCallableData(this.functions, 'deleteUser');
+    this.provisionFromInviteFn = httpsCallableData(this.functions, 'provisionUserFromInvite');
   }
 
   createDocumentRef(id: string): DocumentReference<User> {
@@ -127,6 +129,14 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
     );
   }
 
+  /**
+   * Creates the caller's profile via the `provisionUserFromInvite` Cloud Function — the only
+   * path allowed to create `users` documents. Validates and consumes the invite atomically.
+   */
+  provisionFromInvite(inviteId: string, uid: string): Observable<User | undefined> {
+    return this.provisionFromInviteFn({ inviteId }).pipe(switchMap(() => this.getById(uid)));
+  }
+
   put(partialUser: FirebaseUserModel): Observable<User> {
     const user: FirebaseUserModel = {
       ...partialUser,
@@ -168,14 +178,16 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
   }
 
   delete(userId: string): Observable<void> {
-    const deletePromise = deleteDoc(doc(this.userCollection, userId));
-    try {
-      this.deleteUserFn(userId);
-    } catch (e) {
-      console.error(`Error calling deleteUserFn Cloud Function for ${userId}`);
-    }
-
-    return from(deletePromise);
+    // The callable authorizes against the user doc, so it must run before the doc is deleted.
+    // It is a cold observable — without a subscription it never executes at all.
+    return this.deleteUserFn(userId).pipe(
+      catchError(err => {
+        this.loggerService.error(`Error calling deleteUserFn Cloud Function for ${userId}`, err);
+        return of(undefined);
+      }),
+      switchMap(() => from(deleteDoc(doc(this.userCollection, userId)))),
+      map(() => undefined)
+    );
   }
 
   getAllByCongregation(congregationId: string): Observable<User[]> {

@@ -78,7 +78,9 @@ export class UsersPageComponent implements OnInit {
       })
       .closed.subscribe(res => {
         if (res) {
-          this.userRepository.delete(userId);
+          this.userRepository.delete(userId).subscribe({
+            error: err => console.error(`Error deleting user ${userId}`, err),
+          });
         }
       });
   }

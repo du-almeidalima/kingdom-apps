@@ -130,30 +130,23 @@ describe('FirebaseAuthService', () => {
     });
   });
 
-  it(`should create user if doesn't exists`, (done) => {
+  it(`should provision user from invite if doesn't exists`, (done) => {
     const userRepository = ngMocks.get(FirebaseUserDatasourceService);
     userRepository.getById = jest.fn().mockReturnValue(of(undefined));
-    userRepository.put = jest.fn().mockImplementation((user) => of(user));
+    userRepository.provisionFromInvite = jest.fn().mockReturnValue(of(MOCK_USER));
 
     // From InvitationLink
     const createUserConfig: CreateUserConfig = {
+      inviteId: 'invite123',
       role: RoleEnum.PUBLISHER,
       congregation: elderUser.congregation!,
     };
 
     service.signInWithProvider(FIREBASE_PROVIDERS.GOOGLE, true, createUserConfig).subscribe((userRes) => {
-      const expectUser = {
-        id: MOCK_USER.id,
-        name: MOCK_USER.name,
-        email: MOCK_USER.email,
-        photoUrl: MOCK_USER.photoUrl,
-        role: RoleEnum.PUBLISHER,
-        congregation: expect.objectContaining({ path: `/congregations/${createUserConfig.congregation.id}` }),
-      };
-
       expect(userRepository.getById).toHaveBeenCalledWith(MOCK_USER.id);
-      expect(userRepository.put).toHaveBeenCalledWith(expect.objectContaining(expectUser));
-      expect(userRes).toEqual(expect.objectContaining(expectUser));
+      // Provisioning happens exclusively server-side via the callable.
+      expect(userRepository.provisionFromInvite).toHaveBeenCalledWith('invite123', MOCK_USER.id);
+      expect(userRes).toEqual(expect.objectContaining(MOCK_USER));
 
       done();
     });
@@ -166,7 +159,7 @@ describe('FirebaseAuthService', () => {
     service.signInWithProvider(FIREBASE_PROVIDERS.GOOGLE, false).subscribe((_) => {
       expect(userRepository.getById).toHaveBeenCalledWith(MOCK_USER.id);
       expect(MOCK_AUTH_RES.user.delete).toHaveBeenCalled();
-      expect(userRepository.put).not.toHaveBeenCalled();
+      expect(userRepository.provisionFromInvite).not.toHaveBeenCalled();
 
       done();
     });
@@ -178,6 +171,7 @@ describe('FirebaseAuthService', () => {
 
     // From InvitationLink
     const createUserConfig: CreateUserConfig = {
+      inviteId: 'invite123',
       role: RoleEnum.PUBLISHER,
       congregation: elderUser.congregation!,
       email: 'different.email@test.com',
@@ -192,7 +186,7 @@ describe('FirebaseAuthService', () => {
           // Make assertions that should happen before the error
           expect(userRepository.getById).toHaveBeenCalledWith(MOCK_USER.id);
           expect(MOCK_AUTH_RES.user.delete).toHaveBeenCalled();
-          expect(userRepository.put).not.toHaveBeenCalled();
+          expect(userRepository.provisionFromInvite).not.toHaveBeenCalled();
 
           return EMPTY;
         }),

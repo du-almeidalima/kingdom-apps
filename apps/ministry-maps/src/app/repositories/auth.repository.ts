@@ -11,6 +11,8 @@ export enum AuthErrorEnum {
 
 /** Configuration and values for the user that's being created. Usually from the {@link InvitationLink}. */
 export type CreateUserConfig = {
+  /** Id of the invitation link that authorizes the user provisioning. */
+  inviteId: string;
   email?: string;
   role: RoleEnum;
   congregation: Congregation;

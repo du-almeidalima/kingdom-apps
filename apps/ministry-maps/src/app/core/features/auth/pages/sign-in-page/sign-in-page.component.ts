@@ -9,7 +9,6 @@ import { AuthRoutesEnum } from '../../models/enums/auth-routes';
 import { InvitationLinkRepository } from '../../../../../repositories/invitation-link.repository';
 import { InvitationLink } from '../../../../../../models/invitation-link';
 import { AuthErrorEnum, CreateUserConfig } from '../../../../../repositories/auth.repository';
-import { InviteBO } from '../../../../../features/users/bo/invite/invite-bo.service';
 import { CardComponent } from '@kingdom-apps/common-ui';
 import { NgOptimizedImage } from '@angular/common';
 import { ProviderLoginButtonComponent } from '../../components/provider-login-button.component';
@@ -32,8 +31,7 @@ export class SignInPageComponent implements OnInit {
   constructor(
     private readonly authService: AuthService,
     private readonly router: Router,
-    private readonly route: ActivatedRoute,
-    private readonly inviteBO: InviteBO
+    private readonly route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -67,6 +65,7 @@ export class SignInPageComponent implements OnInit {
     }
 
     const userConfig: CreateUserConfig = {
+      inviteId: this.invite.id,
       role: this.invite.role,
       email: this.invite.email,
       congregation: this.invite.congregation,
@@ -93,8 +92,7 @@ export class SignInPageComponent implements OnInit {
           return;
         }
 
-        // We don't need the response of this operation, it's a fire and forget call to consume th e link
-        this.inviteBO.consumeInviteLink(this.invite).subscribe();
+        // The invite is consumed atomically by the provisionUserFromInvite callable.
 
         if (user.role === RoleEnum.PUBLISHER) {
           this.router.navigate([AuthRoutesEnum.WELCOME]);
