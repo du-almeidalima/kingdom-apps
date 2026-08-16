@@ -28,13 +28,12 @@ import { IconComponent } from '../icon/icon.component';
         id="search-icon"
         aria-label="Pesquisar Território"
         (click)="searchControlTemplate.focus()"
-        [fillColor]="black"
+        fillColor="currentColor"
       />
     </div>
   `,
 })
 export class SearchInputComponent implements OnInit, OnDestroy {
-  black = grey400;
   searchControl = new FormControl('');
   searchControlSubscription?: Subscription;
 

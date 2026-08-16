@@ -134,10 +134,10 @@ import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
   imports: [FormsModule, NgClass, IconComponent, DatePipe, IconButtonComponent, VisitOutcomeToIconPipe],
 })
 export class TerritoryCheckboxComponent implements ControlValueAccessor, OnInit {
-  protected readonly iconColor = grey400;
+  protected readonly iconColor = 'currentColor';
   protected readonly VisitOutcomeEnum = VisitOutcomeEnum;
 
-  buttonIconColor = primaryGreen;
+  buttonIconColor = 'var(--kui-color-action-primary)';
   hasRecentRevisit = false;
   hasRecentlyMoved = false;
   hasRecentlyAskedToStopVisiting = false;

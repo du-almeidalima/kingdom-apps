@@ -98,12 +98,12 @@ import { NgClass } from '@angular/common';
 })
 export class WorkItemComponent implements OnInit {
   protected readonly DesignationStatusEnum = DesignationStatusEnum;
-  protected readonly whiteButtonColor = white200;
-  protected readonly disabledButtonBackgroundColor = grey200;
-  protected readonly disabledColor = disabled;
-  protected readonly disabledLight = disabledLight;
-  protected readonly buttonIconColor = primaryGreen;
-  protected readonly iconColor = grey400;
+  protected readonly whiteButtonColor = 'currentColor';
+  protected readonly disabledButtonBackgroundColor = 'transparent';
+  protected readonly disabledColor = 'var(--kui-color-text-disabled)';
+  protected readonly disabledLight = 'var(--kui-color-text-disabled)';
+  protected readonly buttonIconColor = 'var(--kui-color-action-primary)';
+  protected readonly iconColor = 'currentColor';
 
   public icon: Icons = 'generation-3';
   public isIconLarge = false;

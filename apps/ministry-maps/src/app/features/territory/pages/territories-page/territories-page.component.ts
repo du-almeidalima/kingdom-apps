@@ -80,7 +80,7 @@ export class TerritoriesPageComponent implements OnInit {
 
   protected readonly green200 = green200;
   protected readonly white200 = white200;
-  protected readonly greyButtonColor = grey400;
+  protected readonly greyButtonColor = 'currentColor';
   protected readonly disabledLight = disabledLight;
   protected readonly RoleEnum = RoleEnum;
   protected readonly ALL_OPTION = ALL_OPTION;

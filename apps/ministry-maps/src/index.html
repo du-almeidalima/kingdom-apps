@@ -2,7 +2,39 @@
 <html lang="pt-br" translate="no">
 <head>
   <meta charset="utf-8" />
-  <meta name="theme-color" content="#45C06C" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" data-mm-theme-color content="#E7E6E4" />
+  <script>
+    (() => {
+      try {
+        const storageKey = 'ministry-maps.theme-preference';
+        let pref = 'system';
+        try {
+          const stored = localStorage.getItem(storageKey);
+          if (stored === 'system' || stored === 'light' || stored === 'dark') {
+            pref = stored;
+          }
+        } catch {}
+
+        let isDark = false;
+        try {
+          isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        } catch {}
+
+        const resolved = pref === 'dark' || (pref === 'system' && isDark) ? 'dark' : 'light';
+
+        const docEl = document.documentElement;
+        docEl.setAttribute('data-theme', pref);
+        docEl.setAttribute('data-resolved-theme', resolved);
+        docEl.style.colorScheme = resolved;
+
+        const meta = document.querySelector('meta[name="theme-color"][data-mm-theme-color]');
+        if (meta) {
+          meta.content = resolved === 'dark' ? '#121212' : '#E7E6E4';
+        }
+      } catch {}
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
   <meta name="google" content="notranslate">
   <meta name="description" lang="en" content="Ministry Maps (MM) Web Application to help with the ministry work of the Jehovah Witnesses">

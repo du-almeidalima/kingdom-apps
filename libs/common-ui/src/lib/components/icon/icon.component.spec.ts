@@ -19,6 +19,11 @@ describe('IconComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('should default fillColor to currentColor on instance', () => {
+    const instance = new IconComponent();
+    expect(instance.fillColor).toBe('currentColor');
+  });
+
   it('should set icon input property', () => {
     const testIcon = 'check-mark-circle-thin';
     component.icon = testIcon;

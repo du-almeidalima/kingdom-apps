@@ -38,30 +38,30 @@
 }
 
 :where(.t-headline1, .t-headline2, .t-headline3, .t-headline4, .t-body1, .t-body2) {
-  color: variables.$text;
+  color: var(--kui-color-text, #{variables.$text});
 }
 
 :where(.t-caption) {
-  color: variables.$text-medium;
+  color: var(--kui-color-text-muted, #{variables.$text-medium});
 }
 
 // MODIFIERS
 .t-medium-emphasis {
-  color: variables.$text-medium;
+  color: var(--kui-color-text-muted, #{variables.$text-medium});
 }
 
 .t-low-emphasis {
-  color: variables.$text-low;
+  color: var(--kui-color-text-disabled, #{variables.$text-low});
 }
 
 .t-primary {
-  color: variables.$text-primary;
+  color: var(--kui-color-action-primary, #{variables.$text-primary});
 }
 
 .t-secondary {
-  color: variables.$text-secondary;
+  color: var(--kui-color-text-muted, #{variables.$text-secondary});
 }
 
 .t-white {
-  color: variables.$white-100;
+  color: var(--kui-color-on-inverse, #{variables.$white-100});
 }

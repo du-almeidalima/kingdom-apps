@@ -7,8 +7,8 @@
   gap: 2rem;
   min-height: 10rem;
 
-  background-color: variables.$grey-200;
-  color: variables.$white-200;
+  background-color: var(--kui-color-surface-inverse, #{variables.$grey-200});
+  color: var(--kui-color-on-inverse, #{variables.$white-200});
 
   &__icon-container {
     flex: 0 10rem;
@@ -16,7 +16,9 @@
     justify-content: center;
     align-items: center;
 
-    background-color: variables.$grey-100;
+    background-color: var(--kui-color-surface-inverse, #{variables.$grey-100});
+    color: var(--kui-color-on-inverse, #{variables.$white-200});
+    filter: brightness(115%);
   }
 
   &__icon {
@@ -24,6 +26,7 @@
 
     width: $size;
     height: $size;
+    color: var(--kui-color-on-inverse, #{variables.$white-200});
   }
 
   &__title-container {
@@ -38,10 +41,12 @@
   &__title {
     @extend .t-headline4;
     font-weight: bold;
+    color: var(--kui-color-on-inverse, #{variables.$white-100});
   }
 
   &__subtitle {
     @extend .t-body2;
-    color: variables.$white-300;
+    color: var(--kui-color-on-inverse, #{variables.$white-300});
+    opacity: 0.85;
   }
 }

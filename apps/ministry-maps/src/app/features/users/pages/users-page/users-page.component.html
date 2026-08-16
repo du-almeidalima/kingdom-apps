@@ -13,8 +13,8 @@
 
   <button *libAuthorize="CREATE_INVITE_LINK_ALLOWED"
           lib-floating-action-button title='Criar Link de Convite'
-          [backgroundColor]='green200'
+          data-testid="users-add-button"
           (click)='handleCreateInviteLink()'>
-    <lib-icon icon='plus-lined' [fillColor]='white200' />
+    <lib-icon icon='plus-lined' />
   </button>
 </main>

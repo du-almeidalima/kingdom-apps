@@ -71,13 +71,14 @@
               cdkDragHandle
               data-testid="territory-item-drag-handle"
               [cdkDragHandleDisabled]="sortBy !== TerritoriesOrderBy.SAVED_INDEX"
+              [disabled]="sortBy !== TerritoriesOrderBy.SAVED_INDEX"
               type='button'
               style='cursor: grab'
               [title]="sortBy === TerritoriesOrderBy.SAVED_INDEX ? '' : 'Para ordernar manualmente, use a ordenação Ordem de Cadastro'"
             >
               <lib-icon
                 icon='cursor-23'
-                [fillColor]='sortBy === TerritoriesOrderBy.SAVED_INDEX ? greyButtonColor : disabledLight'
+                fillColor='currentColor'
               />
             </button>
           }
@@ -88,8 +89,7 @@
 
   <button lib-floating-action-button title='Adicionar Território'
           data-testid="territories-add-button"
-          [backgroundColor]='green200'
           (click)='handleOpenManageTerritoryDialog()'>
-    <lib-icon icon='plus-lined' [fillColor]='white200'></lib-icon>
+    <lib-icon icon='plus-lined'></lib-icon>
   </button>
 </div>

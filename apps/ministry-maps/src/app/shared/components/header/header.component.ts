@@ -3,8 +3,6 @@ import {
   HeaderComponent as LibHeaderComponent,
   IconButtonComponent,
   IconComponent,
-  primaryGreen,
-  white100,
 } from '@kingdom-apps/common-ui';
 import { FeatureRoutesEnum } from '../../../app-routes';
 import { UserStateService } from '../../../state/user.state.service';
@@ -14,7 +12,11 @@ import { RouterLink } from '@angular/router';
   selector: 'kingdom-apps-header',
   styleUrls: ['./header.component.scss'],
   template: `
-    <lib-header [logoBackgroundColor]="headerLogoBackgroundColor" initials="MM" [headerLink]="FeatureRoutes.HOME">
+    <lib-header
+      [backgroundColorVar]="headerBackgroundColor"
+      [logoBackgroundColor]="headerLogoBackgroundColor"
+      initials="MM"
+      [headerLink]="FeatureRoutes.HOME">
       <div class="header-container" data-testid="header-nav">
         <p class="header-container__app-name">Ministry Maps</p>
         @if (userStateService.isLoggedIn) {
@@ -34,8 +36,9 @@ import { RouterLink } from '@angular/router';
 })
 export class HeaderComponent {
   public readonly FeatureRoutes = FeatureRoutesEnum;
-  public readonly headerLogoBackgroundColor = primaryGreen;
-  public readonly userIconColor = white100;
+  public readonly headerBackgroundColor = 'var(--mm-color-shell-header)';
+  public readonly headerLogoBackgroundColor = 'var(--mm-color-shell-header-logo-bg)';
+  public readonly userIconColor = 'currentColor';
 
   userStateService = inject(UserStateService);
 }

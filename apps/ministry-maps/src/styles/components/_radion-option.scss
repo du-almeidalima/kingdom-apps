@@ -8,12 +8,12 @@
 
   &__title {
     @extend .t-body1;
-    color: variables.$text;
+    color: var(--kui-color-text, #{variables.$text});
   }
 
   &__description {
     @extend .t-caption;
-    color: variables.$text-medium;
+    color: var(--kui-color-text-muted, #{variables.$text-medium});
   }
 }
 

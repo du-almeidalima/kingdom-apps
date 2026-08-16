@@ -1,5 +1,6 @@
 import { ApplicationConfig, isDevMode, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { provideTheme } from '@kingdom-apps/common-ui';
 import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import {
   connectAuthEmulator,
@@ -23,6 +24,11 @@ import { REPOSITORIES_PROVIDERS } from './repositories/repositories-providers';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideTheme({
+      storageKey: 'ministry-maps.theme-preference',
+      metaColors: { light: '#E7E6E4', dark: '#121212' },
+      metaSelector: 'meta[name="theme-color"][data-mm-theme-color]',
+    }),
     ...REPOSITORIES_PROVIDERS,
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(APP_ROUTES),

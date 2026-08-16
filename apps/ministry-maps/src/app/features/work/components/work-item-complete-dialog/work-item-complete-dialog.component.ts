@@ -119,7 +119,7 @@ type WorkItemCompleteForm = ControlsOf<WorkItemCompleteDialogData>;
 })
 export class WorkItemCompleteDialogComponent implements OnInit {
   public readonly VisitOutcome = VisitOutcomeEnum;
-  public readonly iconColor = grey400;
+  public readonly iconColor = 'currentColor';
   isEdit = false;
   // Not sure if tracking this manually is the best approach, it doesn't seem Angular offers a solutions that doesn't call a function for this.
   isNameRequired = false;

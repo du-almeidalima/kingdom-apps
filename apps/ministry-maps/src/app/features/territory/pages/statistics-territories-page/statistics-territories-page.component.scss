@@ -14,17 +14,19 @@
   grid-template-rows: repeat(2, 1fr);
   grid-column-gap: 0px;
   grid-row-gap: 2px;
-  background-color: white;
-  border: 1px solid #BAB7B5;
-  color: #868686;
+  background-color: var(--kui-color-surface, #{variables.$white-100});
+  border: 1px solid var(--kui-color-border, #{variables.$light-grey-100});
+  color: var(--kui-color-text-muted, #{variables.$text-medium});
+  border-radius: 6px;
+  box-shadow: var(--kui-shadow-surface, #{variables.$shadow-z1});
   font-size: medium;
-}
 
-.statistics-item span{
-  font-weight: bolder;
-  font-style: italic;
-  font-size: larger;
-  color: variables.$text-primary;
+  span {
+    font-weight: bolder;
+    font-style: italic;
+    font-size: larger;
+    color: var(--kui-color-action-primary, #{variables.$primary-green});
+  }
 }
 
 .select-period {

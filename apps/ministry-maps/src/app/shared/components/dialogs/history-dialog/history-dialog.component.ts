@@ -5,7 +5,6 @@ import {
   ButtonComponent,
   DialogComponent,
   DialogFooterComponent,
-  grey400,
   IconComponent,
 } from '@kingdom-apps/common-ui';
 
@@ -59,7 +58,7 @@ import { DatePipe, SlicePipe } from '@angular/common';
   imports: [VisitOutcomeToIconPipe, IconComponent, DialogComponent, DialogFooterComponent, DatePipe, SlicePipe, ButtonComponent],
 })
 export class HistoryDialogComponent {
-  public iconColor = grey400;
+  public iconColor = 'currentColor';
 
   constructor(
     private readonly dialogRef: DialogRef,

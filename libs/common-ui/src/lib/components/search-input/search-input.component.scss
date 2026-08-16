@@ -18,12 +18,13 @@
   width: 100%;
   padding: 0;
 
-  background-color: #FFFFFF;
+  background-color: var(--kui-color-surface-elevated, #FFFFFF);
+  color: var(--kui-color-text, #{variables.$text});
 
-  // Browser default focus styles
   &:focus-within {
-    outline: 5px auto Highlight;
-    outline: 5px auto -webkit-focus-ring-color;
+    outline: 2px solid var(--kui-color-focus, #2563eb);
+    outline-offset: 1px;
+    border-color: var(--kui-color-focus, #2563eb);
   }
 
   .search-input__icon {
@@ -31,6 +32,7 @@
 
     width: 1.5 * $size;
     height: $size;
+    color: var(--kui-color-text-muted, #{variables.$text-medium});
   }
 
   .search-input__input {
@@ -44,12 +46,17 @@
     border: none;
 
     background-color: transparent;
+    color: var(--kui-color-text, #{variables.$text});
 
     &::-webkit-search-decoration,
     &::-webkit-search-cancel-button,
     &::-webkit-search-results-button,
     &::-webkit-search-results-decoration {
       -webkit-appearance: none;
+    }
+
+    &::placeholder {
+      color: var(--kui-color-placeholder, rgba(0, 0, 0, 0.54));
     }
 
     &:focus {

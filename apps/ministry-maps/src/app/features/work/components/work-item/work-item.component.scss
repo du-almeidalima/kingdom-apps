@@ -16,6 +16,9 @@
   display: flex;
 
   min-height: 10rem;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--kui-color-border, #{variables.$light-grey-100});
 
   &__content-container {
     flex: $flex-container;
@@ -27,7 +30,8 @@
 
     padding: 1rem .5rem .5rem 1.5rem;
 
-    background-color: variables.$white-100;
+    background-color: var(--kui-color-surface-elevated, #{variables.$white-100});
+    color: var(--kui-color-text, #{variables.$text});
   }
 
   &__checkbox-container {
@@ -37,11 +41,18 @@
     justify-content: center;
     align-items: center;
 
-    background-color: variables.$primary-green;
+    background-color: var(--mm-color-work-state-pending-bg, var(--kui-color-action-primary, #{variables.$primary-green}));
+    color: var(--mm-color-work-state-pending-fg, var(--kui-color-on-action-primary, #{variables.$white-100}));
     cursor: pointer;
 
+    &--completed {
+      background-color: var(--mm-color-work-state-completed-bg, var(--kui-color-success-surface));
+      color: var(--mm-color-work-state-completed-fg, var(--kui-color-on-success));
+    }
+
     &--disabled {
-      background-color: variables.$grey-100;
+      background-color: var(--kui-color-control-disabled, #{variables.$grey-100});
+      color: var(--kui-color-text-disabled, #{variables.$text-low});
       cursor: initial;
     }
   }
@@ -54,6 +65,7 @@
     border-radius: 50%;
 
     cursor: inherit;
+    color: inherit;
   }
 
   &__icon {
@@ -62,6 +74,7 @@
 
     height: $size;
     width: $size;
+    color: var(--kui-color-text, #{variables.$text});
 
     &--large {
       height: $large-size;
@@ -70,7 +83,6 @@
   }
 
   &__list-tile {
-
     display: flex;
     flex-flow: row nowrap;
     align-items: center;
@@ -88,10 +100,12 @@
   &__title {
     @extend .t-body2;
     font-weight: 500;
+    color: var(--kui-color-text, #{variables.$text});
   }
 
   &__subtitle {
     @extend .t-caption;
+    color: var(--kui-color-text-muted, #{variables.$text-medium});
   }
 
   &__footer {
@@ -106,7 +120,7 @@
 
     // This margin makes the text align with the buttons due to their "invisible" padding
     margin-bottom: variables.$icon-button-padding;
-    color: variables.$grey-100;
+    color: var(--kui-color-text-muted, #{variables.$grey-100});
   }
 
   &__buttons-container {

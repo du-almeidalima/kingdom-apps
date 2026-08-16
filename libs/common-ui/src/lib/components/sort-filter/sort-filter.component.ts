@@ -37,7 +37,7 @@ import { grey400 } from '../../styles/abstract/variables';
 export class SortFilterComponent implements OnInit {
   private readonly dialog = inject(Dialog);
 
-  protected iconColor = signal(grey400);
+  protected iconColor = signal('currentColor');
 
   private currentValue = signal<SortFilterValue>({
     sort: undefined,

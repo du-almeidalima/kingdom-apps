@@ -31,5 +31,5 @@ import { grey400, IconComponent } from '@kingdom-apps/common-ui';
   styleUrls: ['./designation-not-found.component.scss'],
 })
 export class DesignationNotFoundComponent {
-  protected readonly iconColor = grey400;
+  protected readonly iconColor = 'currentColor';
 }

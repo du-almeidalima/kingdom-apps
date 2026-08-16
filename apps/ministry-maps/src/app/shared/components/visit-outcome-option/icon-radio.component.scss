@@ -15,11 +15,13 @@ kingdom-apps-icon-radio {
   min-height: 5rem;
 
   cursor: pointer;
-  background-color: variables.$white-200;
+  background-color: var(--kui-color-surface-elevated, #{variables.$white-200});
+  color: var(--kui-color-text, #{variables.$text});
+  border: 1px solid var(--kui-color-border-strong, #{variables.$grey-100});
 
   // Active state
-  &:is(:hover,:focus), &--active {
-    color: variables.$link;
+  &:is(:hover, :focus-visible), &--active {
+    color: var(--kui-color-action-primary, #{variables.$link});
     border-color: currentColor;
 
     svg.icon {
@@ -27,11 +29,17 @@ kingdom-apps-icon-radio {
     }
   }
 
+  &:focus-visible {
+    outline: 2px solid var(--kui-color-focus, #2563eb);
+    outline-offset: 2px;
+  }
+
   &__icon {
     $size: 2rem;
 
     height: $size;
     width: $size;
+    color: inherit;
 
     svg.icon {
       transition: fill .2s ease-in-out;

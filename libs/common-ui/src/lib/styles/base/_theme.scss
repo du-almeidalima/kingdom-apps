@@ -1,0 +1,128 @@
+@mixin light-theme-tokens {
+  // Canvas, surfaces, and shadows
+  --kui-color-canvas: #E7E6E4;
+  --kui-color-surface: #F8F8F8;
+  --kui-color-surface-elevated: #FDFDFD;
+  --kui-color-surface-muted: #D1D0CE;
+  --kui-color-surface-hover: #E7E6E4;
+  --kui-color-surface-selected: #DCE8F7;
+  --kui-color-surface-inverse: #4D4947;
+  --kui-shadow-surface: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --kui-shadow-dialog: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
+
+  // Text, icon, border, and focus
+  --kui-color-text: rgba(0, 0, 0, 0.87);
+  --kui-color-text-muted: rgba(0, 0, 0, 0.60);
+  --kui-color-text-disabled: rgba(0, 0, 0, 0.38);
+  --kui-color-placeholder: rgba(0, 0, 0, 0.54);
+  --kui-color-on-inverse: #FDFDFD;
+  --kui-color-border: #BAB7B5;
+  --kui-color-border-strong: #615D5C;
+  --kui-color-focus: #07AB3B;
+  --kui-color-backdrop: rgba(0, 0, 0, 0.48);
+  --kui-color-control-disabled: #D1D0CE;
+  --kui-color-control-autofill: #E8F0FE;
+
+  // Actions and links
+  --kui-color-action-primary: #07AB3B;
+  --kui-color-action-primary-hover: #059032;
+  --kui-color-action-primary-active: #047829;
+  --kui-color-on-action-primary: #FDFDFD;
+  --kui-color-link: #4171AE;
+  --kui-color-link-hover: #2A4970;
+
+  // Generic feedback families
+  --kui-color-danger: #DC2727;
+  --kui-color-danger-surface: #FEE3E3;
+  --kui-color-on-danger: #7F1F1F;
+  --kui-color-danger-border: #B91D1D;
+
+  --kui-color-success: #15803D;
+  --kui-color-success-surface: #DCFCE7;
+  --kui-color-on-success: #14532D;
+  --kui-color-success-border: #15803D;
+
+  --kui-color-warning: #B45309;
+  --kui-color-warning-surface: #FEF3C7;
+  --kui-color-on-warning: #78350F;
+  --kui-color-warning-border: #B45309;
+
+  --kui-color-info: #1D4ED8;
+  --kui-color-info-surface: #DBEAFE;
+  --kui-color-on-info: #1E3A8A;
+  --kui-color-info-border: #1D4ED8;
+}
+
+@mixin dark-theme-tokens {
+  // Canvas, surfaces, and shadows
+  --kui-color-canvas: #121212;
+  --kui-color-surface: #1E1E1E;
+  --kui-color-surface-elevated: #262626;
+  --kui-color-surface-muted: #333333;
+  --kui-color-surface-hover: #383838;
+  --kui-color-surface-selected: #0E361D;
+  --kui-color-surface-inverse: #262626;
+  --kui-shadow-surface: 0 8px 24px rgba(0, 0, 0, 0.55);
+  --kui-shadow-dialog: 0 16px 40px rgba(0, 0, 0, 0.65);
+
+  // Text, icon, border, and focus
+  --kui-color-text: rgba(255, 255, 255, 0.87);
+  --kui-color-text-muted: rgba(255, 255, 255, 0.68);
+  --kui-color-text-disabled: rgba(255, 255, 255, 0.38);
+  --kui-color-placeholder: rgba(255, 255, 255, 0.60);
+  --kui-color-on-inverse: #F8FAFC;
+  --kui-color-border: #444444;
+  --kui-color-border-strong: #78716C;
+  --kui-color-focus: #22C55E;
+  --kui-color-backdrop: rgba(0, 0, 0, 0.72);
+  --kui-color-control-disabled: #363332;
+  --kui-color-control-autofill: #1C3325;
+
+  // Actions and links (Vibrant green accent for primary actions, bluish for links)
+  --kui-color-action-primary: #22C55E;
+  --kui-color-action-primary-hover: #4ADE80;
+  --kui-color-action-primary-active: #86EFAC;
+  --kui-color-on-action-primary: #052E16;
+  --kui-color-link: #60A5FA;
+  --kui-color-link-hover: #93C5FD;
+
+  // Generic feedback families
+  --kui-color-danger: #FCA5A5;
+  --kui-color-danger-surface: #4A1717;
+  --kui-color-on-danger: #FEE2E2;
+  --kui-color-danger-border: #F87171;
+
+  --kui-color-success: #86EFAC;
+  --kui-color-success-surface: #123524;
+  --kui-color-on-success: #DCFCE7;
+  --kui-color-success-border: #4ADE80;
+
+  --kui-color-warning: #FCD34D;
+  --kui-color-warning-surface: #422006;
+  --kui-color-on-warning: #FEF3C7;
+  --kui-color-warning-border: #FBBF24;
+
+  --kui-color-info: #93C5FD;
+  --kui-color-info-surface: #172554;
+  --kui-color-on-info: #DBEAFE;
+  --kui-color-info-border: #60A5FA;
+}
+
+:root,
+:root[data-theme='light'],
+:root[data-theme='system'] {
+  @include light-theme-tokens;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  @include dark-theme-tokens;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme='system'] {
+    @include dark-theme-tokens;
+    color-scheme: dark;
+  }
+}

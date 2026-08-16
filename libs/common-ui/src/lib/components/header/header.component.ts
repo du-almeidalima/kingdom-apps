@@ -1,5 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { white100 } from '../../../';
 import { RouterLink } from '@angular/router';
 import { NgStyle, NgTemplateOutlet } from '@angular/common';
 
@@ -11,13 +10,13 @@ import { NgStyle, NgTemplateOutlet } from '@angular/common';
 })
 export class HeaderComponent {
   @Input()
-  public backgroundColorVar = 'hsl(0, 0%, 50%)';
+  public backgroundColorVar = 'var(--kui-color-surface-inverse, hsl(0, 0%, 50%))';
 
   @Input()
-  public logoBackgroundColor = 'hsl(0, 0%, 50%)';
+  public logoBackgroundColor = 'var(--kui-color-surface-inverse, hsl(0, 0%, 50%))';
 
   @Input()
-  public logoColor? = white100;
+  public logoColor? = 'var(--kui-color-on-inverse, currentColor)';
 
   @Input()
   public initials = 'TT';

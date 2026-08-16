@@ -118,7 +118,7 @@ export type UserEditDialogData = {
 export class UsersEditDialogComponent {
   protected readonly RoleEnum = RoleEnum;
   protected readonly white = white100;
-  protected readonly iconColor = grey400;
+  protected readonly iconColor = 'currentColor';
 
   public form: FormGroup<{ role: FormControl<RoleEnum>; name: FormControl<string> }>;
 

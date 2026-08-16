@@ -14,8 +14,9 @@
     'icon notes menu-button';
 
   padding: 1rem .5rem;
-  border: 1px solid variables.$light-grey-100;
-  background-color: variables.$white-100;
+  border: 1px solid var(--kui-color-border, #{variables.$light-grey-100});
+  background-color: var(--kui-color-surface-elevated, #{variables.$white-100});
+  color: var(--kui-color-text, #{variables.$text});
 
   &--row-gap {
     grid-row-gap: 1rem;
@@ -32,6 +33,7 @@
     width: $size;
     // This makes the icon looks centered with the first 2 address lines
     margin-top: .15rem;
+    color: var(--kui-color-text, #{variables.$text});
 
     &--large {
       height: $large-size;

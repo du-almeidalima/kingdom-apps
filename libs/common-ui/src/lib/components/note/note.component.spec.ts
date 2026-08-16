@@ -37,8 +37,7 @@ describe('NoteComponent', () => {
 
     fixture.detectChanges();
     const container = fixture.debugElement.query(By.css('div')).nativeElement;
-    expect(container.classList.contains('bg-blue-50')).toBeTruthy();
-    expect(container.classList.contains('border-blue-800')).toBeTruthy();
+    expect(container.classList.contains('note--info')).toBeTruthy();
   });
 
   it('should apply success classes when type is success', () => {
@@ -48,8 +47,7 @@ describe('NoteComponent', () => {
     fixture.detectChanges();
 
     const container = fixture.debugElement.query(By.css('div')).nativeElement;
-    expect(container.classList.contains('bg-green-50')).toBeTruthy();
-    expect(container.classList.contains('border-green-800')).toBeTruthy();
+    expect(container.classList.contains('note--success')).toBeTruthy();
   });
 
   it('should apply warning classes when type is warning', () => {
@@ -59,8 +57,7 @@ describe('NoteComponent', () => {
     fixture.detectChanges();
 
     const container = fixture.debugElement.query(By.css('div')).nativeElement;
-    expect(container.classList.contains('bg-yellow-50')).toBeTruthy();
-    expect(container.classList.contains('border-yellow-800')).toBeTruthy();
+    expect(container.classList.contains('note--warning')).toBeTruthy();
   });
 
   it('should apply error classes when type is error', () => {
@@ -70,8 +67,7 @@ describe('NoteComponent', () => {
     fixture.detectChanges();
 
     const container = fixture.debugElement.query(By.css('div')).nativeElement;
-    expect(container.classList.contains('bg-red-50')).toBeTruthy();
-    expect(container.classList.contains('border-red-800')).toBeTruthy();
+    expect(container.classList.contains('note--error')).toBeTruthy();
   });
 
   it.each([

@@ -16,9 +16,10 @@
   gap: 1rem;
 
   padding: 1rem;
+  color: var(--kui-color-text, #{variables.$text});
 
   &:not(:first-of-type) {
-    border-top: 1px solid variables.$light-grey-100;
+    border-top: 1px solid var(--kui-color-border, #{variables.$light-grey-100});
   }
 
   &__header {

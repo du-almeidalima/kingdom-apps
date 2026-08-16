@@ -38,12 +38,11 @@
 
   <button
     lib-floating-action-button
-    [backgroundColor]='green200'
-    [disabled]='selectedTerritoriesModel.size === 0'
-    [loading]='isCreatingAssignment'
-    type='submit'
-    form='territory-form'
-    title='Enviar Designação'>
-    <lib-icon icon='paper-plane-2' [fillColor]='white200'></lib-icon>
+    [disabled]="selectedTerritoriesModel.size === 0"
+    [loading]="isCreatingAssignment"
+    type="submit"
+    form="territory-form"
+    title="Enviar Designação">
+    <lib-icon icon="paper-plane-2"></lib-icon>
   </button>
 </div>

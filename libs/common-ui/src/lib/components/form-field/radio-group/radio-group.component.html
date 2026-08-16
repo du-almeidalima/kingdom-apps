@@ -1,0 +1,78 @@
+<div
+  class="lib-radio-group"
+  [class.lib-radio-group--vertical]="layout() === 'vertical'"
+  [class.lib-radio-group--horizontal]="layout() === 'horizontal'"
+  [class.lib-radio-group--grid]="layout() === 'grid'"
+  role="radiogroup"
+  [attr.aria-label]="ariaLabel()"
+>
+  @for (option of options(); track option.value) {
+    <label
+      class="lib-radio-option"
+      [class.lib-radio-option--selected]="isSelected(option.value)"
+      [class.lib-radio-option--disabled]="disabled() || option.disabled"
+      [attr.data-testid]="option.testId"
+    >
+      <input
+        type="radio"
+        class="lib-radio-option__input"
+        [name]="name()"
+        [value]="option.value"
+        [checked]="isSelected(option.value)"
+        [disabled]="disabled() || option.disabled"
+        (change)="selectOption(option)"
+      />
+
+      <div class="lib-radio-option__content">
+        @if (option.icon) {
+          <div
+            class="lib-radio-option__icon"
+            [class.lib-radio-option__icon--selected]="isSelected(option.value)"
+          >
+            <lib-icon [icon]="option.icon" class="h-6 w-6" fillColor="currentColor" />
+          </div>
+        }
+
+        <div class="lib-radio-option__text-container">
+          <span class="lib-radio-option__label">{{ option.label }}</span>
+          @if (option.description) {
+            <span class="lib-radio-option__description">{{ option.description }}</span>
+          }
+        </div>
+      </div>
+
+      <div
+        class="lib-radio-option__indicator"
+        [class.lib-radio-option__indicator--selected]="isSelected(option.value)"
+      >
+        <svg
+          class="lib-radio-option__indicator-svg"
+          viewBox="0 0 20 20"
+          width="20"
+          height="20"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <circle
+            class="lib-radio-option__outer-ring"
+            cx="10"
+            cy="10"
+            r="8.5"
+            stroke="currentColor"
+            stroke-width="2"
+          />
+          @if (isSelected(option.value)) {
+            <circle
+              class="lib-radio-option__inner-dot"
+              cx="10"
+              cy="10"
+              r="4.5"
+              fill="currentColor"
+            />
+          }
+        </svg>
+      </div>
+    </label>
+  }
+</div>

@@ -2,7 +2,6 @@ import { MockBuilder, MockedComponentFixture, MockRender, ngMocks } from 'ng-moc
 import { ToasterContainerComponent } from './toaster-container.component';
 import { DEFAULT_TOAST_DURATION_MS, ToastConfig } from './toaster.models';
 import { IconComponent } from '../icon/icon.component';
-import { green700, orange700, red700, white100 } from '../../styles/abstract/variables';
 
 describe('ToasterContainerComponent', () => {
   let component: ToasterContainerComponent;
@@ -68,7 +67,6 @@ describe('ToasterContainerComponent', () => {
 
       const toasts = component.toasts();
       expect(toasts[0].icon).toBe('check-mark-circle-lined');
-      expect(toasts[0].iconColor).toBeDefined();
     });
 
     it('should generate unique IDs for multiple toasts', () => {
@@ -156,53 +154,6 @@ describe('ToasterContainerComponent', () => {
     });
   });
 
-  describe('toast icon colors', () => {
-    it('should set correct icon color for success toast', () => {
-      const config: ToastConfig = { message: 'Success', type: 'success', icon: 'check-mark-circle-lined' };
-
-      component.push(config);
-
-      const toasts = component.toasts();
-      expect(toasts[0].iconColor).toBe(green700);
-    });
-
-    it('should set correct icon color for warning toast', () => {
-      const config: ToastConfig = { message: 'Warning', type: 'warning', icon: 'warning-lined' };
-
-      component.push(config);
-
-      const toasts = component.toasts();
-      expect(toasts[0].iconColor).toBe(orange700);
-    });
-
-    it('should set correct icon color for error toast', () => {
-      const config: ToastConfig = { message: 'Error', type: 'error', icon: 'error-8' };
-
-      component.push(config);
-
-      const toasts = component.toasts();
-      expect(toasts[0].iconColor).toBe(red700);
-    });
-
-    it('should set correct icon color for info toast', () => {
-      const config: ToastConfig = { message: 'Info', type: 'info', icon: 'info-lined' };
-
-      component.push(config);
-
-      const toasts = component.toasts();
-      expect(toasts[0].iconColor).toBe(white100);
-    });
-
-    it('should set default icon color when type is not specified', () => {
-      const config: ToastConfig = { message: 'Default', icon: 'info-lined' };
-
-      component.push(config);
-
-      const toasts = component.toasts();
-      expect(toasts[0].iconColor).toBe(white100);
-    });
-  });
-
   describe('template rendering', () => {
     it('should render toast messages correctly', () => {
       component.push({ message: 'Test message' });
@@ -225,13 +176,14 @@ describe('ToasterContainerComponent', () => {
       expect(toastElement).toBeTruthy();
     });
 
-    it('should render icon when provided', () => {
+    it('should render icon with currentColor when provided', () => {
       component.push({ message: 'With icon', icon: 'check-mark-circle-lined' });
       fixture.detectChanges();
 
       const iconElement = ngMocks.find(IconComponent);
       expect(iconElement).toBeTruthy();
       expect(iconElement.componentInstance.icon).toBe('check-mark-circle-lined');
+      expect(iconElement.componentInstance.fillColor).toBe('currentColor');
     });
 
     it('should not render icon when not provided', () => {
@@ -240,38 +192,6 @@ describe('ToasterContainerComponent', () => {
 
       const iconElement = ngMocks.find(IconComponent, undefined);
       expect(iconElement).toBeFalsy();
-    });
-
-    it('should set correct icon color for warning toast', () => {
-      component.push({ message: 'Warning', type: 'warning', icon: 'warning-lined' });
-      fixture.detectChanges();
-
-      const iconElement = ngMocks.find(IconComponent);
-      expect(iconElement.componentInstance.fillColor).toBe(orange700);
-    });
-
-    it('should set correct icon color for success toast', () => {
-      component.push({ message: 'Success', type: 'success', icon: 'check-mark-circle-lined' });
-      fixture.detectChanges();
-
-      const iconElement = ngMocks.find(IconComponent);
-      expect(iconElement.componentInstance.fillColor).toBe(green700);
-    });
-
-    it('should set correct icon color for error toast', () => {
-      component.push({ message: 'Error', type: 'error', icon: 'error-8' });
-      fixture.detectChanges();
-
-      const iconElement = ngMocks.find(IconComponent);
-      expect(iconElement.componentInstance.fillColor).toBe(red700);
-    });
-
-    it('should set correct icon color for info toast', () => {
-      component.push({ message: 'Info', type: 'info', icon: 'info-lined' });
-      fixture.detectChanges();
-
-      const iconElement = ngMocks.find(IconComponent);
-      expect(iconElement.componentInstance.fillColor).toBe(white100);
     });
   });
 

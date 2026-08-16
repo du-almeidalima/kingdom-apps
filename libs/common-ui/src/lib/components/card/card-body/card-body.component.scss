@@ -16,10 +16,15 @@
 
       @extend .t-body1;
       text-decoration: none;
-      color: variables.$link;
+      color: var(--kui-color-link, #{variables.$link});
 
       &:focus, &:active, &:hover {
-        color: variables.$link-dark;
+        color: var(--kui-color-link-hover, #{variables.$link-dark});
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--kui-color-focus, #2563eb);
+        outline-offset: 2px;
       }
     }
   }
@@ -27,4 +32,5 @@
 
 .card-body {
   padding: 1.6rem;
+  color: var(--kui-color-text, #{variables.$text});
 }

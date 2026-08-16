@@ -8,7 +8,8 @@ html {
 }
 
 body {
-  background-color: variables.$white-300;
+  background-color: var(--kui-color-canvas, #{variables.$white-300});
+  color: var(--kui-color-text, #{variables.$text});
 }
 
 html,
