@@ -382,6 +382,15 @@ async function main() {
     }
   }
 
+  log('building functions/ministry-maps…');
+  const buildFunctions = spawnSync('npm', ['--prefix', 'functions/ministry-maps', 'run', 'build'], {
+    cwd: workspaceRoot,
+    stdio: 'inherit',
+  });
+  if (buildFunctions.status !== 0) {
+    throw new Error('Failed to build functions/ministry-maps before starting emulators.');
+  }
+
   log(`starting emulators (${EMULATORS.join(', ')}) and the ministry-maps dev server…`);
   writeE2EFirebaseConfig();
 

@@ -63,6 +63,9 @@ jobs:
       - run: npm ci --legacy-peer-deps
       # Separate package.json/lockfile; the Functions emulator loads this codebase.
       - run: npm ci --prefix functions/ministry-maps
+      - run: npm --prefix functions/ministry-maps run lint
+      - run: npm --prefix functions/ministry-maps test
+      - run: npm --prefix functions/ministry-maps run build
 
       - uses: nrwl/nx-set-shas@v4
 

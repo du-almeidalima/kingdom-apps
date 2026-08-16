@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * One-time backfill for the `expireAt` TTL field (designations + logs):
  *   - basis date + 180 days (designations: createdAt; logs: timestamp; fallback: now)
@@ -8,13 +6,12 @@
  * Each page of documents commits atomically in one transaction.
  *
  * Usage (refuses to run without one of these, to avoid hitting an unintended project):
- *   FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 node scripts/backfill-ttl.js [--dry-run]
- *   GOOGLE_APPLICATION_CREDENTIALS=<path> node scripts/backfill-ttl.js [--dry-run]
+ *   FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 node lib/scripts/backfill-ttl.js [--dry-run]
+ *   GOOGLE_APPLICATION_CREDENTIALS=<path> node lib/scripts/backfill-ttl.js [--dry-run]
  */
 
-const admin = require('firebase-admin');
-const { initializeApp } = require('firebase-admin/app');
-const { getFirestore, Timestamp } = require('firebase-admin/firestore');
+import { FieldPath, QueryDocumentSnapshot, QuerySnapshot, Timestamp, Transaction } from 'firebase-admin/firestore';
+import { db } from '../config/firebase';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const TTL_MS = 180 * MS_PER_DAY;
@@ -28,32 +25,46 @@ if (!process.env.FIRESTORE_EMULATOR_HOST && !process.env.GOOGLE_APPLICATION_CRED
   process.exit(1);
 }
 
-initializeApp({ credential: admin.credential.applicationDefault() });
+interface CollectionTarget {
+  name: string;
+  dateField: string;
+}
 
-const db = getFirestore();
+interface BackfillStats {
+  scanned: number;
+  skipped: number;
+  backfilled: number;
+  deleted: number;
+  fallbacks: string[];
+}
 
-const collections = [
+interface PageResult {
+  lastDoc: QueryDocumentSnapshot | null;
+  size: number;
+}
+
+const collections: CollectionTarget[] = [
   { name: 'designations', dateField: 'createdAt' },
   { name: 'logs', dateField: 'timestamp' },
 ];
 
-function basisMillis(data, dateField) {
+function basisMillis(data: Record<string, unknown>, dateField: string): number | null {
   const value = data[dateField];
   return value instanceof Timestamp ? value.toMillis() : null;
 }
 
-async function backfillCollection({ name, dateField }) {
-  const stats = { scanned: 0, skipped: 0, backfilled: 0, deleted: 0, fallbacks: [] };
-  let cursor = null;
+async function backfillCollection({ name, dateField }: CollectionTarget): Promise<BackfillStats> {
+  const stats: BackfillStats = { scanned: 0, skipped: 0, backfilled: 0, deleted: 0, fallbacks: [] };
+  let cursor: QueryDocumentSnapshot | null = null;
 
   for (;;) {
-    const pageQuery = (startAfter) => {
-      const base = db.collection(name).orderBy(admin.firestore.FieldPath.documentId()).limit(PAGE_SIZE);
+    const pageQuery = (startAfter: QueryDocumentSnapshot | null) => {
+      const base = db.collection(name).orderBy(FieldPath.documentId()).limit(PAGE_SIZE);
       return startAfter ? base.startAfter(startAfter) : base;
     };
 
-    const applyTo = (transaction, snapshot) => {
-      for (const doc of snapshot.docs) {
+    const applyTo = (transaction: Transaction | null, docs: QueryDocumentSnapshot[]) => {
+      for (const doc of docs) {
         stats.scanned++;
         const data = doc.data();
         if (data.expireAt !== undefined && data.expireAt !== null) {
@@ -78,20 +89,21 @@ async function backfillCollection({ name, dateField }) {
       }
     };
 
-    const { lastDoc, size } = dryRun
-      ? await (async () => {
-          const snapshot = await (cursor ? pageQuery(cursor).get() : pageQuery(null).get());
+    const pageResult: PageResult = dryRun
+      ? await (async (): Promise<PageResult> => {
+          const snapshot: QuerySnapshot = await (cursor ? pageQuery(cursor).get() : pageQuery(null).get());
           if (snapshot.empty) return { lastDoc: null, size: 0 };
-          applyTo(null, snapshot);
+          applyTo(null, snapshot.docs);
           return { lastDoc: snapshot.docs[snapshot.size - 1], size: snapshot.size };
         })()
-      : await db.runTransaction(async (transaction) => {
+      : await db.runTransaction(async (transaction): Promise<PageResult> => {
           const snapshot = await transaction.get(cursor ? pageQuery(cursor) : pageQuery(null));
           if (snapshot.empty) return { lastDoc: null, size: 0 };
-          applyTo(transaction, snapshot);
+          applyTo(transaction, snapshot.docs);
           return { lastDoc: snapshot.docs[snapshot.size - 1], size: snapshot.size };
         });
 
+    const { lastDoc, size } = pageResult;
     if (!lastDoc || size < PAGE_SIZE) break;
     cursor = lastDoc;
   }
@@ -99,15 +111,17 @@ async function backfillCollection({ name, dateField }) {
   return stats;
 }
 
-async function main() {
+async function main(): Promise<void> {
   console.log(`TTL backfill ${dryRun ? '(DRY RUN)' : ''}: expireAt = basis date + 180d; older than 1y deleted\n`);
 
   for (const collection of collections) {
     const stats = await backfillCollection(collection);
 
     console.log(`${collection.name} (basis: ${collection.dateField}):`);
-    console.log(`  scanned: ${stats.scanned}, skipped: ${stats.skipped}, backfilled: ${stats.backfilled}` +
-      `${dryRun ? ' (would write)' : ''}, deleted: ${stats.deleted}${dryRun ? ' (would delete)' : ''}`);
+    console.log(
+      `  scanned: ${stats.scanned}, skipped: ${stats.skipped}, backfilled: ${stats.backfilled}` +
+        `${dryRun ? ' (would write)' : ''}, deleted: ${stats.deleted}${dryRun ? ' (would delete)' : ''}`
+    );
     for (const path of stats.fallbacks) {
       console.log(`  fallback (missing ${collection.dateField}, used now + 180d): ${path}`);
     }
