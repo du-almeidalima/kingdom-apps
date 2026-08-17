@@ -221,7 +221,7 @@ function resolveBin(name) {
   }
 
   throw new Error(
-    `Could not find "${name}" in node_modules/.bin. Run \`npm ci --legacy-peer-deps\` from the workspace root.`
+    `Could not find "${name}" in node_modules/.bin. Run \`npm ci\` from the workspace root.`
   );
 }
 

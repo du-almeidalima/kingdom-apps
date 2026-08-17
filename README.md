@@ -25,7 +25,7 @@ Nx and Firebase Tools are workspace dependencies; global installations are not r
 With Node.js 22 active (`nvm use` if you use nvm):
 
 ```bash
-npm ci --legacy-peer-deps
+npm ci
 npm ci --prefix functions/ministry-maps
 ```
 

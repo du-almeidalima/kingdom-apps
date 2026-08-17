@@ -69,7 +69,6 @@ Add or update tests for behavior changes. Do not weaken, skip, or delete a faili
 
 ## Gotchas
 
-- Root `npm ci` / `npm install` needs `--legacy-peer-deps` because of Angular 21 and Firebase RC peer dependencies.
 - `functions/ministry-maps` has a separate package manifest and lockfile; install its dependencies separately when needed.
 - `NX_*` values are injected at build time by webpack, not read dynamically in the browser.
 - Angular uses the root flat ESLint config; Functions uses its own flat config `functions/ministry-maps/eslint.config.mjs`.
