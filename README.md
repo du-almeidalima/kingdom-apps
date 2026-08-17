@@ -81,17 +81,18 @@ Commit intentional seed changes that application or test behavior depends on.
 
 ## Common commands
 
-| Task                      | Command                              |
-|---------------------------|--------------------------------------|
-| Start app and emulators   | `npm start`                          |
-| Build the app             | `npx nx build ministry-maps`         |
-| Test the app              | `npx nx test ministry-maps`          |
-| Test affected projects    | `npx nx affected -t test`            |
-| Lint the app              | `npx nx lint ministry-maps`          |
-| Type-check E2E tests      | `npx nx typecheck-e2e ministry-maps` |
-| Run E2E tests             | `npm run e2e`                        |
-| Open Playwright UI        | `npm run e2e:ui`                     |
-| View project dependencies | `npx nx graph`                       |
+| Task                      | Command                                              |
+|---------------------------|------------------------------------------------------|
+| Start app and emulators   | `npm start`                                          |
+| Watch Cloud Functions     | `npm --prefix functions/ministry-maps run build:watch` |
+| Build the app             | `npx nx build ministry-maps`                         |
+| Test the app              | `npx nx test ministry-maps`                          |
+| Test affected projects    | `npx nx affected -t test`                            |
+| Lint the app              | `npx nx lint ministry-maps`                          |
+| Type-check E2E tests      | `npx nx typecheck-e2e ministry-maps`                 |
+| Run E2E tests             | `npm run e2e`                                        |
+| Open Playwright UI        | `npm run e2e:ui`                                     |
+| View project dependencies | `npx nx graph`                                       |
 
 ## Documentation
 
