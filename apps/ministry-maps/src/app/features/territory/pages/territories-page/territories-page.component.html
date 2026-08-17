@@ -8,14 +8,14 @@
       type="button"
       data-testid="territories-overflow-menu"
       *libAuthorize="[RoleEnum.APP_ADMIN, RoleEnum.SUPERINTENDENT, RoleEnum.ADMIN]">
-      <lib-icon [fillColor]="greyButtonColor" icon="menu-dot-vertical-filled"></lib-icon>
+      <lib-icon icon="menu-dot-vertical-filled"></lib-icon>
     </button>
 
     <ng-template #menu>
       <menu class="menu" cdkMenu>
         <li class="menu__item" data-testid="territories-export-item" cdkMenuItem (cdkMenuItemTriggered)="handleExportTerritories()">
           <button lib-icon-button type="button">
-            <lib-icon [fillColor]="greyButtonColor" icon="download-20"></lib-icon>
+            <lib-icon icon="download-20"></lib-icon>
           </button>
           <span>Exportar Territórios</span>
         </li>

@@ -13,6 +13,7 @@ kingdom-apps-icon-radio {
   gap: 1rem;
 
   min-height: 5rem;
+  height: auto;
 
   cursor: pointer;
   background-color: var(--kui-color-surface-elevated, #{variables.$white-200});
@@ -50,6 +51,7 @@ kingdom-apps-icon-radio {
     @extend .t-body1;
 
     color: inherit;
+    flex: 1;
   }
 
   &__input {

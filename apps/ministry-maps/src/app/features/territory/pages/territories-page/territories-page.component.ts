@@ -6,10 +6,7 @@ import { finalize, map, Observable, of, shareReplay } from 'rxjs';
 import { Territory } from '../../../../../models/territory';
 import {
   AuthorizeDirective,
-  disabledLight,
   FloatingActionButtonComponent,
-  green200,
-  grey400,
   IconButtonComponent,
   IconComponent,
   SearchInputComponent,
@@ -17,7 +14,6 @@ import {
   SortFilterComponent,
   SortFilterValue,
   ToasterService,
-  white200,
 } from '@kingdom-apps/common-ui';
 import { Dialog } from '@angular/cdk/dialog';
 import {
@@ -78,10 +74,6 @@ import { TerritoryCsvExporterBO } from '../../bo/territory-csv-exporter/territor
 export class TerritoriesPageComponent implements OnInit {
   private territories$: Observable<Territory[]> = of([]);
 
-  protected readonly green200 = green200;
-  protected readonly white200 = white200;
-  protected readonly greyButtonColor = 'currentColor';
-  protected readonly disabledLight = disabledLight;
   protected readonly RoleEnum = RoleEnum;
   protected readonly ALL_OPTION = ALL_OPTION;
   protected readonly TerritoriesOrderBy = TerritoriesOrderBy;

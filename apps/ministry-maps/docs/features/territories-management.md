@@ -243,7 +243,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline
 - **Steps:** 1. select `Todas` → observe no drag handle renders at all (`@if (selectedCity !== ALL_OPTION)`) → 2. select `São Paulo`, switch sort to `Última Visita` → observe the handle renders but is disabled
-- **Expected UI:** with `Última Visita` selected, the handle's icon is greyed (`disabledLight`) and its `title` attribute reads exactly `Para ordernar manualmente, use a ordenação Ordem de Cadastro` (verbatim, including the source typo "ordernar"); `cdkDragDisabled`/`cdkDragHandleDisabled` are both `true`
+- **Expected UI:** with `Última Visita` selected, the handle button is disabled (`[disabled]`), styled using disabled theme tokens (`currentColor`), and its `title` attribute reads exactly `Para ordernar manualmente, use a ordenação Ordem de Cadastro` (verbatim, including the source typo "ordernar"); `cdkDragDisabled`/`cdkDragHandleDisabled` are both `true`
 - **Expected persistence:** N/A (client-only gating)
 - **Edge cases:** switching back to `Ordem de Cadastro` re-enables the handle without a reload
 - **Priority:** P2 · **Gaps:** none

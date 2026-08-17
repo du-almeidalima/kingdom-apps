@@ -1,5 +1,5 @@
 import { Component, DestroyRef, inject, OnInit } from '@angular/core';
-import { finalize } from 'rxjs';
+import { filter, switchMap } from 'rxjs';
 import { User } from '../../../../../models/user';
 import { UserStateService } from '../../../../state/user.state.service';
 import { UserRepository } from '../../../../repositories/user.repository';
@@ -7,8 +7,11 @@ import { RoleEnum } from '../../../../../models/enums/role';
 import {
   AuthorizeDirective,
   ConfirmDialogComponent,
-  ConfirmDialogData, FloatingActionButtonComponent,
-  green200, IconComponent,
+  ConfirmDialogData,
+  FloatingActionButtonComponent,
+  green200,
+  IconComponent,
+  SpinnerComponent,
   white200,
 } from '@kingdom-apps/common-ui';
 import { Dialog } from '@angular/cdk/dialog';
@@ -25,7 +28,13 @@ import { UserListItemComponent } from '../../components/user-list-item/user-list
   selector: 'kingdom-apps-users-page',
   templateUrl: './users-page.component.html',
   styleUrls: ['./users-page.component.scss'],
-  imports: [UserListItemComponent, AuthorizeDirective, FloatingActionButtonComponent, IconComponent],
+  imports: [
+    UserListItemComponent,
+    AuthorizeDirective,
+    FloatingActionButtonComponent,
+    IconComponent,
+    SpinnerComponent,
+  ],
 })
 export class UsersPageComponent implements OnInit {
   protected readonly CREATE_INVITE_LINK_ALLOWED = CREATE_INVITE_LINK_ALLOWED;
@@ -45,24 +54,29 @@ export class UsersPageComponent implements OnInit {
     [RoleEnum.PUBLISHER, 6],
   ]);
 
-  isLoading = false;
+  isLoading = true;
   users: User[] = [];
 
   ngOnInit(): void {
-    if (this.userState.currentUser?.congregation?.id) {
-      this.isLoading = true;
-      this.userRepository
-        .getAllByCongregation(this.userState.currentUser?.congregation?.id)
-        .pipe(
-          takeUntilDestroyed(this.destroyRef),
-          finalize(() => {
-            this.isLoading = false;
-          })
-        )
-        .subscribe(users => {
+    this.userState.$user
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        filter((user): user is User & { congregation: { id: string } } => !!user?.congregation?.id),
+        switchMap(user => {
+          this.isLoading = true;
+          return this.userRepository.getAllByCongregation(user.congregation.id);
+        })
+      )
+      .subscribe({
+        next: users => {
+          this.isLoading = false;
           this.users = users.sort(this.sortUserFn.bind(this));
-        });
-    }
+        },
+        error: err => {
+          this.isLoading = false;
+          console.error('Error fetching users', err);
+        },
+      });
   }
 
   handleDeleteUser(userId: string): void {

@@ -56,7 +56,7 @@ export type UserEditDialogData = {
             <div class="radio-option">
               <span class="radio-option__title" data-testid="user-edit-role-title">Publicador</span>
               <span class="radio-option__description">
-                Permisão mais básica, apenas está associado a uma congregação.
+                Permissão mais básica, apenas está associado a uma congregação.
               </span>
             </div>
           </kingdom-apps-icon-radio>
