@@ -40,13 +40,4 @@ export class InviteBO {
       })
     );
   }
-
-
-  consumeInviteLink(inviteLink: InvitationLink): Observable<void> {
-    inviteLink.isValid = false;
-    inviteLink.usedAt = new Date();
-    inviteLink.usedBy = this.userState?.currentUser?.email;
-
-    return this.inviteRepository.update(inviteLink);
-  }
 }

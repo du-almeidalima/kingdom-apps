@@ -17,8 +17,9 @@
   border-radius: 3px;
   padding: 1rem;
 
-  background-color: variables.$white-100;
-  border: 1px solid variables.$light-grey-100;
+  background-color: var(--kui-color-surface-elevated, #{variables.$white-100});
+  color: var(--kui-color-text, #{variables.$text});
+  border: 1px solid var(--kui-color-border, #{variables.$light-grey-100});
 
   &__content {
     flex: 1;
@@ -40,28 +41,30 @@
     align-items: center;
     padding: .3em .5em;
     border-radius: .4rem;
-    background-color: variables.$grey-100;
+    background-color: var(--mm-color-user-role-badge-bg, #{variables.$grey-100});
+    color: var(--mm-color-user-role-badge-text, white);
     font-weight: bold;
     letter-spacing: .1rem;
-    @extend .t-white;
 
     &--admin, &--app_admin {
-      color: variables.$text;
-      background-color: variables.$white-100;
-      border: 1px solid variables.$light-grey-100;
+      color: var(--kui-color-text, #{variables.$text});
+      background-color: var(--kui-color-surface, #{variables.$white-100});
+      border: 1px solid var(--kui-color-border, #{variables.$light-grey-100});
     }
 
     &--elder {
-      background-color: variables.$green-200;
+      background-color: var(--kui-color-success-surface, #{variables.$green-200});
+      color: var(--kui-color-on-success, white);
     }
 
     &--organizer {
-      background-color: variables.$blue-200;
+      background-color: var(--kui-color-info-surface, #{variables.$blue-200});
+      color: var(--kui-color-on-info, white);
     }
 
     &--superintendent {
-      color: variables.$text;
-      background-color: variables.$orange-200;
+      color: var(--kui-color-on-warning, #{variables.$text});
+      background-color: var(--kui-color-warning-surface, #{variables.$orange-200});
     }
   }
 }

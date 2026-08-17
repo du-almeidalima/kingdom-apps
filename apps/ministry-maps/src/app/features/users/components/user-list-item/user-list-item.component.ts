@@ -67,7 +67,7 @@ export class UserListItemComponent {
   protected readonly RoleEnum = RoleEnum;
 
   protected readonly deleteButtonColor = red300;
-  protected readonly greyButtonColor = grey400;
+  protected readonly greyButtonColor = 'currentColor';
 
   user = input.required<User>();
   initials = computed(() => getUserInitials(this.user().name));

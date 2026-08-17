@@ -23,6 +23,7 @@ between tests, only between steps *inside* one test).
 | [J-06](./j-06-expired-designation.md) | An expired designation blocks its actions when `shouldDesignationBlockAfterExpired` is `true`, and stays *equally* checkbox-blocked (maps-only difference) when `false` | Admin → anonymous | P1 | `e2e/tests/journey-expired-designation.spec.ts` |
 | [J-07](./j-07-statistics-reconciliation.md) | History seeded across period boundaries is reconciled per period and per city against the Firestore subcollections | Admin | P1 | `e2e/tests/journey-statistics-reconciliation.spec.ts` |
 | [J-08](./j-08-empty-system.md) | A brand-new congregation with no territories behaves gracefully across list, assign, statistics and CSV export | Admin (second congregation) | P1 | `e2e/tests/journey-empty-system.spec.ts` |
+| [J-09](./j-09-ttl-deletion-not-found.md) | An active designation link renders normally; after a simulated TTL deletion, subsequent navigation presents the not-found screen | Anonymous | P0 | `e2e/tests/work-not-found.spec.ts` |
 
 ## Conventions
 

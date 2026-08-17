@@ -7,7 +7,7 @@
 .section {
 
   &__title {
-    color: variables.$green-500;
+    color: var(--kui-color-action-primary, #{variables.$green-500});
     text-transform: uppercase;
     letter-spacing: 0.1em;
   }

@@ -1,3 +1,50 @@
+@use '../../styles/base/typography';
+
 :host {
   display: block;
+}
+
+.note {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 4px;
+
+  &__icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    flex-shrink: 0;
+  }
+
+  &__message {
+    @extend .t-body2;
+  }
+
+  &--info {
+    background-color: var(--kui-color-info-surface);
+    border-color: var(--kui-color-info-border);
+    color: var(--kui-color-on-info);
+  }
+
+  &--success {
+    background-color: var(--kui-color-success-surface);
+    border-color: var(--kui-color-success-border);
+    color: var(--kui-color-on-success);
+  }
+
+  &--warning {
+    background-color: var(--kui-color-warning-surface);
+    border-color: var(--kui-color-warning-border);
+    color: var(--kui-color-on-warning);
+  }
+
+  &--error {
+    background-color: var(--kui-color-danger-surface);
+    border-color: var(--kui-color-danger-border);
+    color: var(--kui-color-on-danger);
+  }
 }

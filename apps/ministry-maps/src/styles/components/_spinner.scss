@@ -12,7 +12,7 @@
 .spinner__inner-block {
   height: 100%;
   border-radius: 100%;
-  border: 3px solid variables.$primary-green;
+  border: 3px solid var(--kui-color-action-primary, #{variables.$primary-green});
   border-bottom-color: transparent;
 
   animation: spin 1s linear infinite;

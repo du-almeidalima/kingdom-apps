@@ -171,9 +171,9 @@ export class TerritoryListItemComponent implements OnInit {
   protected readonly EDIT_ALLOWED = EDIT_ALLOWED;
   protected readonly VisitOutcomeEnum = VisitOutcomeEnum;
 
-  public greyButtonColor = grey400;
+  public greyButtonColor = 'currentColor';
   public deleteButtonColor = red400;
-  public iconColor = grey400;
+  public iconColor = 'currentColor';
   public isIconLarge = false;
   public icon: Icons = 'generation-3';
   public hasRecentlyMoved = false;

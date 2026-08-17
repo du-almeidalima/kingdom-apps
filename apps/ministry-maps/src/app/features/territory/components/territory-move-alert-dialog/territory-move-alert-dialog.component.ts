@@ -91,7 +91,7 @@ export enum MoveResolutionActionsEnum {
 })
 export class TerritoryMoveAlertDialogComponent {
   protected readonly white = white100;
-  protected readonly iconColor = grey400;
+  protected readonly iconColor = 'currentColor';
   public readonly MoveResolutionActions = MoveResolutionActionsEnum;
 
   public isSubmitting = false;

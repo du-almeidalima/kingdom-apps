@@ -34,9 +34,9 @@
     align-items: center;
     padding: .3em .5em;
     border-radius: .4rem;
-    background-color: variables.$grey-100;
+    background-color: var(--mm-color-user-role-badge-bg, #{variables.$grey-100});
+    color: var(--mm-color-user-role-badge-text, white);
     font-weight: bold;
-    @extend .t-white;
   }
 }
 
@@ -50,7 +50,16 @@
   margin-inline: auto;
   margin-bottom: 2rem;
 
-  color: variables.$red-200;
-  border-color: variables.$red-200;
-  background-color: variables.$white-100;
+  color: var(--kui-color-danger, #{variables.$red-200});
+  border-color: var(--kui-color-danger-border, #{variables.$red-200});
+  background-color: var(--kui-color-surface, #{variables.$white-100});
+
+  &:hover {
+    background-color: var(--kui-color-danger-surface, rgba(185, 29, 29, 0.1));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--kui-color-focus, #2563eb);
+    outline-offset: 2px;
+  }
 }

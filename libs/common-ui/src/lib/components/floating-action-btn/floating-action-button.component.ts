@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, Renderer2 } from '@angular/core';
-import { white100 } from '../../styles/abstract/variables';
-import { SpinnerComponent} from '../spinner/spinner.component';
+import { SpinnerComponent } from '../spinner/spinner.component';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -16,10 +15,10 @@ import { SpinnerComponent} from '../spinner/spinner.component';
   imports: [SpinnerComponent],
 })
 export class FloatingActionButtonComponent implements OnInit {
-  spinnerColor = white100;
+  spinnerColor = 'currentColor';
 
   @Input()
-  backgroundColor = white100;
+  backgroundColor?: string;
 
   @Input()
   loading = false;
@@ -28,6 +27,8 @@ export class FloatingActionButtonComponent implements OnInit {
 
   ngOnInit() {
     this.renderer.addClass(this.elRef.nativeElement, `floating-action-btn`);
-    this.renderer.setStyle(this.elRef.nativeElement, '--backgroundColor', this.backgroundColor);
+    if (this.backgroundColor) {
+      this.renderer.setStyle(this.elRef.nativeElement, '--backgroundColor', this.backgroundColor);
+    }
   }
 }

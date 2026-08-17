@@ -27,7 +27,17 @@ export class ProfilePage {
     this.changeCongregationCard = page.locator('kingdom-apps-change-congregation');
     this.congregationSelect = page.getByTestId('profile-congregation-select');
     this.logoutButton = page.getByTestId('profile-logout-button');
+
+    this.appearanceSettings = page.getByTestId('appearance-settings');
+    this.themeOptionSystem = page.getByTestId('theme-option-system');
+    this.themeOptionLight = page.getByTestId('theme-option-light');
+    this.themeOptionDark = page.getByTestId('theme-option-dark');
   }
+
+  readonly appearanceSettings: Locator;
+  readonly themeOptionSystem: Locator;
+  readonly themeOptionLight: Locator;
+  readonly themeOptionDark: Locator;
 
   /** Navigate to the profile page (uses SPA link if logged in to preserve UserState). */
   async goto(): Promise<void> {
@@ -43,5 +53,10 @@ export class ProfilePage {
   /** Select a congregation by visible text in the switch dropdown. */
   async selectCongregation(name: string): Promise<void> {
     await this.congregationSelect.selectOption({ label: name });
+  }
+
+  /** Select a theme preference option. */
+  async selectTheme(preference: 'system' | 'light' | 'dark'): Promise<void> {
+    await this.page.getByTestId(`theme-option-${preference}`).click();
   }
 }

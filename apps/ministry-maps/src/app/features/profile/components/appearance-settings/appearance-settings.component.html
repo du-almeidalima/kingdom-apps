@@ -1,0 +1,13 @@
+<kingdom-apps-section title="Aparência">
+  <div data-testid="appearance-settings">
+    <p class="t-body2 mb-4">Selecione o tema visual de sua preferência:</p>
+    <lib-radio-group
+      name="appearance-theme-preference"
+      ariaLabel="Preferência de tema"
+      [layout]="'vertical'"
+      [options]="options"
+      [value]="currentPreference()"
+      (selected)="onSelectTheme($event)"
+    />
+  </div>
+</kingdom-apps-section>

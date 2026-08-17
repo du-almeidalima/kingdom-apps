@@ -30,7 +30,7 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - run: npm ci --legacy-peer-deps
+      - run: npm ci
       - uses: nrwl/nx-set-shas@v4
 
       # Prepend any command with "nx-cloud record --" to record its logs to Nx Cloud
@@ -60,9 +60,12 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - run: npm ci --legacy-peer-deps
+      - run: npm ci
       # Separate package.json/lockfile; the Functions emulator loads this codebase.
       - run: npm ci --prefix functions/ministry-maps
+      - run: npm --prefix functions/ministry-maps run lint
+      - run: npm --prefix functions/ministry-maps test
+      - run: npm --prefix functions/ministry-maps run build
 
       - uses: nrwl/nx-set-shas@v4
 
@@ -112,7 +115,7 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - run: npm ci --legacy-peer-deps
+      - run: npm ci
       - uses: nrwl/nx-set-shas@v4
 
       - name: Get projects with deploy target

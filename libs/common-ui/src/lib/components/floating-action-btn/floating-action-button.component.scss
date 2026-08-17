@@ -17,16 +17,15 @@ $size: 6rem;
   border: none;
   border-radius: 999rem;
 
-  background-color: var(--backgroundColor, variables.$primary-green);
+  background-color: var(--backgroundColor, var(--kui-color-action-primary, #{variables.$primary-green}));
+  color: var(--kui-color-on-action-primary, #{variables.$white-100});
   cursor: pointer;
   transition:
     100ms linear box-shadow,
     100ms linear filter,
     variables.$background-transition;
 
-  box-shadow: 0 3px 5px -1px rgb(0 0 0 / 20%),
-    0px 6px 10px 0px rgb(0 0 0 / 14%),
-    0px 1px 18px 0px rgb(0 0 0 / 12%);
+  box-shadow: var(--kui-shadow-dialog, 0 3px 5px -1px rgb(0 0 0 / 20%), 0px 6px 10px 0px rgb(0 0 0 / 14%), 0px 1px 18px 0px rgb(0 0 0 / 12%));
 
   &:active,
   &:hover,
@@ -34,13 +33,19 @@ $size: 6rem;
     filter: brightness(110%);
   }
 
+  &:focus-visible {
+    outline: 2px solid var(--kui-color-focus, var(--kui-color-action-primary));
+    outline-offset: 3px;
+  }
+
   &:active {
-    box-shadow: 0 7px 8px -4px rgb(0 0 0 / 20%),
-      0px 12px 17px 2px rgb(0 0 0 / 14%),
-      0px 5px 22px 4px rgb(0 0 0 / 12%);
+    box-shadow: var(--kui-shadow-dialog, 0 7px 8px -4px rgb(0 0 0 / 20%), 0px 12px 17px 2px rgb(0 0 0 / 14%), 0px 5px 22px 4px rgb(0 0 0 / 12%));
   }
 
   &:disabled {
-    background-color: variables.$grey-100;
+    background-color: var(--kui-color-control-disabled, #{variables.$grey-100});
+    color: var(--kui-color-text-disabled, #{variables.$text-low});
+    cursor: not-allowed;
+    filter: none;
   }
 }

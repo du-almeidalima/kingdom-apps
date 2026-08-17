@@ -1,4 +1,3 @@
-@use 'sass:color';
 @use 'libs/common-ui/src/lib/styles/abstract/variables';
 @use 'libs/common-ui/src/lib/styles/base/typography';
 
@@ -8,24 +7,24 @@
 
 .territory-checkbox {
   $border-size: 1px;
-  $accent: variables.$green-400;
 
   display: flex;
 
   width: 100%;
   min-height: 7.5rem;
-  border: $border-size solid variables.$light-grey-100;
+  border: $border-size solid var(--kui-color-border, #{variables.$light-grey-100});
 
-  background-color: variables.$white-100;
+  background-color: var(--kui-color-surface-elevated, #{variables.$white-100});
+  color: var(--kui-color-text, #{variables.$text});
   cursor: pointer;
 
   &--disabled {
-    background-color: variables.$light-grey-100;
+    background-color: var(--kui-color-control-disabled, #{variables.$light-grey-100});
     cursor: initial;
   }
 
   &--selected {
-    border-color: $accent;
+    border-color: var(--kui-color-action-primary, #{variables.$green-400});
   }
 
   &__title-subtitle-container {
@@ -37,10 +36,12 @@
   &__title {
     @extend .t-body2;
     font-weight: 500;
+    color: var(--kui-color-text, #{variables.$text});
   }
 
   &__subtitle {
     @extend .t-caption;
+    color: var(--kui-color-text-muted, #{variables.$text-medium});
   }
 
   &__icon {
@@ -53,8 +54,7 @@
 
     height: $size;
     width: $size;
-    // This makes the icon looks centered with the first 2 address lines
-    //margin-top: .15rem;
+    color: var(--kui-color-text, #{variables.$text});
 
     &--large {
       height: $large-size;
@@ -87,7 +87,7 @@
     font-size: 1.4rem;
 
     &--disabled {
-      color: variables.$grey-300;
+      color: var(--kui-color-text-disabled, #{variables.$grey-300});
     }
   }
 
@@ -106,12 +106,13 @@
 
   &__last-visit-label {
     @extend .t-caption;
-    color: variables.$grey-100;
+    color: var(--kui-color-text-muted, #{variables.$grey-100});
   }
 
   &__last-visit-icon {
     height: 1.25rem;
     width: 1.25rem;
+    color: var(--kui-color-text-muted, #{variables.$grey-100});
   }
 
   &__indicator {
@@ -124,17 +125,16 @@
     transition: background-color 75ms linear;
 
     &--default {
-
-      background-color: color.scale(variables.$light-grey-100, $lightness: 10%);
-      border: $border-size solid variables.$light-grey-100;
+      background-color: var(--kui-color-surface-muted, #{variables.$light-grey-100});
+      border: $border-size solid var(--kui-color-border, #{variables.$light-grey-100});
     }
 
     &--selected {
-      background-color: $accent;
+      background-color: var(--kui-color-action-primary, #{variables.$green-400});
     }
 
     &--disabled {
-      background-color: variables.$grey-100;
+      background-color: var(--kui-color-border-strong, #{variables.$grey-100});
     }
   }
 

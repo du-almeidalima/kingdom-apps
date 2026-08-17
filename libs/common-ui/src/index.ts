@@ -16,3 +16,6 @@ export * from './lib/components/portal/portal-anchor.component';
 export { APP_ADMIN_ROLE } from './lib/directives/authorize/authorize.directive';
 
 export * from './lib/components/copy-text-block/copy-text-block.component';
+
+// Features
+export * from './lib/features';

@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { addDoc, collection, CollectionReference, Firestore } from '@angular/fire/firestore';
+import { addDoc, collection, CollectionReference, Firestore, Timestamp } from '@angular/fire/firestore';
 import { environment } from '../../../../environments/environment';
 
 export type LogEntry = {
   timestamp: Date;
+  expireAt: Timestamp;
   level: string;
   message: string;
   metadata: object;
@@ -20,6 +21,10 @@ export enum LogLevelEnum {
   providedIn: 'root',
 })
 export class LoggerService {
+  // TTL retention: 6 months
+  private static readonly RETENTION_DAYS = 180;
+  private static readonly MS_PER_DAY = 24 * 60 * 60 * 1000;
+
   private readonly logsCollection: CollectionReference;
 
   constructor(private firestore: Firestore) {
@@ -61,6 +66,7 @@ export class LoggerService {
     try {
       const logEntry: LogEntry = {
         timestamp: new Date(),
+        expireAt: Timestamp.fromDate(new Date(Date.now() + LoggerService.RETENTION_DAYS * LoggerService.MS_PER_DAY)),
         level: level,
         message,
         metadata: {

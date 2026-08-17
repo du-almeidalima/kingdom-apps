@@ -118,6 +118,29 @@ are in [`../domain/data-model.md`](../domain/data-model.md); pt-BR ↔ English v
 - **Edge cases:** `ConfirmDialogComponent.handleCancel(false)` closes with a falsy result, which the page's `.closed.subscribe(res => { if (res) { … } })` guard ignores entirely — clicking the dialog's own close affordance (if any) behaves identically to `Cancelar` since both resolve the same `closed` observable with a falsy value
 - **Priority:** P1 · **Gaps:** none
 
+### Appearance settings
+
+#### UC-PROF-11 — Appearance settings renders theme options with current preference selected
+- **Actor:** Any user on `/profile`
+- **Route:** `/profile`
+- **Preconditions:** theme preference stored in `localStorage` or defaulting to `system`
+- **Expected UI:** `data-testid="appearance-settings"` renders card with title `Aparência` and 3 options: `Padrão do sistema` (`system`), `Claro` (`light`), `Escuro` (`dark`). The active preference is visually marked as selected.
+- **Priority:** P0
+
+#### UC-PROF-12 — Changing theme preference updates application theme immediately and persists
+- **Actor:** Any user on `/profile`
+- **Route:** `/profile`
+- **Steps:** Click on `Claro`, `Escuro`, or `Padrão do sistema`.
+- **Expected UI & State:** `html[data-theme]` updates to the chosen preference (`light`|`dark`|`system`), `html[data-resolved-theme]` reflects effective color scheme (`light`|`dark`), meta theme-color updates (`#E7E6E4` for light, `#121212` for dark).
+- **Expected persistence:** `localStorage.getItem('ministry-maps.theme-preference')` holds the selected literal (`system`|`light`|`dark`). No Firestore mutation occurs.
+- **Priority:** P0
+
+#### UC-PROF-13 — Appearance setting syncs across open browser tabs
+- **Actor:** Any user with multiple tabs open
+- **Steps:** Change theme in Tab A.
+- **Expected UI & State:** Tab B reacts to the `StorageEvent` and updates `html[data-theme]`, `html[data-resolved-theme]`, and meta theme-color without reload.
+- **Priority:** P1
+
 ## Testability gaps (summary)
 
 - Zero `data-testid`s exist on `/profile` — the identity card, its initials/name/badge/congregation fields,

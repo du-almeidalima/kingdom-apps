@@ -7,8 +7,11 @@
 
   min-width: 20rem;
 
-  background-color: variables.$white-200;
-  box-shadow: variables.$shadow-z4;
+  background-color: var(--kui-color-surface-elevated, #{variables.$white-200});
+  color: var(--kui-color-text, #{variables.$text});
+  box-shadow: var(--kui-shadow-surface, #{variables.$shadow-z4});
+  border: 1px solid var(--kui-color-border, #{variables.$light-grey-100});
+  border-radius: 4px;
 
   animation: append-animate 200ms ease-out;
 
@@ -23,11 +26,12 @@
 
     list-style: none;
     cursor: pointer;
+    color: var(--kui-color-text, #{variables.$text});
 
     @extend .t-body2;
 
     &:hover {
-      background-color: variables.$white-300;
+      background-color: var(--kui-color-surface-hover, #{variables.$white-300});
     }
 
     button {
@@ -40,7 +44,7 @@
 
   &__separator {
     border: none;
-    border-bottom: 1px solid variables.$light-grey-100;
+    border-bottom: 1px solid var(--kui-color-border, #{variables.$light-grey-100});
     margin-block: .5rem;
   }
 }

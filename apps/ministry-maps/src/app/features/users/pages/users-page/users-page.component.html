@@ -1,20 +1,26 @@
 <main class="container">
   <h2 class="t-headline2 mb-8" data-testid="users-heading">Pessoas</h2>
-  <ul class="list-none" data-testid="users-list">
-    @for (user of users; track user.id) {
-      <li class="[&:not(:first-child)]:mt-3">
-        <kingdom-apps-user-list-item
-          [user]="user"
-          (remove)="handleDeleteUser($event)"
-          (edit)="handleEditUser($event)" />
-      </li>
-    }
-  </ul>
+  @if (isLoading) {
+    <div class="flex items-center justify-center mt-52 py-6" data-testid="users-loading">
+      <lib-spinner [height]="'5rem'" [width]="'5rem'" class="mx-auto" />
+    </div>
+  } @else {
+    <ul class="list-none" data-testid="users-list">
+      @for (user of users; track user.id) {
+        <li class="[&:not(:first-child)]:mt-3">
+          <kingdom-apps-user-list-item
+            [user]="user"
+            (remove)="handleDeleteUser($event)"
+            (edit)="handleEditUser($event)" />
+        </li>
+      }
+    </ul>
 
-  <button *libAuthorize="CREATE_INVITE_LINK_ALLOWED"
-          lib-floating-action-button title='Criar Link de Convite'
-          [backgroundColor]='green200'
-          (click)='handleCreateInviteLink()'>
-    <lib-icon icon='plus-lined' [fillColor]='white200' />
-  </button>
+    <button *libAuthorize="CREATE_INVITE_LINK_ALLOWED"
+            lib-floating-action-button title='Criar Link de Convite'
+            data-testid="users-add-button"
+            (click)='handleCreateInviteLink()'>
+      <lib-icon icon='plus-lined' />
+    </button>
+  }
 </main>

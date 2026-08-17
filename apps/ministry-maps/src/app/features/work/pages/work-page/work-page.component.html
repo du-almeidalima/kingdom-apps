@@ -1,8 +1,9 @@
 <main class='container'>
   @if (isLoading) {
     <span data-testid="work-loading">Loading...</span>
-  }
-  @if (designation) {
+  } @else if (isNotFound) {
+    <kingdom-apps-designation-not-found data-testid="work-designation-not-found" />
+  } @else if (designation) {
     <div>
       @if (isDisabled) {
         <lib-note

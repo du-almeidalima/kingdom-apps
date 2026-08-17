@@ -14,6 +14,8 @@ import { UserStateService } from '../../../../state/user.state.service';
 import { AuthService } from '../../../../core/features/auth/services/auth.service';
 import { getTranslatedRole, RoleEnum } from '../../../../../models/enums/role';
 import { ChangeCongregationComponent } from '../../components/change-congregation.component';
+import { AppearanceSettingsComponent } from '../../components/appearance-settings/appearance-settings.component';
+import { AppInstallSettingsComponent } from '../../components/app-install-settings/app-install-settings.component';
 import { getUserInitials } from '../../../../shared/utils/user-utils';
 import { ProfileBO } from '../../bo/profile.bo';
 
@@ -22,7 +24,15 @@ import { ProfileBO } from '../../bo/profile.bo';
   templateUrl: './profile-page.component.html',
   styleUrl: './profile-page.component.scss',
   standalone: true,
-  imports: [ChangeCongregationComponent, CardComponent, ButtonComponent, IconComponent, AuthorizeDirective],
+  imports: [
+    ChangeCongregationComponent,
+    AppearanceSettingsComponent,
+    AppInstallSettingsComponent,
+    CardComponent,
+    ButtonComponent,
+    IconComponent,
+    AuthorizeDirective,
+  ],
 })
 export class ProfilePageComponent {
   protected readonly RoleEnum = RoleEnum;

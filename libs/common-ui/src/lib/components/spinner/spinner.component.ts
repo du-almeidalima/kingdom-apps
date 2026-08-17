@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { primaryGreen } from '../../styles/abstract/variables';
 
 @Component({
   selector: 'lib-spinner',
@@ -22,5 +21,5 @@ export class SpinnerComponent {
   hide = false;
 
   @Input()
-  color = primaryGreen;
+  color = 'var(--kui-color-action-primary, #07AB3B)';
 }

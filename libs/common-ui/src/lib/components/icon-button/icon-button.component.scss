@@ -15,12 +15,23 @@
   border-radius: 50%;
 
   background-color: transparent;
+  color: var(--kui-color-text, #{variables.$text});
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 
   transition: variables.$background-transition;
 
-  &:hover, &:active, &:focus {
-    background: var(--background-hover-color);
+  &:hover, &:active {
+    background: var(--background-hover-color, var(--kui-color-surface-hover, #{variables.$white-300}));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--kui-color-focus, #2563eb);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    color: var(--kui-color-text-disabled, #{variables.$text-low});
+    cursor: not-allowed;
   }
 }

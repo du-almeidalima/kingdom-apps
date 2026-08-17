@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { addDoc, collection, Firestore } from '@angular/fire/firestore';
+import { addDoc, collection, Firestore, Timestamp } from '@angular/fire/firestore';
 import { MockProvider } from 'ng-mocks';
 
 import { LoggerService, LogLevelEnum } from './logger.service';
@@ -47,6 +47,7 @@ describe('LoggerService', () => {
 
       expect(addDoc).toHaveBeenCalledWith(expect.anything(), {
         timestamp: expect.any(Date),
+        expireAt: expect.any(Timestamp),
         level: LogLevelEnum.DEBUG,
         message,
         metadata: {
@@ -65,6 +66,7 @@ describe('LoggerService', () => {
 
       expect(addDoc).toHaveBeenCalledWith(expect.anything(), {
         timestamp: expect.any(Date),
+        expireAt: expect.any(Timestamp),
         level: LogLevelEnum.INFO,
         message,
         metadata: {
@@ -83,6 +85,7 @@ describe('LoggerService', () => {
 
       expect(addDoc).toHaveBeenCalledWith(expect.anything(), {
         timestamp: expect.any(Date),
+        expireAt: expect.any(Timestamp),
         level: LogLevelEnum.WARN,
         message,
         metadata: {
@@ -102,6 +105,7 @@ describe('LoggerService', () => {
 
       expect(addDoc).toHaveBeenCalledWith(expect.anything(), {
         timestamp: expect.any(Date),
+        expireAt: expect.any(Timestamp),
         level: LogLevelEnum.ERROR,
         message,
         metadata: {
@@ -111,6 +115,22 @@ describe('LoggerService', () => {
           userAgent,
         },
       });
+    });
+  });
+
+  describe('retention policy', () => {
+    it('should set expireAt 6 months (180 days) after creation', async () => {
+      const before = Date.now();
+
+      await service.info('Retention message');
+
+      const after = Date.now();
+      const entry = (addDoc as jest.Mock).mock.calls[0][1];
+      const sixMonthsMs = 180 * 24 * 60 * 60 * 1000;
+
+      expect(entry.expireAt).toBeInstanceOf(Timestamp);
+      expect(entry.expireAt.toMillis()).toBeGreaterThanOrEqual(before + sixMonthsMs);
+      expect(entry.expireAt.toMillis()).toBeLessThanOrEqual(after + sixMonthsMs);
     });
   });
 
@@ -131,6 +151,7 @@ describe('LoggerService', () => {
       // The second call should be an error log with the original error
       expect(addDoc).toHaveBeenLastCalledWith(expect.anything(), {
         timestamp: expect.any(Date),
+        expireAt: expect.any(Timestamp),
         level: LogLevelEnum.ERROR,
         message: 'Error while logging entry',
         metadata: {
@@ -166,6 +187,7 @@ describe('LoggerService', () => {
 
       expect(addDoc).toHaveBeenCalledWith(expect.anything(), {
         timestamp: expect.any(Date),
+        expireAt: expect.any(Timestamp),
         level: LogLevelEnum.INFO,
         message,
         metadata: {

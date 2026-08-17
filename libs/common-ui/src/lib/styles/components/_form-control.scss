@@ -5,8 +5,35 @@
 .form-control {
   height: variables.$control-height;
   padding: variables.$control-padding;
-  border: 1px solid variables.$light-grey-100;
-  background-color: variables.$form-control-background-color;
+  border: 1px solid var(--kui-color-border-strong, #{variables.$light-grey-100});
+  background-color: var(--kui-color-surface-elevated, #{variables.$form-control-background-color});
+  color: var(--kui-color-text, #{variables.$text});
+
+  &:focus,
+  &:focus-visible {
+    outline: 2px solid var(--kui-color-focus, #2563eb);
+    outline-offset: 1px;
+    border-color: var(--kui-color-focus, #2563eb);
+  }
+
+  &:disabled {
+    background-color: var(--kui-color-control-disabled, #{variables.$light-grey-200});
+    color: var(--kui-color-text-disabled, #{variables.$text-low});
+    cursor: not-allowed;
+  }
+
+  &::placeholder {
+    color: var(--kui-color-placeholder, rgba(0, 0, 0, 0.54));
+  }
+
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--kui-color-text, #{variables.$text});
+    -webkit-box-shadow: 0 0 0 1000px var(--kui-color-control-autofill, #e8f0fe) inset;
+    box-shadow: 0 0 0 1000px var(--kui-color-control-autofill, #e8f0fe) inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
 
   transition: all .2s ease-in-out;
   @extend .t-control;

@@ -8,6 +8,7 @@
   padding: 2.4rem;
   border-radius: 3px;
 
-  background-color: variables.$white-200;
-  box-shadow: variables.$shadow-z1;
+  background-color: var(--kui-color-surface, #{variables.$white-200});
+  color: var(--kui-color-text, #{variables.$text});
+  box-shadow: var(--kui-shadow-surface, #{variables.$shadow-z1});
 }

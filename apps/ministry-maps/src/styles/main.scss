@@ -1,8 +1,13 @@
 /* You can add global styles to this file, and also import other style files */
+@use './theme';
 @use './components/index' as *;
 
 @layer mm-base;
 
 @import '@angular/cdk/overlay-prebuilt.css';
+
+.cdk-overlay-backdrop {
+  background-color: var(--kui-color-backdrop, rgba(0, 0, 0, 0.48));
+}
 
 @tailwind utilities;

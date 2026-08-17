@@ -13,11 +13,11 @@
   height: var(--figure-size, $size);
   padding: calc(var(--figure-size) - 1rem);
   border-radius: 100%;
-  background-color: color.scale(variables.$green-300);
+  background-color: var(--mm-color-profile-avatar, #{variables.$green-300});
 
   font-size: var(--figure-font-size, 2.5rem);
   font-weight: bold;
   letter-spacing: var(--figure-letter-spacing, 0.2rem);
   text-transform: uppercase;
-  color: white;
+  color: var(--mm-color-profile-avatar-content, white);
 }

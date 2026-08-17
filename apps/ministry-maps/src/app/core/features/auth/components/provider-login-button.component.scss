@@ -12,10 +12,22 @@
   align-items: center;
 
   height: 5rem;
-  border: 1px solid variables.$light-grey-100;
+  border: 1px solid var(--kui-color-border, #{variables.$light-grey-100});
+  border-radius: 4px;
+  background-color: var(--kui-color-surface-elevated, #ffffff);
+  color: var(--kui-color-text, #{variables.$text});
   padding: 1rem;
 
   cursor: pointer;
+
+  &:hover {
+    background-color: var(--kui-color-surface-hover, #{variables.$white-300});
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--kui-color-focus, #2563eb);
+    outline-offset: 2px;
+  }
 
   &__logo {
     aspect-ratio: 1/1;
@@ -28,5 +40,6 @@
   &__text {
     text-align: start;
     margin-left: 1rem;
+    color: var(--kui-color-text, #{variables.$text});
   }
 }

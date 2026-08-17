@@ -12,11 +12,7 @@ import { from, map, Observable, of, switchMap, take } from 'rxjs';
 
 import { AuthErrorEnum, AuthRepository, CreateUserConfig } from '../auth.repository';
 import { User } from '../../../models/user';
-import { RoleEnum } from '../../../models/enums/role';
-import { doc, DocumentReference, Firestore } from '@angular/fire/firestore';
-import { Congregation } from '../../../models/congregation';
 import { FirebaseUserDatasourceService } from './firebase-user-datasource.service';
-import { FirebaseCongregationModel } from '../../../models/firebase/firebase-congregation-model';
 
 export enum FIREBASE_PROVIDERS {
   'GOOGLE' = 'GOOGLE',
@@ -25,7 +21,6 @@ export enum FIREBASE_PROVIDERS {
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseAuthDatasourceService implements AuthRepository {
-  private readonly firestore = inject(Firestore);
   private readonly auth = inject(Auth);
   private readonly userRepository = inject(FirebaseUserDatasourceService);
 
@@ -125,17 +120,9 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
           throw new Error(AuthErrorEnum.INVALID_CREATE_USER_DATA);
         }
 
-        return this.userRepository.put({
-          id: providerUser.uid,
-          email: providerUser.email ?? '',
-          name: providerUser.displayName ?? 'Unidentified',
-          photoUrl: providerUser.photoURL ?? '',
-          role: createUserConfig?.role ?? RoleEnum.PUBLISHER,
-          congregation: doc(this.firestore, `/congregations/${createUserConfig.congregation.id}`) as DocumentReference<
-            Congregation,
-            FirebaseCongregationModel
-          >,
-        });
+        // Profiles are created server-side only (provisionUserFromInvite callable); the rules
+        // deny client-side creation, so a role can never be forged.
+        return this.userRepository.provisionFromInvite(createUserConfig.inviteId, providerUser.uid);
       })
     );
   }

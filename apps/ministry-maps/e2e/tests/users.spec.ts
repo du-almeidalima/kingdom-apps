@@ -209,7 +209,10 @@ test.describe('Users page (WP-22)', () => {
     expect(await db.getDoc(db.collections.users, 'seed-user-publisher-1')).toBeUndefined();
   });
 
-  test('UC-USERS-09 — ⚠ Auth account survives Firestore doc deletion', async ({ authenticatedPage, db }) => {
+  test('UC-USERS-09 — Delete also removes the Auth account via the deleteUser callable', async ({
+    authenticatedPage,
+    db,
+  }) => {
     const usersPage = new UsersPage(authenticatedPage);
     await usersPage.goto();
 
@@ -223,12 +226,20 @@ test.describe('Users page (WP-22)', () => {
     // Row disappears.
     await expect(usersPage.rowByName('Pedro Lima')).toHaveCount(0);
 
-    // ⚠ Firestore doc is gone…
+    // Firestore doc is gone…
     expect(await db.getDoc(db.collections.users, 'seed-user-publisher-2')).toBeUndefined();
-    // …but the Auth emulator account is still resolvable (the `deleteUser`
-    // callable Observable is never subscribed in the datasource).
-    const authUser = await db.auth.getUser('seed-user-publisher-2');
-    expect(authUser.uid).toBe('seed-user-publisher-2');
+    // …and the deleteUser callable removed the Auth account too (it runs before the doc
+    // deletion; both are async, so poll).
+    await expect
+      .poll(async () => {
+        try {
+          await db.auth.getUser('seed-user-publisher-2');
+          return false;
+        } catch {
+          return true;
+        }
+      })
+      .toBe(true);
   });
 
   // ── Role gating ──────────────────────────────────────────────────────────────

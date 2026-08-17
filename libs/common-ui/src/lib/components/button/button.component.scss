@@ -1,4 +1,3 @@
-@use 'sass:color';
 @use '../../styles/abstract/variables';
 
 :host {
@@ -6,31 +5,48 @@
   min-height: 4.2rem;
   padding: 1.2rem 1.6rem;
   border-radius: 2px;
-  border: 1px solid color.scale(variables.$white-300, $lightness: -20%);
+  border: 1px solid var(--kui-color-border, #{variables.$grey-100});
 
   transition: background-color 100ms linear, width 200ms ease-out;
-  background-color: variables.$white-300;
+  background-color: var(--kui-color-surface-hover, #{variables.$white-300});
+  color: var(--kui-color-text, #{variables.$text});
   text-align: center;
   line-height: 1;
   cursor: pointer;
 
   &:hover {
-    background-color: color.scale(variables.$white-300, $lightness: -10%);
+    background-color: var(--kui-color-surface-muted, #{variables.$white-300});
+  }
+
+  &:active {
+    background-color: var(--kui-color-surface-muted, #{variables.$white-300});
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--kui-color-focus, #2563eb);
+    outline-offset: 2px;
   }
 
   &.button--primary {
-    color: variables.$white-100;
-    background-color: variables.$blue-btn;
-    border-color: color.scale(variables.$blue-btn, $lightness: -20%);
+    color: var(--kui-color-on-action-primary, #{variables.$white-100});
+    background-color: var(--kui-color-action-primary, #{variables.$blue-btn});
+    border-color: var(--kui-color-action-primary, #{variables.$blue-btn});
 
     &:hover {
-      background-color: color.scale(variables.$blue-btn, $lightness: -10%);
+      background-color: var(--kui-color-action-primary-hover, #{variables.$blue-btn});
+      border-color: var(--kui-color-action-primary-hover, #{variables.$blue-btn});
+    }
+
+    &:active {
+      background-color: var(--kui-color-action-primary-active, #{variables.$blue-btn});
+      border-color: var(--kui-color-action-primary-active, #{variables.$blue-btn});
     }
   }
 
   &:disabled {
-    border-color: variables.$grey-100;
-    background-color: variables.$light-grey-100;
-    color: variables.$text-low;
+    border-color: var(--kui-color-border, #{variables.$grey-100});
+    background-color: var(--kui-color-control-disabled, #{variables.$light-grey-100});
+    color: var(--kui-color-text-disabled, #{variables.$text-low});
+    cursor: not-allowed;
   }
 }

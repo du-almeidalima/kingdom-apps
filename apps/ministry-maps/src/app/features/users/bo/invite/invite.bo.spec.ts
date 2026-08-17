@@ -116,37 +116,4 @@ describe('InviteBO', () => {
       expect(inviteRepository.add).not.toHaveBeenCalled();
     });
   });
-
-  describe('consumeInviteLink', () => {
-    const mockInvitationLink: InvitationLink = {
-      id: 'invite123',
-      createdBy: elderUser.email,
-      congregation: publisherUser.congregation!,
-      createdAt: new Date(),
-      role: RoleEnum.PUBLISHER,
-      isValid: true,
-    };
-
-    it('should mark the invite link as consumed', () => {
-      const inviteToConsume = { ...mockInvitationLink };
-      inviteRepository.update.mockReturnValue(of(void 0));
-
-      service.consumeInviteLink(inviteToConsume).subscribe();
-
-      expect(inviteRepository.update).toHaveBeenCalledWith(inviteToConsume);
-    });
-
-    it('should handle the case when user is not logged in', () => {
-      const inviteToConsume = { ...mockInvitationLink };
-      inviteRepository.update.mockReturnValue(of(void 0));
-      userStateService.setUser(null);
-
-      service.consumeInviteLink(inviteToConsume).subscribe();
-
-      expect(inviteToConsume.isValid).toBe(false);
-      expect(inviteToConsume.usedAt).toBeInstanceOf(Date);
-      expect(inviteToConsume.usedBy).toBeUndefined();
-      expect(inviteRepository.update).toHaveBeenCalledWith(inviteToConsume);
-    });
-  });
 });

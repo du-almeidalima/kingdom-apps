@@ -11,7 +11,7 @@ import { IconComponent } from '../../icon/icon.component';
     <div class="card-header">
       @if (icon) {
         <div class="card-header__icon-container">
-          <lib-icon class="card-header__icon" [icon]="icon" [fillColor]="white200"></lib-icon>
+          <lib-icon class="card-header__icon" [icon]="icon" fillColor="currentColor"></lib-icon>
         </div>
       }
       <div class="card-header__title-container">

@@ -123,15 +123,15 @@ Reading a user resolves the reference. If the congregation document is missing, 
 | `role`         | `RoleEnum`           | Role granted to the invitee.                                                                                                                              |
 | `isValid`      | `boolean`            | `true` on creation; **set to `false` on consumption**. Note the field's doc-comment says the opposite of what the code does — trust `false === consumed`. |
 
-> **⚠ `congregation` shape drift between write paths.** `FirebaseInvitationLinkDataSourceService.add`
+> **⚠ `congregation` shape between write paths.** `FirebaseInvitationLinkDataSourceService.add`
 > re-wraps the hydrated `Congregation` into a **`DocumentReference`** before `setDoc`, so a freshly created
-> invite stores `congregation` as a reference. But `update()` (`setDoc({ ...invitationLink })`, **full
-> overwrite, no merge**) receives the invite object **after hydration** (consumption via
-> `InviteBO.consumeInviteLink`), so a consumed invite's `congregation` is overwritten as an **embedded
-> plain object** (`{ id, name, locatedOn, cities, settings }`). Both shapes survive reads because
-> `getById` only accesses `congregation.id` (present on both a `DocumentReference` and the embedded
-> object). When seeding invites raw, write `congregation` as a `DocumentReference` (the creation-time
-> shape); when asserting on a consumed invite, expect the embedded-object shape.
+> invite stores `congregation` as a reference. Consumption moved server-side: the
+> `provisionUserFromInvite` Cloud Function consumes the invite with a field-level
+> `transaction.update(invite, { isValid, usedAt, usedBy })`, so a consumed invite's `congregation`
+> **stays a `DocumentReference`** (the legacy full-doc-overwrite drift via the repository `update()`
+> no longer has any callers — `InviteBO.consumeInviteLink` was removed). Reads only access
+> `congregation.id`, which works for both shapes. When seeding invites raw, always write
+> `congregation` as a `DocumentReference` (the creation-time shape).
 
 ---
 

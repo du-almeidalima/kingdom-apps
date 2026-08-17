@@ -2,10 +2,16 @@
   display: flex;
   margin-bottom: 3rem;
 
-  background-color: var(--backgroundColor, black);
+  background-color: var(--backgroundColor, var(--kui-color-surface-inverse, #4D4947));
+  color: var(--kui-color-on-inverse, #FDFDFD);
 
   &__logo-link-container {
     text-decoration: none;
+
+    &:focus-visible {
+      outline: 2px solid var(--kui-color-focus, #2563eb);
+      outline-offset: 2px;
+    }
   }
 
   &__logo {
@@ -13,7 +19,7 @@
 
     font-size: 2rem;
     font-weight: bold;
-    color: var(--logoColor);
-    background-color: var(--logoBackgroundColor, darkgrey);
+    color: var(--logoColor, var(--kui-color-on-inverse, #FDFDFD));
+    background-color: var(--logoBackgroundColor, var(--kui-color-surface-inverse, #4D4947));
   }
 }

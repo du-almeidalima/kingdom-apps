@@ -4,24 +4,32 @@
 .territory-alert-badge {
   padding: .25rem .5rem;
   border-radius: 100rem;
-  border: 1px solid currentColor;
-
-  color: variables.$grey-200;
+  border: 1px solid var(--mm-color-territory-alert-default-border, #{variables.$grey-200});
+  background-color: var(--mm-color-territory-alert-default-background, #{variables.$white-300});
+  color: var(--mm-color-territory-alert-default-foreground, #{variables.$grey-200});
   @extend .t-caption;
 
   &--revisit {
-    color: variables.$green-500;
+    background-color: var(--mm-color-territory-alert-revisit-background, #dcfce7);
+    color: var(--mm-color-territory-alert-revisit-foreground, #{variables.$green-500});
+    border-color: var(--mm-color-territory-alert-revisit-border, #{variables.$green-500});
   }
 
   &--moved {
-    color: variables.$indigo-800;
+    background-color: var(--mm-color-territory-alert-moved-background, #e0e7ff);
+    color: var(--mm-color-territory-alert-moved-foreground, #{variables.$indigo-800});
+    border-color: var(--mm-color-territory-alert-moved-border, #{variables.$indigo-800});
   }
 
   &--stop-visiting {
-    color: variables.$red-300;
+    background-color: var(--mm-color-territory-alert-stop-visiting-background, #fee3e3);
+    color: var(--mm-color-territory-alert-stop-visiting-foreground, #{variables.$red-300});
+    border-color: var(--mm-color-territory-alert-stop-visiting-border, #{variables.$red-300});
   }
 
   &--bible-student {
-    color: variables.$orange-400;
+    background-color: var(--mm-color-territory-alert-bible-student-background, #ffedd5);
+    color: var(--mm-color-territory-alert-bible-student-foreground, #{variables.$orange-400});
+    border-color: var(--mm-color-territory-alert-bible-student-border, #{variables.$orange-400});
   }
 }

@@ -221,7 +221,7 @@ function resolveBin(name) {
   }
 
   throw new Error(
-    `Could not find "${name}" in node_modules/.bin. Run \`npm ci --legacy-peer-deps\` from the workspace root.`
+    `Could not find "${name}" in node_modules/.bin. Run \`npm ci\` from the workspace root.`
   );
 }
 
@@ -380,6 +380,15 @@ async function main() {
     if (!(await freePort(port, name))) {
       throw new Error(`Port ${port} (${name}) is still in use after SIGKILL — free it manually and retry.`);
     }
+  }
+
+  log('building functions/ministry-maps…');
+  const buildFunctions = spawnSync('npm', ['--prefix', 'functions/ministry-maps', 'run', 'build'], {
+    cwd: workspaceRoot,
+    stdio: 'inherit',
+  });
+  if (buildFunctions.status !== 0) {
+    throw new Error('Failed to build functions/ministry-maps before starting emulators.');
   }
 
   log(`starting emulators (${EMULATORS.join(', ')}) and the ministry-maps dev server…`);

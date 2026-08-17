@@ -218,24 +218,34 @@ test.describe('Territories page — CRUD and reorder (WP-15)', () => {
     const territoriesPage = new TerritoriesPage(authenticatedPage);
     await territoriesPage.goto();
 
-    // "Todas" → no drag handle renders at all.
+    // 1. "Todas" → no drag handle renders at all.
     await territoriesPage.showAllCities();
     await expect(territoriesPage.dragHandle('Av. dos Autonomistas, 1200 - Centro')).toHaveCount(0);
 
-    // Back to São Paulo, switch sort to "Última Visita" → handle disabled + verbatim typo title.
+    // 2. Specific city + "Ordem de Cadastro" (default) → drag handle is enabled.
     await territoriesPage.selectCity('São Paulo');
+    const handle = territoriesPage.dragHandle('Rua das Acácias, 45 - Pinheiros');
+    await expect(handle).toBeVisible();
+    await expect(handle).toBeEnabled();
+
+    // 3. Switch sort to "Última Visita" → handle is disabled with explanatory title.
     const sortFilter = new SortFilterDialogPage(authenticatedPage);
     await sortFilter.open();
     await sortFilter.selectSort('Última Visita');
     await sortFilter.apply();
 
-    const handle = territoriesPage.dragHandle('Rua das Acácias, 45 - Pinheiros');
     await expect(handle).toBeVisible();
-    // `cdkDragHandleDisabled` disables CDK dragging but does not add a native
-    // `disabled` attribute to the button. The grey icon + title are the DOM
-    // affordances exposed by this implementation.
-    await expect(handle.locator('svg')).toHaveCSS('fill', 'rgb(141, 141, 141)');
+    await expect(handle).toBeDisabled();
     await expect(handle).toHaveAttribute('title', 'Para ordernar manualmente, use a ordenação Ordem de Cadastro');
+
+    // 4. Switch back to "Ordem de Cadastro" → handle re-enables without reload (edge case).
+    await sortFilter.open();
+    await sortFilter.selectSort('Ordem de Cadastro');
+    await sortFilter.apply();
+
+    await expect(handle).toBeVisible();
+    await expect(handle).toBeEnabled();
+    await expect(handle).toHaveAttribute('title', '');
 
     // Scope/sort gating is client-only and must not mutate territory records.
     expect((await db.getDoc(db.collections.territories, 'seed-territory-1'))?.['positionIndex']).toBe(0);

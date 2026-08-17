@@ -2,7 +2,8 @@
 
 .quote-report {
   padding: 1rem;
-  background-color: variables.$white-300;
+  background-color: var(--kui-color-surface-muted, #{variables.$white-300});
+  color: var(--kui-color-text, #{variables.$text});
 
   font-size: 1.3rem;
   font-style: italic;

@@ -25,9 +25,9 @@ import { green300, grey400 } from '../../styles/abstract/variables';
       <span class="copy-text-block__content" data-testid="copy-text-block-content">{{ text() }}</span>
       <button class="copy-text-block__button" data-testid="copy-text-block-button" (click)="handleCopyClick()">
         @if (isTextCopied()) {
-        <lib-icon icon="check-mark-circle-lined" class="h-8 w-8" [fillColor]="green300" />
+        <lib-icon icon="check-mark-circle-lined" class="h-8 w-8" [fillColor]="'var(--kui-color-action-primary)'" />
         } @else {
-        <lib-icon icon="copy-lined" class="h-8 w-8" [fillColor]="grey400" />
+        <lib-icon icon="copy-lined" class="h-8 w-8" [fillColor]="'currentColor'" />
         }
       </button>
     </div>
@@ -37,8 +37,6 @@ import { green300, grey400 } from '../../styles/abstract/variables';
   `,
 })
 export class CopyTextBlockComponent implements OnDestroy {
-  protected readonly grey400 = grey400;
-  protected readonly green300 = green300;
 
   clipboard = inject(Clipboard);
 
