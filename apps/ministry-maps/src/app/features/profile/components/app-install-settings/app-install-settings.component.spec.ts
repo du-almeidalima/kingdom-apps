@@ -11,6 +11,7 @@ describe('AppInstallSettingsComponent', () => {
   let isInstalledOnDeviceSignal: ReturnType<typeof signal<boolean>>;
   let canPromptSignal: ReturnType<typeof signal<boolean>>;
   let isIosSignal: ReturnType<typeof signal<boolean>>;
+  let isSamsungBrowserSignal: ReturnType<typeof signal<boolean>>;
   let promptInstallMock: jest.Mock;
 
   beforeEach(async () => {
@@ -18,6 +19,7 @@ describe('AppInstallSettingsComponent', () => {
     isInstalledOnDeviceSignal = signal<boolean>(false);
     canPromptSignal = signal<boolean>(false);
     isIosSignal = signal<boolean>(false);
+    isSamsungBrowserSignal = signal<boolean>(false);
     promptInstallMock = jest.fn().mockResolvedValue('accepted');
 
     const mockPwaService = {
@@ -25,6 +27,7 @@ describe('AppInstallSettingsComponent', () => {
       isInstalledOnDevice: isInstalledOnDeviceSignal.asReadonly(),
       canPrompt: canPromptSignal.asReadonly(),
       isIos: isIosSignal.asReadonly(),
+      isSamsungBrowser: isSamsungBrowserSignal.asReadonly(),
       promptInstall: promptInstallMock,
     };
 
@@ -82,6 +85,17 @@ describe('AppInstallSettingsComponent', () => {
     await component.handleInstall();
 
     expect(promptInstallMock).toHaveBeenCalled();
+  });
+
+  it('should render Samsung Browser notice when isSamsungBrowser is true and promptable', () => {
+    isStandaloneSignal.set(false);
+    isInstalledOnDeviceSignal.set(false);
+    canPromptSignal.set(true);
+    isSamsungBrowserSignal.set(true);
+    fixture.detectChanges();
+
+    const samsungNotice = fixture.debugElement.query(By.css('[data-testid="samsung-browser-notice"]'));
+    expect(samsungNotice).toBeTruthy();
   });
 
   it('should render iOS instructions when on iOS and cannot prompt', () => {

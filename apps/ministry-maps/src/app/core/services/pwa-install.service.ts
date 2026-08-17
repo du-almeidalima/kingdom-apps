@@ -23,6 +23,7 @@ export class PwaInstallService {
   readonly isStandalone = signal<boolean>(false);
   readonly isInstalledOnDevice = signal<boolean>(false);
   readonly isIos = signal<boolean>(false);
+  readonly isSamsungBrowser = signal<boolean>(false);
 
   readonly canPrompt = computed(() => !this.isStandalone() && !this.isInstalledOnDevice() && !!this.deferredPrompt());
 
@@ -67,10 +68,13 @@ export class PwaInstallService {
       // matchMedia listener not supported in this environment
     }
 
-    // Check iOS
+    // Check iOS and Samsung Browser
     const ua = window.navigator?.userAgent ?? '';
     const isIos = /iPad|iPhone|iPod/.test(ua) && !('MSStream' in window);
     this.isIos.set(isIos);
+
+    const isSamsungBrowser = /SamsungBrowser/i.test(ua);
+    this.isSamsungBrowser.set(isSamsungBrowser);
 
     // Pick up early prompt if already captured on window
     if (window.__deferredPwaPrompt) {

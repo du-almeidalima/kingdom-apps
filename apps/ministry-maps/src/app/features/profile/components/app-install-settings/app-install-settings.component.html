@@ -44,6 +44,16 @@
             <lib-icon icon="download-20" class="h-5 w-5" [fillColor]="'currentColor'" />
             <span>Instalar aplicativo</span>
           </button>
+          @if (isSamsungBrowser()) {
+            <div class="app-install__browser-notice" data-testid="samsung-browser-notice">
+              <p class="t-caption text-muted mb-1">
+                <strong>Aviso para Samsung Internet:</strong> Ao instalar, o Android pode exibir uma mensagem informando que o aplicativo foi criado para uma versão anterior do sistema. Esse é um comportamento conhecido desse navegador e é seguro continuar tocando em <em>"Mais detalhes" &gt; "Instalar assim mesmo"</em>.
+              </p>
+              <p class="t-caption text-muted">
+                Para uma instalação direta sem esse aviso, você também pode usar navegadores como <strong>Google Chrome</strong>, <strong>Microsoft Edge</strong>, <strong>Firefox</strong> ou <strong>Opera</strong>.
+              </p>
+            </div>
+          }
         </div>
       }
       @case (AppInstallStatus.IOS) {
@@ -57,9 +67,19 @@
       }
       @case (AppInstallStatus.MANUAL) {
         <div class="app-install__manual" data-testid="app-manual-state">
-          <p class="t-body2">
+          <p class="t-body2 mb-2">
             Você pode instalar o Ministry Maps através do menu do seu navegador selecionando <strong>"Instalar aplicativo"</strong> ou <strong>"Adicionar à tela inicial"</strong>.
           </p>
+          @if (isSamsungBrowser()) {
+            <div class="app-install__browser-notice" data-testid="samsung-browser-notice">
+              <p class="t-caption text-muted mb-1">
+                <strong>Aviso para Samsung Internet:</strong> Ao instalar, o Android pode exibir uma mensagem informando que o aplicativo foi criado para uma versão anterior do sistema. Esse é um comportamento conhecido desse navegador e é seguro continuar tocando em <em>"Mais detalhes" &gt; "Instalar assim mesmo"</em>.
+              </p>
+              <p class="t-caption text-muted">
+                Para uma melhor experiência, você também pode usar navegadores como <strong>Google Chrome</strong>, <strong>Microsoft Edge</strong>, <strong>Firefox</strong> ou <strong>Opera</strong>.
+              </p>
+            </div>
+          }
         </div>
       }
     }

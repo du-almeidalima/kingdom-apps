@@ -25,6 +25,7 @@ export class AppInstallSettingsComponent {
   private readonly pwaInstallService = inject(PwaInstallService);
 
   readonly isInstalling = signal(false);
+  readonly isSamsungBrowser = computed(() => this.pwaInstallService.isSamsungBrowser());
 
   readonly status = computed<AppInstallStatus>(() => {
     if (this.pwaInstallService.isStandalone()) {

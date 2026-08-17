@@ -59,4 +59,12 @@ describe('PwaInstallService', () => {
     expect(service.isInstalledOnDevice()).toBe(true);
     expect(service.canPrompt()).toBe(false);
   });
+
+  it('should detect SamsungBrowser in userAgent', () => {
+    jest.spyOn(window.navigator, 'userAgent', 'get').mockReturnValue(
+      'Mozilla/5.0 (Linux; Android 16; SAMSUNG SM-S918B) AppleWebKit/537.36 SamsungBrowser/26.0 Chrome/120.0 Mobile'
+    );
+    const customService = new PwaInstallService();
+    expect(customService.isSamsungBrowser()).toBe(true);
+  });
 });
