@@ -1,0 +1,59 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+@use 'libs/common-ui/src/lib/styles/base/typography';
+
+:host {
+  display: block;
+}
+
+.app-install {
+  &__installed {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__status-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+  }
+
+  &__prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: auto;
+    min-height: 2.75rem;
+    padding: 0.6rem 1.25rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  &__steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding-left: 1.25rem;
+  }
+}
+
+.text-primary {
+  color: var(--kui-color-text, #{variables.$text});
+}
+
+.text-muted {
+  color: var(--kui-color-text-muted, #{variables.$text-medium});
+}

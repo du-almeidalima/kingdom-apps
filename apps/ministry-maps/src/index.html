@@ -5,6 +5,7 @@
   <meta name="color-scheme" content="light dark" />
   <meta name="theme-color" data-mm-theme-color content="#E7E6E4" />
   <script>
+    // Initialize the theming preferences
     (() => {
       try {
         const storageKey = 'ministry-maps.theme-preference';
@@ -34,6 +35,12 @@
         }
       } catch {}
     })();
+
+    // Stop the browser default install prompt in favor of the custom one
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      window.__deferredPwaPrompt = e;
+    });
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
   <meta name="google" content="notranslate">

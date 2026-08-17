@@ -4,9 +4,19 @@
   "description": "Aplicativo Web para ajudar no trabalho de ministério das Testemunhas de Jeová.",
   "theme_color": "#45C06C",
   "background_color": "#fafafa",
+  "id": "/",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "manifest.webmanifest"
+    }
+  ],
   "icons": [
     {
       "src": "icons/android/android-launchericon-48-48.png",

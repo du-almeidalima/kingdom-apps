@@ -15,6 +15,7 @@ import { AuthService } from '../../../../core/features/auth/services/auth.servic
 import { getTranslatedRole, RoleEnum } from '../../../../../models/enums/role';
 import { ChangeCongregationComponent } from '../../components/change-congregation.component';
 import { AppearanceSettingsComponent } from '../../components/appearance-settings/appearance-settings.component';
+import { AppInstallSettingsComponent } from '../../components/app-install-settings/app-install-settings.component';
 import { getUserInitials } from '../../../../shared/utils/user-utils';
 import { ProfileBO } from '../../bo/profile.bo';
 
@@ -26,6 +27,7 @@ import { ProfileBO } from '../../bo/profile.bo';
   imports: [
     ChangeCongregationComponent,
     AppearanceSettingsComponent,
+    AppInstallSettingsComponent,
     CardComponent,
     ButtonComponent,
     IconComponent,
