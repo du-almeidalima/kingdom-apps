@@ -126,9 +126,9 @@ const requiredPorts = [
       );
     }
 
-    return { name, port };
+    return { name, port, owner: 'emulators' };
   }),
-  { name: 'angular dev-server', port: APP_PORT },
+  { name: 'angular dev-server', port: APP_PORT, owner: 'app' },
 ];
 
 /** Everything this script is responsible for freeing — required plus the CLI's own side ports. */
@@ -168,6 +168,26 @@ async function isPortListening(port) {
   const [ipv4, ipv6] = await Promise.all([probeLoopback('127.0.0.1', port), probeLoopback('::1', port)]);
 
   return ipv4 || ipv6;
+}
+
+/**
+ * The dev server accepts TCP connections (and answers `/` with 404) even while
+ * webpack holds a failed compile — a raw port probe would declare a broken
+ * build "ready" and leave Playwright to time out on its `webServer` `url` 180s
+ * later with no hint why. The app port is only ready once `/` answers 200.
+ *
+ * `localhost`, not a literal loopback IP: the dev server binds whatever
+ * `localhost` resolves to first on this host, and Node's fetch resolves the
+ * same way, so the probe follows the server on every platform.
+ */
+async function isAppServing() {
+  try {
+    const response = await fetch(`http://localhost:${APP_PORT}/`, { signal: AbortSignal.timeout(1_000) });
+
+    return response.status === 200;
+  } catch {
+    return false;
+  }
 }
 
 /** Best-effort PID lookup for a listening port. Returns `[]` when no supported tool is available. */
@@ -344,6 +364,7 @@ async function shutdown(reason, exitCode) {
 async function waitUntilReady() {
   const deadline = Date.now() + STARTUP_TIMEOUT_MS;
   const pending = new Map(requiredPorts.map(({ name, port }) => [port, name]));
+  const ownerByPort = new Map(requiredPorts.map(({ port, owner }) => [port, owner]));
 
   while (pending.size > 0) {
     const dead = children.find((entry) => entry.exited);
@@ -357,15 +378,22 @@ async function waitUntilReady() {
 
     if (Date.now() > deadline) {
       const missing = [...pending].map(([port, name]) => `${name} (:${port})`).join(', ');
+      const owners = [...new Set([...pending.keys()].map((port) => ownerByPort.get(port)))];
+      const tails = children
+        .filter((entry) => owners.includes(entry.label))
+        .map((entry) => `--- tail of ${relative(workspaceRoot, entry.logPath)} ---\n${logTail(entry)}`)
+        .join('\n');
 
       throw new Error(
         `Timed out after ${STARTUP_TIMEOUT_MS}ms waiting for: ${missing}.\n` +
-          `Check the logs in ${relative(workspaceRoot, LOG_DIR)}.`
+          `${tails}\nFull logs in ${relative(workspaceRoot, LOG_DIR)}.`
       );
     }
 
     for (const [port, name] of pending) {
-      if (await isPortListening(port)) {
+      const isReady = port === APP_PORT ? await isAppServing() : await isPortListening(port);
+
+      if (isReady) {
         pending.delete(port);
         log(`${name} is up on :${port}`);
       }
