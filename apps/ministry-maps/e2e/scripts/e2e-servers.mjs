@@ -140,9 +140,18 @@ const managedPorts = [
   })),
 ];
 
-function isPortListening(port) {
+/**
+ * The dev server binds whatever `localhost` resolves to first — on Linux with
+ * Node ≥ 17 (verbatim DNS) that is `::1`, so an IPv4-only probe never sees it
+ * even while Playwright and Chromium are being served over IPv6. Probe both
+ * loopback stacks and count the port as listening when either one accepts.
+ *
+ * The Java emulators are unaffected (they bind IPv4), but probing both costs
+ * nothing and keeps this correct for every child this script may ever start.
+ */
+function probeLoopback(host, port) {
   return new Promise((resolve) => {
-    const socket = createConnection({ host: '127.0.0.1', port });
+    const socket = createConnection({ host, port });
     const settle = (listening) => {
       socket.destroy();
       resolve(listening);
@@ -153,6 +162,12 @@ function isPortListening(port) {
     socket.once('timeout', () => settle(false));
     socket.once('error', () => settle(false));
   });
+}
+
+async function isPortListening(port) {
+  const [ipv4, ipv6] = await Promise.all([probeLoopback('127.0.0.1', port), probeLoopback('::1', port)]);
+
+  return ipv4 || ipv6;
 }
 
 /** Best-effort PID lookup for a listening port. Returns `[]` when no supported tool is available. */
