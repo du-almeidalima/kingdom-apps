@@ -46,7 +46,7 @@ Close-out work once every other box is checked.
      list and confirm no entry contradicted reality during implementation (every deviation found during
      the WPs should already have been patched into the docs per plan README §2.8 — this is the audit).
    - Update `e2e/README.md` (new fixtures, utilities, page objects, spec inventory) and the
-     `.ai/rules/frontend/e2e-testing.md` pointer if the harness surface changed (new roles,
+     `.agents/rules/e2e-testing.md` pointer if the harness surface changed (new roles,
      `signInAsUser`, invitation-link factory).
 
 6. **Tracking table** — all boxes in `e2e/plan/README.md` checked; commit message:

@@ -1,17 +1,19 @@
 # Kingdom Apps — Agent Guide
 
-This file contains repository-wide instructions for coding agents. Use [`README.md`](./README.md) for setup and [`ARCHITECTURE.md`](./ARCHITECTURE.md) for system boundaries.
+Repository-wide instructions for coding agents. [`README.md`](./README.md) has setup and common commands; [`ARCHITECTURE.md`](./ARCHITECTURE.md) records system boundaries and the Firebase topology.
 
 ## Core Rules
 
-- **Standalone Angular only:** new and modified components must be standalone; do not add NgModules. Existing feature-routing NgModules are migration debt, not examples to copy.
-- **Use `inject()`:** do not add constructor injection. Avoid unrelated migrations of legacy code.
-- **Use path aliases:** cross-project imports must use configured `@kingdom-apps/*` aliases (currently
-  `@kingdom-apps/common-ui`).
-- **Use `kebab-case`:** apply it to every new file name.
+- **Standalone Angular only:** no NgModules in new code. Existing feature-routing NgModules are migration debt, not examples to copy.
+- **Prefer `inject()`** for new dependency injection. Legacy constructor DI exists in older files — don't copy it, don't mass-migrate it.
+- **npm + Node 22:** use `npm`/`npx` (e.g. `npx nx … ministry-maps`); never introduce another package manager. Java 21 is required for the Firebase emulators.
+- **Lean dependencies:** keep third-party packages minimal. Before adding one, check whether `common-ui` already provides the component or the shared styles cover it; otherwise build it yourself (standalone + Tailwind/SCSS + design tokens). Adopt a library only when its logic is complex enough that maintaining it in-house would cost more than the dependency's weight.
+- **Path aliases:** cross-project imports use `@kingdom-apps/common-ui` (the only alias). Intra-app imports stay relative.
+- **kebab-case files**, one folder per component, files named after the folder.
 - **Keep `common-ui` generic:** no Ministry Maps domain models, business logic, or feature-specific UI.
-- **Use conventional commits:** `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, and similar types.
-- **Preserve scope:** make the smallest change that satisfies the task; do not refactor unrelated legacy code.
+- **UI copy is pt-BR:** Ministry Maps user-facing strings are Brazilian Portuguese — keep quoted UI text verbatim (selectors in tests rely on it).
+- **Conventional commits:** `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `chore:` — vocabulary and scopes in `.agents/rules/git-commits.md`.
+- **Preserve scope:** smallest change that satisfies the task; no unrelated refactors.
 
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->
@@ -22,7 +24,7 @@ This file contains repository-wide instructions for coding agents. Use [`README.
 - When running tasks (for example build, lint, test, e2e, etc.), always prefer running the task through `nx` (i.e. `nx run`, `nx run-many`, `nx affected`) instead of using the underlying tooling directly
 - Prefix nx commands with the workspace's package manager (e.g., `pnpm nx build`, `npm exec nx test`) - avoids using globally installed CLI
 - You have access to the Nx MCP server and its tools, use them to help the user
-- For Nx plugin best practices, check `node_modules/@nx/<plugin>/PLUGIN.md`. Not all plugins have this file - proceed without it if unavailable.
+- For Nx plugin best practices, check `node_modules/@nx/<plugin>/PLUGIN.md`. Not all plugins have this file - proceed without it if unavailable
 - NEVER guess CLI flags - always check nx_docs or `--help` first when unsure
 
 ## Scaffolding & Generators
@@ -39,40 +41,45 @@ This file contains repository-wide instructions for coding agents. Use [`README.
 
 ## Contextual Rules Index
 
-Read only the rules relevant to the files being changed:
+Rules live in `.agents/rules/`. oh-my-pi and Antigravity load them natively, scoped by the frontmatter `globs`; other harnesses should read the rules relevant to the files being changed:
 
-| Context                               | Rules                                                                           |
-|---------------------------------------|---------------------------------------------------------------------------------|
-| Angular components, services, styling | `.ai/rules/frontend/angular-components.md`, `angular-services.md`, `styling.md` |
-| Unit tests                            | `.ai/rules/frontend/unit-testing.md`                                            |
-| E2E tests                             | `.ai/rules/frontend/e2e-testing.md` and `apps/ministry-maps/e2e/README.md`      |
-| Firebase Functions or Firestore       | `.ai/rules/backend/firebase-functions.md`, `firestore.md`                       |
-| Monorepo, shared UI, repositories     | `.ai/rules/architecture/monorepo.md`, `common-ui.md`, `repositories.md`         |
-| Development, commits, deployment      | `.ai/rules/workflow/development.md`, `git-commits.md`, `deployment.md`          |
+| Context | Rules |
+|---|---|
+| Components, services, state | `.agents/rules/angular-components.md`, `angular-services.md` |
+| Styling, theming, tokens | `.agents/rules/styling.md` |
+| Unit tests (ng-mocks + Jest) | `.agents/rules/unit-testing.md` |
+| E2E (Playwright + emulators) | `.agents/rules/e2e-testing.md` and `apps/ministry-maps/e2e/README.md` |
+| Data access, Firestore, security rules | `.agents/rules/repositories.md`, `firestore.md` |
+| Cloud Functions | `.agents/rules/firebase-functions.md` |
+| Nx workspace, project targets | `.agents/rules/monorepo.md` |
+| Build, CI, deployment | `.agents/rules/deployment.md` |
+| Commits, branches, PRs | `.agents/rules/git-commits.md` |
+| Shared UI library internals | `.agents/rules/common-ui.md`, `patterns.md` |
 
-For Ministry Maps behavior or data changes, also read the relevant material under
-`apps/ministry-maps/docs/`.
+For Ministry Maps behavior or data changes, also read the relevant material under `apps/ministry-maps/docs/`.
 
 ## Verification
 
-Use Nx through the workspace package manager. Run the focused target first, then every relevant downstream target required by the change.
+Use Nx through `npx`. Run the focused target first, then every relevant downstream target required by the change.
 
-| Change                    | Minimum relevant checks                                                                                                                                                               |
-|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `apps/ministry-maps`      | `npx nx test ministry-maps`, `npx nx lint ministry-maps`, `npx nx build ministry-maps`                                                                                                |
-| `libs/common-ui`          | `npx nx test common-ui`, `npx nx lint common-ui`                                                                                                                                      |
-| E2E                       | `npx nx typecheck-e2e ministry-maps`, then the relevant `npx nx e2e ministry-maps` scope                                                                                              |
+| Change | Minimum relevant checks |
+|---|---|
+| `apps/ministry-maps` | `npx nx test ministry-maps`, `npx nx lint ministry-maps`, `npx nx build ministry-maps` |
+| `libs/common-ui` | `npx nx test common-ui`, `npx nx lint common-ui` |
+| E2E | `npx nx typecheck-e2e ministry-maps`, then the relevant `npx nx e2e ministry-maps` scope |
 | `functions/ministry-maps` | `npm --prefix functions/ministry-maps run lint`, `npm --prefix functions/ministry-maps test`, `npm --prefix functions/ministry-maps run build` plus an emulator-backed behavior check |
-| Documentation only        | Validate changed links and commands; run `git diff --check`                                                                                                                           |
+| Documentation only | Validate changed links and commands; run `git diff --check` |
 
 Add or update tests for behavior changes. Do not weaken, skip, or delete a failing test to make a change pass.
 
 ## Gotchas
 
-- `functions/ministry-maps` has a separate package manifest and lockfile; install its dependencies separately when needed.
-- `NX_*` values are injected at build time by webpack, not read dynamically in the browser.
-- Angular uses the root flat ESLint config; Functions uses its own flat config `functions/ministry-maps/eslint.config.mjs`.
-- Local Firebase seed data is imported and exported by the `firebase-emulator:serve` target.
+- `functions/ministry-maps` is **not an Nx project**: separate manifest and lockfile, driven by `npm --prefix functions/ministry-maps run <script>`.
+- `NX_*` values are injected at build time (webpack DefinePlugin) from `apps/ministry-maps/.env.development`/`.env.production` — not read dynamically in the browser.
+- Root flat ESLint config covers the Angular workspace; Functions has its own `functions/ministry-maps/eslint.config.mjs`.
+- `npm start` imports the emulator seed on start and exports it back on graceful exit; snapshot manually with `npx firebase emulators:export tools/executors/firebase-emulator/seed --force`.
+- Deploy order when both change: functions first, then Firestore rules. Hosting deploys happen in CI on merge to `main`.
+- `npx nx build ministry-maps` is a **production** build (default configuration).
 
 <!-- CODEGRAPH_START -->
 

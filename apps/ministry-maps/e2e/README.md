@@ -13,7 +13,7 @@ npx nx e2e ministry-maps --no-tui
 ```
 
 The Playwright `webServer` starts one supervisor (`e2e/scripts/e2e-servers.mjs`). The supervisor starts Firestore, Auth, and Functions (with the Emulator UI disabled for unattended runs) alongside the Angular app at
-`http://localhost:4200`, waits for every required port, and shuts everything down in order. It also sweeps stale listeners before and after a run, so a cancelled agent or CI job cannot poison the next run.
+`http://localhost:4200`, waits for every required port (the app additionally must answer `GET /` with 200 — a broken webpack build serves 404s and fails fast with the dev-server log tail), and shuts everything down in order. It also sweeps stale listeners before and after a run, so a cancelled agent or CI job cannot poison the next run.
 
 ## Architecture
 

@@ -162,5 +162,5 @@ redirect-leg dups (UC-ASSIGN-23/24, UC-STAT-16/17, UC-USERS-16/17, UC-NAV-06/07/
 ## Sources
 
 - `apps/ministry-maps/docs/` (entire behavioral catalog)
-- `apps/ministry-maps/e2e/README.md`, `.ai/rules/frontend/e2e-testing.md`
+- `apps/ministry-maps/e2e/README.md`, `.agents/rules/e2e-testing.md`
 - `apps/ministry-maps/e2e/tests/{smoke,territories}.spec.ts`

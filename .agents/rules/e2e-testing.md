@@ -1,8 +1,11 @@
 ---
-applyTo:
-  - "**/e2e/**"
-  - "**/playwright.config.ts"
-instruction: "Apply these rules when writing or maintaining end-to-end (E2E) tests. The project uses Playwright + the Firebase Emulators (Firestore + Auth), with NO mocks — tests run against the real emulated backend and seed data via the Admin SDK."
+globs:
+- '**/e2e/**'
+- '**/playwright.config.ts'
+description: Apply these rules when writing or maintaining end-to-end (E2E) tests.
+  The project uses Playwright + the Firebase Emulators (Firestore + Auth), with NO
+  mocks — tests run against the real emulated backend and seed data via the Admin
+  SDK.
 ---
 
 # E2E Testing Guidelines

@@ -1,9 +1,10 @@
 ---
-applyTo:
-  - "**/*.spec.ts"
-  - "**/test/**"
-  - "**/jest.config.ts"
-instruction: "Apply these rules when writing unit tests. The project uses Jest + jest-preset-angular + ng-mocks."
+globs:
+- '**/*.spec.ts'
+- '**/test/**'
+- '**/jest.config.ts'
+description: Apply these rules when writing unit tests. The project uses Jest + jest-preset-angular
+  + ng-mocks.
 ---
 
 # Unit Testing Guidelines

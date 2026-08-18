@@ -1,12 +1,11 @@
 ---
-applyTo: "**"
-instruction: "Common patterns and utilities reference."
+description: Common patterns and utilities reference.
 ---
 
 # Common Patterns & Utilities
 
 ## Utility Files
-Located in `shared/utils/`:
+Located in `shared/utils/` as flat kebab-case modules (list below is non-exhaustive):
 - `date.ts` - Date manipulation
 - `type-utils.ts` - TypeScript utilities  
 - `firebase-entity-converter.ts` - Firestore converters
@@ -31,17 +30,8 @@ Located in `shared/business-objects/` or `features/*/bo/`:
 - Examples: `configuration.bo.ts`, `territory.bo.ts`
 
 ## Folder Structure Pattern
-```
-app/
-├── core/features/      # Core functionality (auth, etc.)
-├── features/           # Feature modules
-│   └── <feature>/
-│       ├── bo/         # Business objects
-│       ├── components/ # Feature components
-│       ├── pages/      # Page components
-│       └── dto/        # Data transfer objects
-├── shared/             # App-wide shared code
-├── repositories/       # Data access layer
-├── state/              # State management
-└── models/             # Data models
-```
+
+Canonical layouts and naming conventions live in the rule files (keep this file an index, not a second copy of the trees):
+
+- App (`apps/ministry-maps/src`): "Folder layout" in `.agents/rules/angular-components.md`.
+- Shared UI library (`libs/common-ui`): "Structure" in `.agents/rules/common-ui.md`.
