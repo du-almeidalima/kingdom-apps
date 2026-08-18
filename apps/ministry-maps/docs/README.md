@@ -57,7 +57,7 @@ Treat these documents as a versioned contract for **current behaviour**, not int
 | New or changed use case | Append or revise the entry in its feature document, preserve stable IDs, and add or update its single row in `test-catalog.md`. |
 | New cross-feature journey | Add the next `J-NN` file under `journeys/`, compose existing UC IDs where possible, and add its catalog row. |
 | Selector, harness limitation, manual check, or suspected defect | Update `testability-gaps.md`; add actionable product or engineering work to `developer-follow-up.md` when developer follow-up is required. |
-| Fixture, factory, page object, utility, or auth surface | Update `../e2e/README.md` and, when a binding rule changes, `.ai/rules/frontend/e2e-testing.md`. |
+| Fixture, factory, page object, utility, or auth surface | Update `../e2e/README.md` and, when a binding rule changes, `.agents/rules/e2e-testing.md`. |
 | Automated coverage | Set only the affected catalog row's `Covered` cell, name the owning spec, and recalculate the coverage summary. |
 
 Follow this sequence:
@@ -74,7 +74,7 @@ Follow this sequence:
 ### The harness you must use
 
 Everything lives in [`../e2e`](../e2e) (see [`../e2e/README.md`](../e2e/README.md) and
-`.ai/rules/frontend/e2e-testing.md`). Import `test`/`expect` from `../fixtures` only.
+`.agents/rules/e2e-testing.md`). Import `test`/`expect` from `../fixtures` only.
 
 ```ts
 import { expect, test } from '../fixtures';
@@ -167,4 +167,4 @@ This index was written from:
 
 - `apps/ministry-maps/src/app/app-routes.ts`
 - `apps/ministry-maps/e2e/fixtures/*`, `apps/ministry-maps/e2e/seed/*`, `apps/ministry-maps/e2e/README.md`
-- `.ai/rules/frontend/e2e-testing.md`
+- `.agents/rules/e2e-testing.md`

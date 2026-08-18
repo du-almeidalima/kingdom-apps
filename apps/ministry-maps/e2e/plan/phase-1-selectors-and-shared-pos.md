@@ -128,7 +128,7 @@ green — proves the attribute-only change altered nothing. `npx nx e2e ministry
   - `toast.page.ts` — `message()` (`toast-message`), `expectText(text)` helper.
   - edit `e2e/README.md` — add the new POs to the page-objects section.
 - **Context to read first:** `e2e/page-objects/territories.page.ts` (pattern);
-  `.ai/rules/frontend/e2e-testing.md` §Page Objects.
+  `.agents/rules/e2e-testing.md` §Page Objects.
 - **Acceptance criteria:**
   1. `typecheck-e2e` green.
   2. POs contain no assertions beyond their own effect; synchronisation stays with callers

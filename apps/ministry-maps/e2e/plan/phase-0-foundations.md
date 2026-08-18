@@ -88,7 +88,7 @@ land first. Each WP is independent of the others.
     into a reusable `signInWithUid(page, uid)`; expose `signInAsUser(uid)` in the fixture API; re-implement
     `signInAs(role)` as `signInWithUid(page, ROLE_UIDS[role])` (no behaviour change).
   - edit `e2e/README.md` — document `signInAsUser`.
-- **Context to read first:** `e2e/fixtures/auth.fixture.ts`; `.ai/rules/frontend/e2e-testing.md` §Auth
+- **Context to read first:** `e2e/fixtures/auth.fixture.ts`; `.agents/rules/e2e-testing.md` §Auth
   Fixture.
 - **Acceptance criteria:**
   1. `typecheck-e2e` green.
