@@ -25,4 +25,8 @@ export type Territory = {
   recentHistory?: TerritoryVisitHistory[];
   /** Represents the quantity of people that lives in that Territory. For the majority of cases it will be 1 or null. */
   peopleQuantity?: number;
+  /** Cached geocoded coordinate for this territory, used for route optimization. */
+  geo?: { lat: number; lng: number };
+  geoStatus?: 'ok' | 'approx' | 'failed';
+  geocodedAt?: Date;
 };

@@ -143,3 +143,19 @@
     flex-flow: column nowrap;
   }
 }
+
+.territory-checkbox__route-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  margin-right: 0.4rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background-color: #45c06c;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  vertical-align: middle;
+}
