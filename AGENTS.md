@@ -80,6 +80,7 @@ Add or update tests for behavior changes. Do not weaken, skip, or delete a faili
 - `npm start` imports the emulator seed on start and exports it back on graceful exit; snapshot manually with `npx firebase emulators:export tools/executors/firebase-emulator/seed --force`.
 - Deploy order when both change: functions first, then Firestore rules. Hosting deploys happen in CI on merge to `main`.
 - `npx nx build ministry-maps` is a **production** build (default configuration).
+- The `angular-cli` MCP server works only for docs/best-practices/examples tools. `list_projects` fails (schema error) because this Nx workspace has no `angular.json` — use Nx MCP/tooling for workspace queries instead, and omit `workspacePath` args.
 
 <!-- CODEGRAPH_START -->
 

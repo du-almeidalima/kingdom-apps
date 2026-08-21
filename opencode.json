@@ -10,6 +10,11 @@
       "type": "local",
       "command": ["codegraph", "serve", "--mcp"],
       "enabled": true
+    },
+    "angular-cli": {
+      "type": "local",
+      "command": ["npx", "-y", "@angular/cli", "mcp"],
+      "enabled": true
     }
   }
 }
