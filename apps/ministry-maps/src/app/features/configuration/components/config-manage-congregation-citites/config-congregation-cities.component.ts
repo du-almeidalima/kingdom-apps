@@ -226,6 +226,13 @@ export class ConfigCongregationCitiesComponent implements OnInit {
   }
 
   hasChanges(): boolean {
+    // A deletion (or a net add+delete mix) changes the city count: without this check,
+    // delete-only changes would never enable the Save button.
+    const originalCities = this.congregation?.cities;
+    if (originalCities && this.cities.length !== originalCities.length) {
+      return true;
+    }
+
     return this.cities.some((city) => city.isNew || city.currentName !== city.originalName);
   }
 

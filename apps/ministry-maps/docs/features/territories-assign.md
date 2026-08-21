@@ -102,7 +102,7 @@ This document describes the behavioural use cases for the `/territories/assign` 
 - **Route:** `/territories/assign`
 - **Preconditions (seed):** 1 territory with `recentHistory: [{ visitOutcome: 3, isResolved: false, date: <10 months ago> }]` (unresolved `ASKED_TO_NOT_VISIT_AGAIN`, within the 24-month window)
 - **Steps:** 1. open `/territories/assign`, select its city → 2. tick that territory's checkbox
-- **Expected UI:** `ConfirmDialogComponent` titled `Não visitar`, body `Esse morador pediu para não ser visitado por uma Testemunha de Jeová recentemente dentro do último mês.` then `Você deseja designar esse território mesmo assim?`
+- **Expected UI:** `ConfirmDialogComponent` titled `Não visitar`, body `Esse morador pediu para não ser visitado por uma Testemunha de Jeová recentemente dentro dos últimos dois anos.` then `Você deseja designar esse território mesmo assim?`
 - **Expected persistence:** `db.getDoc(...).recentHistory` entry has `visitOutcome === 3`, `isResolved: false`
 - **Edge cases:** `TerritoryAlertsBO.findImportantAlert` checks `MOVED` before `ASKED_TO_NOT_VISIT_AGAIN` — a territory with both unresolved entries only ever shows the `Se Mudou` dialog; also note the 24-month window uses `differenceInMonths(history.date, now) < 24`, exactly like the `/territories` badge (see [`territories-management.md#UC-TERR-25`](./territories-management.md)), so a 25-month-old entry raises **no** dialog and the territory selects silently
 - **Priority:** P1 · **Gaps:** no `data-testid` on the confirm dialog

@@ -28,10 +28,6 @@ export const REPOSITORIES_PROVIDERS = [
     provide: DesignationRepository,
     useClass: FirebaseDesignationDatasourceService,
   },
-  // {
-  //   provide: NoteRepository,
-  //   useClass: NoteDatasourceService,
-  // },
   {
     provide: InvitationLinkRepository,
     useClass: FirebaseInvitationLinkDataSourceService,

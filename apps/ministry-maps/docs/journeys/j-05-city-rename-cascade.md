@@ -54,14 +54,10 @@ client cache was stale.
    `page.once('dialog', dialog => dialog.accept())` — the `Delete` button calls the browser's native
    `confirm('Are you sure you want to delete this city?')`, which a locator can never see and which hangs
    the test if unhandled (UC-CFG-10).
-10. Click `Delete` on the `Osasco` row → the row disappears immediately (local splice). **⚠ `Save Changes`
-    is disabled after a plain delete** — `hasChanges()` only inspects the *remaining* cities
-    (`city.isNew || city.currentName !== city.originalName`), and none of them changed (UC-CFG-04 defect).
-    To persist the delete, combine it with a trailing-space touch on the remaining city: click `Edit` on
-    `São Paulo Centro`, set its input to `São Paulo Centro ` (trailing space → `currentName !== originalName`
-    → `hasChanges()` true → Save enabled), then click `Save Changes`. `saveChanges()` trims the name, so the
-    persisted value is unchanged `São Paulo Centro`; only the `Osasco` removal is new. Toast:
-    `Cities updated successfully!`.
+10. Click `Delete` on the `Osasco` row → the row disappears immediately (local splice). A delete-only
+    change now counts in `hasChanges()` (fixed 2026-08 — it compares the row count against the
+    congregation snapshot), so `Save Changes` is enabled directly: click it to persist the deletion.
+    Toast: `Cities updated successfully!`.
 
 ⟶ **HAND-OFF (Firestore):** `db.getDoc(db.collections.congregations, seed.ids.congregation).cities`
 deep-equals `['São Paulo Centro']`; **but** `db.getDoc(db.collections.territories, 'seed-territory-2')

@@ -34,7 +34,7 @@ export class TerritoryAlertsBO {
 
   /**
    * Looks into territory [recentHistory]{@link Territory.recentHistory} to find if it was asked to not visit again.
-   * It looks for one month window.
+   * It looks for unresolved entries within a 24-month window (see commit 029f5f0).
    * @return boolean if found.
    */
   static hasRecentlyAskedToStopVisiting(territory: Territory) {
@@ -77,7 +77,7 @@ export class TerritoryAlertsBO {
         return {
           title: 'Não visitar',
           bodyText: `
-          <p>Esse morador pediu para não ser visitado por uma Testemunha de Jeová recentemente dentro do último mês.</p>
+          <p>Esse morador pediu para não ser visitado por uma Testemunha de Jeová recentemente dentro dos últimos dois anos.</p>
           <p class='mt-5'>Você deseja designar esse território mesmo assim?</p>
         `,
         };
@@ -98,10 +98,16 @@ export class TerritoryAlertsBO {
   }
 
   /**
-   * Give the visitOutcome it will mark all recentHistory as resolved and update them in repository.
+   * Marks the given histories as resolved (or clears `isRevisit` when the outcome is REVISIT) and
+   * saves the result in two places:
    *
-   * __NOTE:__ This will only update {@link Territory.recentHistory} since it's what's looked for to display alerts.
-   * No changes will be made on history.
+   * 1. the territory document — the repository rebuilds `recentHistory` from the `history` array
+   *    sent here, so alert badges reflect the change;
+   * 2. each entry's `history/{id}` subcollection doc — so completing a visit (which appends from
+   *    the subcollection) doesn't bring back the resolved flag.
+   *
+   * `histories` may be a subset of `recentHistory` (the Revisita / Não Visitar dialogs pre-filter):
+   * it is merged back into the full list so unrelated entries are kept.
    */
   resolveTerritoryHistoryAlert(
     territory: Territory,
@@ -124,8 +130,15 @@ export class TerritoryAlertsBO {
       return historyClone;
     });
 
-    // This will be used to update recentHistory in repository
-    copiedTerritory.history = updatedHistories;
+    // The repository derives `recentHistory` from the `history` field on update. Callers may pass
+    // only a subset of recentHistory (e.g., only revisit entries), so we merge the updated entries
+    // back into the full recentHistory to avoid dropping unrelated entries from the document.
+    const updatedById = new Map(updatedHistories.map(history => [history.id, history]));
+    const currentRecentHistory = copiedTerritory.recentHistory ?? [];
+    copiedTerritory.history = [
+      ...currentRecentHistory.map(history => updatedById.get(history.id) ?? history),
+      ...updatedHistories.filter(history => !currentRecentHistory.some(h => h.id === history.id)),
+    ];
     const updateRecentHistoryArray$ = this.territoryRepository.update(copiedTerritory);
 
     // Updating the history collection

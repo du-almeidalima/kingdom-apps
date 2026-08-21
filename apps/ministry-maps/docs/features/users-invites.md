@@ -58,18 +58,18 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Steps:** 1. sign in as admin → 2. open `/users` → 3. row menu (`⋮`) on Ana Souza → `Editar`
 - **Expected UI:** dialog title `Editar Usuário`; fields `Nome` (text input, prefilled `Ana Souza`) and `Permissão` (a `kingdom-apps-icon-radio` group, prefilled to the user's current role). As an `ADMIN` editor, exactly 4 options render, in this order: `Publicador` ("Permisão mais básica, apenas está associado a uma congregação."), `Organizador` ("Indicada para Publicadores qualificados ou Servos Ministeriais; Pode designar e atualizar territórios."), `Ancião` ("Tem todas as permissões de um Organizador, mas também pode adicionar/remover territórios e ver pessoas da congregação."), `Administrador` ("Permissões geralmente dada ao SS. Tem acesso total aos mapas da congregação além de poder adicionar, excluir e alterar permissões de usuários."); `Superintendente` is **not** rendered (`canEditAdminRoles = currentUser.role.includes('APP_ADMIN')` is `false` for an `ADMIN` editor). Footer: `Cancelar` / `Salvar` (spinner while submitting)
 - **Expected persistence:** N/A — opening the dialog performs no write
-- **Edge cases:** `canEditAdminRoles` is computed once in the constructor from a `String.prototype.includes` substring check on the editor's own role, not `===` — functionally equivalent to equality for today's `RoleEnum` values, but worth knowing if a future role value contains the substring `APP_ADMIN`
+- **Edge cases:** `canEditAdminRoles` is computed once in the constructor from a strict equality check on the editor's own role (`userState.currentUser?.role === RoleEnum.APP_ADMIN`) — fixed 2026-08 from a fragile `String.prototype.includes` substring check
 - **Priority:** P1 · **Gaps:** no `data-testid` on the radio group or its options; select via the `kingdom-apps-icon-radio` label text (`Publicador`/`Organizador`/`Ancião`/`Administrador`/`Superintendente`)
 
-#### UC-USERS-05 — ⚠ suspected defect: the edit form is disabled for every editor except `APP_ADMIN`, yet "Salvar" still submits unchanged data
+#### UC-USERS-05 — The edit form is disabled only for admin-level users edited by non-`APP_ADMIN` editors (fixed 2026-08)
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline
-- **Steps:** 1. sign in as admin → 2. row menu on Ana Souza (`PUBLISHER`) → `Editar` → 3. try to type in `Nome` and click a different `Permissão` radio → 4. click `Salvar` anyway
-- **Expected UI:** both the `Nome` input and every `Permissão` radio are disabled/non-interactive — typing and clicking have no visible effect. The `Salvar` `<button>` itself is **not** disabled (disabling a `FormGroup` does not disable a plain submit button outside its controls), so clicking it still fires `(ngSubmit)` and the dialog closes as if the save succeeded
-- **Expected persistence:** `handleFormSubmit` reads `form.getRawValue()` (which bypasses the `disabled` state and returns the original prefilled values) and calls `userRepository.update(...)` with those **unchanged** values, so `db.getDoc(db.collections.users, seed.ids.publisherUsers[0])` is byte-for-byte identical to before the dialog was opened — but a Firestore `setDoc` round-trip did occur (a client-visible no-op write, not a blocked one)
-- **Edge cases:** root cause — the guard is `if ((data.user.role === RoleEnum.SUPERINTENDENT || RoleEnum.ADMIN || RoleEnum.APP_ADMIN) && currentUser.role !== RoleEnum.APP_ADMIN)`. `RoleEnum.ADMIN` and `RoleEnum.APP_ADMIN` are non-empty string constants, so the `||` chain is **always truthy** regardless of `data.user.role` — the whole condition collapses to `currentUser.role !== RoleEnum.APP_ADMIN`. This means the target user's role is irrelevant: editing a `PUBLISHER`, an `ELDER`, or another `ADMIN` all disable the form identically, for **any** editor who is not `APP_ADMIN`
-- **Priority:** P0 · **Gaps:** `⚠ suspected defect` — the intended condition was almost certainly `(data.user.role === SUPERINTENDENT || data.user.role === ADMIN || data.user.role === APP_ADMIN)`; **assert today's reality**: form disabled, persisted doc unchanged after `Salvar`, for any `ADMIN`/`ELDER`/`SUPERINTENDENT` editor
+- **Steps:** 1. sign in as admin → 2. row menu on Ana Souza (`PUBLISHER`) → `Editar` → 3. observe the `Nome` input and `Permissão` radios → 4. click `Salvar` without changes
+- **Expected UI:** the form is fully interactive — editing a non-admin-level user (`PUBLISHER`/`ORGANIZER`/`ELDER`) as a non-`APP_ADMIN` editor is allowed, matching the Firestore rules (UC-RULES-11: same-congregation `ADMIN` edits of non-protected users are permitted). `Salvar` closes the dialog
+- **Expected persistence:** `handleFormSubmit` reads `form.getRawValue()` and calls `userRepository.update(...)`; with no edits the values are unchanged, so `db.getDoc(db.collections.users, seed.ids.publisherUsers[0])` is identical to before the dialog was opened (a client-visible no-op write)
+- **Edge cases:** the disable gate is `[SUPERINTENDENT, ADMIN, APP_ADMIN].includes(data.user.role) && currentUser.role !== RoleEnum.APP_ADMIN` — the edited user's role must be one of the three admin-level roles for the form to lock (see UC-USERS-07 for the admin editing themselves). Historical defect: before the 2026-08 fix the guard was `(data.user.role === SUPERINTENDENT || RoleEnum.ADMIN || RoleEnum.APP_ADMIN)` — an always-truthy `||` chain that disabled the form for **every** edited user whenever the viewer was not `APP_ADMIN`
+- **Priority:** P0 · **Gaps:** none — the former `⚠ suspected defect` (Gap #22) was fixed and verified by this test
 
 #### UC-USERS-06 — An `APP_ADMIN` editor gets a usable form and edits persist
 - **Actor:** App Admin (harness extension needed — only `admin`/`publisher` exist in `signInAs` today)
@@ -86,7 +86,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline
 - **Steps:** 1. sign in as admin → 2. row menu on **Carlos Almeida** (the signed-in admin's own row) → `Editar`
-- **Expected UI:** the dialog opens exactly as for any other user — there is no `data.user.id === currentUser.id` check anywhere in `UsersEditDialogComponent`. Because the editor's role is `ADMIN` (not `APP_ADMIN`), the form is disabled per UC-USERS-05's bug even though the admin is editing themselves; there is no "you are editing your own account" warning or confirmation of any kind
+- **Expected UI:** the dialog opens exactly as for any other user — there is no `data.user.id === currentUser.id` check anywhere in `UsersEditDialogComponent`. Because the edited user's role is `ADMIN` (an admin-level role) and the editor is not `APP_ADMIN`, the form is disabled per UC-USERS-05's gate; there is no "you are editing your own account" warning or confirmation of any kind
 - **Expected persistence:** clicking `Salvar` re-persists the unchanged doc, same mechanics as UC-USERS-05; `db.getDoc(db.collections.users, seed.ids.adminUser)` is unchanged
 - **Edge cases:** the overflow menu that opens this dialog (`*libAuthorize="[APP_ADMIN, SUPERINTENDENT, ADMIN]"`) is gated on the **viewer's** role, not the row's user, so an admin always sees the menu on their own row too; an `APP_ADMIN` editing themselves via this same path (no bug for them, per UC-USERS-06) could demote their own role with zero guardrail
 - **Priority:** P2 · **Gaps:** none beyond UC-USERS-04/05's selectors
@@ -210,8 +210,8 @@ scope here except where needed to explain what a created `invitation_links` doc 
   `ORGANIZER` scenario in this document (UC-USERS-06, UC-USERS-15) needs a new seeded uid and a
   `ROLE_UIDS`/`TestRole` entry before it can be automated.
 - Documented current-behaviour-vs-defect items: UC-USERS-05 (edit form disabled for every non-`APP_ADMIN`
-  editor regardless of the target's role, because of an always-truthy `||` chain; "Salvar" still submits
-  unchanged data), UC-USERS-09 (deleting a user removes the Firestore doc but leaves the Auth account
+  editor regardless of the target's role — **fixed 2026-08**, the gate now keys on the edited user's
+  admin-level role), UC-USERS-09 (deleting a user removes the Firestore doc but leaves the Auth account
   intact, because the `deleteUser` callable `Observable` is never subscribed).
 - Documentation inconsistency found while verifying: `InvitationLink.congregation` is declared as an
   embedded `Congregation` object and described that way in

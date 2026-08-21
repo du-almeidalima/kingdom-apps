@@ -50,8 +50,7 @@ export class InviteCreateDialogCopyLinkComponent {
   inviteLink = input.required<string>();
 
   handleSendInvitationLink() {
-    const text = `Por favor, acesse o link abaixo e conecte com sua conta Google para acessar o MM.%0a%0a${this.inviteLink()}
-    `;
+    const text = `Por favor, acesse o link abaixo e conecte com sua conta Google para acessar o MM.\n\n${this.inviteLink()}`;
 
     const builtUrl = createSendWhatsAppLink(text);
 

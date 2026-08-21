@@ -70,7 +70,7 @@ test.describe('Configuration — Cities (WP-25)', () => {
     await expect(configPage.saveButton).toBeEnabled();
   });
 
-  test('UC-CFG-04 — Delete city removes row locally (hasChanges evaluates false for deleted rows)', async ({
+  test('UC-CFG-04 — Delete city removes row locally and counts as a change (Save enabled)', async ({
     authenticatedPage,
     db,
     seed,
@@ -82,11 +82,11 @@ test.describe('Configuration — Cities (WP-25)', () => {
     await expect(configPage.cityRows).toHaveCount(1);
     await expect(configPage.rowByName('Osasco')).toHaveCount(0);
 
-    // Documented defect behavior: hasChanges() checks city.isNew || city.currentName !== city.originalName on remaining cities,
-    // so deleting an existing city without other edits leaves saveButton disabled.
-    await expect(configPage.saveButton).toBeDisabled();
+    // Fixed (2026-08): hasChanges() also compares the row count against the congregation
+    // snapshot, so a delete-only change now enables Save Changes.
+    await expect(configPage.saveButton).toBeEnabled();
 
-    // Firestore unchanged before save
+    // Firestore unchanged before actually saving
     const congDoc = await db.getDoc(db.collections.congregations, seed.ids.congregation);
     expect(congDoc?.['cities']).toEqual(['São Paulo', 'Osasco']);
   });

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { FIREBASE_PROVIDERS } from '../../../../repositories/firebase/firebase-auth-datasource.service';
 import { SpinnerComponent } from '@kingdom-apps/common-ui';
@@ -34,9 +34,9 @@ import { SpinnerComponent } from '@kingdom-apps/common-ui';
     </div>
   `,
 })
-export class ProviderLoginButtonComponent {
-  imgUrl: string;
-  imgAltText: string;
+export class ProviderLoginButtonComponent implements OnInit {
+  imgUrl!: string;
+  imgAltText!: string;
   btnSize = 25;
 
   @Input()
@@ -48,7 +48,7 @@ export class ProviderLoginButtonComponent {
   @Output()
   providerClick = new EventEmitter<FIREBASE_PROVIDERS>();
 
-  constructor() {
+  ngOnInit(): void {
     switch (this.provider) {
       case FIREBASE_PROVIDERS.GOOGLE:
         this.imgUrl =

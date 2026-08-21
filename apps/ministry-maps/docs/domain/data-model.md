@@ -208,8 +208,11 @@ Deleting a visit (`deleteVisitHistory`) removes **both** the subcollection doc a
 `recentHistory` (matched by `id`), but does **not** recompute `lastVisit`.
 
 Resolving an alert (`TerritoryAlertsBO.resolveTerritoryHistoryAlert`) marks the matching entries
-`isResolved: true`, writes them back to the subcollection with `setVisitHistory`, **and** recomputes
-`recentHistory` from only the entries it was handed — so passing a filtered subset drops the other entries from `recentHistory` while the subcollection stays complete (`UC-TERR-31`, `⚠ suspected defect`).
+`isResolved: true`, writes them back to the subcollection with `setVisitHistory`, **and** merges the
+updated entries back into the **full** `recentHistory` (matched by id) — so passing a filtered subset
+(e.g. the `Revisita` dialog's `filter(h => h.isRevisit)`) no longer drops unrelated entries, while the
+subcollection stays complete (`UC-TERR-31`; truncation fixed 2026-08 — see
+`docs/2026-08-unit-testing-bug-fixes.md`).
 
 ### 4.2 Designation territories are frozen snapshots
 

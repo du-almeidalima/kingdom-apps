@@ -340,15 +340,15 @@ months) and `isRevisit` drive a badge.
 
 ### "Revisita" / "Não Visitar" alert resolution dialogs
 
-#### UC-TERR-31 — ⚠ Resolving "Revisita" can silently drop unrelated `recentHistory` entries
+#### UC-TERR-31 — Resolving "Revisita" preserves unrelated `recentHistory` entries (fixed 2026-08)
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** 1 territory, non-empty `note`, `recentHistory` with **two** entries: (A) `{ isRevisit: true }` and (B) an unrelated unresolved `MOVED` (`visitOutcome: 2`) entry
 - **Steps:** 1. menu → `Revisita` (only entry A is passed to the dialog: `territory.recentHistory.filter(h => h.isRevisit)`) → 2. dialog title `Revisita`, message `Um ou mais publicadores marcaram que esse território está sendo revisitado: `, quoted report(s) → 3. `Remover Marcação`
-- **Expected UI:** the `Revisita` badge disappears; the unrelated `Mudou` badge/menu item also disappears even though it was never addressed
-- **Expected persistence:** `handleResolveAlert` calls `markAsResolvedCallback` with **only** entry A; `resolveTerritoryHistoryAlert` sets `copiedTerritory.history = [A with isRevisit:false]` and `TerritoryRepository.update` recomputes `recentHistory = history.slice(-5)` from that single-element array — so the parent doc's `recentHistory` now contains **only** entry A, and entry B is gone from `recentHistory`. Assert `db.getDoc(...).recentHistory` has length `1` after this action. The `history` subcollection is untouched for entry B (`db.getSubcollectionDocs` still has both docs) — only the denormalised array loses it
-- **Edge cases:** this reproduces identically for `Não Visitar` (`handleResolveStopVisitingAlert` filters by `visitOutcome === 3` the same way)
-- **Priority:** P1 · **Gaps:** `⚠ suspected defect` — resolving one alert type should not truncate unrelated `recentHistory` entries; consolidate in `testability-gaps.md`
+- **Expected UI:** the `Revisita` badge disappears; the unrelated `Mudou` badge/menu item **remains** (entry B was never addressed and is no longer dropped — this is the fixed behavior)
+- **Expected persistence:** `resolveTerritoryHistoryAlert` merges the updated entries back into the **full** `recentHistory` (matched by id) before persisting, so the parent doc's `recentHistory` keeps **both** entries: entry A with `isRevisit: false`, entry B untouched (`isResolved` still falsy). The `history` subcollection keeps both docs, with only entry A's doc rewritten (`isRevisit: false` via `setVisitHistory`)
+- **Edge cases:** this reproduces identically for `Não Visitar` (`handleResolveStopVisitingAlert` filters by `visitOutcome === 3` the same way). Historical defect: before the 2026-08 fix, `recentHistory` was rewritten from only the filtered subset, silently dropping unrelated entries
+- **Priority:** P1 · **Gaps:** none — the former `⚠ suspected defect` (Gap #7) was fixed and verified by this test
 
 #### UC-TERR-32 — Resolve "Não Visitar" alert clears the badge
 - **Actor:** Admin
@@ -357,7 +357,7 @@ months) and `isRevisit` drive a badge.
 - **Steps:** 1. menu → `Não Visitar` → 2. dialog title `Parar de Visitar`, message `Um ou mais publicadores marcaram que esse território pediu para não ser visitado: ` → 3. `Remover Marcação`
 - **Expected UI:** `Não quer visitas` badge and `Não Visitar` menu item disappear
 - **Expected persistence:** the matching entry's `isResolved` becomes `true` in both `recentHistory` and the `history/{visitId}` subcollection doc
-- **Priority:** P1 · **Gaps:** none (see UC-TERR-31 for the truncation caveat when other alerts coexist)
+- **Priority:** P1 · **Gaps:** none (resolving one alert type preserves unrelated `recentHistory` entries — see UC-TERR-31)
 
 ### Maps-link affordance
 
@@ -436,8 +436,8 @@ months) and `isRevisit` drive a badge.
   UC-TERR-04 (empty-congregation filter throws), UC-TERR-12 (badge miscounts on fresh load), UC-TERR-16
   (bible-instructor cleared on re-check), UC-TERR-20 (orphaned `history` subcollection after delete),
   UC-TERR-27 (badges gated by `note`, already tracked in `data-model.md`), UC-TERR-28 (history dialog reads
-  the unordered full subcollection, not `recentHistory`), UC-TERR-31 (alert resolution truncates unrelated
-  `recentHistory` entries), UC-TERR-33 (no maps affordance on this screen).
+  the unordered full subcollection, not `recentHistory`), UC-TERR-31 (alert resolution truncation —
+  **fixed 2026-08**), UC-TERR-33 (no maps affordance on this screen).
 
 ## Sources
 

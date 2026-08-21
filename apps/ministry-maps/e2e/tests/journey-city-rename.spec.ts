@@ -107,21 +107,12 @@ test('J-05 — City rename cascades to territories; city delete leaves an orphan
   await expect(territoriesPage.territoryByAddress('Rua Harmonia, 300 - Vila Madalena')).toBeVisible();
 
   // ── Leg 3 — Delete `Osasco`; the orphaned territory keeps its stale city ────
-  // (UC-CFG-10 ⚠). NOTE: a plain delete leaves `hasChanges()` false (it only
-  // inspects the REMAINING cities — UC-CFG-04 defect), so Save stays disabled.
-  // Touch the remaining city's name with a trailing space — `saveChanges()`
-  // trims it back to the same value — to enable the save that persists the delete.
+  // (UC-CFG-10 ⚠). Fixed (2026-08): a delete-only change now counts in hasChanges(),
+  // so the deletion can be saved on its own — no more trailing-space workaround.
   const configPage2 = await gotoConfig();
   await configPage2.deleteCity('Osasco');
   await expect(configPage2.rowByName('Osasco')).toHaveCount(0);
 
-  // Workaround for the hasChanges defect: a trailing-space touch on the
-  // remaining city makes currentName !== originalName → Save enabled. The BO
-  // trims it, so the persisted name is unchanged.
-  await configPage2.editCity('São Paulo Centro');
-  const remainingInput = configPage2.cityInput().first();
-  await expect(remainingInput).toHaveValue('São Paulo Centro');
-  await configPage2.fillCityInput(remainingInput, 'São Paulo Centro ');
   await configPage2.save();
   await toast.expectText('Cities updated successfully!');
 

@@ -9,17 +9,6 @@ import {
 
 type CustomConverterFunction<T> = (data: any) => T | Partial<T>;
 
-
-/**
- * @deprecated This was intended to be used as a generic converter, but it doesn't work well with TS and only supports
- * 1 property.
- */
-export const convertFirebaseTimestampToDateFactory = (field: string) => {
-  return (data: any) => ({
-    [field]: data[field]?.toDate(),
-  });
-};
-
 // This function ensures that no undefined property is sent to FireStore causing a runtime error;
 export const removeUndefined = (obj: any) => {
   for (const prop in obj) {

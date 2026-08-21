@@ -132,16 +132,17 @@ export class UsersEditDialogComponent {
     protected readonly userState: UserStateService,
     formBuilder: NonNullableFormBuilder
   ) {
-    this.canEditAdminRoles = !!userState.currentUser?.role.includes(RoleEnum.APP_ADMIN);
+    this.canEditAdminRoles = userState.currentUser?.role === RoleEnum.APP_ADMIN;
     this.form = formBuilder.group({
       role: formBuilder.control(data.user.role),
       name: formBuilder.control(data.user.name),
     });
 
-    if (
-      (data.user.role === RoleEnum.SUPERINTENDENT || RoleEnum.ADMIN || RoleEnum.APP_ADMIN) &&
-      userState.currentUser?.role !== RoleEnum.APP_ADMIN
-    ) {
+    // Only APP_ADMINs may edit users that already hold an admin-level role.
+    const editedUserHasAdminRole = [RoleEnum.SUPERINTENDENT, RoleEnum.ADMIN, RoleEnum.APP_ADMIN].includes(
+      data.user.role
+    );
+    if (editedUserHasAdminRole && userState.currentUser?.role !== RoleEnum.APP_ADMIN) {
       this.form.disable();
     }
   }

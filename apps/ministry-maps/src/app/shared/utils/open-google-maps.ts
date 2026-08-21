@@ -37,7 +37,8 @@ const openGoogleMapsHandler = (mapsLink: string, territory: Territory) => {
         `S.browser_fallback_url=${mapsLink}%3Fentry%3Ds&sa%3DX;` +
         `S.intent_description=${territory.address};end`
     );
-  } else if (BrowserEnum.FIREFOX || BrowserEnum.SAFARI || BrowserEnum.UNKNOWN) {
+  } else {
+    // Firefox, Safari and any other browser: open in a new tab.
     window.open(sanitizedLink, '_blank');
   }
 };

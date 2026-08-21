@@ -277,7 +277,7 @@ test.describe('Territories page — alerts (WP-16)', () => {
     }).toPass();
   });
 
-  test('UC-TERR-31 — resolving "Revisita" truncates unrelated recentHistory entries (⚠ defect)', async ({
+  test('UC-TERR-31 — resolving "Revisita" preserves unrelated recentHistory entries (fixed)', async ({
     authenticatedPage,
     seed,
     db,
@@ -326,15 +326,28 @@ test.describe('Territories page — alerts (WP-16)', () => {
     ).toBeVisible();
     await alerts.save();
 
-    // ⚠ recentHistory is recomputed from only the revisit subset → length 1.
+    // Fixed (2026-08): resolution merges the updated subset back into the full recentHistory —
+    // the unrelated MOVED entry must survive, and the revisit entry loses its isRevisit flag.
     await expect(async () => {
       const stored = await db.getDoc(db.collections.territories, both.id);
-      expect((stored?.['recentHistory'] as unknown[]).length).toBe(1);
+      const recentHistory = stored?.['recentHistory'] as Array<Record<string, unknown>>;
+      expect(recentHistory).toHaveLength(2);
+      const revisitEntry = recentHistory.find(h => h['notes'] === 'Aceitou revisita.');
+      expect(revisitEntry?.['isRevisit']).toBe(false);
+      const movedEntry = recentHistory.find(h => h['notes'] === 'Se mudou.');
+      expect(movedEntry?.['isResolved']).toBe(false);
     }).toPass();
-    // The subcollection is untouched — still both docs.
-    expect(
-      await db.getSubcollectionDocs(db.collections.territories, both.id, db.historySubcollection),
-    ).toHaveLength(2);
+    // The subcollection keeps both docs; only the revisit doc was rewritten (isRevisit cleared).
+    const subDocs = await db.getSubcollectionDocs(
+      db.collections.territories,
+      both.id,
+      db.historySubcollection,
+    );
+    expect(subDocs).toHaveLength(2);
+    const revisitDoc = subDocs.find(h => h['notes'] === 'Aceitou revisita.') as
+      | Record<string, unknown>
+      | undefined;
+    expect(revisitDoc?.['isRevisit']).toBe(false);
   });
 
   test('UC-TERR-32 — resolve "Não Visitar" clears the badge', async ({ authenticatedPage, seed, db }) => {
