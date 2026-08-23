@@ -11,7 +11,8 @@
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
     "test": "jest",
-    "backfill:ttl": "node lib/scripts/backfill-ttl.js"
+    "backfill:ttl": "node lib/scripts/backfill-ttl.js",
+    "backfill:history-stamps": "node lib/scripts/backfill-territory-history-stamps.js"
   },
   "engines": {
     "node": "22"

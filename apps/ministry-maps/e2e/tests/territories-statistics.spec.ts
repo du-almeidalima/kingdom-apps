@@ -83,14 +83,12 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
       await expect(statisticsPage.tilePeople).toContainText('Pessoas: 3');
     });
 
-    test('UC-STAT-03 — "Mudaram" count is derived from unresolved-MOVED entries in recentHistory', async ({
+    test('UC-STAT-03 — "Mudaram" count is derived from unresolved-MOVED entries in the fetched history', async ({
       authenticatedPage,
       seed,
       db,
     }) => {
-      // Seed a territory whose latest visit is an unresolved MOVED entry — the
-      // seeder derives `recentHistory` from `history`, so this entry lands in
-      // the parent doc's `recentHistory` (where `hasRecentlyMoved` looks).
+      // Seed a territory whose latest visit is an unresolved MOVED entry.
       const moved = seed.factories.buildTerritory({
         congregationId: seed.ids.congregation,
         city: 'São Paulo',
@@ -117,6 +115,47 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
       expect(
         rh.some(h => h['visitOutcome'] === VisitOutcomeEnum.MOVED && h['isResolved'] === false),
       ).toBe(true);
+      // The subcollection doc carries the stamps that power the single collection-group query.
+      const historyDocs = await db.getSubcollectionDocs(db.collections.territories, moved.id, db.historySubcollection);
+      expect(historyDocs[0]['congregationId']).toBe(seed.ids.congregation);
+      expect(historyDocs[0]['territoryId']).toBe(moved.id);
+    });
+
+    test('UC-STAT-03b — "Mudaram" counts an unresolved MOVED beyond the last 5 visits (gap #21)', async ({
+      authenticatedPage,
+      seed,
+    }) => {
+      // Six visits within the last year: five newer ones fill `recentHistory` and push the
+      // unresolved MOVED out of it. The count must come from the fetched full history, so the
+      // move still contributes 1.
+      const now = Date.now();
+      const visits = Array.from({ length: 5 }, (_, i) =>
+        seed.factories.buildVisitHistory({
+          visitOutcome: VisitOutcomeEnum.NOT_ANSWERED,
+          date: new Date(now - (i + 1) * 7 * 86_400_000),
+        })
+      );
+      visits.push(
+        seed.factories.buildVisitHistory({
+          visitOutcome: VisitOutcomeEnum.MOVED,
+          isResolved: false,
+          date: new Date(now - 60 * 86_400_000),
+          notes: 'Morador se mudou há dois meses.',
+        })
+      );
+
+      const movedBeyondRecent = seed.factories.buildTerritory({
+        congregationId: seed.ids.congregation,
+        city: 'São Paulo',
+        address: 'Rua do Mudado Antigo, 51',
+        history: visits,
+      });
+      await seed.write({ territories: [movedBeyondRecent] });
+
+      const statisticsPage = new StatisticsPage(authenticatedPage);
+      await statisticsPage.goto();
+
+      await expect(statisticsPage.tileMoved).toContainText('Mudaram: 1');
     });
 
     test('UC-STAT-10 — Visit count includes only outcomes SPOKE (0) and REVISIT (4)', async ({
@@ -526,18 +565,16 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
       expect(qualifying).toHaveLength(1);
     });
 
-    test('UC-STAT-13 — Empty congregation hangs in loading state (⚠ defect: combineLatest([]) never emits)', async ({
+    test('UC-STAT-13 — Empty congregation renders clean zero totals', async ({
       seed,
       signInAsUser,
       db,
       page,
     }) => {
-      // ⚠ Today's reality: with zero territories, `FirebaseTerritoryDatasourceService
-      //   .getAllByCongregation({ getHistory: true })` returns `combineLatest([])`, which
-      //   NEVER emits (empty observables hang `combineLatest`). `filteredTerritories$`
-      //   never resolves, `finalize` never flips `isLoading`, and the static/dynamic
-      //   sections never render — the page is stuck on the loading branch. See
-      //   testability-gaps.md §3 #42.
+      // With zero territories, `FirebaseTerritoryDatasourceService.getAllByCongregation
+      //   ({ getHistory: true })` guards the empty snapshot and returns `of([])` immediately —
+      //   no history query is issued. `isLoading` flips to false and the page renders every
+      //   tile with zero totals.
       const congregation = seed.factories.buildCongregation({ cities: ['Guarulhos'] });
       const admin = seed.factories.buildUser({
         role: RoleEnum.ADMIN,
@@ -548,15 +585,15 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
       await signInAsUser(admin.id);
       await page.goto('/territories/statistics');
 
-      // The heading and city filter render synchronously; the filter stays
-      // disabled because `[disabled]="isLoading"` never flips back to false.
       await expect(page.getByTestId('statistics-heading')).toBeVisible();
-      await expect(page.getByTestId('statistics-city-filter')).toBeDisabled();
-      // The loading branch is the only thing rendered.
-      await expect(page.getByTestId('statistics-loading')).toBeVisible();
-      // The "Gerais" / "Por período" sections never appear.
-      await expect(page.getByTestId('statistics-static-section')).toHaveCount(0);
-      await expect(page.getByTestId('statistics-dynamic-section')).toHaveCount(0);
+      // Loading cleared: the filter is enabled and both sections render with zeros.
+      await expect(page.getByTestId('statistics-city-filter')).toBeEnabled();
+      await expect(page.getByTestId('statistics-loading')).toHaveCount(0);
+      await expect(page.getByTestId('statistics-static-section')).toBeVisible();
+      await expect(page.getByTestId('statistics-dynamic-section')).toBeVisible();
+      await expect(page.getByTestId('statistic-tile-territories')).toContainText('Territórios: 0');
+      await expect(page.getByTestId('statistic-tile-bible-studies')).toContainText('Estudos bíblicos: 0');
+      await expect(page.getByTestId('statistic-tile-moved')).toContainText('Mudaram: 0');
 
       const scoped = await db.queryWhere(
         db.collections.territories,

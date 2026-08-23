@@ -80,7 +80,14 @@ export class TerritoryStatisticsBO {
     return territories.reduce((acc, cur) => {
       acc.territoryCount++;
       acc.peopleCount += cur.peopleQuantity ? cur.peopleQuantity : 1;
-      if (TerritoryAlertsBO.hasRecentlyMoved(cur)) acc.movedCount++;
+      // The statistics page fetches the full (1-year-window) history, so count unresolved moves
+      // from it — an unresolved move beyond the last 5 visits still counts (gap #21). Falls back
+      // to recentHistory when no history was resolved for the territory.
+      const hasUnresolvedMoved = cur.history
+        ? cur.history.some((h) => h.visitOutcome === VisitOutcomeEnum.MOVED && !h.isResolved)
+        : TerritoryAlertsBO.hasRecentlyMoved(cur);
+
+      if (hasUnresolvedMoved) acc.movedCount++;
 
       if (cur.isBibleStudent) acc.bibleStudiesCount++;
 

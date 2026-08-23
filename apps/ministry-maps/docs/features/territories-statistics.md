@@ -5,11 +5,27 @@ This document describes the behavioural use cases for the `/territories/statisti
 **Route:** `/territories/statistics`
 **Actors:** `ADMIN`, `ELDER`, `ORGANIZER`, `SUPERINTENDENT`, `APP_ADMIN` (Publishers are redirected).
 
+## How data is loaded
+
+The page fetches all territories **and their visit history in a single collection-group query**
+(`FirebaseTerritoryDatasourceService.getAllByCongregation(congregationId, { getHistory: true })`,
+see [`../domain/data-model.md §4.8`](../domain/data-model.md#48-statistics-history-resolution-one-collection-group-query)):
+one `collectionGroup('history')` read filtered by `congregationId` and `date >= now - 1 year`, with
+results grouped per territory. This is what keeps the page fast on congregations with significant
+history — there is no per-territory subcollection query.
+
+Two properties follow from this design:
+
+- Visit documents must carry the `congregationId`/`territoryId` stamps to be counted. New visits are
+  stamped by the work page write-back, seeded visits by the E2E seeder, and legacy documents by the
+  one-time `backfill:history-stamps` script (see `apps/ministry-maps/docs/2026-08-statistics-deployment-plan.md`).
+- Every metric on this page only sees visits from the **last year**; older visits exist in Firestore
+  but are outside the query window.
+
 ## Testability gaps (summary)
 
 - **Missing Selectors:** No `data-testid` on the main heading, city filter `<select>`, period filter `<select>`, or any individual metric tile. Selectors must rely on verbatim text or DOM structure.
 - **Harness Extensions:** `signInAs` fixture only supports `'admin'` and `'publisher'`. Roles like `ELDER`, `ORGANIZER`, `SUPERINTENDENT`, and `APP_ADMIN` require harness extensions to be testable.
-- **Inconsistent Data Sources:** The "Mudaram" metric relies on denormalised `recentHistory` (last 5 visits), while "Visitas" and "Revisitas" use the full `history` subcollection.
 
 ### Gerais (Static totals)
 
@@ -33,14 +49,23 @@ This document describes the behavioural use cases for the `/territories/statisti
 - **Edge cases:** selecting "Todas" restores the totals from UC-STAT-01
 - **Priority:** P1 · **Gaps:** no data-testids
 
-#### UC-STAT-03 — Displays "Moved" count from recent history
+#### UC-STAT-03 — Displays "Moved" count from unresolved-MOVED visits in the fetched history
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
-- **Preconditions (seed):** default baseline; plus 1 territory with `recentHistory` containing a visit with `visitOutcome: 2` (MOVED) and `isResolved: false`
+- **Preconditions (seed):** default baseline; plus 1 territory whose `history` contains a visit with `visitOutcome: 2` (MOVED) and `isResolved: false` (the seeder stamps the subcollection docs)
 - **Steps:** 1. navigate to statistics
 - **Expected UI:** "Mudaram: 1"
-- **Expected persistence:** `db.getDoc(db.collections.territories, id)` has `recentHistory` with an unresolved `MOVED` (2) outcome
-- **Edge cases:** if `isResolved: true`, the count is 0; ⚠ suspected defect: if the `MOVED` visit is older than the last 5 (not in `recentHistory`), it is ignored even if it exists in the `history` subcollection
+- **Expected persistence:** the `history/{visitId}` doc carries `congregationId === seed.ids.congregation` and `territoryId === <territory id>` (the stamps that make it visible to the collection-group query); `recentHistory` also reflects the entry, but the count does not depend on that
+- **Edge cases:** if `isResolved: true`, the count is 0; a visit older than 1 year is outside the query window and never counts
+- **Priority:** P1 · **Gaps:** no data-testids
+
+#### UC-STAT-03b — "Moved" counts an unresolved MOVED beyond the last 5 visits
+- **Actor:** Admin
+- **Route:** `/territories/statistics`
+- **Preconditions (seed):** 1 territory with six visits within the last year: five newer `NOT_ANSWERED` visits (weekly) fill `recentHistory`, plus one unresolved `MOVED` dated ~2 months ago — pushed out of `recentHistory` but inside the query window
+- **Steps:** 1. navigate to statistics
+- **Expected UI:** "Mudaram: 1" — the count derives from the fetched full history, not from the capped `recentHistory`
+- **Expected persistence:** parent doc's `recentHistory` has length ≤ 5 and excludes the MOVED entry; the `history` subcollection holds all 6 docs
 - **Priority:** P1 · **Gaps:** no data-testids
 
 ### Por período (Dynamic metrics)
@@ -139,9 +164,10 @@ This document describes the behavioural use cases for the `/territories/statisti
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** congregation with 0 territories
 - **Steps:** 1. navigate to statistics
-- **Expected UI:** ⚠ **Defect** — page hangs in loading state forever: the `statistics-heading` and disabled `statistics-city-filter` render, but the `statistics-loading` spinner is the only branch shown; the static/dynamic sections never appear. Root cause: `FirebaseTerritoryDatasourceService.getAllByCongregation({ getHistory: true })` builds `combineLatest([])` for an empty snapshot, which never emits; `finalize` never flips `isLoading`. See `testability-gaps.md` §3 #42.
+- **Expected UI:** clean zero totals — the loading state clears, the static section renders "Territórios: 0", "Pessoas: 0", "Estudos bíblicos: 0", "Mudaram: 0", the dynamic section renders "Visitas: 0", "Revisitas: 0", and the city filter becomes enabled while still listing the congregation's cities
 - **Expected persistence:** `db.getCollectionDocs(db.collections.territories)` is empty (scoped to the congregation)
-- **Priority:** P2 · **Gaps:** no data-testids (now present); ⚠ suspected defect
+- **Edge cases:** `getAllByCongregation({ getHistory: true })` returns `of([])` immediately for an empty territory snapshot — no history query is issued at all
+- **Priority:** P2 · **Gaps:** no data-testids
 
 #### UC-STAT-14 — Loading state
 - **Actor:** Admin
@@ -205,5 +231,7 @@ This document describes the behavioural use cases for the `/territories/statisti
 - `apps/ministry-maps/src/app/features/territory/bo/territory-statistics/territory-statistics.bo.ts`
 - `apps/ministry-maps/src/app/features/territory/bo/territory-alerts/territory-alerts.bo.ts`
 - `apps/ministry-maps/src/app/repositories/firebase/firebase-territory-datasource.service.ts`
+- `firestore.indexes.json` (history collection-group composite index) · `firestore.rules` (recursive history match)
+- `functions/ministry-maps/src/scripts/backfill-territory-history-stamps.ts` (legacy document stamps)
 - `apps/ministry-maps/docs/domain/data-model.md`
 - `apps/ministry-maps/docs/domain/roles-and-permissions.md`

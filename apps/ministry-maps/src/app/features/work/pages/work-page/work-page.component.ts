@@ -90,10 +90,13 @@ export class WorkPageComponent implements OnInit, OnDestroy {
     // Updating also the territory with the new history entry
     if (designationTerritory?.history?.length && designationTerritory?.history?.length >= 1) {
       // TODO: At some point we should limit the amount of history per territory
-      visitHistoryUpdate$ = this.territoryRepository.setVisitHistory(
-        designationTerritory.id,
-        designationTerritory.history[designationTerritory.history.length - 1]
-      );
+      const visitEntry = designationTerritory.history[designationTerritory.history.length - 1];
+      const stampedVisitEntry = {
+        ...visitEntry,
+        congregationId: this.designation!.congregationId,
+        territoryId: designationTerritory.id,
+      };
+      visitHistoryUpdate$ = this.territoryRepository.setVisitHistory(designationTerritory.id, stampedVisitEntry);
     }
 
     // The observables must be spread out: `concat([a$, b$])` would emit them as values and

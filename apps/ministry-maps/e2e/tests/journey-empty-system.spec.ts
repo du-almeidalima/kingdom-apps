@@ -71,22 +71,22 @@ test('J-08 — Empty congregation: list, assign, statistics and CSV export all b
   // ⟶ HAND-OFF (Firestore): no new designation.
   expect(await db.getCollectionDocs(db.collections.designations)).toHaveLength(1); // baseline only
 
-  // ── Leg 3 — `/territories/statistics` hangs in loading (⚠ defect, UC-STAT-13) ─
-  // With zero territories, `getAllByCongregation({ getHistory: true })` returns
-  // `combineLatest([])`, which never emits — `isLoading` never flips and the
-  // static/dynamic sections never render. Assert the hang (today's reality), not
-  // the intended "all zeros". See docs/testability-gaps.md §3 #42.
+  // ── Leg 3 — `/territories/statistics` renders clean zero totals (UC-STAT-13) ─
+  // With zero territories, `getAllByCongregation({ getHistory: true })` returns `of([])`
+  // immediately (empty-snapshot guard), so the loading state clears and every tile renders 0.
   const statisticsPage = new StatisticsPage(page);
-  // Navigate directly: `statisticsPage.goto()` waits for the static section,
-  // which is exactly what never renders in this scenario.
-  await page.goto('/territories/statistics');
+  await statisticsPage.goto();
 
   await expect(statisticsPage.heading).toBeVisible();
-  await expect(statisticsPage.cityFilter).toBeDisabled(); // [disabled]="isLoading" never clears
-  await expect(statisticsPage.loading).toBeVisible(); // the loading branch is all that renders
-  await expect(statisticsPage.staticSection).toHaveCount(0);
-  await expect(statisticsPage.dynamicSection).toHaveCount(0);
-  // The city <select> still offers the congregation's cities, but is never enabled.
+  await expect(statisticsPage.loading).toHaveCount(0);
+  await expect(statisticsPage.staticSection).toBeVisible();
+  await expect(statisticsPage.dynamicSection).toBeVisible();
+  await expect(statisticsPage.tileTerritories).toContainText('Territórios: 0');
+  await expect(statisticsPage.tilePeople).toContainText('Pessoas: 0');
+  await expect(statisticsPage.tileBibleStudies).toContainText('Estudos bíblicos: 0');
+  await expect(statisticsPage.tileMoved).toContainText('Mudaram: 0');
+  // The city <select> still offers the congregation's cities once loading clears.
+  await expect(statisticsPage.cityFilter).toBeEnabled();
   expect(await statisticsPage.cityFilter.locator('option').allTextContents()).toEqual(['Campinas', 'Todas']);
 
   // ── Leg 4 — CSV export of an empty territory set (UC-TERR-34 with n = 0) ───

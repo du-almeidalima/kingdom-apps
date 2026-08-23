@@ -63,7 +63,11 @@ export async function seed(def: SeedDefinition): Promise<SeedResult> {
     for (const visit of history) {
       batch.set(
         territoryRef.collection(TERRITORY_HISTORY_SUBCOLLECTION).doc(visit.id),
-        visit,
+        {
+          ...visit,
+          congregationId: territory.congregationId,
+          territoryId: territory.id,
+        },
       );
     }
   }

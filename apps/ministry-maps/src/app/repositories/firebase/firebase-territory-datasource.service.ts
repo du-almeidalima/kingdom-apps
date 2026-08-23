@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import {
   collection,
   collectionData,
+  collectionGroup,
   CollectionReference,
   deleteDoc,
   doc,
@@ -15,8 +16,9 @@ import {
   query,
   runTransaction,
   setDoc,
+  Timestamp,
   updateDoc,
-  where
+  where,
 } from '@angular/fire/firestore';
 import { combineLatest, defer, EMPTY, forkJoin, from, map, Observable, of, switchMap } from 'rxjs';
 
@@ -26,7 +28,7 @@ import { Territory } from '../../../models/territory';
 import { TerritoryVisitHistory } from '../../../models/territory-visit-history';
 import {
   FirebaseTerritoryModel,
-  FirebaseTerritoryVisitHistoryModel
+  FirebaseTerritoryVisitHistoryModel,
 } from '../../../models/firebase/firebase-territory-model';
 import { FirebaseDatasource } from './firebase-datasource';
 
@@ -35,7 +37,7 @@ export const convertTerritoryFirebaseTimestampsToDate = (data: FirebaseTerritory
   return {
     ...data,
     lastVisit: data.lastVisit?.toDate(),
-    recentHistory: data.recentHistory?.map(h => ({
+    recentHistory: data.recentHistory?.map((h) => ({
       ...h,
       date: h?.date?.toDate(),
     })),
@@ -79,29 +81,43 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
     return from(collectionData<Territory>(q)).pipe(
       // Resolve Territory History
       switchMap((territoriesSnapshot) => {
-        if (!options?.getHistory) {
+        if (!options?.getHistory || territoriesSnapshot.length === 0) {
           return of(territoriesSnapshot);
         }
 
-        // Looping through each territory and resolving the history sub collection documents
-        const territories$ = territoriesSnapshot.map((territory) => {
-          const path = `${FirebaseTerritoryDatasourceService.COLLECTION_NAME}/${territory.id}/${this.historySubCollectionName}`;
-          const territoryVisitHistoryCollection = collection(this.firestore, path).withConverter<TerritoryVisitHistory>(
-            firebaseEntityConverterFactory(convertTerritoryHistoryFirebaseTimestampsToDate)
-          );
+        // Dynamic visit history (up to 1 year back) in ONE collection-group query
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+        oneYearAgo.setHours(0, 0, 0, 0);
 
-          return from(getDocs(territoryVisitHistoryCollection)).pipe(
-            map((territoryVisitHistorySnapshots) => {
-              return {
-                ...territory,
-                history: territoryVisitHistorySnapshots.docs.map((visitHistorySnapshot) => visitHistorySnapshot.data()),
-              };
-            })
-          );
-        });
+        const historyGroupQuery = query(
+          collectionGroup(this.firestore, this.historySubCollectionName),
+          where('congregationId', '==', congregationId),
+          where('date', '>=', Timestamp.fromDate(oneYearAgo))
+        ).withConverter<TerritoryVisitHistory>(
+          firebaseEntityConverterFactory(convertTerritoryHistoryFirebaseTimestampsToDate)
+        );
 
-        // Combining all territoriesObservables into one array
-        return combineLatest(territories$);
+        return from(getDocs(historyGroupQuery)).pipe(
+          map((historySnapshot) => {
+            const historyByTerritoryId = new Map<string, TerritoryVisitHistory[]>();
+
+            for (const docSnap of historySnapshot.docs) {
+              const data = docSnap.data();
+              const territoryId = data.territoryId ?? docSnap.ref.parent?.parent?.id;
+              if (territoryId) {
+                const list = historyByTerritoryId.get(territoryId) ?? [];
+                list.push(data);
+                historyByTerritoryId.set(territoryId, list);
+              }
+            }
+
+            return territoriesSnapshot.map((territory) => ({
+              ...territory,
+              history: historyByTerritoryId.get(territory.id) ?? [],
+            }));
+          })
+        );
       })
     );
   }

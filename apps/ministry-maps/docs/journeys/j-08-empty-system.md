@@ -53,23 +53,17 @@ baseline docs (the new congregation added none).
 ⟶ **HAND-OFF (Firestore):** `db.getCollectionDocs(db.collections.designations)` unchanged (still only the
 baseline `seed-designation`) — nothing could be submitted.
 
-### Leg 3 — `/territories/statistics` hangs in the loading state (⚠ defect)
+### Leg 3 — `/territories/statistics` renders clean zero totals
 
 6. `page.goto('/territories/statistics')`.
-7. ⚠ **Today's reality (per UC-STAT-13 / `docs/testability-gaps.md` §3 #42):** with zero territories,
-   `FirebaseTerritoryDatasourceService.getAllByCongregation({ getHistory: true })` returns
-   `combineLatest([])`, which **never emits**. `filteredTerritories$` never resolves, `finalize` never
-   flips `isLoading`, and the static/dynamic sections never render. Assert the **hang**, not zeros: the
-   heading renders, the loading branch (`statistics-loading`) stays visible, the city `<select>` stays
-   `disabled` (it renders `Campinas`/`Todas` but is never enabled), and the `statistics-static-section`
-   / `statistics-dynamic-section` are absent. This is a locked-in suspected defect — do not assert the
-   intended "all zeros" behaviour until the BO is fixed.
+7. With zero territories, `FirebaseTerritoryDatasourceService.getAllByCongregation({ getHistory: true })`
+   guards the empty snapshot and returns `of([])` immediately (UC-STAT-13), so the loading state
+   clears: the heading renders, the static section shows `Territórios: 0`, `Pessoas: 0`,
+   `Estudos bíblicos: 0`, `Mudaram: 0`, the dynamic section shows `Visitas: 0`, `Revisitas: 0`, and
+   the city `<select>` becomes enabled while still offering `Campinas`/`Todas`. No history query is
+   issued at all.
 
-> **Doc note (reality vs. original entry):** an earlier version of this leg asserted `Territórios: 0` /
-> `Visitas: 0` etc. That was the *intended* behaviour, not today's. UC-STAT-13 already pins down the
-> hang; this journey re-asserts the same reality in the empty-congregation context.
-
-⟶ **HAND-OFF (Firestore):** no document was created by visiting the screen (the hang is read-side only).
+⟶ **HAND-OFF (Firestore):** no document was created by visiting the screen (the page is read-only).
 
 ### Leg 4 — CSV export of an empty territory set
 

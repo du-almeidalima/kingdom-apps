@@ -88,6 +88,20 @@ describe('TerritoryStatisticsBO', () => {
       );
     });
 
+    it('counts an unresolved MOVED visit that only exists in the full history (beyond the last 5)', () => {
+      const oldMovedVisit: TerritoryVisitHistory = { ...mockMoveVisit, id: 'old-moved', date: new Date(2020, 0, 1) };
+      // recentHistory is capped at the last 5 visits — the old unresolved move was pushed out of it,
+      // but the statistics page fetches the full history, so it must still count.
+      const territoryWithOldMove = territoryMockBuilder({
+        recentHistory: [mockRevisit, mockNotAnswered, mockNotVisitAgain, mockRevisit],
+        history: [...Array.from({ length: 5 }, (_, i) => ({ ...mockRevisit, id: `recent-${i}` })), oldMovedVisit],
+      });
+
+      expect(territoryStatisticsBO.deriveTerritoryStatistics([territoryWithOldMove])).toEqual(
+        expect.objectContaining({ movedCount: 1 })
+      );
+    });
+
     it('should store the territory in cache', async () => {
       const territoryRepository = ngMocks.get(TerritoryRepository);
       const territoryRepositoryMock = jest.spyOn(territoryRepository, 'getAllByCongregation');

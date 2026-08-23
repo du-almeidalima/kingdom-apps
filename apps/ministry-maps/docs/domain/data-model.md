@@ -57,15 +57,17 @@ invitation_links/{linkId}        → congregation: DocumentReference on create, 
 
 ### 2.2 `TerritoryVisitHistory` — `src/models/territory-visit-history.ts`
 
-| Field          | Type                 | Required | Meaning / test relevance                                                                    |
-|----------------|----------------------|----------|---------------------------------------------------------------------------------------------|
-| `id`           | `string`             | ✔       | Same id in the subcollection doc **and** in the `recentHistory` array element.              |
-| `notes`        | `string`             | ✔       | Free text captured in the complete-visit dialog.                                            |
-| `isRevisit`    | `boolean`            | ✔       | Counted separately in statistics.                                                           |
-| `isResolved`   | `boolean?`           | ✖       | Used by the "not answered" / "moved" alert resolution flow.                                 |
-| `name`         | `string?`            | ✖       | Name of the publisher who did the visit; required by the dialog when `isRevisit` is ticked. |
-| `date`         | `Date` → `Timestamp` | ✔       | Drives `lastVisit`, `recentHistory` ordering and every statistics period.                   |
-| `visitOutcome` | `VisitOutcomeEnum`   | ✔       | **Numeric** on the wire (§3.2).                                                             |
+| Field            | Type                 | Required | Meaning / test relevance                                                                                                                                           |
+|------------------|----------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `id`             | `string`             | ✔       | Same id in the subcollection doc **and** in the `recentHistory` array element.                                                                                     |
+| `notes`          | `string`             | ✔       | Free text captured in the complete-visit dialog.                                                                                                                   |
+| `isRevisit`      | `boolean`            | ✔       | Counted separately in statistics.                                                                                                                                  |
+| `isResolved`     | `boolean?`           | ✖       | Used by the "not answered" / "moved" alert resolution flow.                                                                                                        |
+| `name`           | `string?`            | ✖       | Name of the publisher who did the visit; required by the dialog when `isRevisit` is ticked.                                                                        |
+| `date`           | `Date` → `Timestamp` | ✔       | Drives `lastVisit`, `recentHistory` ordering and every statistics period.                                                                                          |
+| `visitOutcome`   | `VisitOutcomeEnum`   | ✔       | **Numeric** on the wire (§3.2).                                                                                                                                    |
+| `congregationId` | `string?`            | ✖       | Plain id, stamped at write time. Enables the single collection-group statistics query (§4.7). Backfill stamps legacy docs (`functions` `backfill:history-stamps`). |
+| `territoryId`    | `string?`            | ✖       | Plain id of the parent territory document, stamped at write time alongside `congregationId`.                                                                       |
 
 ### 2.3 `Designation` / `DesignationTerritory` — `src/models/designation.ts`
 
@@ -208,10 +210,7 @@ Deleting a visit (`deleteVisitHistory`) removes **both** the subcollection doc a
 `recentHistory` (matched by `id`), but does **not** recompute `lastVisit`.
 
 Resolving an alert (`TerritoryAlertsBO.resolveTerritoryHistoryAlert`) marks the matching entries
-`isResolved: true`, writes them back to the subcollection with `setVisitHistory`, **and** merges the
-updated entries back into the **full** `recentHistory` (matched by id) — so passing a filtered subset
-(e.g. the `Revisita` dialog's `filter(h => h.isRevisit)`) no longer drops unrelated entries, while the
-subcollection stays complete (`UC-TERR-31`; truncation fixed 2026-08 — see
+`isResolved: true`, writes them back to the subcollection with `setVisitHistory`, **and** merges the updated entries back into the **full** `recentHistory` (matched by id) — so passing a filtered subset (e.g. the `Revisita` dialog's `filter(h => h.isRevisit)`) no longer drops unrelated entries, while the subcollection stays complete (`UC-TERR-31`; truncation fixed 2026-08 — see
 `docs/2026-08-unit-testing-bug-fixes.md`).
 
 ### 4.2 Designation territories are frozen snapshots
@@ -275,25 +274,38 @@ So: a background Admin-SDK write is expected to appear on `/territories` **witho
 - `getAllByCongregationAndCities` uses `where('city','in',cities)` → **max 30** values per query.
 - `getAllInIds` uses `where(documentId(),'in',ids)` → **max 30** ids per query; selecting more territories than that in one designation is an untested boundary (see `UC-ASSIGN` edge cases).
 
+### 4.8 Statistics history resolution: one collection-group query
+
+`getAllByCongregation(congregationId, { getHistory: true })` resolves every territory's visits with a **single collection-group query** — `collectionGroup('history')` where `congregationId == X` and
+`date >= now - 1 year` (see the composite index in `firestore.indexes.json` and the recursive
+`match /{path=**}/history/{historyId}` rule in `firestore.rules`). This replaced one subcollection query per territory, which made `/territories/statistics` crawl on congregations with history.
+
+Consequences:
+
+- Visit documents **must carry `congregationId`** (and `territoryId`) to appear: new visits are stamped by the work page's write-back (`WorkPageComponent.handleTerritoryUpdated`, from
+  `designation.congregationId`), seeded docs are stamped by the seeder, and legacy production docs are stamped once by the `backfill:history-stamps` script.
+- Visits older than **1 year** are not returned → dynamic period tiles and the `Mudaram` count only see the last year of data (the previous behaviour only saw `recentHistory`, so this is strictly broader).
+- A congregation with zero territories returns `of([])` immediately (empty-snapshot guard, gap #42).
+
 ---
 
 ## 5. Default E2E baseline seed
 
 Applied automatically before **every** test by the `resetAndSeed` auto fixture (the emulator starts empty). Ids come from `DEFAULT_SEED_IDS` (`seed.ids`).
 
-| Entity       | Id                         | Key values                                                                                                                                                                                       |
-|--------------|----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Congregation | `seed-congregation`        | `Congregação Jardim Primavera`, `São Paulo, SP`, cities `['São Paulo', 'Osasco']`, settings `{ designationAccessExpiryDays: 7, shouldDesignationBlockAfterExpired: true }`                       |
-| Admin user   | `seed-user-admin`          | `Carlos Almeida`, `carlos.almeida@example.com`, `ADMIN`                                                                                                                                          |
-| Publishers   | `seed-user-publisher-1..3` | `Ana Souza`, `Pedro Lima`, `Mariana Costa`, `PUBLISHER`, emails `seed-user-publisher-N@example.com`                                                                                              |
-| Elder        | `seed-user-elder`          | `Marcos Oliveira`, `ELDER`, `seed-user-elder@example.com`                                                                                                                                                                       |
-| Organizer    | `seed-user-organizer`      | `Ricardo Santos`, `ORGANIZER`, `seed-user-organizer@example.com`                                                                                                                                                                 |
-| Superintendent | `seed-user-superintendent` | `Felipe Rodrigues`, `SUPERINTENDENT`, `seed-user-superintendent@example.com`                                                                                                                                                   |
-| App Admin    | `seed-user-app-admin`      | `Daniel Ferreira`, `APP_ADMIN`, `seed-user-app-admin@example.com`                                                                                                                                                                |
-| Territory 1  | `seed-territory-1`         | São Paulo · `Rua das Acácias, 45 - Pinheiros` · `COUPLE` · `positionIndex 0` · 2 visits (`REVISIT` 2024-03-10, `SPOKE` 2024-02-20)                                                               |
-| Territory 2  | `seed-territory-2`         | Osasco · `Av. dos Autonomistas, 1200 - Centro` · `WOMAN` · `positionIndex 1` · 1 visit (`NOT_ANSWERED` 2024-03-05, `isResolved: false`)                                                          |
-| Territory 3  | `seed-territory-3`         | São Paulo · `Rua Harmonia, 300 - Vila Madalena` · `MAN` · `positionIndex 2` · `isBibleStudent: true`, `bibleInstructor: seed-user-publisher-1` · 1 visit (`SPOKE` 2024-03-12, `isRevisit: true`) |
-| Designation  | `seed-designation`         | `createdBy: seed-user-admin`, `createdAt 2024-03-01`, **`expiresAt 2024-03-08` (already expired)**, embeds a snapshot of `seed-territory-1`, `settings.shouldDesignationBlockAfterExpired: true` |
+| Entity         | Id                         | Key values                                                                                                                                                                                       |
+|----------------|----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Congregation   | `seed-congregation`        | `Congregação Jardim Primavera`, `São Paulo, SP`, cities `['São Paulo', 'Osasco']`, settings `{ designationAccessExpiryDays: 7, shouldDesignationBlockAfterExpired: true }`                       |
+| Admin user     | `seed-user-admin`          | `Carlos Almeida`, `carlos.almeida@example.com`, `ADMIN`                                                                                                                                          |
+| Publishers     | `seed-user-publisher-1..3` | `Ana Souza`, `Pedro Lima`, `Mariana Costa`, `PUBLISHER`, emails `seed-user-publisher-N@example.com`                                                                                              |
+| Elder          | `seed-user-elder`          | `Marcos Oliveira`, `ELDER`, `seed-user-elder@example.com`                                                                                                                                        |
+| Organizer      | `seed-user-organizer`      | `Ricardo Santos`, `ORGANIZER`, `seed-user-organizer@example.com`                                                                                                                                 |
+| Superintendent | `seed-user-superintendent` | `Felipe Rodrigues`, `SUPERINTENDENT`, `seed-user-superintendent@example.com`                                                                                                                     |
+| App Admin      | `seed-user-app-admin`      | `Daniel Ferreira`, `APP_ADMIN`, `seed-user-app-admin@example.com`                                                                                                                                |
+| Territory 1    | `seed-territory-1`         | São Paulo · `Rua das Acácias, 45 - Pinheiros` · `COUPLE` · `positionIndex 0` · 2 visits (`REVISIT` 2024-03-10, `SPOKE` 2024-02-20)                                                               |
+| Territory 2    | `seed-territory-2`         | Osasco · `Av. dos Autonomistas, 1200 - Centro` · `WOMAN` · `positionIndex 1` · 1 visit (`NOT_ANSWERED` 2024-03-05, `isResolved: false`)                                                          |
+| Territory 3    | `seed-territory-3`         | São Paulo · `Rua Harmonia, 300 - Vila Madalena` · `MAN` · `positionIndex 2` · `isBibleStudent: true`, `bibleInstructor: seed-user-publisher-1` · 1 visit (`SPOKE` 2024-03-12, `isRevisit: true`) |
+| Designation    | `seed-designation`         | `createdBy: seed-user-admin`, `createdAt 2024-03-01`, **`expiresAt 2024-03-08` (already expired)**, embeds a snapshot of `seed-territory-1`, `settings.shouldDesignationBlockAfterExpired: true` |
 
 Baseline counts: `congregations 1`, `users 8`, `territories 3`, `designations 1`, history docs `2 + 1 + 1`.
 

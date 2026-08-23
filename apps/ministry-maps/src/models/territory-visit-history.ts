@@ -8,4 +8,8 @@ export type TerritoryVisitHistory = {
   name?: string;
   date: Date;
   visitOutcome: VisitOutcomeEnum;
+  /** Congregation ID, stamped at write time to support collection-group queries (statistics). */
+  congregationId?: string;
+  /** Parent territory ID, stamped at write time. */
+  territoryId?: string;
 };
