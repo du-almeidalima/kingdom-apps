@@ -44,7 +44,7 @@ Repository-wide instructions for coding agents. [`README.md`](./README.md) has s
 Rules live in `.agents/rules/`. oh-my-pi and Antigravity load them natively, scoped by the frontmatter `globs`; other harnesses should read the rules relevant to the files being changed:
 
 | Context                                | Rules                                                                 |
-| -------------------------------------- | --------------------------------------------------------------------- |
+|----------------------------------------|-----------------------------------------------------------------------|
 | Components, services, state            | `.agents/rules/angular-components.md`, `angular-services.md`          |
 | Styling, theming, tokens               | `.agents/rules/styling.md`                                            |
 | Unit tests (ng-mocks + Jest)           | `.agents/rules/unit-testing.md`                                       |
@@ -63,7 +63,7 @@ For Ministry Maps behavior or data changes, also read the relevant material unde
 Use Nx through `npx`. Run the focused target first, then every relevant downstream target required by the change.
 
 | Change                    | Minimum relevant checks                                                                                                                                                               |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `apps/ministry-maps`      | `npx nx test ministry-maps`, `npx nx lint ministry-maps`, `npx nx build ministry-maps`                                                                                                |
 | `libs/common-ui`          | `npx nx test common-ui`, `npx nx lint common-ui`                                                                                                                                      |
 | E2E                       | `npx nx typecheck-e2e ministry-maps`, then the relevant `npx nx e2e ministry-maps` scope                                                                                              |
@@ -86,21 +86,10 @@ Add or update tests for behavior changes. Do not weaken, skip, or delete a faili
 
 ## CodeGraph
 
-Use CodeGraph before generic text search or opening several files when locating or understanding code:
+In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the repo root), reach for it BEFORE grep/find or reading files when you need to understand or locate code:
 
-1. Run `codegraph status` at the repository root. Do not infer readiness from `.codegraph/`; the directory can exist before an index does.
-2. If the index is usable, prefer the `codegraph_explore` MCP tool when available. Otherwise run
-   `codegraph explore "<symbol names or question>"` from the shell.
-3. If the index is stale, run `codegraph sync` and check its status again. If CodeGraph is unavailable or cannot provide the needed result, fall back to the normal repository search tools.
+- **MCP tool** (when available): `codegraph_explore` answers most code questions in one call — the relevant symbols' verbatim source plus the call paths between them, including dynamic-dispatch hops grep can't follow. Name a file or symbol in the query to read its current line-numbered source. If it's listed but deferred, load it by name via tool search.
+- **Shell** (always works): `codegraph explore "<symbol names or question>"` prints the same output.
 
-Name concrete symbols or files in queries when possible. The index is machine-local and intentionally ignored by Git; never commit its database, daemon files, sockets, or logs.
-
-For an explicit environment-setup task, the portable one-time setup is:
-
-```bash
-npm install --global @colbymchenry/codegraph
-codegraph init
-codegraph status
-```
-
+If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is the user's decision.
 <!-- CODEGRAPH_END -->
