@@ -5,6 +5,7 @@ Behavioral specifications for the application's root shell and main navigation h
 ### Shell and Header
 
 #### UC-NAV-01 — Authenticated header shows profile link
+
 - **Actor:** Any signed-in user
 - **Route:** `/home` (or any)
 - **Preconditions (seed):** default baseline; `signInAs('publisher')`
@@ -15,6 +16,7 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Priority:** P0 · **Gaps:** none
 
 #### UC-NAV-02 — Anonymous header hides profile link
+
 - **Actor:** Anonymous visitor
 - **Route:** `/login`
 - **Preconditions (seed):** default baseline
@@ -25,6 +27,7 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Priority:** P1 · **Gaps:** none
 
 #### UC-NAV-03 — Logo navigates to home
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline; `signInAs('admin')`
@@ -35,6 +38,7 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Priority:** P1 · **Gaps:** none
 
 #### UC-NAV-04 — Application loading state
+
 - **Actor:** Any user
 - **Route:** `/`
 - **Preconditions (seed):** none
@@ -47,6 +51,7 @@ Behavioral specifications for the application's root shell and main navigation h
 ### Home Hub Access
 
 #### UC-NAV-05 — Authorized home hub shows greeting and navigation cards
+
 - **Actor:** Admin (Carlos Almeida)
 - **Route:** `/home`
 - **Preconditions (seed):** default baseline (`seed-user-admin` name is `Carlos Almeida`); `signInAs('admin')`
@@ -58,6 +63,7 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Sources:** `apps/ministry-maps/src/app/features/home/pages/home-page/home-page.component.ts`
 
 #### UC-NAV-06 — Publisher restricted from admin areas (Redirect to Welcome)
+
 - **Actor:** Publisher
 - **Route:** `/home`
 - **Preconditions (seed):** default baseline; `signInAs('publisher')`
@@ -68,6 +74,7 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Priority:** P0 · **Gaps:** none
 
 #### UC-NAV-07 — Anonymous restricted from home hub (Redirect to Login)
+
 - **Actor:** Anonymous visitor
 - **Route:** `/home`
 - **Preconditions (seed):** default baseline
@@ -80,6 +87,7 @@ Behavioral specifications for the application's root shell and main navigation h
 ### Router Behavior and Guards
 
 #### UC-NAV-08 — Unauthorized role results in cancelled navigation (⚠ suspected defect)
+
 - **Actor:** A user with a valid role that is NOT in the allowed list for a route
 - **Route:** `/territories`
 - **Preconditions (seed):** A user seeded with a custom role (e.g., `GUEST`) that is not in `ORGANIZER, ADMIN, ELDER, SUPERINTENDENT`
@@ -91,6 +99,7 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Sources:** `apps/ministry-maps/src/app/core/features/auth/guards/auth.guard.ts`
 
 #### UC-NAV-09 — Unknown route behavior
+
 - **Actor:** Any user
 - **Route:** `/nao-existe`
 - **Preconditions (seed):** none
@@ -102,6 +111,7 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Sources:** `apps/ministry-maps/src/app/app-routes.ts`
 
 #### UC-NAV-10 — Anonymous can reach Profile and Configuration (⚠ suspected defect)
+
 - **Actor:** Anonymous visitor
 - **Route:** `/profile`
 - **Preconditions (seed):** none
@@ -115,6 +125,7 @@ Behavioral specifications for the application's root shell and main navigation h
 ### Smoke Navigation Links
 
 #### UC-NAV-11 — Home link navigates to Territories list
+
 - **Actor:** Admin
 - **Route:** `/home`
 - **Preconditions (seed):** default baseline; `signInAs('admin')`
@@ -125,6 +136,7 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Priority:** P0 · **Gaps:** none
 
 #### UC-NAV-12 — Home link navigates to Assign Territories
+
 - **Actor:** Admin
 - **Route:** `/home`
 - **Preconditions (seed):** default baseline; `signInAs('admin')`
@@ -136,6 +148,7 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Sources:** `apps/ministry-maps/src/app/features/territory/pages/assign-territories-page/assign-territories-page.component.ts`
 
 #### UC-NAV-13 — Home link navigates to Territories Statistics
+
 - **Actor:** Admin
 - **Route:** `/home`
 - **Preconditions (seed):** default baseline; `signInAs('admin')`
@@ -146,6 +159,7 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Priority:** P0 · **Gaps:** no `data-testid` on Statistics page heading
 
 #### UC-NAV-14 — Home link navigates to Users list
+
 - **Actor:** Admin
 - **Route:** `/home`
 - **Preconditions (seed):** default baseline; `signInAs('admin')`

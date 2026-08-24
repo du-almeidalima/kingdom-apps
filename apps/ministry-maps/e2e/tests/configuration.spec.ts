@@ -1,3 +1,5 @@
+import type { Page } from '@playwright/test';
+
 import { expect, test } from '../fixtures';
 import { ConfigurationPage } from '../page-objects/configuration.page';
 import { RoleEnum } from '../../src/models/enums/role';
@@ -8,12 +10,12 @@ test.describe('Configuration — Cities (WP-25)', () => {
   test.use({ role: 'admin' });
 
   // Helper to ensure UserStateService is fully hydrated before client-side navigation to /configuration
-  async function gotoConfigWithResolvedUser(page: any) {
+  async function gotoConfigWithResolvedUser(page: Page) {
     await page.goto('/home');
     await expect(page).toHaveURL(/\/(home|welcome)/, { timeout: 15000 });
-    await expect(
-      page.getByTestId('welcome-heading').or(page.getByTestId('home-heading'))
-    ).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('welcome-heading').or(page.getByTestId('home-heading'))).toBeVisible({
+      timeout: 15000,
+    });
 
     // Client-side Angular Router navigation via popstate so in-memory UserState is preserved
     await page.evaluate(() => {
@@ -70,7 +72,7 @@ test.describe('Configuration — Cities (WP-25)', () => {
     await expect(configPage.saveButton).toBeEnabled();
   });
 
-  test('UC-CFG-04 — Delete city removes row locally (hasChanges evaluates false for deleted rows)', async ({
+  test('UC-CFG-04 — Delete city removes row locally and counts as a change (Save enabled)', async ({
     authenticatedPage,
     db,
     seed,
@@ -82,11 +84,11 @@ test.describe('Configuration — Cities (WP-25)', () => {
     await expect(configPage.cityRows).toHaveCount(1);
     await expect(configPage.rowByName('Osasco')).toHaveCount(0);
 
-    // Documented defect behavior: hasChanges() checks city.isNew || city.currentName !== city.originalName on remaining cities,
-    // so deleting an existing city without other edits leaves saveButton disabled.
-    await expect(configPage.saveButton).toBeDisabled();
+    // Fixed (2026-08): hasChanges() also compares the row count against the congregation
+    // snapshot, so a delete-only change now enables Save Changes.
+    await expect(configPage.saveButton).toBeEnabled();
 
-    // Firestore unchanged before save
+    // Firestore unchanged before actually saving
     const congDoc = await db.getDoc(db.collections.congregations, seed.ids.congregation);
     expect(congDoc?.['cities']).toEqual(['São Paulo', 'Osasco']);
   });
@@ -117,11 +119,7 @@ test.describe('Configuration — Cities (WP-25)', () => {
     await expect(configPage.saveButton).toBeDisabled();
   });
 
-  test('UC-CFG-07 — Save changes cascades city rename to territories', async ({
-    authenticatedPage,
-    seed,
-    db,
-  }) => {
+  test('UC-CFG-07 — Save changes cascades city rename to territories', async ({ authenticatedPage, seed, db }) => {
     const configPage = await gotoConfigWithResolvedUser(authenticatedPage);
 
     await configPage.editCity('São Paulo');
@@ -163,9 +161,7 @@ test.describe('Configuration — Cities (WP-25)', () => {
     await expect(authenticatedPage.locator('text=All cities must have a name.')).toBeVisible();
   });
 
-  test('UC-CFG-09 — Duplicate city name triggers validation toast and blocks save', async ({
-    authenticatedPage,
-  }) => {
+  test('UC-CFG-09 — Duplicate city name triggers validation toast and blocks save', async ({ authenticatedPage }) => {
     const configPage = await gotoConfigWithResolvedUser(authenticatedPage);
 
     await configPage.addCity();
@@ -202,7 +198,7 @@ test.describe('Configuration — Cities (WP-25)', () => {
 
     await expect(configPage.noCongregationBanner).toBeVisible();
     await expect(configPage.noCongregationBanner).toContainText(
-      'No congregation found. Please ensure you are logged in.'
+      'No congregation found. Please ensure you are logged in.',
     );
   });
 

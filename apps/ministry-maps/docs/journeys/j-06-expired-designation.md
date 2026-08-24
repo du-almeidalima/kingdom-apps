@@ -13,7 +13,7 @@ a `mapsLink` from the `buildTerritory` default — keep it, leg 2 needs it):
 
 ```ts
 const tBlocked = seed.factories.buildTerritory({ id: 'j06-t-blocked', congregationId: seed.ids.congregation, city: 'São Paulo', history: [] });
-const tOpen    = seed.factories.buildTerritory({ id: 'j06-t-open',    congregationId: seed.ids.congregation, city: 'São Paulo', history: [] });
+const tOpen = seed.factories.buildTerritory({ id: 'j06-t-open', congregationId: seed.ids.congregation, city: 'São Paulo', history: [] });
 await seed.write({
   territories: [tBlocked, tOpen],
   designations: [
@@ -21,7 +21,7 @@ await seed.write({
       id: 'j06-d-blocked',
       congregationId: seed.ids.congregation,
       createdBy: seed.ids.adminUser,
-      expiresAt: new Date('2020-01-01'),                          // long expired
+      expiresAt: new Date('2020-01-01'), // long expired
       settings: { shouldDesignationBlockAfterExpired: true },
       territories: [seed.factories.buildDesignationTerritory({ id: 'j06-t-blocked', congregationId: seed.ids.congregation, history: [] })],
     }),
@@ -56,11 +56,11 @@ asserted separately; this journey is purely about consumption.)
 db.historySubcollection)` is still **empty** — no write occurred; `db.getDoc(db.collections.designations,
 'j06-d-blocked').territories[0].status === 'PENDING'`.
 
-### Leg 2 — Expired + non-blocking: ⚠ the checkbox is *still* disabled; only maps is usable
+### Leg 2 — Expired + non-blocking: ⚠ the checkbox is _still_ disabled; only maps is usable
 
 5. `page.goto('/work/j06-d-nonblocking')`.
 6. Assert the **same** info note renders (`@if (isDisabled)` checks expiry alone, not the setting) — the
-   page *looks* identically unusable (UC-WORK-21).
+   page _looks_ identically unusable (UC-WORK-21).
 7. Assert the row's checkbox is **still `disabled`** — `WorkPageComponent` binds the checkbox/edit/undo
    controls to `isDisabled` (expiry), not to `isBlocked`; `shouldDesignationBlockAfterExpired: false` does
    **not** restore them (⚠ suspected defect — assert today's reality, not the intuitive reading).

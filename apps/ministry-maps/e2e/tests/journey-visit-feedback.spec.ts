@@ -78,11 +78,7 @@ test('J-02 — Visit feedback loop to elder: history, badge and statistics recon
   // ⟶ HAND-OFF (Firestore, fire-and-forget — wrap in expect.poll/toPass).
   await expect
     .poll(async () => {
-      const docs = await db.getSubcollectionDocs(
-        db.collections.territories,
-        'j02-territory',
-        db.historySubcollection,
-      );
+      const docs = await db.getSubcollectionDocs(db.collections.territories, 'j02-territory', db.historySubcollection);
       return docs.length;
     })
     .toBe(1);
@@ -102,10 +98,7 @@ test('J-02 — Visit feedback loop to elder: history, badge and statistics recon
   expect((tDoc?.['recentHistory'] as Array<Record<string, unknown>>).length).toBe(1);
   // Designation snapshot flipped to DONE.
   await expect
-    .poll(
-      async () =>
-        (await db.getDoc(db.collections.designations, 'j02-designation'))?.['territories'][0]['status'],
-    )
+    .poll(async () => (await db.getDoc(db.collections.designations, 'j02-designation'))?.['territories'][0]['status'])
     .toBe(DesignationStatusEnum.DONE);
 
   // ── Leg 2 — Elder verifies on `/territories` (UC-TERR-26/28/29) ────────────
@@ -134,9 +127,7 @@ test('J-02 — Visit feedback loop to elder: history, badge and statistics recon
 
   // ⟶ HAND-OFF (Firestore): the badge reads recentHistory, not the subcollection.
   const rhDoc = await db.getDoc(db.collections.territories, 'j02-territory');
-  expect(
-    (rhDoc?.['recentHistory'] as Array<Record<string, unknown>>).some((h) => h['isRevisit'] === true),
-  ).toBe(true);
+  expect((rhDoc?.['recentHistory'] as Array<Record<string, unknown>>).some((h) => h['isRevisit'] === true)).toBe(true);
 
   // ── Leg 3 — Elder verifies on `/territories/statistics` (UC-STAT-*) ────────
   const statisticsPage = new StatisticsPage(page);
@@ -157,10 +148,6 @@ test('J-02 — Visit feedback loop to elder: history, badge and statistics recon
   await expect(statisticsPage.tileRevisits).toContainText('Revisitas: 0');
 
   // ⟶ FINAL SWEEP (Firestore): the numbers reconcile 1:1 with the subcollection.
-  const finalDocs = await db.getSubcollectionDocs(
-    db.collections.territories,
-    'j02-territory',
-    db.historySubcollection,
-  );
+  const finalDocs = await db.getSubcollectionDocs(db.collections.territories, 'j02-territory', db.historySubcollection);
   expect(finalDocs).toHaveLength(1);
 });

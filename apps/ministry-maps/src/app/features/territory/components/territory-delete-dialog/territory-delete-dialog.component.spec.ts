@@ -8,7 +8,7 @@ describe('TerritoryDeleteDialogComponent', () => {
     MockBuilder(TerritoryDeleteDialogComponent, [TerritoryModule]).provide({
       provide: DialogRef,
       useValue: { close: jest.fn() },
-    })
+    }),
   );
 
   it('should create', () => {
@@ -17,7 +17,7 @@ describe('TerritoryDeleteDialogComponent', () => {
     expect(fixture.point.componentInstance).toBeTruthy();
   });
 
-  it.each([true, false])('it should return close returning %s', outcome => {
+  it.each([true, false])('it should return close returning %s', (outcome) => {
     const fixture = MockRender(TerritoryDeleteDialogComponent);
     const dialogRef = ngMocks.get(DialogRef);
 

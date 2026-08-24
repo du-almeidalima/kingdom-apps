@@ -17,7 +17,7 @@ export const environment = {
   congregationSettingsDefaultValues: {
     designationAccessExpiryDays: 45,
     shouldDesignationBlockAfterExpired: false,
-  } as CongregationSettings
+  } as CongregationSettings,
 };
 
 /*

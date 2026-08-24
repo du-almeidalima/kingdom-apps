@@ -1,13 +1,13 @@
-import { Directive, ElementRef, HostListener, Input } from '@angular/core';
+import { Directive, ElementRef, HostListener, Input, inject } from '@angular/core';
 
 @Directive({
   selector: '[libOnlyNumbers]',
 })
 export class OnlyNumbersDirective {
+  private el = inject(ElementRef);
+
   @Input() decimal = false;
   @Input() negative = false;
-
-  constructor(private el: ElementRef) {}
 
   /**
    * Handles the key press event to allow or block specific characters based on defined criteria.

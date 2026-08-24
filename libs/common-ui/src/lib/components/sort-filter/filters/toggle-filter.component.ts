@@ -21,12 +21,12 @@ import { Icons } from '../../icon/icon-type';
           [disabled]="isDisabled()"
         />
         @if (icon()) {
-        <lib-icon [icon]="icon()!" class="toggle-icon" />
+          <lib-icon [icon]="icon()!" class="toggle-icon" />
         }
         <div class="toggle-text">
           <span lib-label>{{ title() }}</span>
           @if (secondaryText()) {
-          <span class="toggle-secondary">{{ secondaryText() }}</span>
+            <span class="toggle-secondary">{{ secondaryText() }}</span>
           }
         </div>
         <span class="toggle-switch"></span>

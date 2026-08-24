@@ -15,10 +15,7 @@ test.describe('provisionUserFromInvite callable (UC-USERS-18..23)', () => {
   const NEW_USER_EMAIL = 'novo.organizador@example.com';
   const NEW_USER_UID = 'e2e-new-organizer';
 
-  test('UC-USERS-18 — Valid invite provisions the user and consumes the invite atomically', async ({
-    seed,
-    db,
-  }) => {
+  test('UC-USERS-18 — Valid invite provisions the user and consumes the invite atomically', async ({ seed, db }) => {
     const invite = seed.factories.buildInvitationLink({
       congregationId: seed.ids.congregation,
       role: RoleEnum.ORGANIZER,
@@ -72,7 +69,7 @@ test.describe('provisionUserFromInvite callable (UC-USERS-18..23)', () => {
 
     const inviteAfter = await db.getDoc(db.collections.invitation_links, invite.id);
     expect(inviteAfter?.['usedAt']).toStrictEqual(usedAtFirst);
-    expect((await db.getCollectionDocs(db.collections.users)).find(u => u['id'] === NEW_USER_UID)).toBeDefined();
+    expect((await db.getCollectionDocs(db.collections.users)).find((u) => u['id'] === NEW_USER_UID)).toBeDefined();
   });
 
   test('UC-USERS-20 — A consumed invite cannot provision a different caller', async ({ seed, db }) => {

@@ -1,6 +1,6 @@
 # Ministry Maps — E2E Use-Case & Journey Map
 
-This directory is the **behavioural specification of Ministry Maps written for test automation**. It exists so that an agent (or a human) can open it in a *fresh session*, pick an entry, and write a Playwright + Firebase-emulator E2E spec **without reading the application source code first**.
+This directory is the **behavioural specification of Ministry Maps written for test automation**. It exists so that an agent (or a human) can open it in a _fresh session_, pick an entry, and write a Playwright + Firebase-emulator E2E spec **without reading the application source code first**.
 
 > This is a **derived artifact**. Every behavioural claim was verified against the source files listed
 > in the `Sources` section at the bottom of each document. After a refactor, re-verify against those
@@ -11,7 +11,7 @@ This directory is the **behavioural specification of Ministry Maps written for t
 ## What is in here
 
 | Path                                                                   | Purpose                                                                                                                                   |
-|------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | [`domain/data-model.md`](./domain/data-model.md)                       | The "second brain": Firestore collections, every model's fields, storage contracts and invariants. Read this **before writing any seed**. |
 | [`domain/roles-and-permissions.md`](./domain/roles-and-permissions.md) | `RoleEnum`, `authGuard` semantics, `libAuthorize` directive, role → route/feature matrix.                                                 |
 | [`domain/glossary.md`](./domain/glossary.md)                           | pt-BR ↔ English domain terms and the UI label dictionary used for locale-accurate selectors.                                              |
@@ -24,7 +24,7 @@ This directory is the **behavioural specification of Ministry Maps written for t
 ### Feature documents
 
 | File                                                                         | ID prefix   | Area                                                                      |
-|------------------------------------------------------------------------------|-------------|---------------------------------------------------------------------------|
+| ---------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------- |
 | [`features/auth-onboarding.md`](./features/auth-onboarding.md)               | `UC-AUTH`   | `/login`, `/sign-in/:inviteId`, `/welcome`, `/no-account`, guards, logout |
 | [`features/navigation-shell.md`](./features/navigation-shell.md)             | `UC-NAV`    | header, home hub links, role gating, unknown routes                       |
 | [`features/territories-management.md`](./features/territories-management.md) | `UC-TERR`   | `/territories` list, filters, CRUD, alerts, history, CSV                  |
@@ -50,15 +50,15 @@ This directory is the **behavioural specification of Ministry Maps written for t
 
 Treat these documents as a versioned contract for **current behaviour**, not intended behaviour. Update them in the same change as a feature or test whenever possible, and verify every claim against the implementation and the source paths listed in the affected document.
 
-| Change | Required documentation updates |
-|--------|--------------------------------|
-| Domain model, persistence invariant, role, or terminology | Update the relevant file under `domain/`; update the glossary when user-visible language changes. |
-| New feature area | Create a kebab-case `features/<area>.md`, choose an unused `UC-<AREA>` prefix, and register both in this README. |
-| New or changed use case | Append or revise the entry in its feature document, preserve stable IDs, and add or update its single row in `test-catalog.md`. |
-| New cross-feature journey | Add the next `J-NN` file under `journeys/`, compose existing UC IDs where possible, and add its catalog row. |
+| Change                                                          | Required documentation updates                                                                                                             |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Domain model, persistence invariant, role, or terminology       | Update the relevant file under `domain/`; update the glossary when user-visible language changes.                                          |
+| New feature area                                                | Create a kebab-case `features/<area>.md`, choose an unused `UC-<AREA>` prefix, and register both in this README.                           |
+| New or changed use case                                         | Append or revise the entry in its feature document, preserve stable IDs, and add or update its single row in `test-catalog.md`.            |
+| New cross-feature journey                                       | Add the next `J-NN` file under `journeys/`, compose existing UC IDs where possible, and add its catalog row.                               |
 | Selector, harness limitation, manual check, or suspected defect | Update `testability-gaps.md`; add actionable product or engineering work to `developer-follow-up.md` when developer follow-up is required. |
-| Fixture, factory, page object, utility, or auth surface | Update `../e2e/README.md` and, when a binding rule changes, `.agents/rules/e2e-testing.md`. |
-| Automated coverage | Set only the affected catalog row's `Covered` cell, name the owning spec, and recalculate the coverage summary. |
+| Fixture, factory, page object, utility, or auth surface         | Update `../e2e/README.md` and, when a binding rule changes, `.agents/rules/e2e-testing.md`.                                                |
+| Automated coverage                                              | Set only the affected catalog row's `Covered` cell, name the owning spec, and recalculate the coverage summary.                            |
 
 Follow this sequence:
 
@@ -98,15 +98,16 @@ Available today:
 - `db.*` read helpers — exact signatures (get these right, the docs use them verbatim):
 
   ```ts
-  db.collections            // { congregations, users, territories, designations, invitation_links }
-  db.historySubcollection   // 'history'
-  db.getDoc(collection, id)                            // → data | undefined
-  db.getDocSnapshot(collection, id)                    // → DocumentSnapshot (inspect Timestamp / DocumentReference)
-  db.getCollectionDocs(collection)                     // → data[]
-  db.getSubcollectionDocs(collection, id, subcollection)
-  db.queryWhere(collection, field, operator, value)     // → data[]
-  db.firestore / db.auth                               // raw Admin SDK escape hatch
+  db.collections; // { congregations, users, territories, designations, invitation_links }
+  db.historySubcollection; // 'history'
+  db.getDoc(collection, id); // → data | undefined
+  db.getDocSnapshot(collection, id); // → DocumentSnapshot (inspect Timestamp / DocumentReference)
+  db.getCollectionDocs(collection); // → data[]
+  db.getSubcollectionDocs(collection, id, subcollection);
+  db.queryWhere(collection, field, operator, value); // → data[]
+  db.firestore / db.auth; // raw Admin SDK escape hatch
   ```
+
 - `signInAs('admin' | 'publisher' | 'elder' | 'organizer' | 'superintendent' | 'app_admin')`,
   `signInAsUser(uid)`, and the `authenticatedPage` fixture
 - `resetAndSeed` — automatic per-test wipe + default seed (the emulator starts **empty**)
@@ -126,7 +127,7 @@ The exact live surface is maintained in [`../e2e/README.md`](../e2e/README.md). 
 ### Priorities
 
 | Priority | Meaning                                                                                                                          |
-|----------|----------------------------------------------------------------------------------------------------------------------------------|
+| -------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | **P0**   | Core path — if this breaks, the app fails its purpose (assign a territory, work it, persist the visit, sign in). Automate first. |
 | **P1**   | Important variant, guard, or negative path that users hit regularly (filters, expiry, permissions, validation).                  |
 | **P2**   | Cosmetic, rare, or low-risk detail (labels, ordering nuances, empty-state copy).                                                 |
@@ -137,7 +138,7 @@ Prose is **English**. Every user-visible string is quoted **verbatim in pt-BR**,
 
 ### Behaviour vs intent
 
-Where the implementation contradicts what a reader would expect, the entry documents **what the code does today** and adds a `⚠ suspected defect` note plus the assertion a test should make *now*. Tests must lock in reality; changing the behaviour is a separate product decision. All such items are consolidated in
+Where the implementation contradicts what a reader would expect, the entry documents **what the code does today** and adds a `⚠ suspected defect` note plus the assertion a test should make _now_. Tests must lock in reality; changing the behaviour is a separate product decision. All such items are consolidated in
 [`testability-gaps.md`](./testability-gaps.md#documented-current-behaviour-vs-suspected-defects).
 
 ### Use-case entry template

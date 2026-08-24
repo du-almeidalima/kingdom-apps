@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { finalize, Observable, of, shareReplay } from 'rxjs';
 
 import {
@@ -15,6 +15,7 @@ import {
 } from '@kingdom-apps/common-ui';
 
 import { Territory } from '../../../../../models/territory';
+import { User } from '../../../../../models/user';
 import { TERRITORY_SORT_FILTER_CONFIG } from '../../config/territory-filter.config';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { UserStateService } from '../../../../state/user.state.service';
@@ -51,6 +52,23 @@ import { AsyncPipe } from '@angular/common';
   ],
 })
 export class AssignTerritoriesPageComponent implements OnInit {
+  private readonly territoryRepository = inject(TerritoryRepository);
+  private readonly userState = inject(UserStateService);
+  private readonly territoryBO = inject(TerritoryBO);
+  private readonly dialog = inject(Dialog);
+
+  /**
+   * This page is only reachable for a signed-in user whose congregation reference is resolved,
+   * so the state values are asserted here instead of guarded at every call site.
+   */
+  private get currentCongregation(): NonNullable<User['congregation']> {
+    const user = this.userState.currentUser;
+    if (!user?.congregation) {
+      throw new Error('Assign Territories requires a signed-in user with a resolved congregation.');
+    }
+    return user.congregation;
+  }
+
   private territories$: Observable<Territory[]> = of([]);
 
   public readonly ALL_OPTION = ALL_OPTION;
@@ -61,7 +79,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
   cities: string[] = [];
   selectedCity = '';
   searchTerm?: string | null;
-  searchFilters: TerritoryFilterSettings['filters'] = TERRITORY_SORT_FILTER_CONFIG.filterConfigs?.initial;
+  searchFilters: TerritoryFilterSettings['filters'] = TERRITORY_SORT_FILTER_CONFIG.filterConfigs.initial;
   orderBy: TerritoriesOrderBy = TerritoriesOrderBy.SAVED_INDEX;
   filteredTerritories$: Observable<Territory[]> = of([]);
   selectedTerritoriesModel = new Set<string>();
@@ -72,15 +90,8 @@ export class AssignTerritoriesPageComponent implements OnInit {
   @ViewChild(SearchInputComponent)
   searchInputComponent!: SearchInputComponent;
 
-  constructor(
-    private readonly territoryRepository: TerritoryRepository,
-    private readonly userState: UserStateService,
-    private readonly territoryBO: TerritoryBO,
-    private readonly dialog: Dialog
-  ) {}
-
   ngOnInit(): void {
-    const { id, cities } = this.userState.currentUser!.congregation!;
+    const { id, cities } = this.currentCongregation;
     const firstCity = cities.length >= 0 ? cities[0] : ALL_OPTION;
 
     this.selectedCity = firstCity;
@@ -112,7 +123,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
       .pipe(
         finalize(() => {
           this.isCreatingAssignment = false;
-        })
+        }),
       )
       .subscribe((designation) => {
         this.shareDesignation(designation.id);
@@ -148,7 +159,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
   }
 
   handleSortFilterChange(value: SortFilterValue) {
-    this.searchFilters = value.filters ?? {};
+    this.searchFilters = (value.filters ?? {}) as TerritoryFilterSettings['filters'];
     this.orderBy = (value.sort as TerritoriesOrderBy) ?? TerritoriesOrderBy.SAVED_INDEX;
     this.filterTerritories();
   }
@@ -157,7 +168,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
     this.selectedCity = city;
     this.searchTerm = '';
     this.searchInputComponent.resetSearch();
-    this.fetchTerritories(this.userState.currentUser!.congregation!.id, city);
+    this.fetchTerritories(this.currentCongregation.id, city);
   }
 
   handleTerritoryCheck(value: boolean, territory: Territory) {

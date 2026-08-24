@@ -15,4 +15,4 @@ export type InvitationLink = {
   role: RoleEnum;
   /** When used, this is set to true */
   isValid: boolean;
-}
+};

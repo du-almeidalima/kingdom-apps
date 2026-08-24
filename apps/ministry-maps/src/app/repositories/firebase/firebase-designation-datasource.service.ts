@@ -49,7 +49,7 @@ export class FirebaseDesignationDatasourceService implements DesignationReposito
 
   constructor() {
     this.designationCollection = collection(this.firestore, this.collectionName).withConverter<Designation>(
-      firebaseEntityConverterFactory(convertHistoryDateFirebaseTimestampToDate)
+      firebaseEntityConverterFactory(convertHistoryDateFirebaseTimestampToDate),
     );
   }
 
@@ -70,18 +70,18 @@ export class FirebaseDesignationDatasourceService implements DesignationReposito
     const newDesignationDocRef = doc(this.designationCollection);
     const expireAt = Timestamp.fromDate(
       new Date(
-        Date.now() + FirebaseDesignationDatasourceService.TTL_DAYS * FirebaseDesignationDatasourceService.MS_PER_DAY
-      )
+        Date.now() + FirebaseDesignationDatasourceService.TTL_DAYS * FirebaseDesignationDatasourceService.MS_PER_DAY,
+      ),
     );
     const newDesignation$ = from(
-      setDoc(newDesignationDocRef, { ...designation, id: newDesignationDocRef.id, expireAt })
+      setDoc(newDesignationDocRef, { ...designation, id: newDesignationDocRef.id, expireAt }),
     );
 
     return newDesignation$.pipe(
       switchMap(() => {
         return docData(newDesignationDocRef, { idField: 'id' }) as Observable<Designation>;
       }),
-      take(1)
+      take(1),
     );
   }
 

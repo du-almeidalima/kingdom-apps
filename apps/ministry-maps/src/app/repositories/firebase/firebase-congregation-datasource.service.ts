@@ -32,7 +32,7 @@ export class FirebaseCongregationDatasourceService implements CongregationReposi
   constructor() {
     this.congregationCollection = collection(
       this.firestore,
-      FirebaseCongregationDatasourceService.COLLECTION_NAME
+      FirebaseCongregationDatasourceService.COLLECTION_NAME,
     ).withConverter(congregationConverter);
   }
 
@@ -44,7 +44,7 @@ export class FirebaseCongregationDatasourceService implements CongregationReposi
    */
   static resolveUserCongregationReference(
     congregationRef: DocumentReference<Congregation, FirebaseCongregationModel | DocumentData>,
-    options?: { useCache: boolean }
+    options?: { useCache: boolean },
   ): Observable<Congregation | undefined> {
     const congregationDoc = options?.useCache ? getDocFromCache(congregationRef) : getDoc(congregationRef);
 
@@ -55,7 +55,7 @@ export class FirebaseCongregationDatasourceService implements CongregationReposi
         }
 
         return congregationDocSnapshot.data();
-      })
+      }),
     );
   }
 
@@ -79,7 +79,7 @@ export class FirebaseCongregationDatasourceService implements CongregationReposi
           name: d.data().name,
           id: d.data().id,
         }));
-      })
+      }),
     );
   }
 

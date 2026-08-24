@@ -25,10 +25,7 @@
 
       <div class="lib-radio-option__content">
         @if (option.icon) {
-          <div
-            class="lib-radio-option__icon"
-            [class.lib-radio-option__icon--selected]="isSelected(option.value)"
-          >
+          <div class="lib-radio-option__icon" [class.lib-radio-option__icon--selected]="isSelected(option.value)">
             <lib-icon [icon]="option.icon" class="h-6 w-6" fillColor="currentColor" />
           </div>
         }
@@ -41,10 +38,7 @@
         </div>
       </div>
 
-      <div
-        class="lib-radio-option__indicator"
-        [class.lib-radio-option__indicator--selected]="isSelected(option.value)"
-      >
+      <div class="lib-radio-option__indicator" [class.lib-radio-option__indicator--selected]="isSelected(option.value)">
         <svg
           class="lib-radio-option__indicator-svg"
           viewBox="0 0 20 20"
@@ -54,22 +48,9 @@
           xmlns="http://www.w3.org/2000/svg"
           aria-hidden="true"
         >
-          <circle
-            class="lib-radio-option__outer-ring"
-            cx="10"
-            cy="10"
-            r="8.5"
-            stroke="currentColor"
-            stroke-width="2"
-          />
+          <circle class="lib-radio-option__outer-ring" cx="10" cy="10" r="8.5" stroke="currentColor" stroke-width="2" />
           @if (isSelected(option.value)) {
-            <circle
-              class="lib-radio-option__inner-dot"
-              cx="10"
-              cy="10"
-              r="4.5"
-              fill="currentColor"
-            />
+            <circle class="lib-radio-option__inner-dot" cx="10" cy="10" r="4.5" fill="currentColor" />
           }
         </svg>
       </div>

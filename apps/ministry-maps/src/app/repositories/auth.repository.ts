@@ -4,8 +4,8 @@ import { RoleEnum } from '../../models/enums/role';
 import { Congregation } from '../../models/congregation';
 
 export enum AuthErrorEnum {
-  INVALID_EMAIL= 'INVALID_EMAIL',
-  INVALID_CREATE_USER_DATA= 'INVALID_CREATE_USER_DATA',
+  INVALID_EMAIL = 'INVALID_EMAIL',
+  INVALID_CREATE_USER_DATA = 'INVALID_CREATE_USER_DATA',
   UNKNOWN_ERROR = 'UNKNOWN_ERROR',
 }
 
@@ -16,7 +16,7 @@ export type CreateUserConfig = {
   email?: string;
   role: RoleEnum;
   congregation: Congregation;
-}
+};
 
 export abstract class AuthRepository {
   /**
@@ -26,7 +26,11 @@ export abstract class AuthRepository {
    * @param createUserConfig When provided, will use the configuration found in here to set the user values.
    *
    */
-  abstract signInWithProvider(providers: string, createUser: boolean, createUserConfig?: CreateUserConfig): Observable<User | void>;
+  abstract signInWithProvider(
+    providers: string,
+    createUser: boolean,
+    createUserConfig?: CreateUserConfig,
+  ): Observable<User | void>;
 
   /**
    * Emits a boolean whenever the User auth state changes based on its authentication status

@@ -14,30 +14,27 @@ export class ProfileBO {
 
   /** Validates if the provided user is an ADMIN and updates its congregation id */
   public changeUserCongregation(userId: string, congregationId: string): Observable<User | null> {
-    return this.userRepository.getById(userId)
-      .pipe(
-        switchMap(user => {
-          if (!user || !user.congregation) {
-            return of(null);
-          }
+    return this.userRepository.getById(userId).pipe(
+      switchMap((user) => {
+        if (!user || !user.congregation) {
+          return of(null);
+        }
 
-          if (!ProfileBO.CHANGE_CONGREGATION_ALLOWED.includes(user.role)) {
-            throw Error('Changing congregations is not authorized by Non-Admin users.');
-          }
+        if (!ProfileBO.CHANGE_CONGREGATION_ALLOWED.includes(user.role)) {
+          throw Error('Changing congregations is not authorized by Non-Admin users.');
+        }
 
-          user.congregation.id = congregationId;
+        user.congregation.id = congregationId;
 
-          return this.userRepository.update(user)
-            .pipe(
-              tap(updatedUser => {
-                  if (!updatedUser) return;
+        return this.userRepository.update(user).pipe(
+          tap((updatedUser) => {
+            if (!updatedUser) return;
 
-                  // Notifying application that the user was updated
-                  this.userState.setUser(updatedUser);
-                },
-              ),
-            );
-        }),
-      );
+            // Notifying application that the user was updated
+            this.userState.setUser(updatedUser);
+          }),
+        );
+      }),
+    );
   }
 }

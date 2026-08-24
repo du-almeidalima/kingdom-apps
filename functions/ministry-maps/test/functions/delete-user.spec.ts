@@ -34,7 +34,7 @@ describe('deleteUser Cloud Function', () => {
       deleteUserRunner.run({
         auth: undefined,
         data: 'target-user-id',
-      })
+      }),
     ).rejects.toThrow(HttpsError);
   });
 
@@ -207,7 +207,7 @@ describe('deleteUser Cloud Function', () => {
       deleteUserRunner.run({
         auth: { uid: 'caller-admin' } as CallableRequest<string>['auth'],
         data: 'target-user',
-      })
+      }),
     ).resolves.not.toThrow();
 
     expect(mockDeleteAuthUser).toHaveBeenCalledWith('target-user');

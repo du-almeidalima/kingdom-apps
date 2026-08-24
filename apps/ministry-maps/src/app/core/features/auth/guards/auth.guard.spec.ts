@@ -71,7 +71,7 @@ describe('AuthGuard', () => {
     expect(result).toEqual(urlTree);
   });
 
-  it('should redirect unauthenticated users to login', done => {
+  it('should redirect unauthenticated users to login', (done) => {
     const route: ActivatedRouteSnapshot = {
       data: { roles: 'ORGANIZER' },
       routeConfig: {
@@ -90,7 +90,7 @@ describe('AuthGuard', () => {
     const result = TestBed.runInInjectionContext(() => authGuard(route, state));
 
     if (result instanceof Observable) {
-      result.subscribe(value => {
+      result.subscribe((value) => {
         const urlTree = router.createUrlTree(['login']);
         expect(value).toEqual(urlTree);
         done();
@@ -102,7 +102,7 @@ describe('AuthGuard', () => {
     expect(true).toBe(false);
   });
 
-  it('should redirect Publishers users to login after authentication', done => {
+  it('should redirect Publishers users to login after authentication', (done) => {
     const route: ActivatedRouteSnapshot = {
       data: { roles: 'ORGANIZER' },
       routeConfig: {
@@ -123,7 +123,7 @@ describe('AuthGuard', () => {
     const result = TestBed.runInInjectionContext(() => authGuard(route, state));
 
     if (result instanceof Observable) {
-      result.subscribe(value => {
+      result.subscribe((value) => {
         const urlTree = router.createUrlTree(['welcome']);
         expect(value).toEqual(urlTree);
         done();
@@ -151,13 +151,11 @@ describe('AuthGuard', () => {
 
         // Stub user unauthenticated
         userStateService.setUser(null);
-        authService.resolveUserFromAuthProvider = jest
-          .fn()
-          .mockReturnValue(of(userMockBuilder({ role: role })));
+        authService.resolveUserFromAuthProvider = jest.fn().mockReturnValue(of(userMockBuilder({ role: role })));
 
         const result = TestBed.runInInjectionContext(() => authGuard(route, state));
         if (result instanceof Observable) {
-          result.subscribe(value => {
+          result.subscribe((value) => {
             expect(value).toBe(true);
             done();
           });
@@ -168,14 +166,15 @@ describe('AuthGuard', () => {
         // Should not have gotten in here
         expect(true).toBe(false);
         done();
-      })
+      },
+    );
   });
 
   describe('Admins users', () => {
     it.each([FeatureRoutesEnum.TERRITORIES, FeatureRoutesEnum.HOME, FeatureRoutesEnum.WORK, FeatureRoutesEnum.PROFILE])(
       'should Access %s',
-      featureRoute => {
-        const route = APP_ROUTES.find(r => r.path === featureRoute);
+      (featureRoute) => {
+        const route = APP_ROUTES.find((r) => r.path === featureRoute);
 
         if (!route) {
           throw new Error('Route Not Found');
@@ -197,7 +196,7 @@ describe('AuthGuard', () => {
         const result = TestBed.runInInjectionContext(() => authGuard(routeSnapshotMock, state));
 
         expect(result).toBeTruthy();
-      }
+      },
     );
   });
 });

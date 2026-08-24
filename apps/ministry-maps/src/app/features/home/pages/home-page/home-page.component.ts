@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FeatureRoutesEnum } from '../../../../app-routes';
 import { TerritoryRoutesEnum } from '../../../territory/territory-routes.module';
 import { UserStateService } from '../../../../state/user.state.service';
@@ -14,15 +14,15 @@ import { CardBodyComponent, CardComponent, CardHeaderComponent } from '@kingdom-
   imports: [RouterLink, CardBodyComponent, CardComponent, CardHeaderComponent],
 })
 export class HomePageComponent {
+  readonly userState = inject(UserStateService);
+
   public readonly TerritoryRoutes = TerritoryRoutesEnum;
   public readonly FeatureRoutes = FeatureRoutesEnum;
   public readonly UsersRoutesEnum = UsersRoutesEnum;
 
-  constructor(public readonly userState: UserStateService) {}
-
   get userName(): string {
     const userNames = this.userState.currentUser?.name.split(' ');
 
-    return userNames ? userNames[0] : this.userState.currentUser?.name ?? '';
+    return userNames ? userNames[0] : (this.userState.currentUser?.name ?? '');
   }
 }

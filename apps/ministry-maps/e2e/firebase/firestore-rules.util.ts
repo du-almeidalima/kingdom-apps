@@ -1,8 +1,5 @@
 import { auth } from '../config/firebase-admin.context';
-import {
-  AUTH_SIGN_IN_CUSTOM_TOKEN_URL,
-  FIRESTORE_DOCUMENTS_URL,
-} from '../config/emulator.config';
+import { AUTH_SIGN_IN_CUSTOM_TOKEN_URL, FIRESTORE_DOCUMENTS_URL } from '../config/emulator.config';
 
 /**
  * Converts a JS value into Firestore REST API v1 Value format.
@@ -15,9 +12,7 @@ function encodeFirestoreValue(value: unknown): Record<string, unknown> {
     return { booleanValue: value };
   }
   if (typeof value === 'number') {
-    return Number.isInteger(value)
-      ? { integerValue: value.toString() }
-      : { doubleValue: value };
+    return Number.isInteger(value) ? { integerValue: value.toString() } : { doubleValue: value };
   }
   if (typeof value === 'string') {
     return { stringValue: value };
@@ -111,11 +106,7 @@ export async function readDocAs(path: string, idToken?: string): Promise<number>
  * Uses `Authorization: Bearer <idToken>` if provided.
  * Returns the HTTP response status (200 = allowed, 403 = permission denied).
  */
-export async function createDocAs(
-  path: string,
-  data: Record<string, unknown> = {},
-  idToken?: string,
-): Promise<number> {
+export async function createDocAs(path: string, data: Record<string, unknown> = {}, idToken?: string): Promise<number> {
   const url = getDocumentUrl(path);
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -140,13 +131,9 @@ export async function createDocAs(
  * `request.resource.data` as ONLY the sent fields (untouched fields look deleted).
  * Returns the HTTP response status (200 = allowed, 403 = permission denied).
  */
-export async function updateDocAs(
-  path: string,
-  data: Record<string, unknown> = {},
-  idToken?: string,
-): Promise<number> {
+export async function updateDocAs(path: string, data: Record<string, unknown> = {}, idToken?: string): Promise<number> {
   const mask = Object.keys(data)
-    .map(field => `updateMask.fieldPaths=${encodeURIComponent(field)}`)
+    .map((field) => `updateMask.fieldPaths=${encodeURIComponent(field)}`)
     .join('&');
   const url = `${getDocumentUrl(path)}?${mask}`;
   const headers: Record<string, string> = {

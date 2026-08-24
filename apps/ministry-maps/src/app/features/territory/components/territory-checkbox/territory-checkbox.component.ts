@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, forwardRef, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, forwardRef, Input, OnInit, inject } from '@angular/core';
 import { Territory } from '../../../../../models/territory';
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
 import openGoogleMapsHandler from '../../../../shared/utils/open-google-maps';
-import { grey400, IconButtonComponent, IconComponent, Icons, primaryGreen } from '@kingdom-apps/common-ui';
+import { IconButtonComponent, IconComponent, Icons } from '@kingdom-apps/common-ui';
 import { Dialog } from '@angular/cdk/dialog';
 import { HistoryDialogComponent } from '../../../../shared/components/dialogs';
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
@@ -30,7 +30,7 @@ import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
       [for]="territory.id"
       [ngClass]="{
         'territory-checkbox--disabled': disabled,
-        'territory-checkbox--selected': !disabled && value
+        'territory-checkbox--selected': !disabled && value,
       }"
     >
       <div class="territory-checkbox__control-container">
@@ -67,17 +67,25 @@ import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
             @if (territory.lastVisit) {
               <div class="territory-checkbox__last-visit-container">
                 <span class="territory-checkbox__last-visit-label">
-                  Última visita: {{ territory.lastVisit | date : 'dd/MM/yyyy' }}
+                  Última visita: {{ territory.lastVisit | date: 'dd/MM/yyyy' }}
                 </span>
-                @if (territory.recentHistory?.length
-                && territory.recentHistory![territory.recentHistory!.length - 1].visitOutcome !== undefined) {
+                @if (
+                  territory.recentHistory?.length &&
+                  territory.recentHistory![territory.recentHistory!.length - 1].visitOutcome !== undefined
+                ) {
                   <lib-icon
                     [ngClass]="{
-                      '-mt-0.5': territory.recentHistory![territory.recentHistory!.length - 1].visitOutcome === VisitOutcomeEnum.NOT_ANSWERED,
-                      '-mt-1.5': territory.recentHistory![territory.recentHistory!.length - 1].visitOutcome !== VisitOutcomeEnum.NOT_ANSWERED,
+                      '-mt-0.5':
+                        territory.recentHistory![territory.recentHistory!.length - 1].visitOutcome ===
+                        VisitOutcomeEnum.NOT_ANSWERED,
+                      '-mt-1.5':
+                        territory.recentHistory![territory.recentHistory!.length - 1].visitOutcome !==
+                        VisitOutcomeEnum.NOT_ANSWERED,
                     }"
                     class="territory-checkbox__last-visit-icon"
-                    [icon]="territory.recentHistory![territory.recentHistory!.length - 1].visitOutcome | visitOutcomeToIcon"
+                    [icon]="
+                      territory.recentHistory![territory.recentHistory!.length - 1].visitOutcome | visitOutcomeToIcon
+                    "
                     [fillColor]="iconColor"
                   />
                 }
@@ -89,28 +97,29 @@ import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
                 class="territory-alert-badge territory-alert-badge--revisit"
                 title="Essa pessoa foi marcada como revisita recentemente"
               >
-              Revisita
-            </span>
+                Revisita
+              </span>
             }
             @if (hasRecentlyMoved) {
-              <span class="territory-alert-badge territory-alert-badge--moved"
-                    title="Essa pessoa se mudou"> Mudou </span>
+              <span class="territory-alert-badge territory-alert-badge--moved" title="Essa pessoa se mudou">
+                Mudou
+              </span>
             }
             @if (hasRecentlyAskedToStopVisiting) {
               <span
                 class="territory-alert-badge territory-alert-badge--stop-visiting"
                 title="Essa pessoa disse que não quer ser visitada por uma Testemunha de Jeová"
               >
-              Não quer visitas
-            </span>
+                Não quer visitas
+              </span>
             }
             @if (isBibleStudent) {
               <span
                 class="territory-alert-badge territory-alert-badge--bible-student"
                 title="Essa pessoa é um estudante da Bíblia"
               >
-              Estudante
-            </span>
+                Estudante
+              </span>
             }
           </div>
         </div>
@@ -134,6 +143,8 @@ import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
   imports: [FormsModule, NgClass, IconComponent, DatePipe, IconButtonComponent, VisitOutcomeToIconPipe],
 })
 export class TerritoryCheckboxComponent implements ControlValueAccessor, OnInit {
+  private readonly dialog = inject(Dialog);
+
   protected readonly iconColor = 'currentColor';
   protected readonly VisitOutcomeEnum = VisitOutcomeEnum;
 
@@ -161,8 +172,6 @@ export class TerritoryCheckboxComponent implements ControlValueAccessor, OnInit 
 
     return prefix + (this.value ? 'selected' : 'default');
   }
-
-  constructor(private readonly dialog: Dialog) {}
 
   ngOnInit(): void {
     this.hasRecentRevisit = TerritoryAlertsBO.hasRecentRevisit(this.territory);

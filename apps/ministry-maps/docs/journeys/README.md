@@ -9,21 +9,21 @@ Each journey becomes **one spec file** under `e2e/tests/` (suggested names are l
 (`test('J-02 — visit feedback loop to elder', ...)`) and the steps inside reference the composed UC IDs in
 comments. Splitting a journey into several `test()` blocks is acceptable **only** if each block re-establishes
 its own seed (remember: `resetAndSeed` wipes the emulators before every test — state never carries over
-between tests, only between steps *inside* one test).
+between tests, only between steps _inside_ one test).
 
 ## Index
 
-| ID | Journey | Identities | Priority | Suggested spec file |
-|---|---|---|---|---|
-| [J-01](./j-01-admin-creates-assigns-publisher-works.md) | Admin creates territories, builds **two** designations mixing new + seeded territories; each publisher opens their own link and sees exactly their own territories | Admin → anonymous ×2 | P0 | `e2e/tests/journey-admin-assign-work.spec.ts` |
-| [J-02](./j-02-visit-feedback-loop-to-elder.md) | Publisher completes a territory with a revisit; an Elder then verifies the history entry, the badge, and the statistics delta | anonymous → Elder | P0 | `e2e/tests/journey-visit-feedback.spec.ts` |
-| [J-03](./j-03-invite-onboarding.md) | Admin creates an invite; it is opened (valid), re-opened after consumption (`INVALID_LINK`), and attempted with a wrong email (`INVALID_EMAIL`) | Admin → anonymous invitee | P0 | `e2e/tests/journey-invite-onboarding.spec.ts` |
-| [J-04](./j-04-moved-alert-resolution.md) | Publisher records `MOVED`; the alert appears on `/territories`; an Organizer resolves it; badge and `Mudaram` count update | anonymous → Organizer | P1 | `e2e/tests/journey-moved-alert.spec.ts` |
-| [J-05](./j-05-city-rename-cascade.md) | Admin renames a city (batch territory update + filter reload caveat), then deletes a city and observes the orphaned territory | Admin | P1 | `e2e/tests/journey-city-rename.spec.ts` |
-| [J-06](./j-06-expired-designation.md) | An expired designation blocks its actions when `shouldDesignationBlockAfterExpired` is `true`, and stays *equally* checkbox-blocked (maps-only difference) when `false` | Admin → anonymous | P1 | `e2e/tests/journey-expired-designation.spec.ts` |
-| [J-07](./j-07-statistics-reconciliation.md) | History seeded across period boundaries is reconciled per period and per city against the Firestore subcollections | Admin | P1 | `e2e/tests/journey-statistics-reconciliation.spec.ts` |
-| [J-08](./j-08-empty-system.md) | A brand-new congregation with no territories behaves gracefully across list, assign, statistics and CSV export | Admin (second congregation) | P1 | `e2e/tests/journey-empty-system.spec.ts` |
-| [J-09](./j-09-ttl-deletion-not-found.md) | An active designation link renders normally; after a simulated TTL deletion, subsequent navigation presents the not-found screen | Anonymous | P0 | `e2e/tests/work-not-found.spec.ts` |
+| ID                                                      | Journey                                                                                                                                                                 | Identities                  | Priority | Suggested spec file                                   |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- | -------- | ----------------------------------------------------- |
+| [J-01](./j-01-admin-creates-assigns-publisher-works.md) | Admin creates territories, builds **two** designations mixing new + seeded territories; each publisher opens their own link and sees exactly their own territories      | Admin → anonymous ×2        | P0       | `e2e/tests/journey-admin-assign-work.spec.ts`         |
+| [J-02](./j-02-visit-feedback-loop-to-elder.md)          | Publisher completes a territory with a revisit; an Elder then verifies the history entry, the badge, and the statistics delta                                           | anonymous → Elder           | P0       | `e2e/tests/journey-visit-feedback.spec.ts`            |
+| [J-03](./j-03-invite-onboarding.md)                     | Admin creates an invite; it is opened (valid), re-opened after consumption (`INVALID_LINK`), and attempted with a wrong email (`INVALID_EMAIL`)                         | Admin → anonymous invitee   | P0       | `e2e/tests/journey-invite-onboarding.spec.ts`         |
+| [J-04](./j-04-moved-alert-resolution.md)                | Publisher records `MOVED`; the alert appears on `/territories`; an Organizer resolves it; badge and `Mudaram` count update                                              | anonymous → Organizer       | P1       | `e2e/tests/journey-moved-alert.spec.ts`               |
+| [J-05](./j-05-city-rename-cascade.md)                   | Admin renames a city (batch territory update + filter reload caveat), then deletes a city and observes the orphaned territory                                           | Admin                       | P1       | `e2e/tests/journey-city-rename.spec.ts`               |
+| [J-06](./j-06-expired-designation.md)                   | An expired designation blocks its actions when `shouldDesignationBlockAfterExpired` is `true`, and stays _equally_ checkbox-blocked (maps-only difference) when `false` | Admin → anonymous           | P1       | `e2e/tests/journey-expired-designation.spec.ts`       |
+| [J-07](./j-07-statistics-reconciliation.md)             | History seeded across period boundaries is reconciled per period and per city against the Firestore subcollections                                                      | Admin                       | P1       | `e2e/tests/journey-statistics-reconciliation.spec.ts` |
+| [J-08](./j-08-empty-system.md)                          | A brand-new congregation with no territories behaves gracefully across list, assign, statistics and CSV export                                                          | Admin (second congregation) | P1       | `e2e/tests/journey-empty-system.spec.ts`              |
+| [J-09](./j-09-ttl-deletion-not-found.md)                | An active designation link renders normally; after a simulated TTL deletion, subsequent navigation presents the not-found screen                                        | Anonymous                   | P0       | `e2e/tests/work-not-found.spec.ts`                    |
 
 ## Conventions
 
@@ -31,13 +31,13 @@ between tests, only between steps *inside* one test).
 
 A journey runs on the single fixture-provided `page`. Switch identities **explicitly**:
 
-| Switch | How | Notes |
-|---|---|---|
-| anonymous → role | `await signInAs('admin' \| 'publisher')` then `page.goto(target)` | `signInAs` leaves the page on `/login` by design (UC-AUTH-03); the caller always navigates. |
-| role → anonymous | `await page.evaluate(() => (window as any).__E2E__.auth.signOut())` | Triggers the forced-logout subscription (UC-AUTH-22): both state services clear and the app navigates itself to `/login`. **Then** `page.goto(...)` for the anonymous leg. |
-| role → another role | sign out (row above) **first**, then `signInAs(other)` | Never mint a second custom token over a live session: the app-level `UserStateService` would keep the previous user while Firebase swaps the auth user — an inconsistent state the app never produces on its own. |
+| Switch              | How                                                                 | Notes                                                                                                                                                                                                             |
+| ------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| anonymous → role    | `await signInAs('admin' \| 'publisher')` then `page.goto(target)`   | `signInAs` leaves the page on `/login` by design (UC-AUTH-03); the caller always navigates.                                                                                                                       |
+| role → anonymous    | `await page.evaluate(() => (window as any).__E2E__.auth.signOut())` | Triggers the forced-logout subscription (UC-AUTH-22): both state services clear and the app navigates itself to `/login`. **Then** `page.goto(...)` for the anonymous leg.                                        |
+| role → another role | sign out (row above) **first**, then `signInAs(other)`              | Never mint a second custom token over a live session: the app-level `UserStateService` would keep the previous user while Firebase swaps the auth user — an inconsistent state the app never produces on its own. |
 
-Two *anonymous* publishers opening two different links (J-01) do **not** need two browser contexts:
+Two _anonymous_ publishers opening two different links (J-01) do **not** need two browser contexts:
 `/work/:id` is unguarded and holds no session state, so sequential legs on the same page faithfully simulate
 "two different people each opening their own WhatsApp link". A fresh `browser.newContext()` per person is a
 valid stronger isolation, but it opts out of the composed fixtures (`seed`, `db`, `signInAs` are bound to

@@ -34,10 +34,7 @@ test.describe('E2E seeding smoke test', () => {
     );
   });
 
-  test('seeds territory dates as Firestore Timestamps and a history subcollection', async ({
-    db,
-    seed,
-  }) => {
+  test('seeds territory dates as Firestore Timestamps and a history subcollection', async ({ db, seed }) => {
     const territoryId = seed.ids.territories[0];
     const snapshot = await db.getDocSnapshot(db.collections.territories, territoryId);
     const data = snapshot.data();
@@ -45,11 +42,7 @@ test.describe('E2E seeding smoke test', () => {
     expect(data?.['lastVisit']).toBeInstanceOf(Timestamp);
     expect(Array.isArray(data?.['recentHistory'])).toBe(true);
 
-    const history = await db.getSubcollectionDocs(
-      db.collections.territories,
-      territoryId,
-      db.historySubcollection,
-    );
+    const history = await db.getSubcollectionDocs(db.collections.territories, territoryId, db.historySubcollection);
     expect(history).toHaveLength(2);
     expect(history[0]?.['date']).toBeInstanceOf(Timestamp);
   });

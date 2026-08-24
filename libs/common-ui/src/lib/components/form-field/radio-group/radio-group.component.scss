@@ -48,7 +48,10 @@
   background-color: var(--kui-color-surface, #{variables.$white-100});
   color: var(--kui-color-text, #{variables.$text});
   cursor: pointer;
-  transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease;
   user-select: none;
 
   &:hover:not(&--disabled) {

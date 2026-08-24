@@ -17,11 +17,7 @@ describe('WorkPageComponent', () => {
   // Resets customizations after each test, in our case of `ActivatedRoute`.
   MockInstance.scope();
 
-  beforeEach(() =>
-    MockBuilder(WorkPageComponent)
-      .mock(ActivatedRoute)
-      .provide(MOCK_REPOSITORIES_PROVIDERS)
-  );
+  beforeEach(() => MockBuilder(WorkPageComponent).mock(ActivatedRoute).provide(MOCK_REPOSITORIES_PROVIDERS));
 
   it('should create', () => {
     MockInstance(ActivatedRoute, 'snapshot', jest.fn(), 'get').mockReturnValue({
@@ -137,7 +133,11 @@ describe('WorkPageComponent', () => {
       expect(spies.territoryUpdate).toHaveBeenCalledTimes(1);
       expect(spies.setVisitHistory).toHaveBeenCalledWith(
         designationTerritory.id,
-        designationTerritory.history![designationTerritory.history!.length - 1]
+        expect.objectContaining({
+          id: '1699999999999',
+          congregationId: designation.congregationId,
+          territoryId: designationTerritory.id,
+        }),
       );
       expect(alertSpy).not.toHaveBeenCalled();
 

@@ -22,18 +22,16 @@ describe('ProfilePageComponent', () => {
     [RoleEnum.ORGANIZER, 'Organizador'],
     [RoleEnum.APP_ADMIN, 'App Admin.'],
     [RoleEnum.SUPERINTENDENT, 'Superintendente'],
-  ])(
-    'role %s should be %s',
-    (role, description) => {
-      const roleUser = userMockBuilder({ role });
-      const userStateService = ngMocks.get(UserStateService);
-      userStateService.setUser(roleUser);
+  ])('role %s should be %s', (role, description) => {
+    const roleUser = userMockBuilder({ role });
+    const userStateService = ngMocks.get(UserStateService);
+    userStateService.setUser(roleUser);
 
-      ngMocks.flushTestBed();
+    ngMocks.flushTestBed();
 
-      MockRender(ProfilePageComponent);
-      const roleBadge = ngMocks.find('.user-card__privilege-badge')
+    MockRender(ProfilePageComponent);
+    const roleBadge = ngMocks.find('.user-card__privilege-badge');
 
-      expect(roleBadge.nativeElement.textContent).toBe(description);
-    })
+    expect(roleBadge.nativeElement.textContent).toBe(description);
+  });
 });

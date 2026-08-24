@@ -1,8 +1,8 @@
 ---
 globs:
-- '**/project.json'
-- '**/ngsw-config.json'
-- '**/firebase.json'
+  - '**/project.json'
+  - '**/ngsw-config.json'
+  - '**/firebase.json'
 description: Builds, budgets, the CI pipeline, and Firebase deployment.
 ---
 

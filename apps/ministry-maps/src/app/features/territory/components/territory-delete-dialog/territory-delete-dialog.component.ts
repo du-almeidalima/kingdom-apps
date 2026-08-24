@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { DialogRef } from '@angular/cdk/dialog';
 import { ButtonComponent, DialogComponent, DialogFooterComponent } from '@kingdom-apps/common-ui';
 
@@ -22,7 +22,7 @@ import { ButtonComponent, DialogComponent, DialogFooterComponent } from '@kingdo
   imports: [DialogFooterComponent, DialogComponent, ButtonComponent],
 })
 export class TerritoryDeleteDialogComponent {
-  constructor(private readonly dialogRef: DialogRef) {}
+  private readonly dialogRef = inject(DialogRef);
 
   // TODO: Refactor the basic dialog logic into a base class
   handleCancel(result: boolean) {

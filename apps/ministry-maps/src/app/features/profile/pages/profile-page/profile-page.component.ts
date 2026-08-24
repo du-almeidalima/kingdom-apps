@@ -53,7 +53,7 @@ export class ProfilePageComponent {
       .open<ConfirmDialogComponent, ConfirmDialogData>(ConfirmDialogComponent, {
         data: { title: 'Sair', bodyText: 'Você realmente deseja sair?' },
       })
-      .closed.subscribe(res => {
+      .closed.subscribe((res) => {
         if (res) {
           this.authService.logOut();
         }

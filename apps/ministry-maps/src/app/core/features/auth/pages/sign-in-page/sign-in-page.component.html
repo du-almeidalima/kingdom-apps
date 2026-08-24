@@ -1,8 +1,8 @@
-<div class='container'>
+<div class="container">
   <lib-card data-testid="sign-in-card">
-    <h1 class='mb-10'>Cadastrar</h1>
+    <h1 class="mb-10">Cadastrar</h1>
     <div class="img-container">
-      <img class="image" alt="MM Image" ngSrc="assets/images/map-image.png" priority="1" fill="contain">
+      <img class="image" alt="MM Image" ngSrc="assets/images/map-image.png" priority="1" fill="contain" />
     </div>
     @if (errorCode) {
       <p class="t-body1 mt-10" data-testid="sign-in-error">
@@ -18,16 +18,13 @@
           }
         }
       </p>
-      <p class="t-body1 mt-3">
-        Por favor, peça para um administrador criar outro link para você.
-      </p>
+      <p class="t-body1 mt-3">Por favor, peça para um administrador criar outro link para você.</p>
     } @else {
       <p class="t-body1 mt-10">
-        Bem vindo ao <span class="t-primary font-bold">Ministry Maps</span> ou <span class="t-primary font-bold">MM</span>!
+        Bem vindo ao <span class="t-primary font-bold">Ministry Maps</span> ou
+        <span class="t-primary font-bold">MM</span>!
       </p>
-      <p class="t-body1 mt-5">
-        Parar criar uma conta, clique no botão a baixo.
-      </p>
+      <p class="t-body1 mt-5">Parar criar uma conta, clique no botão a baixo.</p>
       <!-- Google Login Button -->
       <div class="providers-container mt-10">
         <kingdom-apps-provider-login-button

@@ -30,14 +30,14 @@ export class InviteBO {
     };
 
     return this.inviteRepository.add(inviteLink).pipe(
-      tap(createdInviteLink => {
+      tap((createdInviteLink) => {
         const user = this.userState.currentUser;
         const congregation = user?.congregation;
 
         this.loggerService.info(
-          `User [${user?.name}] (${user?.id}) of Congregation [${congregation?.name}] (${congregation?.id}) created Invitation Link [${createdInviteLink?.id}].`
+          `User [${user?.name}] (${user?.id}) of Congregation [${congregation?.name}] (${congregation?.id}) created Invitation Link [${createdInviteLink?.id}].`,
         );
-      })
+      }),
     );
   }
 }

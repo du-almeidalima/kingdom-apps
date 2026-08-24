@@ -33,8 +33,15 @@ describe('ThemeService', () => {
     removeEventListener: jest.Mock;
   };
 
-  let windowListeners: Record<string, Array<(e: any) => void>>;
-  let mockWindow: any;
+  interface MockWindow {
+    localStorage: { getItem: jest.Mock; setItem: jest.Mock };
+    matchMedia: jest.Mock;
+    addEventListener: jest.Mock;
+    removeEventListener: jest.Mock;
+  }
+
+  let windowListeners: Record<string, Array<(e: Event) => void>>;
+  let mockWindow!: MockWindow;
   let currentInjector: EnvironmentInjector | null = null;
 
   function createMockEnvironment(options?: {
@@ -89,14 +96,14 @@ describe('ThemeService', () => {
     mockMediaQueryList = {
       matches: opts.isDarkMedia,
       media: DARK_MODE_QUERY,
-      addEventListener: jest.fn((event: string, listener: any) => {
+      addEventListener: jest.fn((event: string, listener: (e: { matches: boolean }) => void) => {
         if (event === 'change') {
           mediaListeners.push(listener);
         }
       }),
-      removeEventListener: jest.fn((event: string, listener: any) => {
+      removeEventListener: jest.fn((event: string, listener: (e: { matches: boolean }) => void) => {
         if (event === 'change') {
-          mediaListeners = mediaListeners.filter(l => l !== listener);
+          mediaListeners = mediaListeners.filter((l) => l !== listener);
         }
       }),
     };
@@ -113,15 +120,15 @@ describe('ThemeService', () => {
         }
         return mockMediaQueryList;
       }),
-      addEventListener: jest.fn((event: string, listener: any) => {
+      addEventListener: jest.fn((event: string, listener: (e: Event) => void) => {
         if (!windowListeners[event]) {
           windowListeners[event] = [];
         }
         windowListeners[event].push(listener);
       }),
-      removeEventListener: jest.fn((event: string, listener: any) => {
+      removeEventListener: jest.fn((event: string, listener: (e: Event) => void) => {
         if (windowListeners[event]) {
-          windowListeners[event] = windowListeners[event].filter(l => l !== listener);
+          windowListeners[event] = windowListeners[event].filter((l) => l !== listener);
         }
       }),
     };
@@ -129,10 +136,7 @@ describe('ThemeService', () => {
     return { doc, mockWindow };
   }
 
-  function setupService(
-    envOptions?: Parameters<typeof createMockEnvironment>[0],
-    config?: ThemeConfig,
-  ): ThemeService {
+  function setupService(envOptions?: Parameters<typeof createMockEnvironment>[0], config?: ThemeConfig): ThemeService {
     const env = createMockEnvironment(envOptions);
     const parentInjector = TestBed.inject(EnvironmentInjector);
 
@@ -388,7 +392,7 @@ describe('ThemeService', () => {
       expect(service.resolvedTheme()).toBe('light');
       expect(metaElement.content).toBe('#E7E6E4');
 
-      mediaListeners.forEach(listener => listener({ matches: true }));
+      mediaListeners.forEach((listener) => listener({ matches: true }));
 
       expect(service.preference()).toBe('system');
       expect(service.resolvedTheme()).toBe('dark');
@@ -404,7 +408,7 @@ describe('ThemeService', () => {
       });
       service.initialize();
 
-      mediaListeners.forEach(listener => listener({ matches: true }));
+      mediaListeners.forEach((listener) => listener({ matches: true }));
 
       expect(service.preference()).toBe('light');
       expect(service.resolvedTheme()).toBe('light');
@@ -423,7 +427,7 @@ describe('ThemeService', () => {
         oldValue: 'system',
       });
 
-      windowListeners['storage']?.forEach(listener => listener(storageEvent));
+      windowListeners['storage']?.forEach((listener) => listener(storageEvent));
 
       expect(service.preference()).toBe('dark');
       expect(service.resolvedTheme()).toBe('dark');
@@ -444,7 +448,7 @@ describe('ThemeService', () => {
         newValue: null,
       });
 
-      windowListeners['storage']?.forEach(listener => listener(storageEvent));
+      windowListeners['storage']?.forEach((listener) => listener(storageEvent));
 
       expect(service.preference()).toBe('system');
       expect(service.resolvedTheme()).toBe('light');
@@ -462,7 +466,7 @@ describe('ThemeService', () => {
         newValue: 'dark',
       });
 
-      windowListeners['storage']?.forEach(listener => listener(storageEvent));
+      windowListeners['storage']?.forEach((listener) => listener(storageEvent));
 
       expect(service.preference()).toBe('system');
       expect(service.resolvedTheme()).toBe('light');

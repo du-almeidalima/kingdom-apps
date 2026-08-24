@@ -1,11 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import {
-  RadioGroupComponent,
-  RadioOption,
-  ThemePreference,
-  ThemeService,
-} from '@kingdom-apps/common-ui';
+import { RadioGroupComponent, RadioOption, ThemePreference, ThemeService } from '@kingdom-apps/common-ui';
 import { SectionComponent } from '../../../../shared/components/section/section.component';
 
 @Component({

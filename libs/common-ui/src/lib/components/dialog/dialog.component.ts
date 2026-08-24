@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
 import { DialogRef } from '@angular/cdk/dialog';
 import { IconComponent } from '../icon/icon.component';
 
@@ -23,10 +23,10 @@ import { IconComponent } from '../icon/icon.component';
   imports: [IconComponent],
 })
 export class DialogComponent {
+  private dialogRef = inject(DialogRef);
+
   @Input()
   title = '';
-
-  constructor(private dialogRef: DialogRef) {}
 
   handleCloseDialog() {
     this.dialogRef.close();

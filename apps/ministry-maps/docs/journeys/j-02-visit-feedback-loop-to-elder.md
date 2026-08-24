@@ -17,14 +17,14 @@ const territory = seed.factories.buildTerritory({
   congregationId: seed.ids.congregation,
   city: 'São Paulo',
   address: 'Rua do Feedback, 77 - Bela Vista',
-  note: 'Casa com portão azul.',       // non-empty note is REQUIRED — badges only render with a note (UC-TERR-27)
+  note: 'Casa com portão azul.', // non-empty note is REQUIRED — badges only render with a note (UC-TERR-27)
   history: [],
 });
 const designation = seed.factories.buildDesignation({
   id: 'j02-designation',
   congregationId: seed.ids.congregation,
   createdBy: seed.ids.adminUser,
-  expiresAt: new Date(Date.now() + 7 * 86_400_000),   // active — the factory default is in the past
+  expiresAt: new Date(Date.now() + 7 * 86_400_000), // active — the factory default is in the past
   territories: [
     seed.factories.buildDesignationTerritory({
       id: 'j02-territory',
@@ -35,7 +35,7 @@ const designation = seed.factories.buildDesignation({
       // (work-page.component.ts handleTerritoryUpdated) overwrites the territory doc
       // with the designation territory fields, so an empty snapshot note would clobber
       // the seeded note and hide the Revisita badge after completion (UC-TERR-27).
-      history: [],                    // REQUIRED — the factory default omits it and crashes the page (UC-WORK-04)
+      history: [], // REQUIRED — the factory default omits it and crashes the page (UC-WORK-04)
     }),
   ],
 });
@@ -107,7 +107,7 @@ source of the dynamic counts (UC-STAT-12), and it holds exactly one doc, written
   strings quoted above.
 - The statistics page is a **one-shot** read (`getDocs`, no listener —
   [`../domain/data-model.md §4.6`](../domain/data-model.md#46-realtime-vs-one-shot-reads)): always navigate
-  to it *after* the write has landed (the leg-1 hand-off poll guarantees this).
+  to it _after_ the write has landed (the leg-1 hand-off poll guarantees this).
 - Baseline history dates (2024) fall outside every dynamic period, so the baseline contributes `0` to all
   `Por período` numbers — only the leg-1 visit is counted (see the note at the top of
   [`../features/territories-statistics.md`](../features/territories-statistics.md)).

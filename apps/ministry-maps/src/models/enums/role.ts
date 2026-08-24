@@ -26,4 +26,4 @@ export const getTranslatedRole = (role: RoleEnum) => {
     default:
       return 'Publicador';
   }
-}
+};

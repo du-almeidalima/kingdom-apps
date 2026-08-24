@@ -25,13 +25,14 @@ import { finalize } from 'rxjs';
         name="Cidade"
         data-testid="profile-congregation-select"
         [ngModel]="user()?.congregation?.id"
-        (ngModelChange)="handleChangeCongregation($event)">
+        (ngModelChange)="handleChangeCongregation($event)"
+      >
         @for (congregation of congregations(); track congregation) {
           <option [value]="congregation.id">{{ congregation.name }}</option>
         }
       </select>
     </kingdom-apps-section>
-    `,
+  `,
 })
 export class ChangeCongregationComponent implements OnInit {
   userState = inject(UserStateService);
@@ -48,7 +49,7 @@ export class ChangeCongregationComponent implements OnInit {
   ]);
 
   ngOnInit(): void {
-    this.congregationRepository.getCongregations().subscribe(congregations => {
+    this.congregationRepository.getCongregations().subscribe((congregations) => {
       this.congregations.set(congregations ?? []);
     });
   }
@@ -60,12 +61,12 @@ export class ChangeCongregationComponent implements OnInit {
 
     this.isLoading.set(true);
     this.profileBo
-    // @ts-expect-error: TypeScript is struggling to infer types with Signals...
+      // @ts-expect-error: TypeScript is struggling to infer types with Signals...
       .changeUserCongregation(this.user()?.id, congregationId)
       .pipe(
         finalize(() => {
           this.isLoading.set(false);
-        })
+        }),
       )
       .subscribe();
   }

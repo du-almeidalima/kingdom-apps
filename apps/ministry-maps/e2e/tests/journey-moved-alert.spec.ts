@@ -70,8 +70,7 @@ test('J-04 — Moved alert: report → observe → resolve → verify gone', asy
   await expect
     .poll(
       async () =>
-        (await db.getSubcollectionDocs(db.collections.territories, 'j04-territory', db.historySubcollection))
-          .length,
+        (await db.getSubcollectionDocs(db.collections.territories, 'j04-territory', db.historySubcollection)).length,
     )
     .toBe(1);
   const historyDocs = await db.getSubcollectionDocs(
@@ -127,9 +126,7 @@ test('J-04 — Moved alert: report → observe → resolve → verify gone', asy
   await expect(alerts.dialog).toBeVisible();
   await expect(alerts.title).toHaveText('Morador Mudou');
   await expect(
-    alerts.dialog.getByText(
-      'Recentemente um publicador reportou que esse morador não está mais nesse endereço:',
-    ),
+    alerts.dialog.getByText('Recentemente um publicador reportou que esse morador não está mais nesse endereço:'),
   ).toBeVisible();
   await expect(alerts.dialog.getByText('O que você quer fazer?')).toBeVisible();
   // Default "Remover Marcação" → Salvar.
@@ -141,11 +138,7 @@ test('J-04 — Moved alert: report → observe → resolve → verify gone', asy
   // ⟶ HAND-OFF (Firestore): resolution wrote BOTH representations.
   await expect
     .poll(async () => {
-      const sub = await db.getSubcollectionDocs(
-        db.collections.territories,
-        'j04-territory',
-        db.historySubcollection,
-      );
+      const sub = await db.getSubcollectionDocs(db.collections.territories, 'j04-territory', db.historySubcollection);
       return sub.find((h) => h['visitOutcome'] === VisitOutcomeEnum.MOVED)?.['isResolved'];
     })
     .toBe(true);
@@ -164,7 +157,9 @@ test('J-04 — Moved alert: report → observe → resolve → verify gone', asy
   await page.reload();
   await expect(territoriesPage.list).toBeVisible();
   await expect(territoriesPage.territoryByAddress('Rua da Mudança, 404 - Moema')).toBeVisible();
-  await expect(territoriesPage.territoryByAddress('Rua da Mudança, 404 - Moema').getByTestId('territory-alert-badge')).toHaveCount(0);
+  await expect(
+    territoriesPage.territoryByAddress('Rua da Mudança, 404 - Moema').getByTestId('territory-alert-badge'),
+  ).toHaveCount(0);
 
   // UC-STAT-03: resolved entries do not count.
   await statisticsPage.goto();
@@ -173,11 +168,7 @@ test('J-04 — Moved alert: report → observe → resolve → verify gone', asy
   // ── FINAL SWEEP (Firestore) ────────────────────────────────────────────────
   const desDoc = await db.getDoc(db.collections.designations, 'j04-designation');
   expect(desDoc?.['territories'][0]['status']).toBe(DesignationStatusEnum.DONE); // leg 1, never touched by resolution
-  const finalSub = await db.getSubcollectionDocs(
-    db.collections.territories,
-    'j04-territory',
-    db.historySubcollection,
-  );
+  const finalSub = await db.getSubcollectionDocs(db.collections.territories, 'j04-territory', db.historySubcollection);
   expect(finalSub).toHaveLength(1);
   expect(finalSub[0]['visitOutcome']).toBe(VisitOutcomeEnum.MOVED);
   expect(finalSub[0]['isResolved']).toBe(true);

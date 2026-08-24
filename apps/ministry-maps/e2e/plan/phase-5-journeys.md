@@ -77,7 +77,7 @@ Conventions for all journey specs (from `docs/journeys/README.md`):
   checkbox still disabled, only maps enabled; both leave zero writes).
 - **Depends on:** WP-11 (work POs).
 - **Key assertions:** verbatim note `Essa designação está desabilitada. Por favor peça ao seu SG uma
-  designação nova.`; the disabled/enabled matrix per mode; empty history subcollections at the end.
+designação nova.`; the disabled/enabled matrix per mode; empty history subcollections at the end.
 - **Note:** do not point this at `seed.ids.designation` (history-less → UC-WORK-04); the journey doc's
   seed block builds two dedicated designations.
 

@@ -7,7 +7,9 @@
   border-radius: 2px;
   border: 1px solid var(--kui-color-border, #{variables.$grey-100});
 
-  transition: background-color 100ms linear, width 200ms ease-out;
+  transition:
+    background-color 100ms linear,
+    width 200ms ease-out;
   background-color: var(--kui-color-surface-hover, #{variables.$white-300});
   color: var(--kui-color-text, #{variables.$text});
   text-align: center;

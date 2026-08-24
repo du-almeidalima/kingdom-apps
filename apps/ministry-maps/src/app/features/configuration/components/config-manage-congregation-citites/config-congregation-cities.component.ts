@@ -29,30 +29,33 @@ interface CityItem {
 
       <!-- Cities List -->
       @if (congregation) {
-        <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-6 overflow-hidden" data-testid="config-cities-list">
+        <div
+          class="bg-white border border-gray-200 rounded-lg shadow-sm mb-6 overflow-hidden"
+          data-testid="config-cities-list"
+        >
           @for (city of cities; track city; let i = $index) {
             <div
-               class="px-6 py-4 border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors"
-               data-testid="config-city-row"
-               >
+              class="px-6 py-4 border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors"
+              data-testid="config-city-row"
+            >
               @if (!city.isEditing) {
                 <div class="flex justify-between items-center gap-4">
                   <span class="flex-1 text-gray-900 font-medium">{{ city.currentName }}</span>
                   <div class="flex gap-2">
                     <button
-                       class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-                       data-testid="config-edit-city"
-                       (click)="editCity(city)"
-                       [disabled]="hasEditingCities"
-                       >
+                      class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                      data-testid="config-edit-city"
+                      (click)="editCity(city)"
+                      [disabled]="hasEditingCities"
+                    >
                       Edit
                     </button>
                     <button
-                       class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-                       data-testid="config-delete-city"
-                       (click)="deleteCity(i)"
-                       [disabled]="hasEditingCities"
-                       >
+                      class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                      data-testid="config-delete-city"
+                      (click)="deleteCity(i)"
+                      [disabled]="hasEditingCities"
+                    >
                       Delete
                     </button>
                   </div>
@@ -70,12 +73,12 @@ interface CityItem {
                     [class.border-green-500]="city.isNew"
                     [class.focus:border-green-600]="city.isNew"
                     placeholder="Enter city name"
-                    />
+                  />
                   <div class="flex gap-2">
                     <button
-                       class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors text-sm font-medium"
-                       (click)="cancelEdit(city, i)"
-                       >
+                      class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors text-sm font-medium"
+                      (click)="cancelEdit(city, i)"
+                    >
                       Cancel
                     </button>
                   </div>
@@ -98,7 +101,7 @@ interface CityItem {
           data-testid="config-add-city"
           (click)="addCity()"
           [disabled]="hasEditingCities || isLoading"
-          >
+        >
           + Add City
         </button>
 
@@ -107,7 +110,7 @@ interface CityItem {
           data-testid="config-save"
           (click)="saveChanges()"
           [disabled]="!hasChanges() || isLoading"
-          >
+        >
           @if (!isLoading) {
             <span>Save Changes</span>
           }
@@ -119,12 +122,15 @@ interface CityItem {
 
       <!-- No Congregation State -->
       @if (!congregation) {
-        <div class="p-12 text-center bg-red-50 border border-red-200 rounded-lg text-red-800" data-testid="config-no-congregation-banner">
+        <div
+          class="p-12 text-center bg-red-50 border border-red-200 rounded-lg text-red-800"
+          data-testid="config-no-congregation-banner"
+        >
           <p class="text-lg">No congregation found. Please ensure you are logged in.</p>
         </div>
       }
     </div>
-    `,
+  `,
 })
 export class ConfigCongregationCitiesComponent implements OnInit {
   private configurationBO = inject(ConfigurationBO);
@@ -226,6 +232,13 @@ export class ConfigCongregationCitiesComponent implements OnInit {
   }
 
   hasChanges(): boolean {
+    // A deletion (or a net add+delete mix) changes the city count: without this check,
+    // delete-only changes would never enable the Save button.
+    const originalCities = this.congregation?.cities;
+    if (originalCities && this.cities.length !== originalCities.length) {
+      return true;
+    }
+
     return this.cities.some((city) => city.isNew || city.currentName !== city.originalName);
   }
 

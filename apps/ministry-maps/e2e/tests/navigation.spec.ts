@@ -37,7 +37,7 @@ test.describe('Navigation & Shell', () => {
     await header.goToHome();
 
     await expect(page).toHaveURL(/\/home$/);
-    
+
     const userDoc = await db.getDoc(db.collections.users, seed.ids.adminUser);
     expect(userDoc?.role).toBe(RoleEnum.ADMIN);
   });
@@ -57,7 +57,7 @@ test.describe('Navigation & Shell', () => {
     await page.goto('/home');
 
     const home = new HomePage(page);
-    
+
     // Greeting
     await expect(home.heading).toBeVisible();
     await expect(home.heading).toHaveText('Bem-Vindo Carlos!');
@@ -96,7 +96,7 @@ test.describe('Navigation & Shell', () => {
     await signInAs('admin');
 
     const consoleErrors: string[] = [];
-    page.on('console', msg => {
+    page.on('console', (msg) => {
       if (msg.type() === 'error') {
         consoleErrors.push(msg.text());
       }
@@ -104,13 +104,13 @@ test.describe('Navigation & Shell', () => {
 
     await page.goto('/nao-existe');
     await expect(page).toHaveURL(/\/$/);
-    
+
     // empty outlet (no headings present)
     await expect(page.getByTestId('home-heading')).toHaveCount(0);
     await expect(page.getByTestId('territories-heading')).toHaveCount(0);
 
     // expect angular router error in console
-    expect(consoleErrors.some(e => e.includes('Cannot match any routes'))).toBeTruthy();
+    expect(consoleErrors.some((e) => e.includes('Cannot match any routes'))).toBeTruthy();
 
     expect(await db.getCollectionDocs(db.collections.users)).toHaveLength(8);
   });

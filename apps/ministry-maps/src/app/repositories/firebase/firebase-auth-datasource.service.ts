@@ -15,8 +15,8 @@ import { User } from '../../../models/user';
 import { FirebaseUserDatasourceService } from './firebase-user-datasource.service';
 
 export enum FIREBASE_PROVIDERS {
-  'GOOGLE' = 'GOOGLE',
-  'MICROSOFT' = 'MICROSOFT',
+  GOOGLE = 'GOOGLE',
+  MICROSOFT = 'MICROSOFT',
 }
 
 @Injectable({ providedIn: 'root' })
@@ -32,7 +32,7 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
   signInWithProvider(
     provider: FIREBASE_PROVIDERS,
     createUser = false,
-    createUserConfig?: CreateUserConfig
+    createUserConfig?: CreateUserConfig,
   ): Observable<User | void> {
     let authProviderInstance: GoogleAuthProvider | OAuthProvider;
 
@@ -50,7 +50,7 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
     const providerRes = signInWithPopup(this.auth, authProviderInstance);
 
     return from(providerRes).pipe(
-      switchMap((providerUser) => this.handleUserAuthentication(providerUser, createUser, createUserConfig))
+      switchMap((providerUser) => this.handleUserAuthentication(providerUser, createUser, createUserConfig)),
     );
   }
 
@@ -66,7 +66,7 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
         }
 
         return of(undefined);
-      })
+      }),
     );
   }
 
@@ -92,7 +92,7 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
   private handleUserAuthentication(
     { user: providerUser }: UserCredential,
     createUser = false,
-    createUserConfig?: CreateUserConfig
+    createUserConfig?: CreateUserConfig,
   ): Observable<User | void> {
     return this.userRepository.getById(providerUser.uid).pipe(
       take(1),
@@ -112,7 +112,7 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
               if (isConfigEmailDifferent) {
                 throw new Error(AuthErrorEnum.INVALID_EMAIL);
               }
-            })
+            }),
           );
         }
 
@@ -123,7 +123,7 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
         // Profiles are created server-side only (provisionUserFromInvite callable); the rules
         // deny client-side creation, so a role can never be forged.
         return this.userRepository.provisionFromInvite(createUserConfig.inviteId, providerUser.uid);
-      })
+      }),
     );
   }
 }

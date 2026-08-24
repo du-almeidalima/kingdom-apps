@@ -1,14 +1,12 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 
 import {
   ConfirmDialogComponent,
-  ConfirmDialogData, disabled, disabledLight,
-  grey200,
-  grey400, IconButtonComponent, IconComponent,
+  ConfirmDialogData,
+  IconButtonComponent,
+  IconComponent,
   Icons,
-  primaryGreen,
-  white200,
 } from '@kingdom-apps/common-ui';
 import {
   WorkItemCompleteDialogComponent,
@@ -33,7 +31,8 @@ import { NgClass } from '@angular/common';
         class="work-item__checkbox-container"
         [title]="done ? 'Apagar Visita' : 'Concluir visita'"
         [ngClass]="{ 'work-item__checkbox-container--disabled': done || disabled }"
-        [for]="territory.id">
+        [for]="territory.id"
+      >
         @if (done) {
           <button
             lib-icon-button
@@ -41,7 +40,8 @@ import { NgClass } from '@angular/common';
             data-testid="work-item-undo"
             [disabled]="disabled"
             [hoverBackgroundColor]="disabledButtonBackgroundColor"
-            (click)="handleUndo()">
+            (click)="handleUndo()"
+          >
             <lib-icon [fillColor]="disabled ? disabledLight : whiteButtonColor" icon="eraser-2"></lib-icon>
           </button>
         } @else {
@@ -51,7 +51,8 @@ import { NgClass } from '@angular/common';
             data-testid="work-item-checkbox"
             [id]="territory.id"
             [disabled]="disabled"
-            (click)="handleCheck($event)" />
+            (click)="handleCheck($event)"
+          />
         }
       </label>
       <!-- Content -->
@@ -63,7 +64,8 @@ import { NgClass } from '@angular/common';
             class="work-item__icon"
             [ngClass]="{ 'work-item__icon--large': isIconLarge }"
             [fillColor]="iconColor"
-            [icon]="icon" />
+            [icon]="icon"
+          />
           <!-- Title and Subtitle -->
           <div class="work-item__title-subtitle-container">
             <h3 class="work-item__title">{{ territory.address }}</h3>
@@ -80,7 +82,12 @@ import { NgClass } from '@angular/common';
               </button>
             }
             @if (territory.mapsLink) {
-              <button lib-icon-button data-testid="work-item-maps" [disabled]="blocked" (click)="handleOpenMaps(territory.mapsLink)">
+              <button
+                lib-icon-button
+                data-testid="work-item-maps"
+                [disabled]="blocked"
+                (click)="handleOpenMaps(territory.mapsLink)"
+              >
                 <lib-icon [fillColor]="blocked ? disabledColor : buttonIconColor" icon="map-5" />
               </button>
             }
@@ -97,6 +104,8 @@ import { NgClass } from '@angular/common';
   imports: [IconComponent, NgClass, IconButtonComponent],
 })
 export class WorkItemComponent implements OnInit {
+  private readonly dialog = inject(Dialog);
+
   protected readonly DesignationStatusEnum = DesignationStatusEnum;
   protected readonly whiteButtonColor = 'currentColor';
   protected readonly disabledButtonBackgroundColor = 'transparent';
@@ -121,8 +130,6 @@ export class WorkItemComponent implements OnInit {
   @Output()
   lastVisitReverted = new EventEmitter<DesignationTerritory>();
 
-  constructor(private readonly dialog: Dialog) {}
-
   ngOnInit(): void {
     this.icon = mapTerritoryIcon(this.territory.icon);
     this.isIconLarge = isIconLarge(this.icon);
@@ -135,7 +142,7 @@ export class WorkItemComponent implements OnInit {
       return;
     }
 
-    this.dialog.open<WorkItemCompleteDialogData>(WorkItemCompleteDialogComponent).closed.subscribe(data => {
+    this.dialog.open<WorkItemCompleteDialogData>(WorkItemCompleteDialogComponent).closed.subscribe((data) => {
       if (data) {
         const nowDate = new Date();
 
@@ -178,7 +185,7 @@ export class WorkItemComponent implements OnInit {
       .open<WorkItemCompleteDialogData>(WorkItemCompleteDialogComponent, {
         data: { ...lastHistoryEntry },
       })
-      .closed.subscribe(data => {
+      .closed.subscribe((data) => {
         if (data) {
           const historyEntry: TerritoryVisitHistory = {
             ...data,
@@ -212,7 +219,7 @@ export class WorkItemComponent implements OnInit {
           `,
         },
       })
-      .closed.subscribe(res => {
+      .closed.subscribe((res) => {
         if (res) {
           this.lastVisitReverted.emit(this.territory);
         }

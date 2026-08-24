@@ -121,8 +121,8 @@ const requiredPorts = [
       throw new Error(
         `firebase.json has no "emulators.${name}.port". Add it, or drop "${name}" from EMULATORS in ${relative(
           workspaceRoot,
-          fileURLToPath(import.meta.url)
-        )}.`
+          fileURLToPath(import.meta.url),
+        )}.`,
       );
     }
 
@@ -255,9 +255,7 @@ function resolveBin(name) {
     return local;
   }
 
-  throw new Error(
-    `Could not find "${name}" in node_modules/.bin. Run \`npm ci\` from the workspace root.`
-  );
+  throw new Error(`Could not find "${name}" in node_modules/.bin. Run \`npm ci\` from the workspace root.`);
 }
 
 function start(label, command, args) {
@@ -372,7 +370,7 @@ async function waitUntilReady() {
     if (dead) {
       throw new Error(
         `${dead.label} exited with code ${dead.code} before the servers were ready.\n` +
-          `--- tail of ${relative(workspaceRoot, dead.logPath)} ---\n${logTail(dead)}`
+          `--- tail of ${relative(workspaceRoot, dead.logPath)} ---\n${logTail(dead)}`,
       );
     }
 
@@ -386,7 +384,7 @@ async function waitUntilReady() {
 
       throw new Error(
         `Timed out after ${STARTUP_TIMEOUT_MS}ms waiting for: ${missing}.\n` +
-          `${tails}\nFull logs in ${relative(workspaceRoot, LOG_DIR)}.`
+          `${tails}\nFull logs in ${relative(workspaceRoot, LOG_DIR)}.`,
       );
     }
 
@@ -416,7 +414,7 @@ async function main() {
     if (process.env['E2E_NO_PORT_CLEANUP'] === '1') {
       throw new Error(
         `Port ${port} (${name}) is already in use and E2E_NO_PORT_CLEANUP=1. ` +
-          `Stop that process, or set E2E_REUSE_SERVERS=1 to run the specs against the stack you already have.`
+          `Stop that process, or set E2E_REUSE_SERVERS=1 to run the specs against the stack you already have.`,
       );
     }
 

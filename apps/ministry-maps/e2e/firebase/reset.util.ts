@@ -16,9 +16,7 @@ async function deleteOrThrow(url: string, label: string): Promise<void> {
 
   if (!response.ok) {
     const body = await response.text().catch(() => '');
-    throw new Error(
-      `Failed to clear ${label} (HTTP ${response.status}): ${body}`,
-    );
+    throw new Error(`Failed to clear ${label} (HTTP ${response.status}): ${body}`);
   }
 }
 

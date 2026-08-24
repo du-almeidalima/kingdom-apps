@@ -6,9 +6,7 @@ import { TerritoryIcon } from '../../../src/models/territory';
 import { DesignationSeed } from '../types';
 
 /** Builds a single embedded designation territory with a `PENDING` status. */
-export function buildDesignationTerritory(
-  over: Partial<DesignationTerritory> = {},
-): DesignationTerritory {
+export function buildDesignationTerritory(over: Partial<DesignationTerritory> = {}): DesignationTerritory {
   return {
     id: `territory-${randomUUID()}`,
     city: 'São Paulo',

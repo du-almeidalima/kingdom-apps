@@ -10,7 +10,7 @@ export type TerritoryRepositoryQueryOptions = {
 export abstract class TerritoryRepository {
   abstract getAllByCongregation(
     congregationId: string,
-    options?: TerritoryRepositoryQueryOptions
+    options?: TerritoryRepositoryQueryOptions,
   ): Observable<Territory[]>;
 
   abstract getAllByCongregationAndCities(congregationId: string, cities: string[]): Observable<Territory[]>;

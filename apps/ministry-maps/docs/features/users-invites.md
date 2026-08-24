@@ -8,7 +8,7 @@ user list, the edit-user dialog, the delete-user confirmation, and invitation-li
 [`../domain/roles-and-permissions.md`](../domain/roles-and-permissions.md)); `PUBLISHER` is redirected to
 `/welcome`; anonymous visitors are redirected to `/login`. Within the page, only `APP_ADMIN`,
 `SUPERINTENDENT` and `ADMIN` see the per-row overflow menu (edit/delete); only `ADMIN` (+ `APP_ADMIN`
-bypass) sees the "Criar Link de Convite" floating action button — see the *Role gating* group. Field/model
+bypass) sees the "Criar Link de Convite" floating action button — see the _Role gating_ group. Field/model
 shapes referenced below are defined in [`../domain/data-model.md`](../domain/data-model.md); pt-BR ↔
 English vocabulary is in [`../domain/glossary.md`](../domain/glossary.md).
 
@@ -20,6 +20,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 ### Listing and congregation scope
 
 #### UC-USERS-01 — List is scoped to the signed-in user's congregation and ordered by role priority
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline (8 users since WP-01: `seed-user-admin` `ADMIN`, `seed-user-publisher-1..3` `PUBLISHER`, plus `seed-user-elder` `ELDER`, `seed-user-organizer` `ORGANIZER`, `seed-user-superintendent` `SUPERINTENDENT`, `seed-user-app-admin` `APP_ADMIN`)
@@ -30,6 +31,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Priority:** P0 · **Gaps:** no `data-testid` on the list or its container; select rows by name text
 
 #### UC-USERS-02 — Each row shows initials, name and the translated role badge
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline
@@ -40,6 +42,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Priority:** P1 · **Gaps:** no `data-testid` on the initials figure or badge; select via row text
 
 #### UC-USERS-03 — A user from another congregation is never listed
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline; plus `buildCongregation()` (a second congregation) and `buildUser({ congregationId: <second congregation id>, role: 'ADMIN' })` in it
@@ -52,26 +55,29 @@ scope here except where needed to explain what a created `invitation_links` doc 
 ### Edit-user dialog
 
 #### UC-USERS-04 — Dialog fields and role options; `SUPERINTENDENT` is offered only to an `APP_ADMIN` editor
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline
 - **Steps:** 1. sign in as admin → 2. open `/users` → 3. row menu (`⋮`) on Ana Souza → `Editar`
 - **Expected UI:** dialog title `Editar Usuário`; fields `Nome` (text input, prefilled `Ana Souza`) and `Permissão` (a `kingdom-apps-icon-radio` group, prefilled to the user's current role). As an `ADMIN` editor, exactly 4 options render, in this order: `Publicador` ("Permisão mais básica, apenas está associado a uma congregação."), `Organizador` ("Indicada para Publicadores qualificados ou Servos Ministeriais; Pode designar e atualizar territórios."), `Ancião` ("Tem todas as permissões de um Organizador, mas também pode adicionar/remover territórios e ver pessoas da congregação."), `Administrador` ("Permissões geralmente dada ao SS. Tem acesso total aos mapas da congregação além de poder adicionar, excluir e alterar permissões de usuários."); `Superintendente` is **not** rendered (`canEditAdminRoles = currentUser.role.includes('APP_ADMIN')` is `false` for an `ADMIN` editor). Footer: `Cancelar` / `Salvar` (spinner while submitting)
 - **Expected persistence:** N/A — opening the dialog performs no write
-- **Edge cases:** `canEditAdminRoles` is computed once in the constructor from a `String.prototype.includes` substring check on the editor's own role, not `===` — functionally equivalent to equality for today's `RoleEnum` values, but worth knowing if a future role value contains the substring `APP_ADMIN`
+- **Edge cases:** `canEditAdminRoles` is computed once in the constructor from a strict equality check on the editor's own role (`userState.currentUser?.role === RoleEnum.APP_ADMIN`) — fixed 2026-08 from a fragile `String.prototype.includes` substring check
 - **Priority:** P1 · **Gaps:** no `data-testid` on the radio group or its options; select via the `kingdom-apps-icon-radio` label text (`Publicador`/`Organizador`/`Ancião`/`Administrador`/`Superintendente`)
 
-#### UC-USERS-05 — ⚠ suspected defect: the edit form is disabled for every editor except `APP_ADMIN`, yet "Salvar" still submits unchanged data
+#### UC-USERS-05 — The edit form is disabled only for admin-level users edited by non-`APP_ADMIN` editors (fixed 2026-08)
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline
-- **Steps:** 1. sign in as admin → 2. row menu on Ana Souza (`PUBLISHER`) → `Editar` → 3. try to type in `Nome` and click a different `Permissão` radio → 4. click `Salvar` anyway
-- **Expected UI:** both the `Nome` input and every `Permissão` radio are disabled/non-interactive — typing and clicking have no visible effect. The `Salvar` `<button>` itself is **not** disabled (disabling a `FormGroup` does not disable a plain submit button outside its controls), so clicking it still fires `(ngSubmit)` and the dialog closes as if the save succeeded
-- **Expected persistence:** `handleFormSubmit` reads `form.getRawValue()` (which bypasses the `disabled` state and returns the original prefilled values) and calls `userRepository.update(...)` with those **unchanged** values, so `db.getDoc(db.collections.users, seed.ids.publisherUsers[0])` is byte-for-byte identical to before the dialog was opened — but a Firestore `setDoc` round-trip did occur (a client-visible no-op write, not a blocked one)
-- **Edge cases:** root cause — the guard is `if ((data.user.role === RoleEnum.SUPERINTENDENT || RoleEnum.ADMIN || RoleEnum.APP_ADMIN) && currentUser.role !== RoleEnum.APP_ADMIN)`. `RoleEnum.ADMIN` and `RoleEnum.APP_ADMIN` are non-empty string constants, so the `||` chain is **always truthy** regardless of `data.user.role` — the whole condition collapses to `currentUser.role !== RoleEnum.APP_ADMIN`. This means the target user's role is irrelevant: editing a `PUBLISHER`, an `ELDER`, or another `ADMIN` all disable the form identically, for **any** editor who is not `APP_ADMIN`
-- **Priority:** P0 · **Gaps:** `⚠ suspected defect` — the intended condition was almost certainly `(data.user.role === SUPERINTENDENT || data.user.role === ADMIN || data.user.role === APP_ADMIN)`; **assert today's reality**: form disabled, persisted doc unchanged after `Salvar`, for any `ADMIN`/`ELDER`/`SUPERINTENDENT` editor
+- **Steps:** 1. sign in as admin → 2. row menu on Ana Souza (`PUBLISHER`) → `Editar` → 3. observe the `Nome` input and `Permissão` radios → 4. click `Salvar` without changes
+- **Expected UI:** the form is fully interactive — editing a non-admin-level user (`PUBLISHER`/`ORGANIZER`/`ELDER`) as a non-`APP_ADMIN` editor is allowed, matching the Firestore rules (UC-RULES-11: same-congregation `ADMIN` edits of non-protected users are permitted). `Salvar` closes the dialog
+- **Expected persistence:** `handleFormSubmit` reads `form.getRawValue()` and calls `userRepository.update(...)`; with no edits the values are unchanged, so `db.getDoc(db.collections.users, seed.ids.publisherUsers[0])` is identical to before the dialog was opened (a client-visible no-op write)
+- **Edge cases:** the disable gate is `[SUPERINTENDENT, ADMIN, APP_ADMIN].includes(data.user.role) && currentUser.role !== RoleEnum.APP_ADMIN` — the edited user's role must be one of the three admin-level roles for the form to lock (see UC-USERS-07 for the admin editing themselves). Historical defect: before the 2026-08 fix the guard was `(data.user.role === SUPERINTENDENT || RoleEnum.ADMIN || RoleEnum.APP_ADMIN)` — an always-truthy `||` chain that disabled the form for **every** edited user whenever the viewer was not `APP_ADMIN`
+- **Priority:** P0 · **Gaps:** none — the former `⚠ suspected defect` (Gap #22) was fixed and verified by this test
 
 #### UC-USERS-06 — An `APP_ADMIN` editor gets a usable form and edits persist
+
 - **Actor:** App Admin (harness extension needed — only `admin`/`publisher` exist in `signInAs` today)
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline; an extra seeded user with `role: 'APP_ADMIN'`
@@ -82,11 +88,12 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Priority:** P1 · **Gaps:** `signInAs('appAdmin')` harness extension needed (no seeded `APP_ADMIN` uid in `ROLE_UIDS` today)
 
 #### UC-USERS-07 — Editing your own account is not special-cased
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline
 - **Steps:** 1. sign in as admin → 2. row menu on **Carlos Almeida** (the signed-in admin's own row) → `Editar`
-- **Expected UI:** the dialog opens exactly as for any other user — there is no `data.user.id === currentUser.id` check anywhere in `UsersEditDialogComponent`. Because the editor's role is `ADMIN` (not `APP_ADMIN`), the form is disabled per UC-USERS-05's bug even though the admin is editing themselves; there is no "you are editing your own account" warning or confirmation of any kind
+- **Expected UI:** the dialog opens exactly as for any other user — there is no `data.user.id === currentUser.id` check anywhere in `UsersEditDialogComponent`. Because the edited user's role is `ADMIN` (an admin-level role) and the editor is not `APP_ADMIN`, the form is disabled per UC-USERS-05's gate; there is no "you are editing your own account" warning or confirmation of any kind
 - **Expected persistence:** clicking `Salvar` re-persists the unchanged doc, same mechanics as UC-USERS-05; `db.getDoc(db.collections.users, seed.ids.adminUser)` is unchanged
 - **Edge cases:** the overflow menu that opens this dialog (`*libAuthorize="[APP_ADMIN, SUPERINTENDENT, ADMIN]"`) is gated on the **viewer's** role, not the row's user, so an admin always sees the menu on their own row too; an `APP_ADMIN` editing themselves via this same path (no bug for them, per UC-USERS-06) could demote their own role with zero guardrail
 - **Priority:** P2 · **Gaps:** none beyond UC-USERS-04/05's selectors
@@ -94,6 +101,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 ### Delete user
 
 #### UC-USERS-08 — Delete confirmation dialog and Firestore doc removal
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline (`seed-user-publisher-1`, Ana Souza)
@@ -104,6 +112,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Priority:** P0 · **Gaps:** no `data-testid` on the confirm dialog, the row menu trigger, or the menu items; select via role/text
 
 #### UC-USERS-09 — ⚠ suspected defect: deleting a user removes the Firestore doc but the Auth account survives
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline (`seed-user-publisher-1`, Ana Souza — every seeded user also has an Auth emulator account, password `test-password-123`)
@@ -116,6 +125,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 ### Invitation-link creation
 
 #### UC-USERS-10 — "Criar Link de Convite" is an `ADMIN`-only floating action button
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline
@@ -126,6 +136,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Priority:** P0 · **Gaps:** the button carries no visible text, only an icon and a `title` attribute — select it with `page.getByTitle('Criar Link de Convite')`; no `data-testid`
 
 #### UC-USERS-11 — Invite dialog defaults to `ORGANIZER`, email is optional, and the persisted doc's `congregation` is a `DocumentReference`
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline
@@ -136,6 +147,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Priority:** P0 · **Gaps:** `invitation_links` harness extension needed — no `Collections` entry, no `buildInvitationLink` factory (raw `db.firestore.collection('invitation_links')` is the workaround today); this also means the `congregation`-as-reference finding above should be reconciled with `data-model.md §2.6`, which currently describes it as an "embedded object, not a reference" — that description matches the **hydrated, in-memory** `InvitationLink` type but not the raw persisted document; no `data-testid` on the role radios or email input
 
 #### UC-USERS-12 — Invite creation with no congregation is effectively unreachable via the UI; the guard only fires when the whole user is `null`
+
 - **Actor:** Admin (hypothetical — see Edge cases)
 - **Route:** `/users`
 - **Preconditions (seed):** none reproducible through normal seed + UI flow
@@ -148,6 +160,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 ### Invitation-link sharing
 
 #### UC-USERS-13 — The generated link is `${environment.baseUrl}sign-in/{id}` and is copyable to the clipboard
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline; continues right after UC-USERS-11's successful submit
@@ -158,6 +171,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Priority:** P1 · **Gaps:** no `data-testid` on the copy button, the link text, or the help text; the exact `environment.baseUrl` used by the app under test must come from the harness's own config, not be hardcoded in the spec
 
 #### UC-USERS-14 — "Enviar" builds a `whatsapp://` link; desktop opens a new window, mobile navigates in place
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline; continues right after UC-USERS-13
@@ -170,6 +184,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 ### Role gating
 
 #### UC-USERS-15 — `ORGANIZER`/`ELDER` see the list but not the edit/delete menu or the invite FAB
+
 - **Actor:** Organizer (harness extension needed — only `admin`/`publisher` exist in `signInAs` today)
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline; an extra user with `role: 'ORGANIZER'` in `seed-congregation`
@@ -180,6 +195,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Priority:** P1 · **Gaps:** `signInAs('organizer')`/`signInAs('elder')` harness extension needed
 
 #### UC-USERS-16 — Publisher is redirected to `/welcome`
+
 - **Actor:** Publisher
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline
@@ -190,6 +206,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Priority:** P0 · **Gaps:** none
 
 #### UC-USERS-17 — Anonymous access redirects to `/login`
+
 - **Actor:** Anonymous
 - **Route:** `/users`
 - **Preconditions (seed):** none required
@@ -210,8 +227,8 @@ scope here except where needed to explain what a created `invitation_links` doc 
   `ORGANIZER` scenario in this document (UC-USERS-06, UC-USERS-15) needs a new seeded uid and a
   `ROLE_UIDS`/`TestRole` entry before it can be automated.
 - Documented current-behaviour-vs-defect items: UC-USERS-05 (edit form disabled for every non-`APP_ADMIN`
-  editor regardless of the target's role, because of an always-truthy `||` chain; "Salvar" still submits
-  unchanged data), UC-USERS-09 (deleting a user removes the Firestore doc but leaves the Auth account
+  editor regardless of the target's role — **fixed 2026-08**, the gate now keys on the edited user's
+  admin-level role), UC-USERS-09 (deleting a user removes the Firestore doc but leaves the Auth account
   intact, because the `deleteUser` callable `Observable` is never subscribed).
 - Documentation inconsistency found while verifying: `InvitationLink.congregation` is declared as an
   embedded `Congregation` object and described that way in

@@ -6,6 +6,6 @@ import { TerritoryStatisticsBO } from './bo/territory-statistics/territory-stati
 
 @NgModule({
   imports: [TerritoryRoutesModule],
-  providers: [TerritoryAlertsBO, TerritoryBO, TerritoryStatisticsBO]
+  providers: [TerritoryAlertsBO, TerritoryBO, TerritoryStatisticsBO],
 })
 export class TerritoryModule {}

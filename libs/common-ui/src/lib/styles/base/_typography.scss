@@ -1,4 +1,4 @@
-@use "../abstract/variables";
+@use '../abstract/variables';
 
 // TYPOGRAPHY CLASSES
 .t-headline1 {
@@ -7,7 +7,7 @@
 
 .t-headline2 {
   font-size: 3.4rem;
-  letter-spacing: .25px;
+  letter-spacing: 0.25px;
   font-weight: normal;
 }
 
@@ -17,7 +17,7 @@
 
 .t-headline4 {
   font-size: 2rem;
-  letter-spacing: .15px;
+  letter-spacing: 0.15px;
 }
 
 .t-body1 {

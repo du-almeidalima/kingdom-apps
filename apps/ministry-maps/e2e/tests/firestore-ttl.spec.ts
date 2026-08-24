@@ -65,14 +65,14 @@ test.describe('Firestore TTL Retention', () => {
       .poll(async () => {
         const logs = await db.getCollectionDocs(db.collections.logs);
         return logs.find((log) =>
-          (log['message'] as string | undefined)?.includes(`created Designation [${designationId}]`)
+          (log['message'] as string | undefined)?.includes(`created Designation [${designationId}]`),
         );
       })
       .toBeDefined();
 
     const logs = await db.getCollectionDocs(db.collections.logs);
     const matchingLog = logs.find((log) =>
-      (log['message'] as string | undefined)?.includes(`created Designation [${designationId}]`)
+      (log['message'] as string | undefined)?.includes(`created Designation [${designationId}]`),
     );
     expect(matchingLog).toBeDefined();
 

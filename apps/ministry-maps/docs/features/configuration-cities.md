@@ -15,12 +15,13 @@ is in [`../domain/glossary.md`](../domain/glossary.md).
 
 > **⚠ Locale note:** unlike every other screen catalogued in this app, `ConfigCongregationCitiesComponent`'s
 > template and every `ToasterService` message on it are hard-coded in **English** (`"Manage Congregation
-> Cities"`, `"Edit"`, `"Save Changes"`, …), not pt-BR. All literal strings below are quoted verbatim as they
+Cities"`, `"Edit"`, `"Save Changes"`, …), not pt-BR. All literal strings below are quoted verbatim as they
 > appear in the running app — do **not** "correct" them to Portuguese.
 
 ### Cities list
 
 #### UC-CFG-01 — Cities list renders `congregation.cities` for the signed-in admin
+
 - **Actor:** Admin
 - **Route:** `/configuration`
 - **Preconditions (seed):** default baseline (`seed.ids.congregation` cities `['São Paulo', 'Osasco']`)
@@ -33,6 +34,7 @@ is in [`../domain/glossary.md`](../domain/glossary.md).
 ### Add / rename / cancel
 
 #### UC-CFG-02 — Add a city opens a new, empty, editable row
+
 - **Actor:** Admin
 - **Route:** `/configuration`
 - **Preconditions (seed):** default baseline
@@ -43,6 +45,7 @@ is in [`../domain/glossary.md`](../domain/glossary.md).
 - **Priority:** P0 · **Gaps:** none
 
 #### UC-CFG-03 — Rename an existing city inline
+
 - **Actor:** Admin
 - **Route:** `/configuration`
 - **Preconditions (seed):** default baseline
@@ -53,6 +56,7 @@ is in [`../domain/glossary.md`](../domain/glossary.md).
 - **Priority:** P0 · **Gaps:** none
 
 #### UC-CFG-04 — Cancel an in-progress edit
+
 - **Actor:** Admin
 - **Route:** `/configuration`
 - **Preconditions (seed):** default baseline
@@ -63,6 +67,7 @@ is in [`../domain/glossary.md`](../domain/glossary.md).
 - **Priority:** P1 · **Gaps:** none
 
 #### UC-CFG-05 — Single-edit-at-a-time constraint disables other rows and "Add", but not "Save Changes"
+
 - **Actor:** Admin
 - **Route:** `/configuration`
 - **Preconditions (seed):** default baseline
@@ -75,6 +80,7 @@ is in [`../domain/glossary.md`](../domain/glossary.md).
 ### Validation
 
 #### UC-CFG-06 — ⚠ Empty city name blocks save with a toast; nothing persisted
+
 - **Actor:** Admin
 - **Route:** `/configuration`
 - **Preconditions (seed):** default baseline
@@ -85,6 +91,7 @@ is in [`../domain/glossary.md`](../domain/glossary.md).
 - **Priority:** P0 · **Gaps:** `⚠ suspected defect`-adjacent only in that the message is in English on an otherwise pt-BR app; the behaviour itself (block + toast) is correct and should be asserted as-is; no `data-testid` on the toast — assert via its rendered text
 
 #### UC-CFG-07 — ⚠ Duplicate city name blocks save with a toast; nothing persisted
+
 - **Actor:** Admin
 - **Route:** `/configuration`
 - **Preconditions (seed):** default baseline
@@ -97,6 +104,7 @@ is in [`../domain/glossary.md`](../domain/glossary.md).
 ### Save & persistence
 
 #### UC-CFG-08 — Save persists `congregations/{id}.cities` and batch-renames every affected territory
+
 - **Actor:** Admin
 - **Route:** `/configuration`
 - **Preconditions (seed):** default baseline; `seed-territory-1`/`seed-territory-3` in `São Paulo`, `seed-territory-2` in `Osasco`
@@ -107,6 +115,7 @@ is in [`../domain/glossary.md`](../domain/glossary.md).
 - **Priority:** P0 · **Gaps:** `⚠ suspected defect` (partial-failure window from non-atomic `forkJoin`) — today's happy-path assertion is both writes landing, as above; no fault-injection harness exists to exercise the failure window
 
 #### UC-CFG-09 — A newly added city needs no territory updates; an untouched city is skipped by the rename batch
+
 - **Actor:** Admin
 - **Route:** `/configuration`
 - **Preconditions (seed):** default baseline
@@ -119,11 +128,12 @@ is in [`../domain/glossary.md`](../domain/glossary.md).
 ### Delete a city
 
 #### UC-CFG-10 — ⚠ Delete removes the city from `congregation.cities` but leaves territories orphaned, pointing at a name that no longer exists
+
 - **Actor:** Admin
 - **Route:** `/configuration`
 - **Preconditions (seed):** default baseline (`seed-territory-2` is in `Osasco`)
 - **Steps:** 1. click `Delete` on the `Osasco` row → 2. a **native** browser `confirm()` dialog appears with text `Are you sure you want to delete this city?` → 3. accept it → 4. `Save Changes`
-- **Expected UI:** because this is `window.confirm(...)`, not an in-app dialog component, Playwright must register `page.on('dialog', dialog => dialog.accept())` (or `.dismiss()`) **before** the click that triggers it — a normal `getByRole('dialog')`/`getByText` locator will never see it, and an unhandled native dialog will hang the test. After accepting, the `Osasco` row disappears immediately (local splice, before any save); after `Save Changes`, toast `Cities updated successfully!`
+- **Expected UI:** after accepting the confirm, the `Osasco` row disappears immediately (local splice, before any save) and `Save Changes` is **enabled** — a delete-only change counts in `hasChanges()` (fixed 2026-08: the row count is compared against the congregation snapshot; previously a plain delete left Save disabled and deletions were unsavable on their own). Because this is `window.confirm(...)`, not an in-app dialog component, Playwright must register `page.on('dialog', dialog => dialog.accept())` (or `.dismiss()`) **before** the click that triggers it — a normal `getByRole('dialog')`/`getByText` locator will never see it, and an unhandled native dialog will hang the test. After `Save Changes`, toast `Cities updated successfully!`
 - **Expected persistence:** `db.getDoc(db.collections.congregations, seed.ids.congregation).cities` deep-equals `['São Paulo']` (no `Osasco`); **but** `db.getDoc(db.collections.territories, 'seed-territory-2').city` is still exactly `'Osasco'` — `deleteCity` only removes the array entry client-side and is never translated into an `UpdateCongregationCityDTO`, so `ConfigurationBO` has no record that `Osasco` was removed and performs **no** territory update for it. `seed-territory-2` is now an orphan: its `city` value no longer appears in any city `<select>` on `/territories` (it was built from `congregation.cities`), yet the territory document and its history are fully intact and still returned by `db.queryWhere(db.collections.territories, 'congregationId', '==', seed.ids.congregation)`
 - **Edge cases:** dismissing the native confirm (via `dialog.dismiss()` or a manual `Cancelar`-equivalent) leaves the row in place with no change at all
 - **Priority:** P1 · **Gaps:** `⚠ suspected defect` — orphaned territories after a city delete; test today must assert the territory **survives with its stale city name** (not that it is migrated or deleted), and must use `page.on('dialog')` for the native `confirm()`
@@ -131,6 +141,7 @@ is in [`../domain/glossary.md`](../domain/glossary.md).
 ### Stale state after save
 
 #### UC-CFG-11 — ⚠ `/territories`'s city `<select>` does not reflect a cities save until a full reload
+
 - **Actor:** Admin
 - **Route:** `/configuration` then `/territories`
 - **Preconditions (seed):** default baseline
@@ -143,6 +154,7 @@ is in [`../domain/glossary.md`](../domain/glossary.md).
 ### Anonymous access & role gating
 
 #### UC-CFG-12 — ⚠ Anonymous visit does not redirect and shows the "no congregation" state
+
 - **Actor:** Anonymous
 - **Route:** `/configuration`
 - **Preconditions (seed):** none required; do not sign in
@@ -153,6 +165,7 @@ is in [`../domain/glossary.md`](../domain/glossary.md).
 - **Priority:** P1 · **Gaps:** `⚠ suspected defect` (tracked alongside `UC-PROF-03` in [`../domain/roles-and-permissions.md §3.1`](../domain/roles-and-permissions.md#31-suspected-defect--roles--short-circuits-the-login-check)); no `data-testid` on the banner — match its literal text
 
 #### UC-CFG-13 — ⚠ `EDIT_CONGREGATION_CONFIGURATION` is defined but never enforced — every role, including `PUBLISHER`, can edit cities
+
 - **Actor:** Publisher
 - **Route:** `/configuration`
 - **Preconditions (seed):** default baseline

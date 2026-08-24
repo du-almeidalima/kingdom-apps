@@ -2,4 +2,4 @@
 export type AuthUser = {
   name: string;
   roles: string[] | string;
-}
+};

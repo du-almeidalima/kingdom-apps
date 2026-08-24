@@ -57,7 +57,7 @@ test.describe('Territories page — alerts (WP-16)', () => {
 
     const stored = await db.getDoc(db.collections.territories, moved.id);
     const rh = stored?.['recentHistory'] as Array<Record<string, unknown>>;
-    expect(rh.some(h => h['visitOutcome'] === VisitOutcomeEnum.MOVED && h['isResolved'] === false)).toBe(true);
+    expect(rh.some((h) => h['visitOutcome'] === VisitOutcomeEnum.MOVED && h['isResolved'] === false)).toBe(true);
   });
 
   test('UC-TERR-25 — "Não quer visitas" badge (24-month window)', async ({ authenticatedPage, seed, db }) => {
@@ -92,7 +92,7 @@ test.describe('Territories page — alerts (WP-16)', () => {
 
     const stored = await db.getDoc(db.collections.territories, stopVisit.id);
     const rh = stored?.['recentHistory'] as Array<Record<string, unknown>>;
-    expect(rh.some(h => h['visitOutcome'] === VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN)).toBe(true);
+    expect(rh.some((h) => h['visitOutcome'] === VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN)).toBe(true);
   });
 
   test('UC-TERR-26 — "Revisita" badge for any isRevisit entry', async ({ authenticatedPage, db }) => {
@@ -102,14 +102,11 @@ test.describe('Territories page — alerts (WP-16)', () => {
     const row = territoriesPage.territoryByAddress('Rua Harmonia, 300 - Vila Madalena');
     const badge = row.getByTestId('territory-alert-badge').filter({ hasText: 'Revisita' });
     await expect(badge).toBeVisible();
-    await expect(badge).toHaveAttribute(
-      'title',
-      'Essa pessoa foi marcada como revisita recentemente',
-    );
+    await expect(badge).toHaveAttribute('title', 'Essa pessoa foi marcada como revisita recentemente');
 
     const stored = await db.getDoc(db.collections.territories, 'seed-territory-3');
     const rh = stored?.['recentHistory'] as Array<Record<string, unknown>>;
-    expect(rh.some(h => h['isRevisit'] === true)).toBe(true);
+    expect(rh.some((h) => h['isRevisit'] === true)).toBe(true);
   });
 
   test('UC-TERR-27 — alert badges only render when note is non-empty (⚠ defect)', async ({
@@ -153,7 +150,7 @@ test.describe('Territories page — alerts (WP-16)', () => {
     expect(stored?.['note']).toBe('');
     expect(stored?.['isBibleStudent']).toBe(true);
     const rh = stored?.['recentHistory'] as Array<Record<string, unknown>>;
-    expect(rh.some(h => h['visitOutcome'] === VisitOutcomeEnum.MOVED && h['isResolved'] === false)).toBe(true);
+    expect(rh.some((h) => h['visitOutcome'] === VisitOutcomeEnum.MOVED && h['isResolved'] === false)).toBe(true);
   });
 
   // ── Visit-history dialog ────────────────────────────────────────────────────
@@ -205,9 +202,9 @@ test.describe('Territories page — alerts (WP-16)', () => {
     await expect(historyDialog.closeButton).toBeVisible();
     await historyDialog.close();
 
-    expect(
-      await db.getSubcollectionDocs(db.collections.territories, empty.id, db.historySubcollection),
-    ).toHaveLength(0);
+    expect(await db.getSubcollectionDocs(db.collections.territories, empty.id, db.historySubcollection)).toHaveLength(
+      0,
+    );
   });
 
   // ── Resolution dialogs ──────────────────────────────────────────────────────
@@ -252,7 +249,9 @@ test.describe('Territories page — alerts (WP-16)', () => {
     ).toBeVisible();
     await expect(alerts.dialog.getByText('O que você quer fazer?')).toBeVisible();
     // Three radio options rendered.
-    await expect(alerts.dialog.getByTestId('alert-resolve-radio').filter({ hasText: 'Remover Marcação' })).toBeVisible();
+    await expect(
+      alerts.dialog.getByTestId('alert-resolve-radio').filter({ hasText: 'Remover Marcação' }),
+    ).toBeVisible();
     await expect(alerts.dialog.getByTestId('alert-resolve-radio').filter({ hasText: 'Apagar Endereço' })).toBeVisible();
     await expect(alerts.dialog.getByTestId('alert-resolve-radio').filter({ hasText: 'Editar Endereço' })).toBeVisible();
 
@@ -263,21 +262,18 @@ test.describe('Territories page — alerts (WP-16)', () => {
     await expect(async () => {
       const stored = await db.getDoc(db.collections.territories, moved.id);
       const rh = stored?.['recentHistory'] as Array<Record<string, unknown>>;
-      const movedEntry = rh.find(h => h['visitOutcome'] === VisitOutcomeEnum.MOVED);
+      const movedEntry = rh.find((h) => h['visitOutcome'] === VisitOutcomeEnum.MOVED);
       expect(movedEntry?.['isResolved']).toBe(true);
     }).toPass();
     await expect(async () => {
-      const sub = await db.getSubcollectionDocs(
-        db.collections.territories,
-        moved.id,
-        db.historySubcollection,
-      );
-      const movedDoc = sub.find(h => h['visitOutcome'] === VisitOutcomeEnum.MOVED) as Record<string, unknown> | undefined;
+      const sub = await db.getSubcollectionDocs(db.collections.territories, moved.id, db.historySubcollection);
+      const movedDoc = sub.find((h) => h['visitOutcome'] === VisitOutcomeEnum.MOVED) as
+        Record<string, unknown> | undefined;
       expect(movedDoc?.['isResolved']).toBe(true);
     }).toPass();
   });
 
-  test('UC-TERR-31 — resolving "Revisita" truncates unrelated recentHistory entries (⚠ defect)', async ({
+  test('UC-TERR-31 — resolving "Revisita" preserves unrelated recentHistory entries (fixed)', async ({
     authenticatedPage,
     seed,
     db,
@@ -320,21 +316,26 @@ test.describe('Territories page — alerts (WP-16)', () => {
     await expect(alerts.dialog).toBeVisible();
     await expect(alerts.title).toHaveText('Revisita');
     await expect(
-      alerts.dialog.getByText(
-        'Um ou mais publicadores marcaram que esse território está sendo revisitado: ',
-      ),
+      alerts.dialog.getByText('Um ou mais publicadores marcaram que esse território está sendo revisitado: '),
     ).toBeVisible();
     await alerts.save();
 
-    // ⚠ recentHistory is recomputed from only the revisit subset → length 1.
+    // Fixed (2026-08): resolution merges the updated subset back into the full recentHistory —
+    // the unrelated MOVED entry must survive, and the revisit entry loses its isRevisit flag.
     await expect(async () => {
       const stored = await db.getDoc(db.collections.territories, both.id);
-      expect((stored?.['recentHistory'] as unknown[]).length).toBe(1);
+      const recentHistory = stored?.['recentHistory'] as Array<Record<string, unknown>>;
+      expect(recentHistory).toHaveLength(2);
+      const revisitEntry = recentHistory.find((h) => h['notes'] === 'Aceitou revisita.');
+      expect(revisitEntry?.['isRevisit']).toBe(false);
+      const movedEntry = recentHistory.find((h) => h['notes'] === 'Se mudou.');
+      expect(movedEntry?.['isResolved']).toBe(false);
     }).toPass();
-    // The subcollection is untouched — still both docs.
-    expect(
-      await db.getSubcollectionDocs(db.collections.territories, both.id, db.historySubcollection),
-    ).toHaveLength(2);
+    // The subcollection keeps both docs; only the revisit doc was rewritten (isRevisit cleared).
+    const subDocs = await db.getSubcollectionDocs(db.collections.territories, both.id, db.historySubcollection);
+    expect(subDocs).toHaveLength(2);
+    const revisitDoc = subDocs.find((h) => h['notes'] === 'Aceitou revisita.') as Record<string, unknown> | undefined;
+    expect(revisitDoc?.['isRevisit']).toBe(false);
   });
 
   test('UC-TERR-32 — resolve "Não Visitar" clears the badge', async ({ authenticatedPage, seed, db }) => {
@@ -365,9 +366,7 @@ test.describe('Territories page — alerts (WP-16)', () => {
     await expect(alerts.dialog).toBeVisible();
     await expect(alerts.title).toHaveText('Parar de Visitar');
     await expect(
-      alerts.dialog.getByText(
-        'Um ou mais publicadores marcaram que esse território pediu para não ser visitado: ',
-      ),
+      alerts.dialog.getByText('Um ou mais publicadores marcaram que esse território pediu para não ser visitado: '),
     ).toBeVisible();
     await alerts.save();
 
@@ -375,18 +374,13 @@ test.describe('Territories page — alerts (WP-16)', () => {
     await expect(async () => {
       const stored = await db.getDoc(db.collections.territories, stopVisit.id);
       const rh = stored?.['recentHistory'] as Array<Record<string, unknown>>;
-      const entry = rh.find(h => h['visitOutcome'] === VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN);
+      const entry = rh.find((h) => h['visitOutcome'] === VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN);
       expect(entry?.['isResolved']).toBe(true);
     }).toPass();
     await expect(async () => {
-      const sub = await db.getSubcollectionDocs(
-        db.collections.territories,
-        stopVisit.id,
-        db.historySubcollection,
-      );
-      const doc = sub.find(h => h['visitOutcome'] === VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN) as
-        | Record<string, unknown>
-        | undefined;
+      const sub = await db.getSubcollectionDocs(db.collections.territories, stopVisit.id, db.historySubcollection);
+      const doc = sub.find((h) => h['visitOutcome'] === VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN) as
+        Record<string, unknown> | undefined;
       expect(doc?.['isResolved']).toBe(true);
     }).toPass();
   });

@@ -13,8 +13,8 @@ function getClientEnvironment(configuration) {
         return env;
       },
       {
-        NODE_ENV: process.env.NODE_ENV || configuration
-      }
+        NODE_ENV: process.env.NODE_ENV || configuration,
+      },
     );
 
   // Stringify all values so we can feed into webpack DefinePlugin
@@ -22,15 +22,12 @@ function getClientEnvironment(configuration) {
     'process.env': Object.keys(raw).reduce((env, key) => {
       env[key] = JSON.stringify(raw[key]);
       return env;
-    }, {})
+    }, {}),
   };
 }
 
-
 module.exports = (config, options, context) => {
-  config.plugins.push(
-    new webpack.DefinePlugin(getClientEnvironment(context.configuration))
-  );
+  config.plugins.push(new webpack.DefinePlugin(getClientEnvironment(context.configuration)));
 
   return config;
 };

@@ -14,15 +14,15 @@ and **§4.2** first — they already document the dual-history contract and the 
 > territory omits `history` throws inside the `docData` pipeline the instant `/work/:id` opens (see
 > UC-WORK-04). This even affects the **default baseline** `seed-designation` (its own embedded territory has
 > no `history` override — see [`data-model.md §5`](../domain/data-model.md#5-default-e2e-baseline-seed)).
-> Every entry below that needs a *working* page explicitly overrides `history: []` on
+> Every entry below that needs a _working_ page explicitly overrides `history: []` on
 > `buildDesignationTerritory(...)`; do not omit it when writing a new seed for this feature.
 
 **Quick reference — the two expiry flags `WorkPageComponent` computes in `ngOnInit`:**
 
-| Flag         | Formula                                                                    | Drives                                                                                                  |
-|--------------|----------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
+| Flag         | Formula                                                                         | Drives                                                                                                  |
+| ------------ | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | `isDisabled` | `designation?.expiresAt ? designation.expiresAt.getTime() < Date.now() : false` | the info note (`@if (isDisabled)`); the checkbox/edit/undo `disabled` input on `kingdom-apps-work-item` |
-| `isBlocked`  | `isDisabled && !!designation.settings?.shouldDesignationBlockAfterExpired` | only the maps button's `disabled` input on `kingdom-apps-work-item`                                     |
+| `isBlocked`  | `isDisabled && !!designation.settings?.shouldDesignationBlockAfterExpired`      | only the maps button's `disabled` input on `kingdom-apps-work-item`                                     |
 
 Read that table before writing any expiry test (UC-WORK-20/21): the naming suggests `isBlocked` gates everything, but it only ever gates the maps affordance.
 

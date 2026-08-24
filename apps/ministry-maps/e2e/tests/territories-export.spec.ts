@@ -2,6 +2,7 @@ import { expect, test } from '../fixtures';
 import { TerritoriesPage } from '../page-objects/territories.page';
 import { ToastPage } from '../page-objects/toast.page';
 import { downloadCsv } from '../utils/csv-download.util';
+import { expectData } from '../utils/firestore-assert.util';
 
 // ─── WP-17: CSV export + overflow role gating ─────────────────────────────────
 
@@ -39,18 +40,17 @@ test.describe('Territories page — export & role gating (WP-17)', () => {
 
     // One data row per congregation territory, sorted by city (Osasco before São Paulo).
     const all = await db.getCollectionDocs(db.collections.territories);
-    const dataRows = lines.slice(1).filter(l => l.length > 0);
+    const dataRows = lines.slice(1).filter((l) => l.length > 0);
     expect(dataRows).toHaveLength(all.length);
     expect(dataRows[0].startsWith('Osasco;')).toBe(true);
 
     // The bible-student territory (seed-territory-3) exports a `Sim` flag and
     // its raw instructor uid; dates are dd/MM/yyyy (lastVisit 2024-03-12).
-    const studentRow = dataRows.find(l => l.includes('Rua Harmonia, 300 - Vila Madalena'));
-    expect(studentRow).toBeTruthy();
-    expect(studentRow!).toContain('Homem'); // icon label
-    expect(studentRow!).toContain('Sim'); // isBibleStudent → "Sim"
-    expect(studentRow!).toContain('seed-user-publisher-1'); // raw instructor uid
-    expect(studentRow!).toMatch(/12\/03\/2024$/);
+    const studentRow = expectData(dataRows.find((l) => l.includes('Rua Harmonia, 300 - Vila Madalena')));
+    expect(studentRow).toContain('Homem'); // icon label
+    expect(studentRow).toContain('Sim'); // isBibleStudent → "Sim"
+    expect(studentRow).toContain('seed-user-publisher-1'); // raw instructor uid
+    expect(studentRow).toMatch(/12\/03\/2024$/);
   });
 
   test('UC-TERR-35 — export/overflow menu hidden for ORGANIZER and ELDER', async ({ signInAs, db, page }) => {
@@ -61,9 +61,11 @@ test.describe('Territories page — export & role gating (WP-17)', () => {
       // The ⋮ overflow button is gated to [APP_ADMIN, SUPERINTENDENT, ADMIN].
       await expect(territoriesPage.overflowMenu).toHaveCount(0);
 
-      expect((await db.getDoc(db.collections.users, role === 'organizer' ? 'seed-user-organizer' : 'seed-user-elder'))?.['role']).toBe(
-        role === 'organizer' ? 'ORGANIZER' : 'ELDER',
-      );
+      expect(
+        (await db.getDoc(db.collections.users, role === 'organizer' ? 'seed-user-organizer' : 'seed-user-elder'))?.[
+          'role'
+        ],
+      ).toBe(role === 'organizer' ? 'ORGANIZER' : 'ELDER');
     }
   });
 

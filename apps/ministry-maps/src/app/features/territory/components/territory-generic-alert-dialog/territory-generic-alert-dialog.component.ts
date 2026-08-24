@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import {
   ButtonComponent,
@@ -15,7 +15,7 @@ import { DatePipe, SlicePipe } from '@angular/common';
 
 export type TerritoryGenericAlertDialogData = {
   history: TerritoryVisitHistory[];
-  markAsResolvedCallback: (history: TerritoryVisitHistory[]) => Observable<any>;
+  markAsResolvedCallback: (history: TerritoryVisitHistory[]) => Observable<unknown>;
   title: string;
   message: string;
 };
@@ -38,7 +38,7 @@ export type TerritoryGenericAlertDialogData = {
             </blockquote>
             <figcaption class="quote-report__caption text-gray-600 t-caption">
               @if (report.name) {
-                <span>{{ report.name | slice : 0 : 30 }}</span
+                <span>{{ report.name | slice: 0 : 30 }}</span
                 >,&nbsp;
               }
               {{ report.date | date }}
@@ -77,14 +77,12 @@ export type TerritoryGenericAlertDialogData = {
   ],
 })
 export class TerritoryGenericAlertDialogComponent {
+  readonly data = inject<TerritoryGenericAlertDialogData>(DIALOG_DATA);
+  private readonly dialogRef = inject(DialogRef);
+
   protected readonly white = white100;
 
   public isSubmitting = false;
-
-  constructor(
-    @Inject(DIALOG_DATA) public readonly data: TerritoryGenericAlertDialogData,
-    private readonly dialogRef: DialogRef
-  ) {}
 
   handleResolveAlert() {
     this.isSubmitting = true;
@@ -94,7 +92,7 @@ export class TerritoryGenericAlertDialogComponent {
       .pipe(
         finalize(() => {
           this.isSubmitting = false;
-        })
+        }),
       )
       .subscribe(() => {
         this.dialogRef.close(true);

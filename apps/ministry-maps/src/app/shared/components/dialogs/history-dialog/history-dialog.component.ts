@@ -1,14 +1,8 @@
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 
-import {
-  ButtonComponent,
-  DialogComponent,
-  DialogFooterComponent,
-  IconComponent,
-} from '@kingdom-apps/common-ui';
+import { ButtonComponent, DialogComponent, DialogFooterComponent, IconComponent } from '@kingdom-apps/common-ui';
 
-import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
 import { VisitOutcomeToIconPipe } from '../../../pipes/visit-outcome-to-icon/visit-outcome-to-icon.pipe';
 import { DatePipe, SlicePipe } from '@angular/common';
 
@@ -24,7 +18,8 @@ import { DatePipe, SlicePipe } from '@angular/common';
             <lib-icon
               class="work-item-history__icon"
               [icon]="history.visitOutcome | visitOutcomeToIcon"
-              [fillColor]="iconColor"></lib-icon>
+              [fillColor]="iconColor"
+            ></lib-icon>
             <p class="work-item-history__note">
               {{ history.notes ? history.notes : 'Sem observações' }}
             </p>
@@ -33,13 +28,15 @@ import { DatePipe, SlicePipe } from '@angular/common';
             @if (history.isRevisit) {
               <span
                 class="territory-alert-badge territory-alert-badge--revisit"
-                title="Essa pessoa foi marcada como revisita recentemente">
-            Revisita
-          </span>
+                title="Essa pessoa foi marcada como revisita recentemente"
+              >
+                Revisita
+              </span>
             }
             <h3 class="t-caption font-light text-right ml-auto">
               @if (history.name) {
-                <span>{{ history.name | slice : 0 : 30 }}</span>,&nbsp;
+                <span>{{ history.name | slice: 0 : 30 }}</span
+                >,&nbsp;
               }
               {{ history.date | date }}
             </h3>
@@ -48,22 +45,35 @@ import { DatePipe, SlicePipe } from '@angular/common';
       }
       <lib-dialog-footer class="sticky bottom-0 left-0 right-0">
         <div class="flex justify-end gap-4">
-          <button lib-button btnType="primary" type="submit" form="work-item-complete" data-testid="history-dialog-close" (click)="handleCancel()">
+          <button
+            lib-button
+            btnType="primary"
+            type="submit"
+            form="work-item-complete"
+            data-testid="history-dialog-close"
+            (click)="handleCancel()"
+          >
             Fechar
           </button>
         </div>
       </lib-dialog-footer>
     </lib-dialog>
   `,
-  imports: [VisitOutcomeToIconPipe, IconComponent, DialogComponent, DialogFooterComponent, DatePipe, SlicePipe, ButtonComponent],
+  imports: [
+    VisitOutcomeToIconPipe,
+    IconComponent,
+    DialogComponent,
+    DialogFooterComponent,
+    DatePipe,
+    SlicePipe,
+    ButtonComponent,
+  ],
 })
 export class HistoryDialogComponent {
-  public iconColor = 'currentColor';
+  private readonly dialogRef = inject(DialogRef);
+  readonly data = inject(DIALOG_DATA);
 
-  constructor(
-    private readonly dialogRef: DialogRef,
-    @Inject(DIALOG_DATA) public readonly data: TerritoryVisitHistory[]
-  ) {}
+  public iconColor = 'currentColor';
 
   // TODO: Refactor the basic dialog logic into a base class
   handleCancel() {

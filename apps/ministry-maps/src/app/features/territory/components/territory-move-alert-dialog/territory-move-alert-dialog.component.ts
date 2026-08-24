@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import {
   ButtonComponent,
   DialogComponent,
   DialogFooterComponent,
-  grey400,
   IconComponent,
   SpinnerComponent,
   white100,
@@ -19,7 +18,7 @@ import { DatePipe } from '@angular/common';
 
 export type TerritoryMoveAlertDialogData = {
   history: TerritoryVisitHistory[];
-  markAsResolvedCallback: (history: TerritoryVisitHistory[]) => Observable<any>;
+  markAsResolvedCallback: (history: TerritoryVisitHistory[]) => Observable<unknown>;
 };
 
 export enum MoveResolutionActionsEnum {
@@ -49,15 +48,30 @@ export enum MoveResolutionActionsEnum {
       <!-- ACTION -->
       <p class="t-body2 my-5">O que você quer fazer?</p>
       <form id="move-alert-resolution-form" [formGroup]="form" (ngSubmit)="handleFormSubmit()">
-        <kingdom-apps-icon-radio formControlName="action" data-testid="alert-resolve-radio" [value]="MoveResolutionActions.MARK_AS_RESOLVED" class="mt-3">
+        <kingdom-apps-icon-radio
+          formControlName="action"
+          data-testid="alert-resolve-radio"
+          [value]="MoveResolutionActions.MARK_AS_RESOLVED"
+          class="mt-3"
+        >
           <lib-icon class="icon-radio__icon" icon="check-mark-circle-lined" [fillColor]="iconColor" />
           Remover Marcação
         </kingdom-apps-icon-radio>
-        <kingdom-apps-icon-radio formControlName="action" data-testid="alert-resolve-radio" [value]="MoveResolutionActions.DELETE_TERRITORY" class="mt-3">
+        <kingdom-apps-icon-radio
+          formControlName="action"
+          data-testid="alert-resolve-radio"
+          [value]="MoveResolutionActions.DELETE_TERRITORY"
+          class="mt-3"
+        >
           <lib-icon class="icon-radio__icon" icon="trash-can-lined" [fillColor]="iconColor" />
           Apagar Endereço
         </kingdom-apps-icon-radio>
-        <kingdom-apps-icon-radio formControlName="action" data-testid="alert-resolve-radio" [value]="MoveResolutionActions.EDIT_TERRITORY" class="mt-3">
+        <kingdom-apps-icon-radio
+          formControlName="action"
+          data-testid="alert-resolve-radio"
+          [value]="MoveResolutionActions.EDIT_TERRITORY"
+          class="mt-3"
+        >
           <lib-icon class="icon-radio__icon" icon="pencil-lined" [fillColor]="iconColor" />
           Editar Endereço
         </kingdom-apps-icon-radio>
@@ -67,7 +81,13 @@ export enum MoveResolutionActionsEnum {
       <lib-dialog-footer>
         <div class="flex flex-nowrap justify-end gap-4">
           <button lib-button lib-dialog-close>Cancelar</button>
-          <button lib-button btnType="primary" type="submit" form="move-alert-resolution-form" data-testid="alert-resolve-save">
+          <button
+            lib-button
+            btnType="primary"
+            type="submit"
+            form="move-alert-resolution-form"
+            data-testid="alert-resolve-save"
+          >
             @if (!isSubmitting) {
               <span>Salvar</span>
             } @else {
@@ -90,6 +110,9 @@ export enum MoveResolutionActionsEnum {
   ],
 })
 export class TerritoryMoveAlertDialogComponent {
+  readonly data = inject<TerritoryMoveAlertDialogData>(DIALOG_DATA);
+  private readonly dialogRef = inject(DialogRef);
+
   protected readonly white = white100;
   protected readonly iconColor = 'currentColor';
   public readonly MoveResolutionActions = MoveResolutionActionsEnum;
@@ -99,11 +122,10 @@ export class TerritoryMoveAlertDialogComponent {
 
   public form: FormGroup<{ action: FormControl<MoveResolutionActionsEnum> }>;
 
-  constructor(
-    @Inject(DIALOG_DATA) public readonly data: TerritoryMoveAlertDialogData,
-    private readonly dialogRef: DialogRef
-  ) {
-    this.historyReports = data.history?.filter(history => {
+  constructor() {
+    const data = this.data;
+
+    this.historyReports = data.history?.filter((history) => {
       return history.visitOutcome === VisitOutcomeEnum.MOVED && history?.notes?.length > 1;
     });
 
@@ -127,7 +149,7 @@ export class TerritoryMoveAlertDialogComponent {
           .pipe(
             finalize(() => {
               this.isSubmitting = false;
-            })
+            }),
           )
           .subscribe(() => {
             this.dialogRef.close();

@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { finalize, Observable, tap } from 'rxjs';
 
 import { AuthRepository, CreateUserConfig } from '../../../../repositories/auth.repository';
@@ -15,16 +15,18 @@ import { FirebaseUserDatasourceService } from '../../../../repositories/firebase
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly authRepository = inject(AuthRepository);
+  private readonly userState = inject(UserStateService);
+  private readonly authUserState = inject(AuthUserStateService);
+  private readonly firebaseAuthDatasourceService = inject(FirebaseAuthDatasourceService);
+  private readonly userRepository = inject(FirebaseUserDatasourceService);
+  private readonly router = inject(Router);
+
   readonly isAuthenticating = signal(false);
 
-  constructor(
-    private readonly authRepository: AuthRepository,
-    private readonly userState: UserStateService,
-    private readonly authUserState: AuthUserStateService,
-    private readonly firebaseAuthDatasourceService: FirebaseAuthDatasourceService,
-    private readonly userRepository: FirebaseUserDatasourceService,
-    private readonly router: Router
-  ) {
+  constructor() {
+    const userState = this.userState;
+
     // Updates the UserState whenever the authStateChanges
     this.authRepository.authStateChanged().subscribe((authStateChange) => {
       // User was logged in, but its auth state has changed to log out
@@ -47,7 +49,7 @@ export class AuthService {
   signInWithProvider(
     provider: FIREBASE_PROVIDERS,
     createUser = false,
-    createUserConfiguration?: CreateUserConfig
+    createUserConfiguration?: CreateUserConfig,
   ): Observable<User | void> {
     return this.authRepository.signInWithProvider(provider, createUser, createUserConfiguration).pipe(
       tap((userRes) => {
@@ -60,7 +62,7 @@ export class AuthService {
           roles: [userRes.role],
           name: userRes.name,
         });
-      })
+      }),
     );
   }
 
@@ -90,7 +92,7 @@ export class AuthService {
       }),
       finalize(() => {
         this.isAuthenticating.set(false);
-      })
+      }),
     );
   }
 
@@ -100,7 +102,6 @@ export class AuthService {
    */
   private refreshUserFromServer(userId: string): void {
     this.userRepository.getById(userId).subscribe((user) => {
-
       if (user) {
         this.userState.setUser(user);
         this.authUserState.setUser({ roles: [user.role], name: user.name });

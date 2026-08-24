@@ -35,15 +35,15 @@ The future generic token source belongs in `libs/common-ui/src/lib/styles/base/_
 
 ## Known global and shell owners
 
-| Classification | File | Current responsibility and risk |
-|---|---|---|
-| Theme foundation + known colors | `apps/ministry-maps/src/index.html` | Contains one fixed `theme-color` and no synchronous preference initializer. Angular-only application would permit a wrong-theme flash. |
-| Theme foundation + known colors | `apps/ministry-maps/src/styles/main.scss` and `apps/ministry-maps/src/styles/components/` | Import shared Sass and own global body/loading/radio/quote/alert/avatar presentation with light palette assumptions. |
-| Verification-only/possible false positive | `apps/ministry-maps/src/app/app.component.scss` | File exists but the current root component uses inline styles rather than this file. Do not wire or migrate it opportunistically; reclassify only if current wiring changes. |
-| Theme integration owner | `apps/ministry-maps/src/app/app.component.html` | Root host must inherit the pre-paint theme during loading/lazy navigation; current app-specific shell color ownership is in the shared header component. |
-| Known rendered color owner | `apps/ministry-maps/src/app/shared/components/header/header.component.ts` and `.scss` | Pass runtime primary-green/white values and use fixed light hover/content presentation for the Ministry Maps shell. |
-| Theme integration owner | `apps/ministry-maps/src/app/app-config.ts` | Standalone application providers currently have no theme initializer; this is the registration point for idempotent `ThemeService.initialize()`. |
-| Visual verification required | `apps/ministry-maps/src/app/app.component.ts` | Root shell component and lazy-route host; verify loading, navigation, and route transition states. |
+| Classification                            | File                                                                                      | Current responsibility and risk                                                                                                                                              |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Theme foundation + known colors           | `apps/ministry-maps/src/index.html`                                                       | Contains one fixed `theme-color` and no synchronous preference initializer. Angular-only application would permit a wrong-theme flash.                                       |
+| Theme foundation + known colors           | `apps/ministry-maps/src/styles/main.scss` and `apps/ministry-maps/src/styles/components/` | Import shared Sass and own global body/loading/radio/quote/alert/avatar presentation with light palette assumptions.                                                         |
+| Verification-only/possible false positive | `apps/ministry-maps/src/app/app.component.scss`                                           | File exists but the current root component uses inline styles rather than this file. Do not wire or migrate it opportunistically; reclassify only if current wiring changes. |
+| Theme integration owner                   | `apps/ministry-maps/src/app/app.component.html`                                           | Root host must inherit the pre-paint theme during loading/lazy navigation; current app-specific shell color ownership is in the shared header component.                     |
+| Known rendered color owner                | `apps/ministry-maps/src/app/shared/components/header/header.component.ts` and `.scss`     | Pass runtime primary-green/white values and use fixed light hover/content presentation for the Ministry Maps shell.                                                          |
+| Theme integration owner                   | `apps/ministry-maps/src/app/app-config.ts`                                                | Standalone application providers currently have no theme initializer; this is the registration point for idempotent `ThemeService.initialize()`.                             |
+| Visual verification required              | `apps/ministry-maps/src/app/app.component.ts`                                             | Root shell component and lazy-route host; verify loading, navigation, and route transition states.                                                                           |
 
 CDK overlays are appended beneath `body`, not inside a feature component. They still inherit root custom properties. Migrate the global backdrop and generic dialog/menu surfaces rather than creating a parallel overlay theme service or overlay class toggler.
 
@@ -135,14 +135,14 @@ The larger signed-out/onboarding experience must also include whichever current 
 
 The route groups below are in app-wide scope. Listed directories are migration/verification roots; the exhaustive rows and states belong in the two matrices.
 
-| Surface | Current root | Known risks |
-|---|---|---|
-| Home | `apps/ministry-maps/src/app/features/home/` | Page canvas plus `ministry-maps-card`/`territory-card` surfaces, icons, links, empty/loading states. |
-| Profile | `apps/ministry-maps/src/app/features/profile/` | Page/cards/avatar, congregation component, logout, and new appearance radios. |
-| Territories | `apps/ministry-maps/src/app/features/territory/` | Lists/items, assignment/return/manage dialogs, forms, notes, inline/status background values, selected/hover states. |
-| Work | `apps/ministry-maps/src/app/features/work/` | Assigned-work, work cards/header/items/lists, notes/add-note overlays, business status colors. |
-| Users | `apps/ministry-maps/src/app/features/users/` | Lists/items, details, add/edit/invite dialogs/forms, congregation association, validation and disabled states. |
-| Configuration | `apps/ministry-maps/src/app/features/configuration/` | Main page, congregation/city/invite/notification components, lists/forms/dialogs, role-specific reachability. |
+| Surface       | Current root                                         | Known risks                                                                                                          |
+| ------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Home          | `apps/ministry-maps/src/app/features/home/`          | Page canvas plus `ministry-maps-card`/`territory-card` surfaces, icons, links, empty/loading states.                 |
+| Profile       | `apps/ministry-maps/src/app/features/profile/`       | Page/cards/avatar, congregation component, logout, and new appearance radios.                                        |
+| Territories   | `apps/ministry-maps/src/app/features/territory/`     | Lists/items, assignment/return/manage dialogs, forms, notes, inline/status background values, selected/hover states. |
+| Work          | `apps/ministry-maps/src/app/features/work/`          | Assigned-work, work cards/header/items/lists, notes/add-note overlays, business status colors.                       |
+| Users         | `apps/ministry-maps/src/app/features/users/`         | Lists/items, details, add/edit/invite dialogs/forms, congregation association, validation and disabled states.       |
+| Configuration | `apps/ministry-maps/src/app/features/configuration/` | Main page, congregation/city/invite/notification components, lists/forms/dialogs, role-specific reachability.        |
 
 Current page-level files include `home-page`, `profile-page`, `territories-page`, `assign-territories-page`, `statistics-territories-page`, `work-page`, `users-page`, and `configuration-main-page`, each under its feature’s `pages/` directory with nearby unit specs. Component-level color owners must not be hidden behind only page-level rows.
 
@@ -198,18 +198,18 @@ Classify each match as `migrate`, `retain with reason`, or `false positive`. Pri
 
 ## Primary risks and required mitigations
 
-| Risk | Mitigation required by the packet |
-|---|---|
-| Wrong-theme flash before Angular | Synchronous defensive head initializer plus light CSS fallback and idempotent Angular adoption. |
-| Runtime theming attempted with Sass-only values | Central semantic CSS custom properties with explicit interaction/on-color tokens. |
-| Domain statuses lose meaning | App-owned semantic status families with separate background/foreground/border/selected/hover roles. |
-| Shared library becomes app-specific | `--kui-*` only in `common-ui`; no app models, `--mm-*`, or Ministry Maps concepts. |
-| Overlay remains light | Migrate inherited generic surfaces and global backdrop; verify open overlays in each scheme. |
-| Literal runtime SVG colors bypass theme | Move presentation to host classes/custom properties and `currentColor` where inheritance is intended. |
-| Storage/browser API failure blocks app | Validate every external value, catch reads/writes/media access, retain in-memory selection on write failure. |
-| Large migration hides regressions | Work matrix row by row, update adjacent specs immediately, run focused gates before proceeding. |
-| Theme conveyed only through color | Preserve text/icons/borders/checked state and validate contrast/non-color cues. |
-| Scope expands into legacy cleanup | Follow the runbook’s anti-refactoring gates; migrate only directly touched legacy DI where required. |
+| Risk                                            | Mitigation required by the packet                                                                            |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Wrong-theme flash before Angular                | Synchronous defensive head initializer plus light CSS fallback and idempotent Angular adoption.              |
+| Runtime theming attempted with Sass-only values | Central semantic CSS custom properties with explicit interaction/on-color tokens.                            |
+| Domain statuses lose meaning                    | App-owned semantic status families with separate background/foreground/border/selected/hover roles.          |
+| Shared library becomes app-specific             | `--kui-*` only in `common-ui`; no app models, `--mm-*`, or Ministry Maps concepts.                           |
+| Overlay remains light                           | Migrate inherited generic surfaces and global backdrop; verify open overlays in each scheme.                 |
+| Literal runtime SVG colors bypass theme         | Move presentation to host classes/custom properties and `currentColor` where inheritance is intended.        |
+| Storage/browser API failure blocks app          | Validate every external value, catch reads/writes/media access, retain in-memory selection on write failure. |
+| Large migration hides regressions               | Work matrix row by row, update adjacent specs immediately, run focused gates before proceeding.              |
+| Theme conveyed only through color               | Preserve text/icons/borders/checked state and validate contrast/non-color cues.                              |
+| Scope expands into legacy cleanup               | Follow the runbook’s anti-refactoring gates; migrate only directly touched legacy DI where required.         |
 
 ## Planning-only boundary
 

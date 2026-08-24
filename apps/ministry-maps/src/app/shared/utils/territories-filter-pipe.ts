@@ -35,7 +35,7 @@ export const cityFilter = (t: Territory, city: string) => {
   }
 
   return city.toLowerCase().localeCompare(t.city.toLowerCase()) === 0;
-}
+};
 
 /**
  * Given a Territory observable, this function returns a filtered observable with every Territory that has a match
@@ -46,7 +46,7 @@ export const cityFilter = (t: Territory, city: string) => {
  */
 export const territoriesFilterPipe = (
   territory$: Observable<Territory[]>,
-  filterSettings: TerritoryFilterSettings
+  filterSettings: TerritoryFilterSettings,
 ): Observable<Territory[]> => {
   const searchTerm = filterSettings.searchTerm;
   const orderBy = filterSettings.orderBy;
@@ -58,7 +58,7 @@ export const territoriesFilterPipe = (
     }
 
     return (t1.positionIndex ?? 0) - (t2.positionIndex ?? 0);
-  }
+  };
 
   // Sorting per city when ALL is selected, as it would be a little confusing using the saved index.
   if (city === ALL_OPTION) {
@@ -68,8 +68,8 @@ export const territoriesFilterPipe = (
   }
 
   return territory$.pipe(
-    map(tArr => {
-      const filtered = tArr.filter(t => {
+    map((tArr) => {
+      const filtered = tArr.filter((t) => {
         if (!cityFilter(t, city)) {
           return false;
         }
@@ -93,10 +93,10 @@ export const territoriesFilterPipe = (
         const searchWords = searchTerm.split(' ');
         const territorySearchableText = (t.address + t.note).toLowerCase();
 
-        return searchWords.every(word => territorySearchableText.includes(word.toLowerCase()));
+        return searchWords.every((word) => territorySearchableText.includes(word.toLowerCase()));
       });
 
       return filtered.sort(sortFn);
-    })
+    }),
   );
 };

@@ -2,7 +2,7 @@
 @use 'libs/common-ui/src/lib/styles/base/typography';
 
 .territory-alert-badge {
-  padding: .25rem .5rem;
+  padding: 0.25rem 0.5rem;
   border-radius: 100rem;
   border: 1px solid var(--mm-color-territory-alert-default-border, #{variables.$grey-200});
   background-color: var(--mm-color-territory-alert-default-background, #{variables.$white-300});

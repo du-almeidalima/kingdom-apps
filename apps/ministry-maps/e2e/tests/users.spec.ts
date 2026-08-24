@@ -55,11 +55,7 @@ test.describe('Users page (WP-22)', () => {
     expect(stored?.['role']).toBe('ADMIN');
   });
 
-  test('UC-USERS-03 — A user from another congregation is never listed', async ({
-    authenticatedPage,
-    seed,
-    db,
-  }) => {
+  test('UC-USERS-03 — A user from another congregation is never listed', async ({ authenticatedPage, seed, db }) => {
     const foreignCongregation = seed.factories.buildCongregation();
     const foreignAdmin = seed.factories.buildUser({
       role: RoleEnum.ADMIN,
@@ -99,7 +95,7 @@ test.describe('Users page (WP-22)', () => {
     expect(labels).toEqual(['Publicador', 'Organizador', 'Ancião', 'Administrador']);
   });
 
-  test('UC-USERS-05 — ⚠ Form is disabled for non-APP_ADMIN editors, yet "Salvar" still submits (no-op)', async ({
+  test('UC-USERS-05 — Form is enabled for a non-admin-level user edited by a non-APP_ADMIN editor (fixed)', async ({
     authenticatedPage,
     db,
   }) => {
@@ -115,13 +111,14 @@ test.describe('Users page (WP-22)', () => {
 
     const editDialog = new UserEditDialogPage(authenticatedPage);
     await expect(editDialog.dialog).toBeVisible();
-    // The disabled FormGroup disables the Nome input.
-    await expect(editDialog.nameInput).toBeDisabled();
-    // The Salvar button is outside the FormGroup, so it stays enabled.
+    // Fixed (2026-08): the disable gate only applies when the EDITED USER holds an admin-level
+    // role (SUPERINTENDENT/ADMIN/APP_ADMIN) and the viewer is not APP_ADMIN. Editing a
+    // PUBLISHER as ADMIN now yields a usable form — matching the Firestore rules (UC-RULES-11),
+    // which already allow same-congregation ADMIN edits of non-protected users.
+    await expect(editDialog.nameInput).toBeEnabled();
     await expect(editDialog.saveButton).toBeEnabled();
 
-    // Click Salvar — `getRawValue()` returns the unchanged prefilled values, so
-    // a no-op `setDoc` round-trip occurs and the dialog closes.
+    // Save without changes — persists the identical doc and closes the dialog.
     await editDialog.save();
     await expect(editDialog.dialog).toHaveCount(0);
 
@@ -172,7 +169,8 @@ test.describe('Users page (WP-22)', () => {
 
     const editDialog = new UserEditDialogPage(authenticatedPage);
     await expect(editDialog.dialog).toBeVisible();
-    // ADMIN editing themselves hits the UC-USERS-05 bug — form is disabled.
+    // The edited user (the admin themselves) holds an admin-level role and the viewer is not
+    // APP_ADMIN, so the form is disabled per the corrected gate (UC-USERS-05).
     await expect(editDialog.nameInput).toBeDisabled();
     await expect(editDialog.nameInput).toHaveValue('Carlos Almeida');
 

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { map, Observable, of, take, tap } from 'rxjs';
 
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
@@ -14,12 +14,7 @@ import { TerritoryAlertsBO } from '../territory-alerts/territory-alerts.bo';
  * @see TerritoryStatisticsBO.deriveTerritoryDynamicStatistics
  */
 export type TStatisticsPeriod =
-  | 'YEAR_TO_DATE'
-  | 'ONE_YEAR'
-  | 'SIX_MONTHS'
-  | 'THREE_MONTHS'
-  | 'ONE_MONTH'
-  | 'THIS_MONTH';
+  'YEAR_TO_DATE' | 'ONE_YEAR' | 'SIX_MONTHS' | 'THREE_MONTHS' | 'ONE_MONTH' | 'THIS_MONTH';
 
 /**
  * This Business Object (BO) can be used to get {@link TerritoryStatisticsDTO} data.
@@ -29,13 +24,11 @@ export type TStatisticsPeriod =
  */
 @Injectable()
 export class TerritoryStatisticsBO {
+  private readonly territoryRepository = inject(TerritoryRepository);
+  private readonly userState = inject(UserStateService);
+
   /** All the territories fetched from remote. The cache is only set on the first request and reused on later requests. */
   private territories: Territory[] = [];
-
-  constructor(
-    private readonly territoryRepository: TerritoryRepository,
-    private readonly userState: UserStateService
-  ) {}
 
   /**
    * Gets the {@link TerritoryStatisticsDTO} for the given city, if no city is provided, it returns the statistics for all
@@ -57,14 +50,14 @@ export class TerritoryStatisticsBO {
             tap((territoriesRes) => {
               // Setting the cache.
               this.territories = territoriesRes;
-            })
+            }),
           );
 
     return territories$.pipe(
       map((territoriesRes) => {
         // When no city is provided, return everything
         return city ? territoriesRes.filter((t) => cityFilter(t, city)) : territoriesRes;
-      })
+      }),
     );
   }
 
@@ -80,7 +73,14 @@ export class TerritoryStatisticsBO {
     return territories.reduce((acc, cur) => {
       acc.territoryCount++;
       acc.peopleCount += cur.peopleQuantity ? cur.peopleQuantity : 1;
-      if (TerritoryAlertsBO.hasRecentlyMoved(cur)) acc.movedCount++;
+      // The statistics page fetches the full (1-year-window) history, so count unresolved moves
+      // from it — an unresolved move beyond the last 5 visits still counts (gap #21). Falls back
+      // to recentHistory when no history was resolved for the territory.
+      const hasUnresolvedMoved = cur.history
+        ? cur.history.some((h) => h.visitOutcome === VisitOutcomeEnum.MOVED && !h.isResolved)
+        : TerritoryAlertsBO.hasRecentlyMoved(cur);
+
+      if (hasUnresolvedMoved) acc.movedCount++;
 
       if (cur.isBibleStudent) acc.bibleStudiesCount++;
 
@@ -91,7 +91,7 @@ export class TerritoryStatisticsBO {
   /** This method derives the {@link TerritoryStatisticsDynamicDTO} based on the provided {@link Territory|Territories} */
   deriveTerritoryDynamicStatistics(
     territories: Territory[],
-    period: TStatisticsPeriod = 'ONE_MONTH'
+    period: TStatisticsPeriod = 'ONE_MONTH',
   ): TerritoryStatisticsDynamicDTO {
     const baseDate = this.getDateFromPeriod(period);
     const territoryStatistics: TerritoryStatisticsDynamicDTO = {

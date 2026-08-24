@@ -11,7 +11,6 @@ import {
 
 import { Clipboard } from '@angular/cdk/clipboard';
 import { IconComponent } from '../icon/icon.component';
-import { green300, grey400 } from '../../styles/abstract/variables';
 
 @Component({
   selector: 'lib-copy-text-block',
@@ -25,26 +24,25 @@ import { green300, grey400 } from '../../styles/abstract/variables';
       <span class="copy-text-block__content" data-testid="copy-text-block-content">{{ text() }}</span>
       <button class="copy-text-block__button" data-testid="copy-text-block-button" (click)="handleCopyClick()">
         @if (isTextCopied()) {
-        <lib-icon icon="check-mark-circle-lined" class="h-8 w-8" [fillColor]="'var(--kui-color-action-primary)'" />
+          <lib-icon icon="check-mark-circle-lined" class="h-8 w-8" [fillColor]="'var(--kui-color-action-primary)'" />
         } @else {
-        <lib-icon icon="copy-lined" class="h-8 w-8" [fillColor]="'currentColor'" />
+          <lib-icon icon="copy-lined" class="h-8 w-8" [fillColor]="'currentColor'" />
         }
       </button>
     </div>
     @if (helpText()) {
-    <p class="t-caption mt-2">{{ helpText() }}</p>
+      <p class="t-caption mt-2">{{ helpText() }}</p>
     }
   `,
 })
 export class CopyTextBlockComponent implements OnDestroy {
-
   clipboard = inject(Clipboard);
 
   text = input.required<string>();
   helpText = input<string>();
 
   isTextCopied = signal(false);
-  timer: any;
+  timer?: ReturnType<typeof setTimeout>;
 
   //TODO: Transform this to output() on new Angular version
   @Output() copyClick = new EventEmitter<string>();

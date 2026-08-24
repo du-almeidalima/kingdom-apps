@@ -15,7 +15,6 @@ import { Dialog } from '@angular/cdk/dialog';
 import { IconComponent } from '../icon/icon.component';
 import { SortFilterConfig, SortFilterValue } from './types/sort-filter.model';
 import { SortFilterDialogComponent } from './sort-filter-dialog/sort-filter-dialog.component';
-import { grey400 } from '../../styles/abstract/variables';
 
 @Component({
   selector: 'lib-sort-filter',
@@ -29,7 +28,7 @@ import { grey400 } from '../../styles/abstract/variables';
         <lib-icon [fillColor]="iconColor()" class="h-8 w-8" icon="filter-down-lined" />
       </button>
       @if (activeFilterCount() > 0) {
-      <span class="sort-filter__badge" data-testid="sort-filter-badge">{{ activeFilterCount() }}</span>
+        <span class="sort-filter__badge" data-testid="sort-filter-badge">{{ activeFilterCount() }}</span>
       }
     </div>
   `,
@@ -143,7 +142,7 @@ export class SortFilterComponent implements OnInit {
     });
   }
 
-  private countActiveFilters(initial: Record<string, any>, current: Record<string, any>): number {
+  private countActiveFilters(initial: Record<string, unknown>, current: Record<string, unknown>): number {
     let count = 0;
     const allKeys = new Set([...Object.keys(initial), ...Object.keys(current)]);
 

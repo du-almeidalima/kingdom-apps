@@ -21,7 +21,8 @@ kingdom-apps-icon-radio {
   border: 1px solid var(--kui-color-border-strong, #{variables.$grey-100});
 
   // Active state
-  &:is(:hover, :focus-visible), &--active {
+  &:is(:hover, :focus-visible),
+  &--active {
     color: var(--kui-color-action-primary, #{variables.$link});
     border-color: currentColor;
 
@@ -43,7 +44,7 @@ kingdom-apps-icon-radio {
     color: inherit;
 
     svg.icon {
-      transition: fill .2s ease-in-out;
+      transition: fill 0.2s ease-in-out;
     }
   }
 

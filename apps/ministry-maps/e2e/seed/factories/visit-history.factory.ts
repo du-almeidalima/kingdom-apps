@@ -16,9 +16,7 @@ let defaultDateSequence = 0;
  * override get distinct, decreasing dates so default builds never collide and
  * sort deterministically.
  */
-export function buildVisitHistory(
-  over: Partial<TerritoryVisitHistory> = {},
-): TerritoryVisitHistory {
+export function buildVisitHistory(over: Partial<TerritoryVisitHistory> = {}): TerritoryVisitHistory {
   return {
     id: `visit-${randomUUID()}`,
     notes: 'Morador atendeu e demonstrou interesse.',

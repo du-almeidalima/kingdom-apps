@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, inject } from '@angular/core';
 
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
@@ -19,24 +19,23 @@ export type TCreateLinkForm = FormGroup<{ role: FormControl<RoleEnum>; email: Fo
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './invite-create-dialog.component.scss',
-  imports: [
-    ReactiveFormsModule,
-    InviteCreateDialogCopyLinkComponent,
-    InviteCreateDialogFormComponent
-],
+  imports: [ReactiveFormsModule, InviteCreateDialogCopyLinkComponent, InviteCreateDialogFormComponent],
   template: `
     @if (createdLink()) {
-    <kingdom-apps-invite-create-dialog-copy-link [inviteLink]="createdLink()" [title]="title()" />
+      <kingdom-apps-invite-create-dialog-copy-link [inviteLink]="createdLink()" [title]="title()" />
     } @else {
-    <kingdom-apps-invite-create-dialog-form
-      [title]="title()"
-      [form]="form"
-      [isSubmitting]="isSubmitting()"
-      (formSubmit)="handleFormSubmit()" />
+      <kingdom-apps-invite-create-dialog-form
+        [title]="title()"
+        [form]="form"
+        [isSubmitting]="isSubmitting()"
+        (formSubmit)="handleFormSubmit()"
+      />
     }
   `,
 })
 export class InviteCreateDialogComponent {
+  private readonly inviteBO = inject(InviteBO);
+
   protected readonly RoleEnum = RoleEnum;
   protected readonly white = white100;
 
@@ -46,7 +45,9 @@ export class InviteCreateDialogComponent {
   createdLink = signal('');
   title = signal('Criar Link de Convite');
 
-  constructor(private readonly inviteBO: InviteBO, formBuilder: FormBuilder) {
+  constructor() {
+    const formBuilder = inject(FormBuilder);
+
     this.form = formBuilder.group({
       role: formBuilder.control(RoleEnum.ORGANIZER, { nonNullable: true }),
       email: formBuilder.control<string>(''),
@@ -63,9 +64,9 @@ export class InviteCreateDialogComponent {
       .pipe(
         finalize(() => {
           this.isSubmitting.set(false);
-        })
+        }),
       )
-      .subscribe(invitationLink => {
+      .subscribe((invitationLink) => {
         this.createdLink.set(this.composeInviteLink(invitationLink.id));
       });
   }

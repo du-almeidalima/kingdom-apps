@@ -17,7 +17,7 @@ describe('HomePageComponent', () => {
     const fixture = MockRender(HomePageComponent);
     const h2Welcome = fixture.debugElement.query(By.css('h2.t-headline2'));
 
-    expect(h2Welcome.nativeElement.textContent).toEqual(`Bem-Vindo ${fixture.point.componentInstance.userName}!`)
+    expect(h2Welcome.nativeElement.textContent).toEqual(`Bem-Vindo ${fixture.point.componentInstance.userName}!`);
   });
 
   it('should use user first name only', () => {
@@ -25,6 +25,6 @@ describe('HomePageComponent', () => {
     const user = ngMocks.get(UserStateService);
     const userName = user.currentUser?.name.split(' ')[0];
 
-    expect(fixture.point.componentInstance.userName).toEqual(userName)
+    expect(fixture.point.componentInstance.userName).toEqual(userName);
   });
 });

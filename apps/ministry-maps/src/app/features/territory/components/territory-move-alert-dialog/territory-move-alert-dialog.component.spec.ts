@@ -22,7 +22,7 @@ describe('TerritoryMoveAlertDialogComponent', () => {
             return EMPTY;
           },
         } as TerritoryMoveAlertDialogData,
-      })
+      }),
   );
 
   it('should create', () => {

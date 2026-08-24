@@ -17,7 +17,7 @@ const mapTerritoryIcon = (territoryIcon: TerritoryIcon): Icons => {
 };
 const isIconLarge = (icon: Icons) => {
   return icon === 'generation-couple';
-}
+};
 
 export default mapTerritoryIcon;
 export { isIconLarge };

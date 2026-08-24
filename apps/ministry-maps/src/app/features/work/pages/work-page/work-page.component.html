@@ -1,4 +1,4 @@
-<main class='container'>
+<main class="container">
   @if (isLoading) {
     <span data-testid="work-loading">Loading...</span>
   } @else if (isNotFound) {
@@ -16,37 +16,37 @@
 
       <!-- IN PROGRESS TERRITORIES -->
       @if (territories.length > 0) {
-        <h2 class='t-headline4 my-5'>Territórios</h2>
+        <h2 class="t-headline4 my-5">Territórios</h2>
         <!-- TODO: Check if this is updating properly -->
         @for (territory of territories; track territory.id + territory.status) {
           <kingdom-apps-work-item
-            class='mt-5'
+            class="mt-5"
             data-testid="work-pending-list"
-            [territory]='territory'
+            [territory]="territory"
             [disabled]="isDisabled"
             [blocked]="isBlocked"
-            (territoryUpdated)='handleTerritoryUpdated($event)'
+            (territoryUpdated)="handleTerritoryUpdated($event)"
           />
         }
       } @else {
-        <h2 class='t-headline2 mb-3' data-testid="work-all-done">Parabéns!</h2>
-        <p class='t-body1'>Todos os territórios foram concluidos, que Jeová abençoe seu trabalho!</p>
+        <h2 class="t-headline2 mb-3" data-testid="work-all-done">Parabéns!</h2>
+        <p class="t-body1">Todos os territórios foram concluidos, que Jeová abençoe seu trabalho!</p>
       }
 
       <!-- DONE TERRITORIES -->
       @if (doneTerritories.length > 0) {
-        <h2 class='t-headline4 my-5'>Concluídos</h2>
+        <h2 class="t-headline4 my-5">Concluídos</h2>
 
         @for (territory of doneTerritories; track territory.id + territory.status) {
           <!-- TODO: Check if this is updating properly -->
           <kingdom-apps-work-item
-            class='mt-5'
+            class="mt-5"
             data-testid="work-completed-list"
-            [territory]='territory'
-            [done]='true'
+            [territory]="territory"
+            [done]="true"
             [disabled]="isDisabled"
             [blocked]="isBlocked"
-            (territoryUpdated)='handleTerritoryUpdated($event)'
+            (territoryUpdated)="handleTerritoryUpdated($event)"
             (lastVisitReverted)="handleLastVisitReverted($event)"
           />
         }

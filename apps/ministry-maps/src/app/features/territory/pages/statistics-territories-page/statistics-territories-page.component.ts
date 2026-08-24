@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Dialog } from '@angular/cdk/dialog';
@@ -28,6 +28,10 @@ import { ALL_OPTION } from '../../../../shared/utils/territories-filter-pipe';
   ],
 })
 export class StatisticsTerritoriesPageComponent implements OnInit {
+  private readonly userState = inject(UserStateService);
+  private readonly territoryStatisticsBO = inject(TerritoryStatisticsBO);
+  dialog = inject(Dialog);
+
   public readonly ALL_OPTION = ALL_OPTION;
 
   public cities: string[] = [];
@@ -37,12 +41,6 @@ export class StatisticsTerritoriesPageComponent implements OnInit {
 
   @ViewChild(SearchInputComponent)
   searchInputComponent?: SearchInputComponent;
-
-  constructor(
-    private readonly userState: UserStateService,
-    private readonly territoryStatisticsBO: TerritoryStatisticsBO,
-    public dialog: Dialog
-  ) {}
 
   ngOnInit(): void {
     this.cities = this.userState.currentUser?.congregation?.cities ?? [];
@@ -61,7 +59,7 @@ export class StatisticsTerritoriesPageComponent implements OnInit {
 
     this.filteredTerritories$ = this.territoryStatisticsBO.getTerritories(this.selectedCity).pipe(
       shareReplay(1),
-      finalize(() => (this.isLoading = false))
+      finalize(() => (this.isLoading = false)),
     );
   }
 }

@@ -33,9 +33,7 @@ test.describe('Theme & Appearance Settings', () => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await expect(page.locator('html')).toHaveAttribute('data-resolved-theme', 'dark');
 
-    const darkStorageValue = await page.evaluate(() =>
-      localStorage.getItem('ministry-maps.theme-preference')
-    );
+    const darkStorageValue = await page.evaluate(() => localStorage.getItem('ministry-maps.theme-preference'));
     expect(darkStorageValue).toBe('dark');
 
     // Select Light
@@ -43,24 +41,18 @@ test.describe('Theme & Appearance Settings', () => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
     await expect(page.locator('html')).toHaveAttribute('data-resolved-theme', 'light');
 
-    const lightStorageValue = await page.evaluate(() =>
-      localStorage.getItem('ministry-maps.theme-preference')
-    );
+    const lightStorageValue = await page.evaluate(() => localStorage.getItem('ministry-maps.theme-preference'));
     expect(lightStorageValue).toBe('light');
 
     // Select System
     await profilePage.selectTheme('system');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'system');
 
-    const systemStorageValue = await page.evaluate(() =>
-      localStorage.getItem('ministry-maps.theme-preference')
-    );
+    const systemStorageValue = await page.evaluate(() => localStorage.getItem('ministry-maps.theme-preference'));
     expect(systemStorageValue).toBe('system');
   });
 
-  test('TS-E04: should retain persisted theme on page reload', async ({
-    authenticatedPage: page,
-  }) => {
+  test('TS-E04: should retain persisted theme on page reload', async ({ authenticatedPage: page }) => {
     const profilePage = new ProfilePage(page);
     await profilePage.goto();
 

@@ -10,13 +10,16 @@ export class CongregationRepositoryMock implements CongregationRepository {
   }
 
   getCongregations(): Observable<Pick<Congregation, 'name' | 'id'>[]> {
-    return of([{ name: congregationMock.name, id: congregationMock.id }, {
-      id: congregationMock2.id,
-      name: congregationMock2.name,
-    }]);
+    return of([
+      { name: congregationMock.name, id: congregationMock.id },
+      {
+        id: congregationMock2.id,
+        name: congregationMock2.name,
+      },
+    ]);
   }
 
-  update(congregation: Congregation): Observable<void> {
+  update(_congregation: Congregation): Observable<void> {
     return of(void 0);
   }
 }
@@ -29,9 +32,8 @@ export const congregationMock: Congregation = {
   locatedOn: 'City 1',
   settings: {
     designationAccessExpiryDays: 45,
-    shouldDesignationBlockAfterExpired: false
-  }
-
+    shouldDesignationBlockAfterExpired: false,
+  },
 };
 
 export const congregationMock2: Congregation = {
@@ -41,6 +43,6 @@ export const congregationMock2: Congregation = {
   locatedOn: 'City 3',
   settings: {
     designationAccessExpiryDays: 45,
-    shouldDesignationBlockAfterExpired: false
-  }
+    shouldDesignationBlockAfterExpired: false,
+  },
 };

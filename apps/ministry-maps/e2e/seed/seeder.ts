@@ -21,39 +21,23 @@ import { InvitationLinkSeed, SeedDefinition, SeedResult, UserSeed } from './type
  * - `Date` values are persisted by the Admin SDK as Firestore `Timestamp`s.
  */
 export async function seed(def: SeedDefinition): Promise<SeedResult> {
-  const {
-    congregations = [],
-    users = [],
-    territories = [],
-    designations = [],
-    invitationLinks = [],
-  } = def;
+  const { congregations = [], users = [], territories = [], designations = [], invitationLinks = [] } = def;
 
   const batch = firestore.batch();
 
   for (const congregation of congregations) {
-    batch.set(
-      firestore.collection(Collections.congregations).doc(congregation.id),
-      congregation,
-    );
+    batch.set(firestore.collection(Collections.congregations).doc(congregation.id), congregation);
   }
 
   for (const user of users) {
-    batch.set(
-      firestore.collection(Collections.users).doc(user.id),
-      toUserDocument(user),
-    );
+    batch.set(firestore.collection(Collections.users).doc(user.id), toUserDocument(user));
   }
 
   for (const territory of territories) {
     const { history, ...rest } = territory;
-    const sortedHistory = [...history].sort(
-      (a, b) => b.date.getTime() - a.date.getTime(),
-    );
+    const sortedHistory = [...history].sort((a, b) => b.date.getTime() - a.date.getTime());
 
-    const territoryRef = firestore
-      .collection(Collections.territories)
-      .doc(territory.id);
+    const territoryRef = firestore.collection(Collections.territories).doc(territory.id);
     batch.set(territoryRef, {
       ...rest,
       lastVisit: sortedHistory[0]?.date ?? null,
@@ -61,18 +45,16 @@ export async function seed(def: SeedDefinition): Promise<SeedResult> {
     });
 
     for (const visit of history) {
-      batch.set(
-        territoryRef.collection(TERRITORY_HISTORY_SUBCOLLECTION).doc(visit.id),
-        visit,
-      );
+      batch.set(territoryRef.collection(TERRITORY_HISTORY_SUBCOLLECTION).doc(visit.id), {
+        ...visit,
+        congregationId: territory.congregationId,
+        territoryId: territory.id,
+      });
     }
   }
 
   for (const designation of designations) {
-    batch.set(
-      firestore.collection(Collections.designations).doc(designation.id),
-      designation,
-    );
+    batch.set(firestore.collection(Collections.designations).doc(designation.id), designation);
   }
 
   for (const invitationLink of invitationLinks) {
@@ -139,9 +121,6 @@ async function createAuthUser(user: UserSeed): Promise<unknown> {
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(
-      `Failed to create Auth emulator user '${user.id}' (${user.email}): ${message}`,
-      { cause: error },
-    );
+    throw new Error(`Failed to create Auth emulator user '${user.id}' (${user.email}): ${message}`, { cause: error });
   }
 }

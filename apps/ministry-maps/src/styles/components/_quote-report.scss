@@ -9,10 +9,11 @@
   font-style: italic;
 
   &:not(&:last-of-type) {
-    margin-bottom: .5rem;
+    margin-bottom: 0.5rem;
   }
 
-  &__quote, &__caption {
+  &__quote,
+  &__caption {
     margin: 1rem;
   }
 }

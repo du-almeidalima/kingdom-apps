@@ -5,7 +5,7 @@ Kingdom Apps is an Nx monorepo for applications that support ministry and congre
 ## Workspace
 
 | Path                                | Purpose                                                                |
-|-------------------------------------|------------------------------------------------------------------------|
+| ----------------------------------- | ---------------------------------------------------------------------- |
 | `apps/ministry-maps`                | Angular PWA for managing territories, designations, users, and visits. |
 | `libs/common-ui`                    | Reusable, application-agnostic Angular UI.                             |
 | `functions/ministry-maps`           | Firebase Functions v2 codebase with its own dependencies and lockfile. |
@@ -81,18 +81,18 @@ Commit intentional seed changes that application or test behavior depends on.
 
 ## Common commands
 
-| Task                      | Command                                              |
-|---------------------------|------------------------------------------------------|
-| Start app and emulators   | `npm start`                                          |
+| Task                      | Command                                                |
+| ------------------------- | ------------------------------------------------------ |
+| Start app and emulators   | `npm start`                                            |
 | Watch Cloud Functions     | `npm --prefix functions/ministry-maps run build:watch` |
-| Build the app             | `npx nx build ministry-maps`                         |
-| Test the app              | `npx nx test ministry-maps`                          |
-| Test affected projects    | `npx nx affected -t test`                            |
-| Lint the app              | `npx nx lint ministry-maps`                          |
-| Type-check E2E tests      | `npx nx typecheck-e2e ministry-maps`                 |
-| Run E2E tests             | `npm run e2e`                                        |
-| Open Playwright UI        | `npm run e2e:ui`                                     |
-| View project dependencies | `npx nx graph`                                       |
+| Build the app             | `npx nx build ministry-maps`                           |
+| Test the app              | `npx nx test ministry-maps`                            |
+| Test affected projects    | `npx nx affected -t test`                              |
+| Lint the app              | `npx nx lint ministry-maps`                            |
+| Type-check E2E tests      | `npx nx typecheck-e2e ministry-maps`                   |
+| Run E2E tests             | `npm run e2e`                                          |
+| Open Playwright UI        | `npm run e2e:ui`                                       |
+| View project dependencies | `npx nx graph`                                         |
 
 ## Documentation
 

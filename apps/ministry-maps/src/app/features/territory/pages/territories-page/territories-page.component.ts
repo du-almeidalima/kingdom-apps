@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { TERRITORY_SORT_FILTER_CONFIG } from '../../config/territory-filter.config';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { UserStateService } from '../../../../state/user.state.service';
@@ -72,6 +72,14 @@ import { TerritoryCsvExporterBO } from '../../bo/territory-csv-exporter/territor
   providers: [TerritoryBO, TerritoryCsvExporterBO],
 })
 export class TerritoriesPageComponent implements OnInit {
+  private readonly territoryRepository = inject(TerritoryRepository);
+  private readonly userState = inject(UserStateService);
+  private readonly territoryAlertsBO = inject(TerritoryAlertsBO);
+  private readonly territoryBO = inject(TerritoryBO);
+  private readonly territoryExporterBO = inject(TerritoryCsvExporterBO);
+  private readonly toasterService = inject(ToasterService);
+  dialog = inject(Dialog);
+
   private territories$: Observable<Territory[]> = of([]);
 
   protected readonly RoleEnum = RoleEnum;
@@ -81,7 +89,7 @@ export class TerritoriesPageComponent implements OnInit {
   public cities: string[] = [];
   public selectedCity = ALL_OPTION;
   public searchTerm?: string | null;
-  public searchFilters: TerritoryFilterSettings['filters'] = TERRITORY_SORT_FILTER_CONFIG.filterConfigs?.initial;
+  public searchFilters: TerritoryFilterSettings['filters'] = TERRITORY_SORT_FILTER_CONFIG.filterConfigs.initial;
   public sortBy = TerritoriesOrderBy.SAVED_INDEX;
   public isLoading = false;
   public filteredTerritories$: Observable<Territory[]> = of([]);
@@ -90,16 +98,6 @@ export class TerritoriesPageComponent implements OnInit {
 
   @ViewChild(SearchInputComponent)
   searchInputComponent?: SearchInputComponent;
-
-  constructor(
-    private readonly territoryRepository: TerritoryRepository,
-    private readonly userState: UserStateService,
-    private readonly territoryAlertsBO: TerritoryAlertsBO,
-    private readonly territoryBO: TerritoryBO,
-    private readonly territoryExporterBO: TerritoryCsvExporterBO,
-    private readonly toasterService: ToasterService,
-    public dialog: Dialog
-  ) {}
 
   ngOnInit(): void {
     this.cities = this.userState.currentUser?.congregation?.cities ?? [];
@@ -146,7 +144,7 @@ export class TerritoriesPageComponent implements OnInit {
   }
 
   handleSortFilterChange(value: SortFilterValue) {
-    this.searchFilters = value.filters ?? {};
+    this.searchFilters = (value.filters ?? {}) as TerritoryFilterSettings['filters'];
     this.sortBy = value.sort as TerritoriesOrderBy;
     this.filterTerritories();
   }
@@ -194,11 +192,11 @@ export class TerritoriesPageComponent implements OnInit {
           }
 
           return t;
-        })
+        }),
       );
     } catch {
       alert(
-        `Uma excessão ocorreu quando os territórios [${event.previousIndex} e ${event.currentIndex}] foram movidos!`
+        `Uma excessão ocorreu quando os territórios [${event.previousIndex} e ${event.currentIndex}] foram movidos!`,
       );
     }
   }
@@ -287,7 +285,7 @@ export class TerritoriesPageComponent implements OnInit {
             return this.territoryAlertsBO.resolveTerritoryHistoryAlert(
               territory,
               histories,
-              VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN
+              VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN,
             );
           },
         },
@@ -323,7 +321,7 @@ export class TerritoriesPageComponent implements OnInit {
       finalize(() => {
         this.isLoading = false;
       }),
-      shareReplay(1)
+      shareReplay(1),
     );
 
     this.filterTerritories();

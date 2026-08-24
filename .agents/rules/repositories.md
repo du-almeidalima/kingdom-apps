@@ -1,6 +1,6 @@
 ---
 globs:
-- '**/repositories/**'
+  - '**/repositories/**'
 description: The repository pattern — abstract repositories bound to Firebase datasources via providers.
 ---
 
@@ -34,9 +34,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
 
 ```typescript
 // repositories-providers.ts — spread into appConfig.providers
-export const REPOSITORIES_PROVIDERS = [
-  { provide: TerritoryRepository, useClass: FirebaseTerritoryDatasourceService },
-];
+export const REPOSITORIES_PROVIDERS = [{ provide: TerritoryRepository, useClass: FirebaseTerritoryDatasourceService }];
 ```
 
 Tests provide the mirror `MOCK_REPOSITORIES_PROVIDERS` from `src/test/mocks/providers/` (built on the `*RepositoryMock` classes in `src/test/mocks/models/`).

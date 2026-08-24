@@ -13,7 +13,7 @@
 
   height: 5.5rem;
   background-color: var(--kui-color-info-surface, #{variables.$blue-50});
-  border: 1px solid var(--kui-color-info-border, #A3B4D5);
+  border: 1px solid var(--kui-color-info-border, #a3b4d5);
   border-radius: 4px;
 
   &__button {
@@ -24,7 +24,7 @@
     width: 4rem;
     padding: $children-padding;
     border: none;
-    border-left: 1px solid var(--kui-color-info-border, #A3B4D5);
+    border-left: 1px solid var(--kui-color-info-border, #a3b4d5);
     color: var(--kui-color-on-info, #{variables.$text});
 
     cursor: pointer;

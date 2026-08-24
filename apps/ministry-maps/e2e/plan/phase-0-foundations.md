@@ -54,7 +54,7 @@ land first. Each WP is independent of the others.
     (`FirebaseInvitationLinkDataSourceService.COLLECTION_NAME`).
   - create `e2e/seed/factories/invitation-link.factory.ts` — `buildInvitationLink(over)` with realistic
     defaults: `createdAt: new Date()`, `createdBy: 'carlos.almeida@example.com'`, `role:
-    RoleEnum.ORGANIZER`, `isValid: true`, `email: undefined` (optional), `congregationId` **required
+RoleEnum.ORGANIZER`, `isValid: true`, `email: undefined` (optional), `congregationId` **required
     override** (same pattern as `buildUser`/`buildTerritory`).
   - edit `e2e/seed/factories/index.ts` — export it.
   - edit `e2e/seed/types.ts` — `InvitationLinkSeed` type (typed against
@@ -62,8 +62,8 @@ land first. Each WP is independent of the others.
     optional `invitationLinks` field on `SeedDefinition`.
   - edit `e2e/seed/seeder.ts` — write invites **mirroring the app's creation-time shape**
     (`docs/domain/data-model.md` §2.6): `congregation` stored as a `DocumentReference`
-    (`firestore.doc(\`congregations/${congregationId}\`)`), the doc's own `id` also written inside the
-    body, dates as plain `Date`s.
+    (`firestore.doc(\`congregations/${congregationId}\`)`), the doc's own `id`also written inside the
+body, dates as plain`Date`s.
   - edit `e2e/README.md` — document the new factory + collection.
 - **Context to read first:** `docs/domain/data-model.md` §1, §2.6 (incl. the shape-drift caveat);
   `apps/ministry-maps/src/app/repositories/firebase/firebase-invitation-link-datasource.service.ts`.
@@ -133,7 +133,7 @@ land first. Each WP is independent of the others.
   3. Full suite green.
 - **Notes/risks:** keep helpers free of `test`/`expect` imports where practical (pure Playwright +
   Node), so they stay usable from fixtures too; the CSV helper must not strip the BOM itself — the
-  assertion *is* about the BOM.
+  assertion _is_ about the BOM.
 
 ---
 

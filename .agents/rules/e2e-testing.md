@@ -1,7 +1,7 @@
 ---
 globs:
-- '**/e2e/**'
-- '**/playwright.config.ts'
+  - '**/e2e/**'
+  - '**/playwright.config.ts'
 description: Apply these rules when writing or maintaining end-to-end (E2E) tests.
   The project uses Playwright + the Firebase Emulators (Firestore + Auth), with NO
   mocks — tests run against the real emulated backend and seed data via the Admin
@@ -95,16 +95,16 @@ Both sign-in helpers leave the page on `/login`; the caller navigates to the gua
 
 ## The `db` Fixture (assertion / read helpers)
 
-| Member                                      | Purpose                                                                    |
-|---------------------------------------------|----------------------------------------------------------------------------|
-| `db.firestore` / `db.auth`                  | Raw Admin SDK handles                                                      |
+| Member                                      | Purpose                                                                                        |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `db.firestore` / `db.auth`                  | Raw Admin SDK handles                                                                          |
 | `db.collections`                            | Collection names (`congregations`, `users`, `territories`, `designations`, `invitation_links`) |
-| `db.historySubcollection`                   | `'history'` subcollection name on a territory                              |
-| `db.getDoc(collection, id)`                 | Document data, or `undefined`                                              |
-| `db.getDocSnapshot(collection, id)`         | Raw snapshot (inspect `DocumentReference` / `Timestamp`)                   |
-| `db.getCollectionDocs(collection)`          | All docs of a collection                                                   |
-| `db.getSubcollectionDocs(coll, id, sub)`    | All docs of a subcollection                                                |
-| `db.queryWhere(collection, field, op, val)` | Query a collection with a `where` filter                                   |
+| `db.historySubcollection`                   | `'history'` subcollection name on a territory                                                  |
+| `db.getDoc(collection, id)`                 | Document data, or `undefined`                                                                  |
+| `db.getDocSnapshot(collection, id)`         | Raw snapshot (inspect `DocumentReference` / `Timestamp`)                                       |
+| `db.getCollectionDocs(collection)`          | All docs of a collection                                                                       |
+| `db.getSubcollectionDocs(coll, id, sub)`    | All docs of a subcollection                                                                    |
+| `db.queryWhere(collection, field, op, val)` | Query a collection with a `where` filter                                                       |
 
 > Need a raw `DocumentReference` for an assertion? Use the escape hatch: `db.firestore.doc(`${db.collections.users}/${id}`)`.
 
@@ -117,19 +117,18 @@ test('default baseline is applied', async ({ db }) => {
 
 ## The `seed` Fixture (build extra data on demand)
 
-| Member            | Purpose                                                                                                                                   |
-|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| Member            | Purpose                                                                                                                      |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | `seed.factories`  | Typed builders for congregations, users, territories, histories, designations, designation territories, and invitation links |
-| `seed.write(def)` | Writes a `SeedDefinition` to the emulators; returns created ids                                                                           |
-| `seed.ids`        | Well-known ids of the default baseline (`DEFAULT_SEED_IDS`)                                                                               |
+| `seed.write(def)` | Writes a `SeedDefinition` to the emulators; returns created ids                                                              |
+| `seed.ids`        | Well-known ids of the default baseline (`DEFAULT_SEED_IDS`)                                                                  |
 
 Reference the deterministic baseline ids instead of hard-coding strings:
 
 ```typescript
 test('admin user belongs to the seeded congregation', async ({ db, seed }) => {
   const snapshot = await db.getDocSnapshot(db.collections.users, seed.ids.adminUser);
-  expect(snapshot.data()?.['congregation'].path)
-    .toBe(`${db.collections.congregations}/${seed.ids.congregation}`);
+  expect(snapshot.data()?.['congregation'].path).toBe(`${db.collections.congregations}/${seed.ids.congregation}`);
 });
 ```
 
@@ -187,7 +186,7 @@ Emulator configuration is centralized in `config/emulator.config.ts` — keep it
 ## Configuration Layer
 
 | Module                             | Purpose                                                                    |
-|------------------------------------|----------------------------------------------------------------------------|
+| ---------------------------------- | -------------------------------------------------------------------------- |
 | `config/emulator.config.ts`        | Single source of truth for ports, hosts, and REST URLs.                    |
 | `config/firebase-admin.context.ts` | Admin SDK initialization (env vars, `ignoreUndefinedProperties`, exports). |
 | `config/auth.config.ts`            | Maps test roles to seeded uids from `DEFAULT_SEED_IDS`.                    |

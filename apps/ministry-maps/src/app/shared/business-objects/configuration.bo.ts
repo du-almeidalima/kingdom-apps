@@ -51,11 +51,11 @@ export class ConfigurationBO {
     updatedCongregationCities.forEach((updatedCity) => {
       if (updatedCity.oldCityName) {
         this.loggerService.info(
-          `Congregation [${congregation.name}] (${congregation.id}) renamed city from [${updatedCity.oldCityName}] to [${updatedCity.newCityName}] by User [${user.name}] (${user.id}).`
+          `Congregation [${congregation.name}] (${congregation.id}) renamed city from [${updatedCity.oldCityName}] to [${updatedCity.newCityName}] by User [${user.name}] (${user.id}).`,
         );
       } else {
         this.loggerService.info(
-          `Congregation [${congregation.name}] (${congregation.id}) added city [${updatedCity.newCityName}] by User [${user.name}] (${user.id}).`
+          `Congregation [${congregation.name}] (${congregation.id}) added city [${updatedCity.newCityName}] by User [${user.name}] (${user.id}).`,
         );
       }
     });
@@ -76,7 +76,7 @@ export class ConfigurationBO {
       catchError((error) => {
         this.loggerService.error('Error updating congregation cities: ' + error);
         return throwError(() => error);
-      })
+      }),
     );
   }
 
@@ -110,11 +110,11 @@ export class ConfigurationBO {
    */
   private updateCitiesOfTerritory(
     updatedCongregationCities: UpdateCongregationCityDTO[],
-    congregation: Congregation
+    congregation: Congregation,
   ): Observable<void> {
     // Gets only the cities that were renamed
     const renamedUpdatedCongregationCities = updatedCongregationCities.filter(
-      (c) => !!c.oldCityName && c.oldCityName !== c.newCityName
+      (c) => !!c.oldCityName && c.oldCityName !== c.newCityName,
     );
 
     const oldCities = renamedUpdatedCongregationCities.map((c) => c.oldCityName as string);
@@ -125,7 +125,7 @@ export class ConfigurationBO {
     }
 
     const updatedCitiesMap = new Map<string, UpdateCongregationCityDTO>(
-      renamedUpdatedCongregationCities.map((c) => [c.oldCityName as string, c])
+      renamedUpdatedCongregationCities.map((c) => [c.oldCityName as string, c]),
     );
 
     return this.territoryRepository.getAllByCongregationAndCities(congregation.id, oldCities).pipe(
@@ -150,7 +150,7 @@ export class ConfigurationBO {
         }
 
         return this.territoryRepository.batchUpdate(updatedTerritories);
-      })
+      }),
     );
   }
 }

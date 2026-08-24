@@ -7,42 +7,40 @@ import {
   WithFieldValue,
 } from '@angular/fire/firestore';
 
+/**
+ * Maps a raw Firestore document payload to its domain shape.
+ *
+ * The input intentionally stays `any`: callers hand in converters typed against their own
+ * Firebase model (e.g. `(data: FirebaseTerritoryModel) => Territory`), and expressing that
+ * soundly requires the callback's parameter to vary independently of {@link T}, which
+ * function-type variance cannot capture here without redesigning the converter API.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type CustomConverterFunction<T> = (data: any) => T | Partial<T>;
 
-
-/**
- * @deprecated This was intended to be used as a generic converter, but it doesn't work well with TS and only supports
- * 1 property.
- */
-export const convertFirebaseTimestampToDateFactory = (field: string) => {
-  return (data: any) => ({
-    [field]: data[field]?.toDate(),
-  });
-};
-
 // This function ensures that no undefined property is sent to FireStore causing a runtime error;
-export const removeUndefined = (obj: any) => {
+export const removeUndefined = (obj: Record<string, unknown>) => {
   for (const prop in obj) {
     if (obj[prop] === undefined) {
       console.warn(`Property '${prop}' is undefined, removing it from the payload object to firestore.`);
       delete obj[prop];
-    } else if (typeof obj[prop] === 'object') {
+    } else if (typeof obj[prop] === 'object' && obj[prop] !== null) {
       if (obj[prop] instanceof DocumentReference) {
         // We don't want to go into Firebase objects as they can cause infinite recursion
         continue;
       }
 
-      removeUndefined(obj[prop]);
+      removeUndefined(obj[prop] as Record<string, unknown>);
     }
   }
 };
 
 export const firebaseEntityConverterFactory = <T extends object>(
-  customConverter?: CustomConverterFunction<T>
+  customConverter?: CustomConverterFunction<T>,
 ): FirestoreDataConverter<T> => {
   return {
     toFirestore(modelObject: WithFieldValue<T>): DocumentData {
-      removeUndefined(modelObject as object);
+      removeUndefined(modelObject as Record<string, unknown>);
       return modelObject as DocumentData;
     },
     fromFirestore(snapshot: QueryDocumentSnapshot, options?: SnapshotOptions): T {

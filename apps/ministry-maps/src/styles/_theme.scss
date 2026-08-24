@@ -2,170 +2,170 @@
   // App aliases and shell/profile contracts
   --mm-color-page: var(--kui-color-canvas);
   --mm-color-shell-header: hsl(0, 0%, 50%);
-  --mm-color-shell-header-content: #FFFFFF;
-  --mm-color-shell-header-logo-bg: #07AB3B;
-  --mm-color-shell-header-logo-text: #FFFFFF;
+  --mm-color-shell-header-content: #ffffff;
+  --mm-color-shell-header-logo-bg: #07ab3b;
+  --mm-color-shell-header-logo-text: #ffffff;
   --mm-color-shell-header-user-btn-hover: rgba(255, 255, 255, 0.15);
-  --mm-color-profile-avatar: #07AB3B;
-  --mm-color-profile-avatar-content: #FFFFFF;
+  --mm-color-profile-avatar: #07ab3b;
+  --mm-color-profile-avatar-content: #ffffff;
 
   // Territory alert contracts
-  --mm-color-territory-alert-default-background: #E7E6E4;
+  --mm-color-territory-alert-default-background: #e7e6e4;
   --mm-color-territory-alert-default-foreground: #292524;
-  --mm-color-territory-alert-default-border: #615D5C;
+  --mm-color-territory-alert-default-border: #615d5c;
 
-  --mm-color-territory-alert-revisit-background: #DCFCE7;
-  --mm-color-territory-alert-revisit-foreground: #14532D;
-  --mm-color-territory-alert-revisit-border: #15803D;
+  --mm-color-territory-alert-revisit-background: #dcfce7;
+  --mm-color-territory-alert-revisit-foreground: #14532d;
+  --mm-color-territory-alert-revisit-border: #15803d;
 
-  --mm-color-territory-alert-moved-background: #E0E7FF;
-  --mm-color-territory-alert-moved-foreground: #312E81;
-  --mm-color-territory-alert-moved-border: #4F46E5;
+  --mm-color-territory-alert-moved-background: #e0e7ff;
+  --mm-color-territory-alert-moved-foreground: #312e81;
+  --mm-color-territory-alert-moved-border: #4f46e5;
 
-  --mm-color-territory-alert-stop-visiting-background: #FEE3E3;
-  --mm-color-territory-alert-stop-visiting-foreground: #7F1F1F;
-  --mm-color-territory-alert-stop-visiting-border: #B91D1D;
+  --mm-color-territory-alert-stop-visiting-background: #fee3e3;
+  --mm-color-territory-alert-stop-visiting-foreground: #7f1f1f;
+  --mm-color-territory-alert-stop-visiting-border: #b91d1d;
 
-  --mm-color-territory-alert-bible-student-background: #FFEDD5;
-  --mm-color-territory-alert-bible-student-foreground: #7C2D12;
-  --mm-color-territory-alert-bible-student-border: #C2410C;
+  --mm-color-territory-alert-bible-student-background: #ffedd5;
+  --mm-color-territory-alert-bible-student-foreground: #7c2d12;
+  --mm-color-territory-alert-bible-student-border: #c2410c;
 
   // Territory/work state contracts
-  --mm-color-work-available-background: #DCFCE7;
-  --mm-color-work-available-foreground: #14532D;
-  --mm-color-work-available-border: #15803D;
-  --mm-color-work-available-hover: #BBF7D0;
-  --mm-color-work-available-selected: #86EFAC;
+  --mm-color-work-available-background: #dcfce7;
+  --mm-color-work-available-foreground: #14532d;
+  --mm-color-work-available-border: #15803d;
+  --mm-color-work-available-hover: #bbf7d0;
+  --mm-color-work-available-selected: #86efac;
 
-  --mm-color-work-assigned-background: #DBEAFE;
-  --mm-color-work-assigned-foreground: #1E3A8A;
-  --mm-color-work-assigned-border: #2563EB;
-  --mm-color-work-assigned-hover: #BFDBFE;
-  --mm-color-work-assigned-selected: #93C5FD;
+  --mm-color-work-assigned-background: #dbeafe;
+  --mm-color-work-assigned-foreground: #1e3a8a;
+  --mm-color-work-assigned-border: #2563eb;
+  --mm-color-work-assigned-hover: #bfdbfe;
+  --mm-color-work-assigned-selected: #93c5fd;
 
-  --mm-color-work-completed-background: #E7E6E4;
+  --mm-color-work-completed-background: #e7e6e4;
   --mm-color-work-completed-foreground: #292524;
-  --mm-color-work-completed-border: #615D5C;
-  --mm-color-work-completed-hover: #D1D0CE;
-  --mm-color-work-completed-selected: #BAB7B5;
+  --mm-color-work-completed-border: #615d5c;
+  --mm-color-work-completed-hover: #d1d0ce;
+  --mm-color-work-completed-selected: #bab7b5;
 
-  --mm-color-work-attention-background: #FEF3C7;
-  --mm-color-work-attention-foreground: #78350F;
-  --mm-color-work-attention-border: #B45309;
-  --mm-color-work-attention-hover: #FDE68A;
-  --mm-color-work-attention-selected: #FCD34D;
+  --mm-color-work-attention-background: #fef3c7;
+  --mm-color-work-attention-foreground: #78350f;
+  --mm-color-work-attention-border: #b45309;
+  --mm-color-work-attention-hover: #fde68a;
+  --mm-color-work-attention-selected: #fcd34d;
 
-  --mm-color-work-overdue-background: #FEE3E3;
-  --mm-color-work-overdue-foreground: #7F1F1F;
-  --mm-color-work-overdue-border: #B91D1D;
-  --mm-color-work-overdue-hover: #FECBCE;
-  --mm-color-work-overdue-selected: #FCA5A5;
+  --mm-color-work-overdue-background: #fee3e3;
+  --mm-color-work-overdue-foreground: #7f1f1f;
+  --mm-color-work-overdue-border: #b91d1d;
+  --mm-color-work-overdue-hover: #fecbce;
+  --mm-color-work-overdue-selected: #fca5a5;
 
   // User-role badge contracts
-  --mm-color-role-admin-background: #F8F8F8;
+  --mm-color-role-admin-background: #f8f8f8;
   --mm-color-role-admin-foreground: #292524;
-  --mm-color-role-admin-border: #615D5C;
+  --mm-color-role-admin-border: #615d5c;
 
-  --mm-color-role-publisher-background: #4D4947;
-  --mm-color-role-publisher-foreground: #FDFDFD;
-  --mm-color-role-publisher-border: #615D5C;
+  --mm-color-role-publisher-background: #4d4947;
+  --mm-color-role-publisher-foreground: #fdfdfd;
+  --mm-color-role-publisher-border: #615d5c;
 
-  --mm-color-role-elder-background: #DCFCE7;
-  --mm-color-role-elder-foreground: #14532D;
-  --mm-color-role-elder-border: #15803D;
+  --mm-color-role-elder-background: #dcfce7;
+  --mm-color-role-elder-foreground: #14532d;
+  --mm-color-role-elder-border: #15803d;
 
-  --mm-color-role-organizer-background: #DBEAFE;
-  --mm-color-role-organizer-foreground: #1E3A8A;
-  --mm-color-role-organizer-border: #2563EB;
+  --mm-color-role-organizer-background: #dbeafe;
+  --mm-color-role-organizer-foreground: #1e3a8a;
+  --mm-color-role-organizer-border: #2563eb;
 
-  --mm-color-role-superintendent-background: #FFEDD5;
-  --mm-color-role-superintendent-foreground: #7C2D12;
-  --mm-color-role-superintendent-border: #C2410C;
+  --mm-color-role-superintendent-background: #ffedd5;
+  --mm-color-role-superintendent-foreground: #7c2d12;
+  --mm-color-role-superintendent-border: #c2410c;
 }
 
 @mixin mm-dark-theme-tokens {
   // App aliases and shell/profile contracts
   --mm-color-page: var(--kui-color-canvas);
   --mm-color-shell-header: #262626;
-  --mm-color-shell-header-content: #F5F5F5;
-  --mm-color-shell-header-logo-bg: #22C55E;
-  --mm-color-shell-header-logo-text: #052E16;
+  --mm-color-shell-header-content: #f5f5f5;
+  --mm-color-shell-header-logo-bg: #22c55e;
+  --mm-color-shell-header-logo-text: #052e16;
   --mm-color-shell-header-user-btn-hover: rgba(255, 255, 255, 0.12);
-  --mm-color-profile-avatar: #22C55E;
-  --mm-color-profile-avatar-content: #052E16;
+  --mm-color-profile-avatar: #22c55e;
+  --mm-color-profile-avatar-content: #052e16;
 
   // Territory alert contracts
   --mm-color-territory-alert-default-background: #363332;
-  --mm-color-territory-alert-default-foreground: #F5F5F4;
-  --mm-color-territory-alert-default-border: #A8A29E;
+  --mm-color-territory-alert-default-foreground: #f5f5f4;
+  --mm-color-territory-alert-default-border: #a8a29e;
 
   --mm-color-territory-alert-revisit-background: #123524;
-  --mm-color-territory-alert-revisit-foreground: #DCFCE7;
-  --mm-color-territory-alert-revisit-border: #4ADE80;
+  --mm-color-territory-alert-revisit-foreground: #dcfce7;
+  --mm-color-territory-alert-revisit-border: #4ade80;
 
   --mm-color-territory-alert-moved-background: #252350;
-  --mm-color-territory-alert-moved-foreground: #E0E7FF;
-  --mm-color-territory-alert-moved-border: #A5B4FC;
+  --mm-color-territory-alert-moved-foreground: #e0e7ff;
+  --mm-color-territory-alert-moved-border: #a5b4fc;
 
-  --mm-color-territory-alert-stop-visiting-background: #4A1717;
-  --mm-color-territory-alert-stop-visiting-foreground: #FEE2E2;
-  --mm-color-territory-alert-stop-visiting-border: #F87171;
+  --mm-color-territory-alert-stop-visiting-background: #4a1717;
+  --mm-color-territory-alert-stop-visiting-foreground: #fee2e2;
+  --mm-color-territory-alert-stop-visiting-border: #f87171;
 
   --mm-color-territory-alert-bible-student-background: #431407;
-  --mm-color-territory-alert-bible-student-foreground: #FFEDD5;
-  --mm-color-territory-alert-bible-student-border: #FB923C;
+  --mm-color-territory-alert-bible-student-foreground: #ffedd5;
+  --mm-color-territory-alert-bible-student-border: #fb923c;
 
   // Territory/work state contracts
   --mm-color-work-available-background: #123524;
-  --mm-color-work-available-foreground: #DCFCE7;
-  --mm-color-work-available-border: #4ADE80;
-  --mm-color-work-available-hover: #17452D;
-  --mm-color-work-available-selected: #1D5638;
+  --mm-color-work-available-foreground: #dcfce7;
+  --mm-color-work-available-border: #4ade80;
+  --mm-color-work-available-hover: #17452d;
+  --mm-color-work-available-selected: #1d5638;
 
   --mm-color-work-assigned-background: #172554;
-  --mm-color-work-assigned-foreground: #DBEAFE;
-  --mm-color-work-assigned-border: #60A5FA;
-  --mm-color-work-assigned-hover: #1E3A5F;
+  --mm-color-work-assigned-foreground: #dbeafe;
+  --mm-color-work-assigned-border: #60a5fa;
+  --mm-color-work-assigned-hover: #1e3a5f;
   --mm-color-work-assigned-selected: #244876;
 
   --mm-color-work-completed-background: #363332;
-  --mm-color-work-completed-foreground: #F5F5F4;
-  --mm-color-work-completed-border: #A8A29E;
-  --mm-color-work-completed-hover: #44403C;
-  --mm-color-work-completed-selected: #57534E;
+  --mm-color-work-completed-foreground: #f5f5f4;
+  --mm-color-work-completed-border: #a8a29e;
+  --mm-color-work-completed-hover: #44403c;
+  --mm-color-work-completed-selected: #57534e;
 
   --mm-color-work-attention-background: #422006;
-  --mm-color-work-attention-foreground: #FEF3C7;
-  --mm-color-work-attention-border: #FBBF24;
-  --mm-color-work-attention-hover: #54280A;
-  --mm-color-work-attention-selected: #713F12;
+  --mm-color-work-attention-foreground: #fef3c7;
+  --mm-color-work-attention-border: #fbbf24;
+  --mm-color-work-attention-hover: #54280a;
+  --mm-color-work-attention-selected: #713f12;
 
-  --mm-color-work-overdue-background: #4A1717;
-  --mm-color-work-overdue-foreground: #FEE2E2;
-  --mm-color-work-overdue-border: #F87171;
-  --mm-color-work-overdue-hover: #5F1B1B;
-  --mm-color-work-overdue-selected: #7F1F1F;
+  --mm-color-work-overdue-background: #4a1717;
+  --mm-color-work-overdue-foreground: #fee2e2;
+  --mm-color-work-overdue-border: #f87171;
+  --mm-color-work-overdue-hover: #5f1b1b;
+  --mm-color-work-overdue-selected: #7f1f1f;
 
   // User-role badge contracts
-  --mm-color-role-admin-background: #27272A;
-  --mm-color-role-admin-foreground: #F5F5F4;
-  --mm-color-role-admin-border: #78716C;
+  --mm-color-role-admin-background: #27272a;
+  --mm-color-role-admin-foreground: #f5f5f4;
+  --mm-color-role-admin-border: #78716c;
 
-  --mm-color-role-publisher-background: #44403C;
-  --mm-color-role-publisher-foreground: #FAFAF9;
-  --mm-color-role-publisher-border: #78716C;
+  --mm-color-role-publisher-background: #44403c;
+  --mm-color-role-publisher-foreground: #fafaf9;
+  --mm-color-role-publisher-border: #78716c;
 
   --mm-color-role-elder-background: #123524;
-  --mm-color-role-elder-foreground: #DCFCE7;
-  --mm-color-role-elder-border: #4ADE80;
+  --mm-color-role-elder-foreground: #dcfce7;
+  --mm-color-role-elder-border: #4ade80;
 
   --mm-color-role-organizer-background: #172554;
-  --mm-color-role-organizer-foreground: #DBEAFE;
-  --mm-color-role-organizer-border: #60A5FA;
+  --mm-color-role-organizer-foreground: #dbeafe;
+  --mm-color-role-organizer-border: #60a5fa;
 
   --mm-color-role-superintendent-background: #431407;
-  --mm-color-role-superintendent-foreground: #FFEDD5;
-  --mm-color-role-superintendent-border: #FB923C;
+  --mm-color-role-superintendent-foreground: #ffedd5;
+  --mm-color-role-superintendent-border: #fb923c;
 }
 
 :root,

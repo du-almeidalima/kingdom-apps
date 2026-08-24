@@ -20,6 +20,10 @@ import { ProviderLoginButtonComponent } from '../../components/provider-login-bu
   imports: [CardComponent, NgOptimizedImage, ProviderLoginButtonComponent],
 })
 export class SignInPageComponent implements OnInit {
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+
   protected readonly FIREBASE_PROVIDERS = FIREBASE_PROVIDERS;
 
   inviteRepository = inject(InvitationLinkRepository);
@@ -27,12 +31,6 @@ export class SignInPageComponent implements OnInit {
   loading = false;
   errorCode: '' | 'INVALID_LINK' | 'INVALID_EMAIL' = '';
   invite: InvitationLink | undefined;
-
-  constructor(
-    private readonly authService: AuthService,
-    private readonly router: Router,
-    private readonly route: ActivatedRoute
-  ) {}
 
   ngOnInit(): void {
     this.loading = true;
@@ -45,9 +43,9 @@ export class SignInPageComponent implements OnInit {
         }),
         catchError(() => {
           return EMPTY;
-        })
+        }),
       )
-      .subscribe(invite => {
+      .subscribe((invite) => {
         if (!invite || !invite.isValid) {
           this.errorCode = 'INVALID_LINK';
           return;
@@ -77,15 +75,15 @@ export class SignInPageComponent implements OnInit {
         finalize(() => {
           this.loading = false;
         }),
-        catchError(err => {
+        catchError((err) => {
           if (err?.message === AuthErrorEnum.INVALID_EMAIL) {
             this.errorCode = 'INVALID_EMAIL';
           }
 
           return EMPTY;
-        })
+        }),
       )
-      .subscribe(user => {
+      .subscribe((user) => {
         // this.invite should never be null, but TypeScript seems to have trouble inferring that it is not null
         // Maybe because this method is async
         if (!user || !this.invite) {

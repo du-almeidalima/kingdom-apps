@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Self, ViewEncapsulation } from '@angular/core';
+import { Component, Input, OnInit, ViewEncapsulation, inject } from '@angular/core';
 import { ControlValueAccessor, FormsModule, NgControl } from '@angular/forms';
 import { NgClass } from '@angular/common';
 
@@ -13,7 +13,8 @@ import { NgClass } from '@angular/common';
       tabindex="0"
       [ngClass]="{ 'icon-radio--active': value === modelValue }"
       (keydown.enter)="valueChanged(value)"
-      (keydown.space)="valueChanged(value)">
+      (keydown.space)="valueChanged(value)"
+    >
       <!-- Icon -->
       <ng-content select="lib-icon"></ng-content>
       <span class="icon-radio__description"><ng-content></ng-content></span>
@@ -24,12 +25,15 @@ import { NgClass } from '@angular/common';
         [(ngModel)]="modelValue"
         [name]="name"
         [value]="value"
-        (change)="valueChanged()" />
+        (change)="valueChanged()"
+      />
     </label>
   `,
   imports: [NgClass, FormsModule],
 })
 export class IconRadioComponent implements OnInit, ControlValueAccessor {
+  private ngControl = inject(NgControl, { self: true });
+
   disabled = false;
 
   modelValue!: string | number;
@@ -40,7 +44,9 @@ export class IconRadioComponent implements OnInit, ControlValueAccessor {
   @Input()
   value!: string | number;
 
-  constructor(@Self() private ngControl: NgControl) {
+  constructor() {
+    const ngControl = this.ngControl;
+
     ngControl.valueAccessor = this;
   }
 
@@ -48,7 +54,7 @@ export class IconRadioComponent implements OnInit, ControlValueAccessor {
     // Looks like Reactive Forms doesn't call writeValue on model changes.
     // Doing this work manually here.
     // https://stackoverflow.com/questions/58236023/how-to-create-a-custom-radio-button-angular-component-that-works-with-reactivefo
-    this.ngControl.control?.valueChanges.subscribe(value => {
+    this.ngControl.control?.valueChanges.subscribe((value) => {
       if (this.modelValue === value) {
         return;
       }

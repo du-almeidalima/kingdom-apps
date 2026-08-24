@@ -18,7 +18,7 @@ describe('DesignationNotFoundComponent', () => {
 
     const paragraphs = ngMocks.findAll(fixture, 'p');
     expect(ngMocks.formatText(paragraphs[0])).toBe(
-      'Não foi possível encontrar esta designação. Ela pode ter expirado ou ter sido removida.'
+      'Não foi possível encontrar esta designação. Ela pode ter expirado ou ter sido removida.',
     );
     expect(ngMocks.formatText(paragraphs[1])).toContain('Superintendente de Grupo (SG)');
   });

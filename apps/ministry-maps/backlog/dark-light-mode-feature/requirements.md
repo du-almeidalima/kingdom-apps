@@ -20,11 +20,11 @@ This document owns product behavior and acceptance criteria. Token names and val
 - **FR-02** — Present exactly three mutually exclusive native radio inputs in a native `fieldset` with a `legend`.
 - **FR-03** — Bind the choices to the exact persisted values and visible labels below.
 
-  | Persisted value | Visible label | Stable test ID |
-  |---|---|---|
-  | `system` | `Sistema` | `profile-theme-system` |
-  | `light` | `Claro` | `profile-theme-light` |
-  | `dark` | `Escuro` | `profile-theme-dark` |
+  | Persisted value | Visible label | Stable test ID         |
+  | --------------- | ------------- | ---------------------- |
+  | `system`        | `Sistema`     | `profile-theme-system` |
+  | `light`         | `Claro`       | `profile-theme-light`  |
+  | `dark`          | `Escuro`      | `profile-theme-dark`   |
 
 - **FR-04** — Use this profile copy:
   - Section/legend: **Aparência**
@@ -47,12 +47,12 @@ This document owns product behavior and acceptance criteria. Token names and val
 
 - **FR-15** — Resolve preference and operating-system state using this truth table:
 
-  | Stored/in-memory preference | OS preference | Effective scheme |
-  |---|---|---|
-  | `system` or no valid value | light/no preference | `light` |
-  | `system` or no valid value | dark | `dark` |
-  | `light` | either | `light` |
-  | `dark` | either | `dark` |
+  | Stored/in-memory preference | OS preference       | Effective scheme |
+  | --------------------------- | ------------------- | ---------------- |
+  | `system` or no valid value  | light/no preference | `light`          |
+  | `system` or no valid value  | dark                | `dark`           |
+  | `light`                     | either              | `light`          |
+  | `dark`                      | either              | `dark`           |
 
 - **FR-16** — Observe `matchMedia('(prefers-color-scheme: dark)')` after bootstrap. A change updates the resolved theme immediately only while preference is `system`.
 - **FR-17** — Set `data-theme="system|light|dark"` on the root `html` element to the preference.

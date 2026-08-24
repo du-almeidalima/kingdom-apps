@@ -8,7 +8,7 @@ describe('WorkItemComponent', () => {
 
   it('should create', () => {
     const fixture = MockRender(WorkItemComponent, {
-      territory: territoryMockBuilder({})
+      territory: territoryMockBuilder({}),
     });
 
     expect(fixture.point.componentInstance).toBeTruthy();

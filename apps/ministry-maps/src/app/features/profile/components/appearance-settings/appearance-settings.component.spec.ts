@@ -6,7 +6,6 @@ import { AppearanceSettingsComponent } from './appearance-settings.component';
 
 describe('AppearanceSettingsComponent', () => {
   let fixture: ComponentFixture<AppearanceSettingsComponent>;
-  let component: AppearanceSettingsComponent;
   let preferenceSignal: ReturnType<typeof signal<ThemePreference>>;
   let resolvedThemeSignal: ReturnType<typeof signal<ResolvedTheme>>;
   let setPreferenceMock: jest.Mock;
@@ -26,13 +25,10 @@ describe('AppearanceSettingsComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [AppearanceSettingsComponent],
-      providers: [
-        { provide: ThemeService, useValue: mockThemeService },
-      ],
+      providers: [{ provide: ThemeService, useValue: mockThemeService }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AppearanceSettingsComponent);
-    component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
@@ -89,7 +85,7 @@ describe('AppearanceSettingsComponent', () => {
 
     const inputs = fixture.debugElement.queryAll(By.css('input[type="radio"]'));
     expect(inputs).toHaveLength(3);
-    inputs.forEach(input => {
+    inputs.forEach((input) => {
       expect(input.attributes['name']).toBe('appearance-theme-preference');
     });
   });

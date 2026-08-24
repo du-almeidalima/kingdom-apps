@@ -6,6 +6,7 @@ import { WorkPage } from '../page-objects/work.page';
 import { WorkItemCompleteDialogPage } from '../page-objects/work-item-complete-dialog.page';
 import { captureWhatsAppPopup } from '../utils/whatsapp-link.util';
 import { DesignationStatusEnum } from '../../src/models/enums/designation-status';
+import { expectData } from '../utils/firestore-assert.util';
 
 /** Extract the designation id from a `/work/{id}` share URL. */
 function designationIdFromShareUrl(sharedUrl: string): string {
@@ -92,7 +93,7 @@ test('J-01 — Admin creates + assigns ×2; publishers work their own independen
     .poll(async () => (await db.getDoc(db.collections.designations, d1))?.['congregationId'])
     .toBe(seed.ids.congregation);
   const d1Snap = await db.getDocSnapshot(db.collections.designations, d1);
-  const d1Data = d1Snap.data()!;
+  const d1Data = expectData(d1Snap.data());
   expect(d1Data['createdBy']).toBe(seed.ids.adminUser);
   expect(d1Data['settings']['shouldDesignationBlockAfterExpired']).toBe(true);
   const createdAtMs = d1Data['createdAt'].toMillis();
@@ -123,10 +124,8 @@ test('J-01 — Admin creates + assigns ×2; publishers work their own independen
   const d2 = designationIdFromShareUrl(cap2.sharedUrl);
 
   // ⟶ HAND-OFF (Firestore, D2): independent snapshot.
-  const d2Data = (await db.getDoc(db.collections.designations, d2))!;
-  const d2TerritoryIds = (d2Data['territories'] as Array<Record<string, unknown>>)
-    .map((t) => t['id'])
-    .sort();
+  const d2Data = expectData(await db.getDoc(db.collections.designations, d2));
+  const d2TerritoryIds = (d2Data['territories'] as Array<Record<string, unknown>>).map((t) => t['id']).sort();
   expect(d2TerritoryIds).toEqual([seed.ids.territories[0], seed.ids.territories[2]].sort());
   for (const t of d2Data['territories'] as Array<Record<string, unknown>>) {
     expect(t['status']).toBe(DesignationStatusEnum.PENDING);
@@ -137,7 +136,11 @@ test('J-01 — Admin creates + assigns ×2; publishers work their own independen
   // Leg 4 — Publisher A opens D1 and completes the shared territory (UC-WORK-01/05/07)
   // ═══════════════════════════════════════════════════════════════════════════
   // Switch identity to anonymous — the app navigates itself to /login (UC-AUTH-22).
-  await page.evaluate(() => (window as any).__E2E__.auth.signOut());
+  await page.evaluate(async () => {
+    const api = window.__E2E__;
+    if (!api) throw new Error('__E2E__ hook unavailable');
+    await api.auth.signOut();
+  });
   await expect(page).toHaveURL(/\/login/);
 
   await workPage.goto(d1);
@@ -167,9 +170,9 @@ test('J-01 — Admin creates + assigns ×2; publishers work their own independen
     })
     .toBe(DesignationStatusEnum.DONE);
 
-  const d1TerritoriesAfter = (
-    (await db.getDoc(db.collections.designations, d1))!['territories'] as Array<Record<string, unknown>>
-  );
+  const d1TerritoriesAfter = expectData(await db.getDoc(db.collections.designations, d1))['territories'] as Array<
+    Record<string, unknown>
+  >;
   const d1OtherStatuses = d1TerritoriesAfter
     .filter((t) => t['id'] !== seed.ids.territories[0])
     .map((t) => t['status'] as string);
@@ -177,7 +180,7 @@ test('J-01 — Admin creates + assigns ×2; publishers work their own independen
 
   // UC-ASSIGN-17/UC-WORK-05: D2's snapshot of the SAME territory is still PENDING.
   const d2SharedStatus = (
-    (await db.getDoc(db.collections.designations, d2))!['territories'] as Array<Record<string, unknown>>
+    expectData(await db.getDoc(db.collections.designations, d2))['territories'] as Array<Record<string, unknown>>
   ).find((t) => t['id'] === seed.ids.territories[0])?.['status'];
   expect(d2SharedStatus).toBe(DesignationStatusEnum.PENDING);
 
@@ -197,7 +200,7 @@ test('J-01 — Admin creates + assigns ×2; publishers work their own independen
   const newest = t1History
     .map((h) => (h['date'] as { toMillis: () => number }).toMillis())
     .reduce((max, v) => Math.max(max, v), 0);
-  const newestDoc = t1History.find((h) => (h['date'] as { toMillis: () => number }).toMillis() === newest)!;
+  const newestDoc = expectData(t1History.find((h) => (h['date'] as { toMillis: () => number }).toMillis() === newest));
   expect(newestDoc['visitOutcome']).toBe(0); // SPOKE
   expect(newestDoc['isRevisit']).toBe(false);
   expect((await db.getDoc(db.collections.territories, seed.ids.territories[0]))?.['lastVisit']).toBeTruthy();
@@ -221,7 +224,7 @@ test('J-01 — Admin creates + assigns ×2; publishers work their own independen
   await expect(sharedRow.getByTestId('work-item-checkbox')).not.toBeChecked();
 
   // ── FINAL SWEEP (Firestore) ────────────────────────────────────────────────
-  const finalD1 = (await db.getDoc(db.collections.designations, d1))!['territories'] as Array<
+  const finalD1 = expectData(await db.getDoc(db.collections.designations, d1))['territories'] as Array<
     Record<string, unknown>
   >;
   const d1Done = finalD1.filter((t) => t['status'] === DesignationStatusEnum.DONE);
@@ -229,7 +232,7 @@ test('J-01 — Admin creates + assigns ×2; publishers work their own independen
   expect(d1Done).toHaveLength(1);
   expect(d1Pending).toHaveLength(2);
 
-  const finalD2 = (await db.getDoc(db.collections.designations, d2))!['territories'] as Array<
+  const finalD2 = expectData(await db.getDoc(db.collections.designations, d2))['territories'] as Array<
     Record<string, unknown>
   >;
   expect(finalD2.every((t) => t['status'] === DesignationStatusEnum.PENDING)).toBe(true);

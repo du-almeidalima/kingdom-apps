@@ -1,6 +1,6 @@
 ---
 globs:
-- libs/common-ui/**
+  - libs/common-ui/**
 description: Working inside common-ui — structure, selectors, tokens, and what belongs in the shared library.
 ---
 

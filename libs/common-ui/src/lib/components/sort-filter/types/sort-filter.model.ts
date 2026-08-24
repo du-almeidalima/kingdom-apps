@@ -11,7 +11,7 @@ export interface BaseFilterConfig {
 export interface SelectFilterConfig extends BaseFilterConfig {
   filterType: 'select';
   placeholder?: string;
-  options: { value: any; label: string }[];
+  options: { value: string; label: string }[];
 }
 
 export interface ToggleFilterConfig extends BaseFilterConfig {
@@ -45,14 +45,14 @@ export type FilterOption = Record<string, FilterConfig>;
  */
 export type SortFilterConfig<
   TFilterOptions extends FilterOption = FilterOption,
-  TSortOptions extends SortOption[] = SortOption[]
+  TSortOptions extends SortOption[] = SortOption[],
 > = {
   sortConfigs?: {
     initial: SortOption['value'];
     options: TSortOptions;
   };
   filterConfigs?: {
-    initial: Partial<{[key in keyof TFilterOptions]: any}> | undefined;
+    initial: Partial<{ [key in keyof TFilterOptions]: unknown }> | undefined;
     options: TFilterOptions;
   };
 };
@@ -62,5 +62,5 @@ export type SortFilterConfig<
  */
 export interface SortFilterValue {
   sort?: string;
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
 }

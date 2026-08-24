@@ -14,5 +14,5 @@ import { NgStyle } from '@angular/common';
 })
 export class CardComponent {
   @Input()
-  customStyle?: any;
+  customStyle?: Record<string, string | number> | null;
 }

@@ -18,7 +18,7 @@ const territory = seed.factories.buildTerritory({
   congregationId: seed.ids.congregation,
   city: 'São Paulo',
   address: 'Rua da Mudança, 404 - Moema',
-  note: 'Portaria 24h.',                // non-empty note is REQUIRED for badges (UC-TERR-27)
+  note: 'Portaria 24h.', // non-empty note is REQUIRED for badges (UC-TERR-27)
   history: [],
 });
 const designation = seed.factories.buildDesignation({
@@ -35,7 +35,7 @@ const designation = seed.factories.buildDesignation({
       note: 'Portaria 24h.', // on the snapshot too — the work write-back overwrites the
       // territory doc with the designation snapshot fields; an empty snapshot note
       // would clobber the seeded note and hide the Mudou badge (UC-TERR-27).
-      history: [],                      // REQUIRED (UC-WORK-04)
+      history: [], // REQUIRED (UC-WORK-04)
     }),
   ],
 });
@@ -115,9 +115,9 @@ isResolved: true`; `Mudaram` reconciles to `0`.
 - **Gaps:** ⚙ `signInAs('organizer')`/`signInAs('elder')` harness extension (see the scoping caveat above —
   a real `ORGANIZER` cannot perform the resolution leg); no `data-testid` on the badge, the sort/filter
   toggles, the `Morador Mudou` dialog radios, or the statistics tiles — select by the verbatim strings.
-- Resolution passes the **full** `recentHistory` for the `Mudou` dialog, so this journey does **not** hit
-  the truncation defect of UC-TERR-31 (that defect needs a *filtered* subset, which only happens on the
-  `Revisita`/`Não Visitar` dialogs) — do not conflate the two.
+- Resolution passes the **full** `recentHistory` for the `Mudou` dialog, so this journey never exercised
+  the (now-fixed, 2026-08) truncation defect of UC-TERR-31 — that defect needed a _filtered_ subset,
+  which only happens on the `Revisita`/`Não Visitar` dialogs. Do not conflate the two.
 - Statistics are one-shot reads: navigate to the page **after** each mutation's hand-off poll has settled.
 
 ## Sources

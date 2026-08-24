@@ -57,7 +57,13 @@ export const mockRevisitTerritory = territoryMockBuilder({ recentHistory: [mockR
 export const mockStudentTerritory = territoryMockBuilder({ isBibleStudent: true });
 
 // PLEASE DO NOT MODIFY IT, AS THIS IS BEING USED IN OTHER TESTS
-export const mockTerritories = [mockMovedTerritory, mockRevisitTerritory, mockStudentTerritory, mockNotAnsweredTerritory, mockNotVisitTerritory];
+export const mockTerritories = [
+  mockMovedTerritory,
+  mockRevisitTerritory,
+  mockStudentTerritory,
+  mockNotAnsweredTerritory,
+  mockNotVisitTerritory,
+];
 
 describe('TerritoryStatisticsBO', () => {
   let territoryStatisticsBO: TerritoryStatisticsBO;
@@ -84,7 +90,21 @@ describe('TerritoryStatisticsBO', () => {
           peopleCount: 5,
           movedCount: 1,
           bibleStudiesCount: 1,
-        } as TerritoryStatisticsDTO)
+        } as TerritoryStatisticsDTO),
+      );
+    });
+
+    it('counts an unresolved MOVED visit that only exists in the full history (beyond the last 5)', () => {
+      const oldMovedVisit: TerritoryVisitHistory = { ...mockMoveVisit, id: 'old-moved', date: new Date(2020, 0, 1) };
+      // recentHistory is capped at the last 5 visits — the old unresolved move was pushed out of it,
+      // but the statistics page fetches the full history, so it must still count.
+      const territoryWithOldMove = territoryMockBuilder({
+        recentHistory: [mockRevisit, mockNotAnswered, mockNotVisitAgain, mockRevisit],
+        history: [...Array.from({ length: 5 }, (_, i) => ({ ...mockRevisit, id: `recent-${i}` })), oldMovedVisit],
+      });
+
+      expect(territoryStatisticsBO.deriveTerritoryStatistics([territoryWithOldMove])).toEqual(
+        expect.objectContaining({ movedCount: 1 }),
       );
     });
 
@@ -212,7 +232,7 @@ describe('TerritoryStatisticsBO', () => {
     it('should not count for dynamic statistics', () => {
       const result = territoryStatisticsBO.deriveTerritoryDynamicStatistics(
         [mockMovedTerritory, mockNotAnsweredTerritory, mockNotVisitTerritory],
-        'ONE_MONTH'
+        'ONE_MONTH',
       );
 
       expect(result).toEqual({

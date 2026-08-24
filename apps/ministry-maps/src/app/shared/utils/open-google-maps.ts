@@ -9,7 +9,7 @@ const extractLinkFromText = (link: string): string => {
     const matches = link?.match(hyperLinkRegex);
 
     return matches?.pop() ?? link;
-  } catch (e) {
+  } catch {
     return link;
   }
 };
@@ -35,9 +35,10 @@ const openGoogleMapsHandler = (mapsLink: string, territory: Territory) => {
     window.open(
       `intent://${mapsHostAndPathname}#Intent;scheme=http;package=${mapsAndroidPackage};` +
         `S.browser_fallback_url=${mapsLink}%3Fentry%3Ds&sa%3DX;` +
-        `S.intent_description=${territory.address};end`
+        `S.intent_description=${territory.address};end`,
     );
-  } else if (BrowserEnum.FIREFOX || BrowserEnum.SAFARI || BrowserEnum.UNKNOWN) {
+  } else {
+    // Firefox, Safari and any other browser: open in a new tab.
     window.open(sanitizedLink, '_blank');
   }
 };

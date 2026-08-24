@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FIREBASE_PROVIDERS } from '../../../../../repositories/firebase/firebase-auth-datasource.service';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
@@ -16,18 +16,19 @@ import { ProviderLoginButtonComponent } from '../../components/provider-login-bu
   imports: [CardComponent, ProviderLoginButtonComponent],
 })
 export class LoginPageComponent {
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
   protected readonly FIREBASE_PROVIDERS = FIREBASE_PROVIDERS;
 
   loading = false;
-
-  constructor(private authService: AuthService, private router: Router) {}
 
   handleProviderLoginClick(firebaseProvider: FIREBASE_PROVIDERS) {
     this.loading = true;
     this.authService
       .signInWithProvider(firebaseProvider)
       .pipe(finalize(() => (this.loading = false)))
-      .subscribe(user => {
+      .subscribe((user) => {
         if (!user) {
           this.router.navigate([AuthRoutesEnum.NO_ACCOUNT]);
           return;

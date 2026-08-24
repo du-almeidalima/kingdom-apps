@@ -2,12 +2,7 @@ import { ApplicationConfig, isDevMode, provideZoneChangeDetection } from '@angul
 import { provideRouter } from '@angular/router';
 import { provideTheme } from '@kingdom-apps/common-ui';
 import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import {
-  connectAuthEmulator,
-  getAuth,
-  provideAuth,
-  signInWithCustomToken,
-} from '@angular/fire/auth';
+import { connectAuthEmulator, getAuth, provideAuth, signInWithCustomToken } from '@angular/fire/auth';
 import {
   connectFirestoreEmulator,
   initializeFirestore,
@@ -48,7 +43,7 @@ export const appConfig: ApplicationConfig = {
         // E2E test fixture can establish a real Firebase session in the browser
         // without driving the OAuth popup. This code is NEVER reached in
         // production builds (gated by env + !useCloud above).
-        (window as any).__E2E__ = { auth, signInWithCustomToken };
+        window.__E2E__ = { auth, signInWithCustomToken };
       }
 
       return auth;
@@ -86,6 +81,6 @@ export const appConfig: ApplicationConfig = {
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',
-    })
+    }),
   ],
 };

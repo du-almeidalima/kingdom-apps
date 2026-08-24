@@ -15,36 +15,33 @@ dates at seed time:
 
 ```ts
 const now = new Date();
-const firstOfThisMonth  = new Date(now.getFullYear(), now.getMonth(), 1);
-const firstOfPrevMonth  = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+const firstOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+const firstOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
 const visits = [
   // IN  — every period's window (today)
-  seed.factories.buildVisitHistory({ id: 'j07-v-today',     visitOutcome: 0, isRevisit: true,  date: now }),
+  seed.factories.buildVisitHistory({ id: 'j07-v-today', visitOutcome: 0, isRevisit: true, date: now }),
   // IN  — this month, ON its first day (boundary-inclusive)
   seed.factories.buildVisitHistory({ id: 'j07-v-month-1st', visitOutcome: 0, isRevisit: false, date: firstOfThisMonth }),
   // IN  — previous month; OUT of "Este Mês" (boundary-exclusive)
-  seed.factories.buildVisitHistory({ id: 'j07-v-prev-mid',  visitOutcome: 4, isRevisit: false, date: new Date(now.getFullYear(), now.getMonth() - 1, 15) }),
+  seed.factories.buildVisitHistory({ id: 'j07-v-prev-mid', visitOutcome: 4, isRevisit: false, date: new Date(now.getFullYear(), now.getMonth() - 1, 15) }),
   // OUT — last day of the month before the previous one; only inside "3 Meses"+ windows
-  seed.factories.buildVisitHistory({ id: 'j07-v-old',       visitOutcome: 0, isRevisit: false, date: new Date(now.getFullYear(), now.getMonth() - 2, 28) }),
+  seed.factories.buildVisitHistory({ id: 'j07-v-old', visitOutcome: 0, isRevisit: false, date: new Date(now.getFullYear(), now.getMonth() - 2, 28) }),
 ];
 await seed.write({
-  territories: [
-    seed.factories.buildTerritory({ id: 'j07-territory-sp', congregationId: seed.ids.congregation, city: 'São Paulo', history: visits }),
-    seed.factories.buildTerritory({ id: 'j07-territory-os', congregationId: seed.ids.congregation, city: 'Osasco',   history: [seed.factories.buildVisitHistory({ id: 'j07-v-os', visitOutcome: 0, isRevisit: true, date: now })] }),
-  ],
+  territories: [seed.factories.buildTerritory({ id: 'j07-territory-sp', congregationId: seed.ids.congregation, city: 'São Paulo', history: visits }), seed.factories.buildTerritory({ id: 'j07-territory-os', congregationId: seed.ids.congregation, city: 'Osasco', history: [seed.factories.buildVisitHistory({ id: 'j07-v-os', visitOutcome: 0, isRevisit: true, date: now })] })],
 });
 ```
 
 Expected counts derived from that seed (the journey's reconciliation table):
 
-| Period (`<select>` label) | Window start | São Paulo `Visitas` | São Paulo `Revisitas` |
-|---|---|---|---|
-| `Este Mês` (THIS_MONTH) | `firstOfThisMonth` | **2** (`v-today`, `v-month-1st`) | **1** |
-| `1 Mês` (ONE_MONTH) | `firstOfPrevMonth` | **3** (+ `v-prev-mid`) | **1** |
-| `3 Meses` (THREE_MONTHS) | 1st of month −2 | **4** (+ `v-old`) | **1** |
+| Period (`<select>` label) | Window start       | São Paulo `Visitas`              | São Paulo `Revisitas` |
+| ------------------------- | ------------------ | -------------------------------- | --------------------- |
+| `Este Mês` (THIS_MONTH)   | `firstOfThisMonth` | **2** (`v-today`, `v-month-1st`) | **1**                 |
+| `1 Mês` (ONE_MONTH)       | `firstOfPrevMonth` | **3** (+ `v-prev-mid`)           | **1**                 |
+| `3 Meses` (THREE_MONTHS)  | 1st of month −2    | **4** (+ `v-old`)                | **1**                 |
 
-`REVISIT` (`4`) counts as a *visit* (UC-STAT-10); only `isRevisit: true` counts as a *revisita*
+`REVISIT` (`4`) counts as a _visit_ (UC-STAT-10); only `isRevisit: true` counts as a _revisita_
 (UC-STAT-11) — `v-prev-mid` is therefore a visit but never a revisita.
 
 ## Script

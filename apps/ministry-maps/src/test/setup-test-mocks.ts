@@ -11,6 +11,7 @@ import { AuthRepositoryMock } from './mocks/models/auth.mock';
 import { DesignationRepository } from '../app/repositories/designation.repository';
 import { DesignationRepositoryMock } from './mocks/models/designation.mock';
 import { UserRepository } from '../app/repositories/user.repository';
+import { InvitationLinkRepository } from '../app/repositories/invitation-link.repository';
 import { InvitationLinkRepositoryMock } from './mocks/models/invitation-link.mock';
 
 // auto spy
@@ -23,4 +24,4 @@ ngMocks.defaultMock([CongregationRepository], () => new CongregationRepositoryMo
 ngMocks.defaultMock([TerritoryRepository], () => new TerritoryRepositoryMock());
 ngMocks.defaultMock([AuthRepository], () => new AuthRepositoryMock());
 ngMocks.defaultMock([DesignationRepository], () => new DesignationRepositoryMock());
-ngMocks.defaultMock([InvitationLinkRepositoryMock], () => new InvitationLinkRepositoryMock());
+ngMocks.defaultMock([InvitationLinkRepository], () => new InvitationLinkRepositoryMock());

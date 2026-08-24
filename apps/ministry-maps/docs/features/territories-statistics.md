@@ -5,15 +5,32 @@ This document describes the behavioural use cases for the `/territories/statisti
 **Route:** `/territories/statistics`
 **Actors:** `ADMIN`, `ELDER`, `ORGANIZER`, `SUPERINTENDENT`, `APP_ADMIN` (Publishers are redirected).
 
+## How data is loaded
+
+The page fetches all territories **and their visit history in a single collection-group query**
+(`FirebaseTerritoryDatasourceService.getAllByCongregation(congregationId, { getHistory: true })`,
+see [`../domain/data-model.md §4.8`](../domain/data-model.md#48-statistics-history-resolution-one-collection-group-query)):
+one `collectionGroup('history')` read filtered by `congregationId` and `date >= now - 1 year`, with
+results grouped per territory. This is what keeps the page fast on congregations with significant
+history — there is no per-territory subcollection query.
+
+Two properties follow from this design:
+
+- Visit documents must carry the `congregationId`/`territoryId` stamps to be counted. New visits are
+  stamped by the work page write-back, seeded visits by the E2E seeder, and legacy documents by the
+  one-time `backfill:history-stamps` script (see `apps/ministry-maps/docs/2026-08-statistics-deployment-plan.md`).
+- Every metric on this page only sees visits from the **last year**; older visits exist in Firestore
+  but are outside the query window.
+
 ## Testability gaps (summary)
 
 - **Missing Selectors:** No `data-testid` on the main heading, city filter `<select>`, period filter `<select>`, or any individual metric tile. Selectors must rely on verbatim text or DOM structure.
 - **Harness Extensions:** `signInAs` fixture only supports `'admin'` and `'publisher'`. Roles like `ELDER`, `ORGANIZER`, `SUPERINTENDENT`, and `APP_ADMIN` require harness extensions to be testable.
-- **Inconsistent Data Sources:** The "Mudaram" metric relies on denormalised `recentHistory` (last 5 visits), while "Visitas" and "Revisitas" use the full `history` subcollection.
 
 ### Gerais (Static totals)
 
 #### UC-STAT-01 — Displays static totals for all cities
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline seed (3 territories: São Paulo x2, Osasco x1)
@@ -24,6 +41,7 @@ This document describes the behavioural use cases for the `/territories/statisti
 - **Priority:** P0 · **Gaps:** no data-testids
 
 #### UC-STAT-02 — Filters static totals by city
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline seed
@@ -33,21 +51,33 @@ This document describes the behavioural use cases for the `/territories/statisti
 - **Edge cases:** selecting "Todas" restores the totals from UC-STAT-01
 - **Priority:** P1 · **Gaps:** no data-testids
 
-#### UC-STAT-03 — Displays "Moved" count from recent history
+#### UC-STAT-03 — Displays "Moved" count from unresolved-MOVED visits in the fetched history
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
-- **Preconditions (seed):** default baseline; plus 1 territory with `recentHistory` containing a visit with `visitOutcome: 2` (MOVED) and `isResolved: false`
+- **Preconditions (seed):** default baseline; plus 1 territory whose `history` contains a visit with `visitOutcome: 2` (MOVED) and `isResolved: false` (the seeder stamps the subcollection docs)
 - **Steps:** 1. navigate to statistics
 - **Expected UI:** "Mudaram: 1"
-- **Expected persistence:** `db.getDoc(db.collections.territories, id)` has `recentHistory` with an unresolved `MOVED` (2) outcome
-- **Edge cases:** if `isResolved: true`, the count is 0; ⚠ suspected defect: if the `MOVED` visit is older than the last 5 (not in `recentHistory`), it is ignored even if it exists in the `history` subcollection
+- **Expected persistence:** the `history/{visitId}` doc carries `congregationId === seed.ids.congregation` and `territoryId === <territory id>` (the stamps that make it visible to the collection-group query); `recentHistory` also reflects the entry, but the count does not depend on that
+- **Edge cases:** if `isResolved: true`, the count is 0; a visit older than 1 year is outside the query window and never counts
+- **Priority:** P1 · **Gaps:** no data-testids
+
+#### UC-STAT-03b — "Moved" counts an unresolved MOVED beyond the last 5 visits
+
+- **Actor:** Admin
+- **Route:** `/territories/statistics`
+- **Preconditions (seed):** 1 territory with six visits within the last year: five newer `NOT_ANSWERED` visits (weekly) fill `recentHistory`, plus one unresolved `MOVED` dated ~2 months ago — pushed out of `recentHistory` but inside the query window
+- **Steps:** 1. navigate to statistics
+- **Expected UI:** "Mudaram: 1" — the count derives from the fetched full history, not from the capped `recentHistory`
+- **Expected persistence:** parent doc's `recentHistory` has length ≤ 5 and excludes the MOVED entry; the `history` subcollection holds all 6 docs
 - **Priority:** P1 · **Gaps:** no data-testids
 
 ### Por período (Dynamic metrics)
 
-*Note: All dynamic periods start at the 1st day of the calculated month. Tests must seed history dates using `new Date()` arithmetic relative to the current execution time. Baseline history (2024) is ignored by all periods today.*
+_Note: All dynamic periods start at the 1st day of the calculated month. Tests must seed history dates using `new Date()` arithmetic relative to the current execution time. Baseline history (2024) is ignored by all periods today._
 
 #### UC-STAT-04 — Dynamic metrics for "Este Mês" (THIS_MONTH)
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline; seed 1 territory with a visit today: `visitOutcome: 0` (SPOKE), `isRevisit: true`
@@ -58,6 +88,7 @@ This document describes the behavioural use cases for the `/territories/statisti
 - **Priority:** P0 · **Gaps:** no data-testids
 
 #### UC-STAT-05 — Dynamic metrics for "1 Mês" (ONE_MONTH)
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline; seed 1 visit today (`visitOutcome: 0`) and 1 visit on the 15th of the PREVIOUS month (`visitOutcome: 0`, `isRevisit: true`)
@@ -68,6 +99,7 @@ This document describes the behavioural use cases for the `/territories/statisti
 - **Priority:** P1 · **Gaps:** no data-testids
 
 #### UC-STAT-06 — Dynamic metrics for "3 Meses" (THREE_MONTHS)
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline; seed 1 visit today and 1 visit 2 months ago (both `visitOutcome: 4` REVISIT, `isRevisit: true`)
@@ -78,6 +110,7 @@ This document describes the behavioural use cases for the `/territories/statisti
 - **Priority:** P1 · **Gaps:** no data-testids
 
 #### UC-STAT-07 — Dynamic metrics for "6 meses" (SIX_MONTHS)
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline; seed 1 visit 5 months ago
@@ -87,6 +120,7 @@ This document describes the behavioural use cases for the `/territories/statisti
 - **Priority:** P1 · **Gaps:** no data-testids
 
 #### UC-STAT-08 — Dynamic metrics for "1 ano" (ONE_YEAR)
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline; seed 1 visit 11 months ago
@@ -96,6 +130,7 @@ This document describes the behavioural use cases for the `/territories/statisti
 - **Priority:** P1 · **Gaps:** no data-testids
 
 #### UC-STAT-09 — Dynamic metrics for "Este Ano" (YEAR_TO_DATE)
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline; seed 1 visit on Jan 1st of the current year
@@ -105,6 +140,7 @@ This document describes the behavioural use cases for the `/territories/statisti
 - **Priority:** P1 · **Gaps:** no data-testids
 
 #### UC-STAT-10 — Visit counting rule (Outcome logic)
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** seed 1 territory with 5 visits today: `SPOKE` (0), `NOT_ANSWERED` (1), `MOVED` (2), `ASKED_TO_NOT_VISIT_AGAIN` (3), `REVISIT` (4)
@@ -114,6 +150,7 @@ This document describes the behavioural use cases for the `/territories/statisti
 - **Priority:** P0 · **Gaps:** no data-testids
 
 #### UC-STAT-11 — Revisit counting rule (Boolean logic)
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** seed 1 territory with 2 visits today: (A) `visitOutcome: 0`, `isRevisit: true`; (B) `visitOutcome: 4`, `isRevisit: false`
@@ -123,6 +160,7 @@ This document describes the behavioural use cases for the `/territories/statisti
 - **Priority:** P0 · **Gaps:** no data-testids
 
 #### UC-STAT-12 — Statistics read from full history subcollection
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline; seed 1 territory with 7 visits today (all `visitOutcome: 0`)
@@ -135,15 +173,18 @@ This document describes the behavioural use cases for the `/territories/statisti
 ### Boundary and Access cases
 
 #### UC-STAT-13 — Empty congregation
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** congregation with 0 territories
 - **Steps:** 1. navigate to statistics
-- **Expected UI:** ⚠ **Defect** — page hangs in loading state forever: the `statistics-heading` and disabled `statistics-city-filter` render, but the `statistics-loading` spinner is the only branch shown; the static/dynamic sections never appear. Root cause: `FirebaseTerritoryDatasourceService.getAllByCongregation({ getHistory: true })` builds `combineLatest([])` for an empty snapshot, which never emits; `finalize` never flips `isLoading`. See `testability-gaps.md` §3 #42.
+- **Expected UI:** clean zero totals — the loading state clears, the static section renders "Territórios: 0", "Pessoas: 0", "Estudos bíblicos: 0", "Mudaram: 0", the dynamic section renders "Visitas: 0", "Revisitas: 0", and the city filter becomes enabled while still listing the congregation's cities
 - **Expected persistence:** `db.getCollectionDocs(db.collections.territories)` is empty (scoped to the congregation)
-- **Priority:** P2 · **Gaps:** no data-testids (now present); ⚠ suspected defect
+- **Edge cases:** `getAllByCongregation({ getHistory: true })` returns `of([])` immediately for an empty territory snapshot — no history query is issued at all
+- **Priority:** P2 · **Gaps:** no data-testids
 
 #### UC-STAT-14 — Loading state
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline
@@ -153,6 +194,7 @@ This document describes the behavioural use cases for the `/territories/statisti
 - **Priority:** P2 · **Gaps:** no data-testid on spinner
 
 #### UC-STAT-15 — Access control (Organizer)
+
 - **Actor:** Organizer (Harness extension needed)
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** user with role `ORGANIZER`
@@ -162,6 +204,7 @@ This document describes the behavioural use cases for the `/territories/statisti
 - **Priority:** P1 · **Gaps:** `signInAs('organizer')` extension needed
 
 #### UC-STAT-16 — Access control (Publisher redirect)
+
 - **Actor:** Publisher
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline
@@ -171,6 +214,7 @@ This document describes the behavioural use cases for the `/territories/statisti
 - **Priority:** P1 · **Gaps:** none
 
 #### UC-STAT-17 — Access control (Anonymous redirect)
+
 - **Actor:** Anonymous
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** N/A
@@ -180,6 +224,7 @@ This document describes the behavioural use cases for the `/territories/statisti
 - **Priority:** P1 · **Gaps:** none
 
 #### UC-STAT-18 — Territories with no history
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** 1 territory with `history: []` (no visits)
@@ -189,6 +234,7 @@ This document describes the behavioural use cases for the `/territories/statisti
 - **Priority:** P2 · **Gaps:** no data-testids
 
 #### UC-STAT-19 — Visits outside selected period
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** seed 1 visit exactly 2 months ago
@@ -205,5 +251,7 @@ This document describes the behavioural use cases for the `/territories/statisti
 - `apps/ministry-maps/src/app/features/territory/bo/territory-statistics/territory-statistics.bo.ts`
 - `apps/ministry-maps/src/app/features/territory/bo/territory-alerts/territory-alerts.bo.ts`
 - `apps/ministry-maps/src/app/repositories/firebase/firebase-territory-datasource.service.ts`
+- `firestore.indexes.json` (history collection-group composite index) · `firestore.rules` (recursive history match)
+- `functions/ministry-maps/src/scripts/backfill-territory-history-stamps.ts` (legacy document stamps)
 - `apps/ministry-maps/docs/domain/data-model.md`
 - `apps/ministry-maps/docs/domain/roles-and-permissions.md`

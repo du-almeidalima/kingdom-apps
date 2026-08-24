@@ -1,18 +1,19 @@
-<div class='container'>
-  <h2 class='t-headline2 mb-8' data-testid="statistics-heading">Estatísticas territórios</h2>
+<div class="container">
+  <h2 class="t-headline2 mb-8" data-testid="statistics-heading">Estatísticas territórios</h2>
 
   <select
     lib-select
     [disabled]="isLoading"
-    class='w-full'
-    name='Cidade'
+    class="w-full"
+    name="Cidade"
     data-testid="statistics-city-filter"
-    [ngModel]='selectedCity'
-    (ngModelChange)='handleSelectedCityChange($event)'>
+    [ngModel]="selectedCity"
+    (ngModelChange)="handleSelectedCityChange($event)"
+  >
     @for (city of cities; track city) {
-      <option [value]='city'>{{ city }}</option>
+      <option [value]="city">{{ city }}</option>
     }
-    <option [value]='ALL_OPTION'>Todas</option>
+    <option [value]="ALL_OPTION">Todas</option>
   </select>
 
   @let territories = (filteredTerritories$ | async) || [];
@@ -21,7 +22,13 @@
       <lib-spinner [height]="'5rem'" [width]="'5rem'" class="mx-auto" />
     </div>
   } @else {
-    <kingdom-apps-territory-statistics-static-section data-testid="statistics-static-section" [territories]="territories" />
-    <kingdom-apps-territory-statistics-dynamic-section data-testid="statistics-dynamic-section" [territories]="territories" />
+    <kingdom-apps-territory-statistics-static-section
+      data-testid="statistics-static-section"
+      [territories]="territories"
+    />
+    <kingdom-apps-territory-statistics-dynamic-section
+      data-testid="statistics-dynamic-section"
+      [territories]="territories"
+    />
   }
 </div>

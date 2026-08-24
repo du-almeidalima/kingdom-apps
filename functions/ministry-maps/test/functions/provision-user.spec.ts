@@ -40,7 +40,7 @@ describe('provisionUserFromInvite Cloud Function', () => {
       provisionUserRunner.run({
         auth: undefined,
         data: { inviteId: 'inv-123' },
-      })
+      }),
     ).rejects.toThrow(HttpsError);
   });
 
@@ -49,7 +49,7 @@ describe('provisionUserFromInvite Cloud Function', () => {
       provisionUserRunner.run({
         auth: { uid: 'user-1', token: { email: 'user@example.com' } },
         data: { inviteId: '' },
-      })
+      }),
     ).rejects.toThrow(HttpsError);
   });
 
@@ -110,7 +110,7 @@ describe('provisionUserFromInvite Cloud Function', () => {
       provisionUserRunner.run({
         auth: { uid: 'new-user', token: { email: 'new@example.com' } },
         data: { inviteId: 'missing-inv' },
-      })
+      }),
     ).rejects.toMatchObject({
       code: 'not-found',
     });
@@ -139,7 +139,7 @@ describe('provisionUserFromInvite Cloud Function', () => {
       provisionUserRunner.run({
         auth: { uid: 'new-user', token: { email: 'new@example.com' } },
         data: { inviteId: 'used-inv' },
-      })
+      }),
     ).rejects.toMatchObject({
       code: 'failed-precondition',
       message: 'INVITATION_ALREADY_USED',
@@ -169,7 +169,7 @@ describe('provisionUserFromInvite Cloud Function', () => {
       provisionUserRunner.run({
         auth: { uid: 'new-user', token: { email: 'new@example.com' } },
         data: { inviteId: 'app-admin-inv' },
-      })
+      }),
     ).rejects.toMatchObject({
       code: 'permission-denied',
     });
@@ -202,7 +202,7 @@ describe('provisionUserFromInvite Cloud Function', () => {
       provisionUserRunner.run({
         auth: { uid: 'new-user', token: { email: 'attacker@example.com' } },
         data: { inviteId: 'pinned-inv' },
-      })
+      }),
     ).rejects.toMatchObject({
       code: 'permission-denied',
       message: 'INVALID_EMAIL',
@@ -230,7 +230,8 @@ describe('provisionUserFromInvite Cloud Function', () => {
 
     mockRunTransaction.mockImplementation(async (callback) => {
       const mockTransaction = {
-        get: jest.fn()
+        get: jest
+          .fn()
           // First get is inviteRef
           .mockResolvedValueOnce({
             exists: true,

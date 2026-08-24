@@ -33,7 +33,7 @@ export const publisherUser: User = {
   email: 'test.publisher@email.com',
   photoUrl: 'https://i.stack.imgur.com/l60Hf.png',
   role: RoleEnum.ORGANIZER,
-  congregation: congregationMock
+  congregation: congregationMock,
 };
 
 export const organizerUser: User = {
@@ -42,7 +42,7 @@ export const organizerUser: User = {
   email: 'org.user@email.com',
   photoUrl: 'https://i.stack.imgur.com/l60Hf.png',
   role: RoleEnum.ORGANIZER,
-  congregation: congregationMock
+  congregation: congregationMock,
 };
 
 export const elderUser: User = {
@@ -51,7 +51,7 @@ export const elderUser: User = {
   email: 'elder.test@email.com',
   photoUrl: 'https://i.stack.imgur.com/l60Hf.png',
   role: RoleEnum.ORGANIZER,
-  congregation: congregationMock
+  congregation: congregationMock,
 };
 
 export const adminUser: User = {
@@ -60,19 +60,18 @@ export const adminUser: User = {
   email: 'admin.user@email.com',
   photoUrl: 'https://i.stack.imgur.com/l60Hf.png',
   role: RoleEnum.ADMIN,
-  congregation: congregationMock
+  congregation: congregationMock,
 };
 
 export const userMockBuilder = (user: Partial<User>) => {
   return {
     ...organizerUser,
-    ...user
-  }
-}
+    ...user,
+  };
+};
 
 // USER STATE SERVICE
 const organizerUserStateServiceMock = new UserStateServiceMock();
 organizerUserStateServiceMock.setUser(organizerUser);
 
-export {organizerUserStateServiceMock}
-
+export { organizerUserStateServiceMock };

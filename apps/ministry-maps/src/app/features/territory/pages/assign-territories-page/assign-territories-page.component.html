@@ -1,36 +1,35 @@
-<div class='container'>
-  <h2 class='t-headline2 mb-8' data-testid="assign-heading">Designar Território</h2>
+<div class="container">
+  <h2 class="t-headline2 mb-8" data-testid="assign-heading">Designar Território</h2>
   <select
     lib-select
-    class='w-full'
-    name='Cidade'
+    class="w-full"
+    name="Cidade"
     data-testid="assign-city-filter"
-    [ngModel]='selectedCity'
-    (ngModelChange)='handleSelectedCityChange($event)'>
+    [ngModel]="selectedCity"
+    (ngModelChange)="handleSelectedCityChange($event)"
+  >
     @for (city of cities; track city) {
-      <option [value]='city'>{{ city }}</option>
+      <option [value]="city">{{ city }}</option>
     }
-    <option [value]='ALL_OPTION'>Todas</option>
+    <option [value]="ALL_OPTION">Todas</option>
   </select>
   <!-- Search, Filters, and Sort -->
   <div class="flex mt-3 gap-3">
-    <lib-search-input class="flex-1" (searched)='handleTerritorySearchTermChange($event)' />
-    <lib-sort-filter
-      [config]="sortFilterConfig"
-      (changed)="handleSortFilterChange($event)"
-    />
+    <lib-search-input class="flex-1" (searched)="handleTerritorySearchTermChange($event)" />
+    <lib-sort-filter [config]="sortFilterConfig" (changed)="handleSortFilterChange($event)" />
   </div>
 
   <!-- Territories -->
-  <form id='territory-form' (submit)='handleTerritoryFormSubmit()'>
-    <div class='flex flex-col gap-5 mt-8 pb-56' data-testid="assign-territory-list">
+  <form id="territory-form" (submit)="handleTerritoryFormSubmit()">
+    <div class="flex flex-col gap-5 mt-8 pb-56" data-testid="assign-territory-list">
       @for (territory of filteredTerritories$ | async; track territory.id) {
         <kingdom-apps-territory-checkbox
-          [territory]='territory'
-          [name]='territory.id'
-          [ngModel]='hasAlreadyBeenSelected(territory.id)'
-          [disabled]='assignedTerritories.has(territory.id)'
-          (ngModelChange)='handleTerritoryCheck($event, territory)'>
+          [territory]="territory"
+          [name]="territory.id"
+          [ngModel]="hasAlreadyBeenSelected(territory.id)"
+          [disabled]="assignedTerritories.has(territory.id)"
+          (ngModelChange)="handleTerritoryCheck($event, territory)"
+        >
         </kingdom-apps-territory-checkbox>
       }
     </div>
@@ -42,7 +41,8 @@
     [loading]="isCreatingAssignment"
     type="submit"
     form="territory-form"
-    title="Enviar Designação">
+    title="Enviar Designação"
+  >
     <lib-icon icon="paper-plane-2"></lib-icon>
   </button>
 </div>

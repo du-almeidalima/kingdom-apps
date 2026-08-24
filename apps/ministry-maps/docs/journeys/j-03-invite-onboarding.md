@@ -40,7 +40,7 @@ shape-drift caveat in [`../domain/data-model.md §2.6`](../domain/data-model.md#
    the app lands on `/login` (UC-AUTH-22).
 5. `page.goto('/sign-in/' + inviteId)` (UC-AUTH-14).
 6. Assert the `Cadastrar` heading, the welcome copy `Bem vindo ao Ministry Maps ou MM!` /
-   `Parar criar uma conta, clique no botão a baixo.` (both *sic*), and the **enabled** button
+   `Parar criar uma conta, clique no botão a baixo.` (both _sic_), and the **enabled** button
    `Entrar com uma conta do Google`; assert **no** error paragraph renders.
 
 ⟶ **HAND-OFF (Firestore):** the invite doc is untouched — `isValid` still `true`, no `usedAt`/`usedBy`
@@ -56,8 +56,8 @@ shape-drift caveat in [`../domain/data-model.md §2.6`](../domain/data-model.md#
    [`../testability-gaps.md`](../testability-gaps.md).
 8. **Automated simulation (keeps the journey executable in CI):** mark the invite as consumed directly —
    `db.firestore.doc('invitation_links/' + inviteId).update({ isValid: false, usedAt: new Date(),
-   usedBy: 'novo.organizador@example.com' })`. Add a comment in the spec: *"simulates UC-AUTH-17, which is
-   manual-only; replace with the real popup flow if the suite ever adopts emulator popup automation."*
+usedBy: 'novo.organizador@example.com' })`. Add a comment in the spec: _"simulates UC-AUTH-17, which is
+   manual-only; replace with the real popup flow if the suite ever adopts emulator popup automation."_
 
 ⟶ **HAND-OFF (Firestore):** `(await db.firestore.doc('invitation_links/' + inviteId).get()).data()` —
 `isValid === false`, `usedAt`/`usedBy` set.
@@ -78,7 +78,7 @@ shape-drift caveat in [`../domain/data-model.md §2.6`](../domain/data-model.md#
 12. ✋ **MANUAL-ONLY (UC-AUTH-18):** complete the popup with a **different** Google account
     (`outra.pessoa@example.com`). Expected: the Auth account is **deleted**, the page shows
     `Esse link não está associado a esse email.` + `Por favor, peça para um administrador criar outro link
-    para você.`, the button disappears (no retry without reload), the invite stays `isValid: true`
+para você.`, the button disappears (no retry without reload), the invite stays `isValid: true`
     (consumption only happens on success), and no `users` doc is created.
 13. **Automated partial alternative:** none — the `INVALID_EMAIL` branch only fires from the popup flow.
     The closest automated coverage of this leg's building blocks is UC-AUTH-15 (missing invite → same

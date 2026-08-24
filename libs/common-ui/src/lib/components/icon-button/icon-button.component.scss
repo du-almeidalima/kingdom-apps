@@ -21,7 +21,8 @@
 
   transition: variables.$background-transition;
 
-  &:hover, &:active {
+  &:hover,
+  &:active {
     background: var(--background-hover-color, var(--kui-color-surface-hover, #{variables.$white-300}));
   }
 

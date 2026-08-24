@@ -28,10 +28,7 @@ export interface CsvDownload {
  * expect(content.startsWith('\uFEFF')).toBe(true);
  * ```
  */
-export async function downloadCsv(
-  page: Page,
-  trigger: () => Promise<void>,
-): Promise<CsvDownload> {
+export async function downloadCsv(page: Page, trigger: () => Promise<void>): Promise<CsvDownload> {
   const [download] = await Promise.all([page.waitForEvent('download'), trigger()]);
 
   const path = await download.path();

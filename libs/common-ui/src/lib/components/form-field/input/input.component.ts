@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, OnInit, Renderer2 } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnInit, Renderer2, inject } from '@angular/core';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -8,7 +8,8 @@ import { ChangeDetectionStrategy, Component, ElementRef, OnInit, Renderer2 } fro
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InputComponent implements OnInit {
-  constructor(private readonly renderer: Renderer2, private readonly elRef: ElementRef<HTMLInputElement>) {}
+  private readonly renderer = inject(Renderer2);
+  private readonly elRef = inject<ElementRef<HTMLInputElement>>(ElementRef);
 
   ngOnInit(): void {
     this.renderer.addClass(this.elRef.nativeElement, `input`);

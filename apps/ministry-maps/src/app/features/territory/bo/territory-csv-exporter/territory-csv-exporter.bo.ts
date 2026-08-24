@@ -3,9 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { of, switchMap } from 'rxjs';
 import type { Territory } from '../../../../../models/territory';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
-import {
-  TerritoryIconTranslatorPipe
-} from '../../../../shared/pipes/territory-icon-translator/territory-icon-translator.pipe';
+import { TerritoryIconTranslatorPipe } from '../../../../shared/pipes/territory-icon-translator/territory-icon-translator.pipe';
 import { UserStateService } from '../../../../state/user.state.service';
 
 /**
@@ -37,7 +35,7 @@ export class TerritoryCsvExporterBO {
         this.exportCsv(territories);
 
         return of(true);
-      })
+      }),
     );
   }
 

@@ -20,7 +20,8 @@ export type Territory = {
   /** Order in which it will be sorted. */
   positionIndex?: number;
   icon: TerritoryIcon;
-  lastVisit?: Date;
+  /** Null (not just undefined) is a stored state: the undo-last-visit flow writes an explicit null. */
+  lastVisit?: Date | null;
   history?: TerritoryVisitHistory[];
   recentHistory?: TerritoryVisitHistory[];
   /** Represents the quantity of people that lives in that Territory. For the majority of cases it will be 1 or null. */

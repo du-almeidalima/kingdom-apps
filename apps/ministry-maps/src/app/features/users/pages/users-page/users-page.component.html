@@ -11,16 +11,20 @@
           <kingdom-apps-user-list-item
             [user]="user"
             (remove)="handleDeleteUser($event)"
-            (edit)="handleEditUser($event)" />
+            (edit)="handleEditUser($event)"
+          />
         </li>
       }
     </ul>
 
-    <button *libAuthorize="CREATE_INVITE_LINK_ALLOWED"
-            lib-floating-action-button title='Criar Link de Convite'
-            data-testid="users-add-button"
-            (click)='handleCreateInviteLink()'>
-      <lib-icon icon='plus-lined' />
+    <button
+      *libAuthorize="CREATE_INVITE_LINK_ALLOWED"
+      lib-floating-action-button
+      title="Criar Link de Convite"
+      data-testid="users-add-button"
+      (click)="handleCreateInviteLink()"
+    >
+      <lib-icon icon="plus-lined" />
     </button>
   }
 </main>

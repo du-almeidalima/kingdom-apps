@@ -3,12 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { HomePageComponent } from './pages/home-page/home-page.component';
 import { RoleEnum } from '../../../models/enums/role';
 
-export const HOME_ALLOWED_ROLES = [
-  RoleEnum.ORGANIZER,
-  RoleEnum.ADMIN,
-  RoleEnum.ELDER,
-  RoleEnum.SUPERINTENDENT,
-]
+export const HOME_ALLOWED_ROLES = [RoleEnum.ORGANIZER, RoleEnum.ADMIN, RoleEnum.ELDER, RoleEnum.SUPERINTENDENT];
 
 export enum HomeRoutesEnum {
   INDEX = '',

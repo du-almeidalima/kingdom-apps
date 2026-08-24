@@ -25,7 +25,12 @@ $size: 6rem;
     100ms linear filter,
     variables.$background-transition;
 
-  box-shadow: var(--kui-shadow-dialog, 0 3px 5px -1px rgb(0 0 0 / 20%), 0px 6px 10px 0px rgb(0 0 0 / 14%), 0px 1px 18px 0px rgb(0 0 0 / 12%));
+  box-shadow: var(
+    --kui-shadow-dialog,
+    0 3px 5px -1px rgb(0 0 0 / 20%),
+    0px 6px 10px 0px rgb(0 0 0 / 14%),
+    0px 1px 18px 0px rgb(0 0 0 / 12%)
+  );
 
   &:active,
   &:hover,
@@ -39,7 +44,12 @@ $size: 6rem;
   }
 
   &:active {
-    box-shadow: var(--kui-shadow-dialog, 0 7px 8px -4px rgb(0 0 0 / 20%), 0px 12px 17px 2px rgb(0 0 0 / 14%), 0px 5px 22px 4px rgb(0 0 0 / 12%));
+    box-shadow: var(
+      --kui-shadow-dialog,
+      0 7px 8px -4px rgb(0 0 0 / 20%),
+      0px 12px 17px 2px rgb(0 0 0 / 14%),
+      0px 5px 22px 4px rgb(0 0 0 / 12%)
+    );
   }
 
   &:disabled {

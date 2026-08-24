@@ -20,6 +20,12 @@ service cloud.firestore {
       }
     }
 
+    // Collection-group queries for history subcollections (statistics single-query read).
+    // Grants nothing new: direct access to territories/{id}/history is already public above.
+    match /{path=**}/history/{historyId} {
+      allow read, write: if true;
+    }
+
     // Readable pre-auth so invite links can be validated before sign-in (the validation chain
     // also resolves the congregation reference). Invites are consumed only by the
     // provisionUserFromInvite Cloud Function, which bypasses rules via the Admin SDK.

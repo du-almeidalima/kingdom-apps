@@ -58,7 +58,7 @@ describe('InviteBO', () => {
         of({
           ...expectedInviteData,
           id: 'invite123',
-        } as InvitationLink)
+        } as InvitationLink),
       );
 
       let result: InvitationLink | undefined;
@@ -90,7 +90,7 @@ describe('InviteBO', () => {
         of({
           ...expectedInviteData,
           id: 'invite123',
-        } as InvitationLink)
+        } as InvitationLink),
       );
 
       let result: InvitationLink | undefined;

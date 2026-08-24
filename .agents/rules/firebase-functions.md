@@ -1,6 +1,6 @@
 ---
 globs:
-- functions/**/*.ts
+  - functions/**/*.ts
 description: Firebase Cloud Functions v2 (TypeScript) — a standalone npm package, not an Nx project.
 ---
 

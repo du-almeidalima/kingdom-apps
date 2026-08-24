@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { addDoc, collection, CollectionReference, Firestore, Timestamp } from '@angular/fire/firestore';
 import { environment } from '../../../../environments/environment';
 
@@ -21,13 +21,15 @@ export enum LogLevelEnum {
   providedIn: 'root',
 })
 export class LoggerService {
+  private firestore = inject(Firestore);
+
   // TTL retention: 6 months
   private static readonly RETENTION_DAYS = 180;
   private static readonly MS_PER_DAY = 24 * 60 * 60 * 1000;
 
   private readonly logsCollection: CollectionReference;
 
-  constructor(private firestore: Firestore) {
+  constructor() {
     this.logsCollection = collection(this.firestore, 'logs');
   }
 

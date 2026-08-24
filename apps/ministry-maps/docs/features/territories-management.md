@@ -8,13 +8,14 @@ their resolution dialogs, the visit-history dialog, and CSV export.
 **Actors:** `ADMIN`, `ELDER`, `ORGANIZER`, `SUPERINTENDENT`, `APP_ADMIN` can reach the page (see
 [`../domain/roles-and-permissions.md`](../domain/roles-and-permissions.md)); `PUBLISHER` is redirected to
 `/welcome`; anonymous visitors are redirected to `/login`. Within the page, `ORGANIZER` sees a materially
-reduced UI (no overflow menu, no edit/delete/alert-resolution on list items) — see the *Role gating* group.
+reduced UI (no overflow menu, no edit/delete/alert-resolution on list items) — see the _Role gating_ group.
 Field/model shapes referenced below are defined in [`../domain/data-model.md`](../domain/data-model.md);
 pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.md).
 
 ### Listing and city scope
 
 #### UC-TERR-01 — List shows only the signed-in user's congregation territories
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline (3 territories in `seed-congregation`); plus 1 extra territory with a different `congregationId`
@@ -25,6 +26,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 - **Priority:** P0 · **Gaps:** none
 
 #### UC-TERR-02 — City `<select>` mirrors `congregation.cities`, "Todas" is a synthetic last option, ordering differs by scope
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline (`cities: ['São Paulo', 'Osasco']`)
@@ -35,6 +37,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 - **Priority:** P0 · **Gaps:** no `data-testid` on individual `<option>`s
 
 #### UC-TERR-03 — Empty state: selected city has no territories
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline; congregation's `cities` extended with `'Guarulhos'` (no territory in that city)
@@ -45,6 +48,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 - **Priority:** P2 · **Gaps:** no empty-state message/testid to assert against; test must assert row count `0`
 
 #### UC-TERR-04 — ⚠ Empty congregation (no cities) breaks the filter
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** congregation with `cities: []` and 0 territories
@@ -57,6 +61,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 ### Search
 
 #### UC-TERR-05 — Multi-word search AND-matches across `address` and `note`
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline; seed 1 extra territory `address: 'Rua das Flores, 123 - Vila Mariana'`, `note: 'Prédio com portaria, falar com o porteiro.'` (the `buildTerritory` default note)
@@ -67,6 +72,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 - **Priority:** P0 · **Gaps:** no `data-testid` on the search input (relies on `lib-search-input` component internals)
 
 #### UC-TERR-06 — Search is case-insensitive but accent-sensitive
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline (territory `seed-territory-1`, address `Rua das Acácias, 45 - Pinheiros`)
@@ -79,6 +85,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 ### Sorting
 
 #### UC-TERR-07 — "Ordem de Cadastro" sorts by saved `positionIndex`
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline, city `São Paulo` selected (`seed-territory-1` `positionIndex 0`, `seed-territory-3` `positionIndex 2`)
@@ -89,6 +96,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 - **Priority:** P1 · **Gaps:** none
 
 #### UC-TERR-08 — "Última Visita" sorts by `lastVisit`
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline, city `São Paulo`; `seed-territory-1` last visit `2024-03-10` (`REVISIT`), `seed-territory-3` last visit `2024-03-12` (`SPOKE`)
@@ -101,6 +109,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 ### Sort/filter dialog
 
 #### UC-TERR-09 — "Estudantes da Bíblia" toggle (default ON) hides bible-student territories when turned off
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline (`seed-territory-3` has `isBibleStudent: true`), city `São Paulo`
@@ -111,6 +120,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 - **Priority:** P1 · **Gaps:** no `data-testid` on the toggle
 
 #### UC-TERR-10 — "Territórios que Mudaram" toggle (default OFF) reveals unresolved-moved territories
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline; plus 1 territory with `recentHistory` containing a `MOVED` (`2`) entry, `isResolved: false`, and a non-empty `note`
@@ -121,6 +131,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 - **Priority:** P1 · **Gaps:** none
 
 #### UC-TERR-11 — Icon `<select>` filter narrows the list to one `TerritoryIcon`
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline, city `São Paulo` (`seed-territory-1` icon `cp`/`Casal`, `seed-territory-3` icon `m`/`Homem`)
@@ -131,6 +142,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 - **Priority:** P2 · **Gaps:** none
 
 #### UC-TERR-12 — ⚠ Active-filter badge counts the default toggle as "active" from first render
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline
@@ -141,6 +153,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 - **Priority:** P2 · **Gaps:** `⚠ suspected defect` — badge baseline should be `config.filterConfigs.initial`, not the unset `initialValue` input; test must assert `1` on fresh load, not `0`
 
 #### UC-TERR-13 — Sort/filter state persists in `localStorage` across reload
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline
@@ -153,6 +166,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 ### Create dialog
 
 #### UC-TERR-14 — Required-field validation blocks submit
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline
@@ -163,6 +177,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 - **Priority:** P0 · **Gaps:** no `data-testid`s on the manage-dialog form fields (rely on `#territory-address`, label text)
 
 #### UC-TERR-15 — City prefills from the currently selected city filter
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline
@@ -173,6 +188,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 - **Priority:** P1 · **Gaps:** none
 
 #### UC-TERR-16 — Bible-student toggle reveals the instructor field; ⚠ re-checking clears it
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline
@@ -180,9 +196,10 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 - **Expected UI:** `Instrutor` only renders while the checkbox is checked; after step 4 the field is visible again but **empty** — `isBibleStudent.valueChanges` calls `bibleInstructor.reset()` whenever the emitted value is truthy, wiping whatever was typed
 - **Expected persistence:** submitting right after step 3 (without unchecking) would persist `bibleInstructor` as typed; submitting after step 4 persists `bibleInstructor: null` (the form control's `reset()` value is serialized as `null` by the Firestore write)
 - **Edge cases:** on **edit** of an existing bible-student territory the field is correctly pre-filled, because `patchValue` runs before the listener is attached — the data loss only happens from interactively toggling within one dialog session
-- **Priority:** P2 · **Gaps:** `⚠ suspected defect` — listener should reset on the *false* transition, not the *true* one
+- **Priority:** P2 · **Gaps:** `⚠ suspected defect` — listener should reset on the _false_ transition, not the _true_ one
 
 #### UC-TERR-17 — `positionIndex` is allocated as max+1 per city on create
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline, city `São Paulo` (`positionIndex` 0 and 2 already used)
@@ -193,6 +210,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 - **Priority:** P1 · **Gaps:** none
 
 #### UC-TERR-18 — Create vs edit dialog: title and submit label differ
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline
@@ -205,6 +223,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 ### Edit dialog
 
 #### UC-TERR-19 — Edit dialog pre-fills existing values and persists a merged diff
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline (`seed-territory-2`: Osasco, `Av. dos Autonomistas, 1200 - Centro`, icon `w`)
@@ -217,6 +236,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 ### Delete territory
 
 #### UC-TERR-20 — Delete confirmation, doc removal, and orphaned history
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline (`seed-territory-1`, which has 2 `history` subcollection docs)
@@ -229,6 +249,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 ### Drag-and-drop reorder
 
 #### UC-TERR-21 — Reordering persists `positionIndex` via a batched transaction
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline, city `São Paulo` selected, sort `Ordem de Cadastro` (default) — required for drag to be enabled
@@ -239,6 +260,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 - **Priority:** P1 · **Gaps:** no `data-testid` on the drag handle button; requires Playwright's low-level mouse API, not `dragTo()`
 
 #### UC-TERR-22 — Drag handle is gated by city scope and sort mode
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline
@@ -256,6 +278,7 @@ outcome — only bible-student, `MOVED` (unresolved), `ASKED_TO_NOT_VISIT_AGAIN`
 months) and `isRevisit` drive a badge.
 
 #### UC-TERR-23 — "Estudante" badge for bible-study territories
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline (`seed-territory-3`: `isBibleStudent: true`, non-empty `note` required — see UC-TERR-27)
@@ -265,6 +288,7 @@ months) and `isRevisit` drive a badge.
 - **Priority:** P1 · **Gaps:** none
 
 #### UC-TERR-24 — "Mudou" badge for an unresolved `MOVED` entry
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** 1 territory with `note` set and `recentHistory` containing `{ visitOutcome: 2, isResolved: false }`
@@ -275,6 +299,7 @@ months) and `isRevisit` drive a badge.
 - **Priority:** P1 · **Gaps:** none
 
 #### UC-TERR-25 — "Não quer visitas" badge, 24-month window
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** 1 territory with `note` set and `recentHistory` containing `{ visitOutcome: 3, isResolved: false, date: <10 months ago> }`
@@ -285,6 +310,7 @@ months) and `isRevisit` drive a badge.
 - **Priority:** P1 · **Gaps:** none
 
 #### UC-TERR-26 — "Revisita" badge for any `isRevisit` entry
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline (`seed-territory-3` has a `recentHistory` entry `{ visitOutcome: 0, isRevisit: true }`, plus its own non-empty `note`)
@@ -295,6 +321,7 @@ months) and `isRevisit` drive a badge.
 - **Priority:** P1 · **Gaps:** none
 
 #### UC-TERR-27 — ⚠ Alert badges only render when `note` is non-empty
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** 1 territory with `note: ''`, `isBibleStudent: true`, and `recentHistory` containing an unresolved `MOVED` entry
@@ -307,6 +334,7 @@ months) and `isRevisit` drive a badge.
 ### Visit-history dialog
 
 #### UC-TERR-28 — ⚠ "Histórico" loads the entire `history` subcollection, reversed, unordered
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline (`seed-territory-1`: 2 history docs, `REVISIT` 2024-03-10 and `SPOKE` 2024-02-20)
@@ -317,6 +345,7 @@ months) and `isRevisit` drive a badge.
 - **Priority:** P1 · **Gaps:** `⚠ suspected defect` — no `orderBy('date')`/`limit(5)` on the query; contrast with `/work/:id`'s history dialog, which renders the designation-embedded `history` array instead (see `data-model.md §4.2`)
 
 #### UC-TERR-29 — "Histórico" menu item is always visible, even with zero visits
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** 1 territory with no `history` subcollection docs (`history: []` at seed time)
@@ -329,6 +358,7 @@ months) and `isRevisit` drive a badge.
 ### "Moved" alert resolution dialog
 
 #### UC-TERR-30 — Resolve "Mudou" alert: mark as resolved, delete, or edit
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** 1 territory with non-empty `note` and `recentHistory` containing an unresolved `MOVED` entry (`notes` length > 1 so it is quoted)
@@ -340,28 +370,31 @@ months) and `isRevisit` drive a badge.
 
 ### "Revisita" / "Não Visitar" alert resolution dialogs
 
-#### UC-TERR-31 — ⚠ Resolving "Revisita" can silently drop unrelated `recentHistory` entries
+#### UC-TERR-31 — Resolving "Revisita" preserves unrelated `recentHistory` entries (fixed 2026-08)
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** 1 territory, non-empty `note`, `recentHistory` with **two** entries: (A) `{ isRevisit: true }` and (B) an unrelated unresolved `MOVED` (`visitOutcome: 2`) entry
 - **Steps:** 1. menu → `Revisita` (only entry A is passed to the dialog: `territory.recentHistory.filter(h => h.isRevisit)`) → 2. dialog title `Revisita`, message `Um ou mais publicadores marcaram que esse território está sendo revisitado: `, quoted report(s) → 3. `Remover Marcação`
-- **Expected UI:** the `Revisita` badge disappears; the unrelated `Mudou` badge/menu item also disappears even though it was never addressed
-- **Expected persistence:** `handleResolveAlert` calls `markAsResolvedCallback` with **only** entry A; `resolveTerritoryHistoryAlert` sets `copiedTerritory.history = [A with isRevisit:false]` and `TerritoryRepository.update` recomputes `recentHistory = history.slice(-5)` from that single-element array — so the parent doc's `recentHistory` now contains **only** entry A, and entry B is gone from `recentHistory`. Assert `db.getDoc(...).recentHistory` has length `1` after this action. The `history` subcollection is untouched for entry B (`db.getSubcollectionDocs` still has both docs) — only the denormalised array loses it
-- **Edge cases:** this reproduces identically for `Não Visitar` (`handleResolveStopVisitingAlert` filters by `visitOutcome === 3` the same way)
-- **Priority:** P1 · **Gaps:** `⚠ suspected defect` — resolving one alert type should not truncate unrelated `recentHistory` entries; consolidate in `testability-gaps.md`
+- **Expected UI:** the `Revisita` badge disappears; the unrelated `Mudou` badge/menu item **remains** (entry B was never addressed and is no longer dropped — this is the fixed behavior)
+- **Expected persistence:** `resolveTerritoryHistoryAlert` merges the updated entries back into the **full** `recentHistory` (matched by id) before persisting, so the parent doc's `recentHistory` keeps **both** entries: entry A with `isRevisit: false`, entry B untouched (`isResolved` still falsy). The `history` subcollection keeps both docs, with only entry A's doc rewritten (`isRevisit: false` via `setVisitHistory`)
+- **Edge cases:** this reproduces identically for `Não Visitar` (`handleResolveStopVisitingAlert` filters by `visitOutcome === 3` the same way). Historical defect: before the 2026-08 fix, `recentHistory` was rewritten from only the filtered subset, silently dropping unrelated entries
+- **Priority:** P1 · **Gaps:** none — the former `⚠ suspected defect` (Gap #7) was fixed and verified by this test
 
 #### UC-TERR-32 — Resolve "Não Visitar" alert clears the badge
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** 1 territory, non-empty `note`, `recentHistory` with one unresolved `ASKED_TO_NOT_VISIT_AGAIN` (`3`) entry dated within 24 months
 - **Steps:** 1. menu → `Não Visitar` → 2. dialog title `Parar de Visitar`, message `Um ou mais publicadores marcaram que esse território pediu para não ser visitado: ` → 3. `Remover Marcação`
 - **Expected UI:** `Não quer visitas` badge and `Não Visitar` menu item disappear
 - **Expected persistence:** the matching entry's `isResolved` becomes `true` in both `recentHistory` and the `history/{visitId}` subcollection doc
-- **Priority:** P1 · **Gaps:** none (see UC-TERR-31 for the truncation caveat when other alerts coexist)
+- **Priority:** P1 · **Gaps:** none (resolving one alert type preserves unrelated `recentHistory` entries — see UC-TERR-31)
 
 ### Maps-link affordance
 
 #### UC-TERR-33 — ⚠ No "open in Maps" button exists on this screen
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline (all 3 territories have a `mapsLink`, per `buildTerritory`'s default)
@@ -374,6 +407,7 @@ months) and `isRevisit` drive a badge.
 ### CSV export
 
 #### UC-TERR-34 — Export downloads a pt-BR CSV, sorted by city
+
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline
@@ -384,6 +418,7 @@ months) and `isRevisit` drive a badge.
 - **Priority:** P1 · **Gaps:** requires `page.waitForEvent('download')`; no `data-testid` on the menu trigger or the `Exportar Territórios` item
 
 #### UC-TERR-35 — Export/overflow menu hidden for `ORGANIZER`/`ELDER`
+
 - **Actor:** Organizer (harness extension needed — only `admin`/`publisher` exist in `signInAs` today)
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline; a user with `role: 'ORGANIZER'`
@@ -396,6 +431,7 @@ months) and `isRevisit` drive a badge.
 ### Role gating
 
 #### UC-TERR-36 — List-item menu (`EDIT_ALLOWED`) excludes `ORGANIZER`
+
 - **Actor:** Organizer (harness extension needed)
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline; a user with `role: 'ORGANIZER'`
@@ -406,6 +442,7 @@ months) and `isRevisit` drive a badge.
 - **Priority:** P1 · **Gaps:** `signInAs('organizer')` harness extension needed
 
 #### UC-TERR-37 — Anonymous access redirects to `/login`
+
 - **Actor:** Anonymous
 - **Route:** `/territories`
 - **Preconditions (seed):** none required (already covered by `apps/ministry-maps/e2e/tests/territories.spec.ts`)
@@ -436,8 +473,8 @@ months) and `isRevisit` drive a badge.
   UC-TERR-04 (empty-congregation filter throws), UC-TERR-12 (badge miscounts on fresh load), UC-TERR-16
   (bible-instructor cleared on re-check), UC-TERR-20 (orphaned `history` subcollection after delete),
   UC-TERR-27 (badges gated by `note`, already tracked in `data-model.md`), UC-TERR-28 (history dialog reads
-  the unordered full subcollection, not `recentHistory`), UC-TERR-31 (alert resolution truncates unrelated
-  `recentHistory` entries), UC-TERR-33 (no maps affordance on this screen).
+  the unordered full subcollection, not `recentHistory`), UC-TERR-31 (alert resolution truncation —
+  **fixed 2026-08**), UC-TERR-33 (no maps affordance on this screen).
 
 ## Sources
 

@@ -99,7 +99,7 @@ apps/ministry-maps/e2e/
 ## Configuration (`config/`)
 
 | Module                      | Purpose                                                                                                                                                                                               |
-|-----------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `emulator.config.ts`        | Single source of truth for ports (`8080`, `9099`, `5001`), project id (`du-ministry-maps`), and derived REST URLs. Keep in sync with `firebase.json`.                                                 |
 | `firebase-admin.context.ts` | Sets env vars (`FIRESTORE_EMULATOR_HOST`, `FIREBASE_AUTH_EMULATOR_HOST`), initializes the Admin app once, and exports `firestore`, `auth`, and `Collections`.                                         |
 | `auth.config.ts`            | `ROLE_UIDS: Record<TestRole, string>` — maps test roles (`admin`, `publisher`, `elder`, `organizer`, `superintendent`, `app_admin`) to seeded uids from `DEFAULT_SEED_IDS` — plus `DEFAULT_PASSWORD`. |
@@ -123,9 +123,7 @@ test('on-demand seeding', async ({ seed, db }) => {
     congregationId: seed.ids.congregation,
     city: 'Campinas',
     address: 'Rua Inventada, 999',
-    history: [
-      seed.factories.buildVisitHistory({ notes: 'Morador interessado.' }),
-    ],
+    history: [seed.factories.buildVisitHistory({ notes: 'Morador interessado.' })],
   });
 
   // SeedDefinition fields are all optional — pass only what you're adding.
@@ -166,7 +164,7 @@ import { test, expect } from '../fixtures';
 ### Available Fixtures
 
 | Fixture             | Type                      | Description                                                |
-|---------------------|---------------------------|------------------------------------------------------------|
+| ------------------- | ------------------------- | ---------------------------------------------------------- |
 | `resetAndSeed`      | auto                      | Wipes + re-seeds before every test.                        |
 | `seed`              | `SeedApi`                 | Factories, `write()`, `ids`.                               |
 | `db`                | `DbApi`                   | Firestore/Auth handles and read helpers.                   |
@@ -184,11 +182,7 @@ test('check Firestore', async ({ db, seed }) => {
   const all = await db.getCollectionDocs(db.collections.congregations);
 
   // Subcollection reads
-  const history = await db.getSubcollectionDocs(
-    db.collections.territories,
-    territoryId,
-    db.historySubcollection,
-  );
+  const history = await db.getSubcollectionDocs(db.collections.territories, territoryId, db.historySubcollection);
 
   // Query helper
   const results = await db.queryWhere(db.collections.users, 'role', '==', 'ADMIN');
@@ -214,7 +208,7 @@ test('guarded route', async ({ authenticatedPage }) => {
 
 ```typescript
 test('guarded route', async ({ signInAs, page }) => {
-  await signInAs('admin');       // mints token + establishes the session
+  await signInAs('admin'); // mints token + establishes the session
   await page.goto('/territories');
   // ...assertions on the guarded page
 });
@@ -302,12 +296,12 @@ Locators use `data-testid` attributes (not text content) for robustness, includi
 Cross-feature UI constructs have dedicated page objects so area specs don't duplicate locator logic:
 
 | Page Object            | Constructor Arg | Key Locators / Actions                                                                              | Used By                                                 |
-|------------------------|-----------------|-----------------------------------------------------------------------------------------------------|---------------------------------------------------------|
+| ---------------------- | --------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
 | `ConfirmDialogPage`    | `page`          | `dialog`, `title`, `confirm()`, `cancel()`                                                          | TERR-20, WORK-17, ASSIGN-07/08, USERS-08/09, PROF-09/10 |
 | `HistoryDialogPage`    | `page`          | `dialog`, `rows`, `close()`                                                                         | TERR-26, WORK-09, J-02                                  |
 | `SortFilterDialogPage` | `page`          | `trigger`, `badge`, `open()`, `apply()`, `selectSort()`, `toggleByTitle()`, `selectFilterByTitle()` | TERR-09…13, ASSIGN-05…10                                |
-| `HeaderPage`           | `page`          | `nav`, `profileLink`, `logo`, `appName`, `goToProfile()`, `goToHome()`                              | NAV-*, PROF-01                                          |
-| `ToastPage`            | `page`          | `message`, `expectText(text)`                                                                       | CFG-*, USERS-10, ASSIGN-12                              |
+| `HeaderPage`           | `page`          | `nav`, `profileLink`, `logo`, `appName`, `goToProfile()`, `goToHome()`                              | NAV-\*, PROF-01                                         |
+| `ToastPage`            | `page`          | `message`, `expectText(text)`                                                                       | CFG-\*, USERS-10, ASSIGN-12                             |
 
 ```typescript
 import { ConfirmDialogPage } from '../page-objects/confirm-dialog.page';
@@ -327,7 +321,7 @@ Canonical helpers for the browser-level techniques catalogued in
 `test`/`expect` imports), so they also work from fixtures.
 
 | Helper                                               | Technique                                                                                                                                         | Serves                                          |
-|------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------|
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
 | `stubWindowOpen(page)` / `getOpenedUrls(page)`       | Records `window.open` URLs via `addInitScript` — the robust option when `waitForEvent('popup')` can't work (custom protocols, `_self` navigation) | UC-USERS-14, UC-WORK-19 (Firefox/Safari branch) |
 | `captureWhatsAppPopup(page, trigger)`                | Wraps `waitForEvent('popup')` around the trigger, decodes the `whatsapp://send?text=…` URL → `{ whatsappUrl, text, sharedUrl }`                   | UC-ASSIGN-19, J-01                              |
 | `downloadCsv(page, trigger)`                         | Wraps `waitForEvent('download')`, reads the file from `download.path()` — keeps the `\uFEFF` BOM for the caller to assert                         | UC-TERR-34, J-08                                |
