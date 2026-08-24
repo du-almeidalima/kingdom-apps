@@ -80,9 +80,7 @@ export const provisionUserFromInvite = onCall<ProvisionUserRequest, Promise<Publ
       usedBy: callerToken.email ?? callerUid,
     });
 
-    logger.info(
-      `Provisioned user [${callerUid}] with role [${invite.role}] from invitation [${inviteId}].`
-    );
+    logger.info(`Provisioned user [${callerUid}] with role [${invite.role}] from invitation [${inviteId}].`);
 
     return toPublicUser(newUser);
   });

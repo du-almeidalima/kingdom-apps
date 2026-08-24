@@ -35,12 +35,14 @@ export class TerritoryBO {
     const expiresInDays = this.congregationSettingsBO.getSettingOrDefault('designationAccessExpiryDays');
     const designationExpirationDate = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000);
     const designationSettings: DesignationSettings = {
-      shouldDesignationBlockAfterExpired: this.congregationSettingsBO.getSettingOrDefault('shouldDesignationBlockAfterExpired')
-    }
+      shouldDesignationBlockAfterExpired: this.congregationSettingsBO.getSettingOrDefault(
+        'shouldDesignationBlockAfterExpired',
+      ),
+    };
 
     return territories$.pipe(
-      switchMap(territories => {
-        const designationTerritories: DesignationTerritory[] = territories.map(t => {
+      switchMap((territories) => {
+        const designationTerritories: DesignationTerritory[] = territories.map((t) => {
           // This is not needed for the Designation Territory
           delete t['recentHistory'];
 
@@ -57,22 +59,22 @@ export class TerritoryBO {
           createdAt: new Date(),
           createdBy: user.id,
           expiresAt: designationExpirationDate,
-          settings: designationSettings
+          settings: designationSettings,
         };
 
         return this.designationRepository.add(newDesignation);
       }),
-      catchError(err => {
+      catchError((err) => {
         this.loggerService.error(err);
         return EMPTY;
       }),
-      tap(designation => {
+      tap((designation) => {
         if (designation) {
           this.loggerService.info(
-            `Congregation [${congregation.name}] (${congregation.id}) created Designation [${designation.id}] by User [${user.name}] (${user.id}).`
+            `Congregation [${congregation.name}] (${congregation.id}) created Designation [${designation.id}] by User [${user.name}] (${user.id}).`,
           );
         }
-      })
+      }),
     );
   }
 
@@ -82,8 +84,10 @@ export class TerritoryBO {
         const user = this.userStateService.currentUser;
         const congregation = user?.congregation;
 
-        this.loggerService.info(`Congregation [${congregation?.name}] (${congregation?.id}) deleted Territory [${territoryId}] by User [${user?.name}] (${user?.id}).`);
-      })
+        this.loggerService.info(
+          `Congregation [${congregation?.name}] (${congregation?.id}) deleted Territory [${territoryId}] by User [${user?.name}] (${user?.id}).`,
+        );
+      }),
     );
   }
 
@@ -109,6 +113,6 @@ export class TerritoryBO {
       getTerritoriesIn$.push(this.territoryRepository.getAllInIds(batchIds));
     }
 
-    return forkJoin(getTerritoriesIn$).pipe(map(territoriesBatches => territoriesBatches.flat()));
+    return forkJoin(getTerritoriesIn$).pipe(map((territoriesBatches) => territoriesBatches.flat()));
   }
 }

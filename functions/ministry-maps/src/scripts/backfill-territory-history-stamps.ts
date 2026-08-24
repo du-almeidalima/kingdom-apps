@@ -85,7 +85,9 @@ async function backfillHistoryStamps(): Promise<BackfillStats> {
 
 async function main(): Promise<void> {
   console.log(
-    `Territory history stamps backfill ${dryRun ? '(DRY RUN)' : ''}: stamps congregationId/territoryId on history documents\n`
+    `Territory history stamps backfill ${
+      dryRun ? '(DRY RUN)' : ''
+    }: stamps congregationId/territoryId on history documents\n`,
   );
 
   const stats = await backfillHistoryStamps();
@@ -94,7 +96,7 @@ async function main(): Promise<void> {
     `Done.\n  Territories scanned: ${stats.territoriesScanned}\n` +
       `  History docs scanned: ${stats.historyDocsScanned}, backfilled: ${stats.historyDocsBackfilled}${
         dryRun ? ' (dry run - no writes)' : ''
-      }`
+      }`,
   );
 }
 

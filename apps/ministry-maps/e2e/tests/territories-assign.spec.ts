@@ -6,6 +6,7 @@ import { captureWhatsAppPopup } from '../utils/whatsapp-link.util';
 import * as firebaseAdmin from 'firebase-admin';
 import { RoleEnum } from '../../src/models/enums/role';
 import { VisitOutcomeEnum } from '../../src/models/enums/visit-outcome';
+import { expectData } from '../utils/firestore-assert.util';
 
 /** Extract the designation id from a `/work/{id}` share URL. */
 function designationIdFromShareUrl(sharedUrl: string): string {
@@ -139,7 +140,7 @@ test.describe('Assign territories — listing & selection (WP-18)', () => {
     await expect(assignPage.checkboxes).toHaveCount(2);
 
     expect((await db.getDoc(db.collections.territories, 'seed-territory-1'))?.['address']).toBe(
-      'Rua das Acácias, 45 - Pinheiros'
+      'Rua das Acácias, 45 - Pinheiros',
     );
   });
 
@@ -198,7 +199,7 @@ test.describe('Assign territories — listing & selection (WP-18)', () => {
     await expect(confirm.dialog).toBeVisible();
     await expect(confirm.title).toHaveText('Se Mudou');
     await expect(
-      authenticatedPage.getByText('Um publicador recentemente relatou que esse morador se mudou.')
+      authenticatedPage.getByText('Um publicador recentemente relatou que esse morador se mudou.'),
     ).toBeVisible();
     await expect(authenticatedPage.getByText('Você deseja designar esse território mesmo assim?')).toBeVisible();
     await confirm.confirm();
@@ -239,15 +240,15 @@ test.describe('Assign territories — listing & selection (WP-18)', () => {
     await expect(confirm.title).toHaveText('Não visitar');
     await expect(
       authenticatedPage.getByText(
-        'Esse morador pediu para não ser visitado por uma Testemunha de Jeová recentemente dentro dos últimos dois anos.'
-      )
+        'Esse morador pediu para não ser visitado por uma Testemunha de Jeová recentemente dentro dos últimos dois anos.',
+      ),
     ).toBeVisible();
     await expect(authenticatedPage.getByText('Você deseja designar esse território mesmo assim?')).toBeVisible();
 
     const stored = await db.getDoc(db.collections.territories, stopVisit.id);
     const rh = stored?.['recentHistory'] as Array<Record<string, unknown>>;
     expect(
-      rh.some((h) => h['visitOutcome'] === VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN && h['isResolved'] === false)
+      rh.some((h) => h['visitOutcome'] === VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN && h['isResolved'] === false),
     ).toBe(true);
   });
 
@@ -369,7 +370,7 @@ test.describe('Assign territories — creation & share (WP-19)', () => {
     // expiresAt ≈ createdAt + 7 days (raw ms, no day-boundary truncation).
     await expect(async () => {
       const snap = await db.getDocSnapshot(db.collections.designations, designationId);
-      const data = snap.data()!;
+      const data = expectData(snap.data());
       const createdAt = data['createdAt'].toMillis();
       const expiresAt = data['expiresAt'].toMillis();
       expect(expiresAt - createdAt).toBeGreaterThanOrEqual(7 * 86_400_000 - 5_000);
@@ -410,7 +411,7 @@ test.describe('Assign territories — creation & share (WP-19)', () => {
 
     await expect(async () => {
       const snap = await db.getDocSnapshot(db.collections.designations, designationId);
-      const data = snap.data()!;
+      const data = expectData(snap.data());
       const diff = data['expiresAt'].toMillis() - data['createdAt'].toMillis();
       // 45-day env default, not the 7-day baseline.
       expect(diff).toBeGreaterThanOrEqual(45 * 86_400_000 - 5_000);
@@ -433,7 +434,7 @@ test.describe('Assign territories — creation & share (WP-19)', () => {
 
     await expect(async () => {
       const snap = await db.getDocSnapshot(db.collections.designations, designationId);
-      const data = snap.data()!;
+      const data = expectData(snap.data());
       expect(data['congregationId']).toBe(seed.ids.congregation);
       expect(data['createdBy']).toBe(seed.ids.adminUser);
       expect(data['id']).toBe(designationId); // id embedded in the body
@@ -454,7 +455,7 @@ test.describe('Assign territories — creation & share (WP-19)', () => {
         notes: `Visita ${i + 1}`,
         date: new Date(Date.UTC(2024, 0, 15 - i)),
         visitOutcome: VisitOutcomeEnum.SPOKE,
-      })
+      }),
     );
     const territoryId = `t-six-${Math.random().toString(36).slice(2, 8)}`;
     const territory = seed.factories.buildTerritory({
@@ -511,10 +512,10 @@ test.describe('Assign territories — creation & share (WP-19)', () => {
     const d1doc = await db.getDoc(db.collections.designations, d1);
     const d2doc = await db.getDoc(db.collections.designations, d2);
     expect(Array.from(ids(d1doc?.['territories'] as Array<Record<string, unknown>>)).sort()).toEqual(
-      ['seed-territory-1', 'seed-territory-3'].sort()
+      ['seed-territory-1', 'seed-territory-3'].sort(),
     );
     expect(Array.from(ids(d2doc?.['territories'] as Array<Record<string, unknown>>)).sort()).toEqual(
-      ['seed-territory-1', 'seed-territory-2'].sort()
+      ['seed-territory-1', 'seed-territory-2'].sort(),
     );
     // Collection grew by 2 (baseline 1 → 3).
     expect(await db.getCollectionDocs(db.collections.designations)).toHaveLength(3);
@@ -538,7 +539,7 @@ test.describe('Assign territories — creation & share (WP-19)', () => {
         city,
         address: `Rua Campinas, ${i + 1}`,
         history: [],
-      })
+      }),
     );
     await seed.write({ territories });
 
@@ -602,7 +603,7 @@ test.describe('Assign territories — creation & share (WP-19)', () => {
       navigator.clipboard
         .readText()
         .then((t) => t)
-        .catch(() => '')
+        .catch(() => ''),
     );
     expect(clipboard).toBe('');
     expect(sharedUrl).toContain('/work/');

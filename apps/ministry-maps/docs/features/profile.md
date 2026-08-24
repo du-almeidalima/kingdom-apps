@@ -15,6 +15,7 @@ are in [`../domain/data-model.md`](../domain/data-model.md); pt-BR ↔ English v
 ### Identity card
 
 #### UC-PROF-01 — Identity card renders the signed-in ADMIN's name, role badge and congregation
+
 - **Actor:** Admin
 - **Route:** `/profile`
 - **Preconditions (seed):** default baseline (`seed.ids.adminUser` = `Carlos Almeida`, role `ADMIN`, congregation `seed.ids.congregation` = `Congregação Jardim Primavera`)
@@ -25,6 +26,7 @@ are in [`../domain/data-model.md`](../domain/data-model.md); pt-BR ↔ English v
 - **Priority:** P0 · **Gaps:** no `data-testid` on the identity card or any of its fields
 
 #### UC-PROF-02 — Identity card renders for a PUBLISHER (badge `Publicador`)
+
 - **Actor:** Publisher
 - **Route:** `/profile`
 - **Preconditions (seed):** default baseline (`seed.ids.publisherUsers[0]` = `Ana Souza`, role `PUBLISHER`)
@@ -35,6 +37,7 @@ are in [`../domain/data-model.md`](../domain/data-model.md); pt-BR ↔ English v
 - **Priority:** P1 · **Gaps:** none
 
 #### UC-PROF-03 — ⚠ Anonymous visit does not redirect and renders placeholder identity content
+
 - **Actor:** Anonymous
 - **Route:** `/profile`
 - **Preconditions (seed):** none required; do not sign in
@@ -47,6 +50,7 @@ are in [`../domain/data-model.md`](../domain/data-model.md); pt-BR ↔ English v
 ### Congregation switch (`APP_ADMIN` / `SUPERINTENDENT` only)
 
 #### UC-PROF-04 — Switch card is hidden for `ADMIN` and `PUBLISHER`
+
 - **Actor:** Admin, Publisher
 - **Route:** `/profile`
 - **Preconditions (seed):** default baseline
@@ -57,6 +61,7 @@ are in [`../domain/data-model.md`](../domain/data-model.md); pt-BR ↔ English v
 - **Priority:** P1 · **Gaps:** none
 
 #### UC-PROF-05 — Switch card lists every congregation, ordered by name
+
 - **Actor:** Superintendent or App Admin (harness extension needed — only `'admin'`/`'publisher'` exist in `signInAs` today)
 - **Route:** `/profile`
 - **Preconditions (seed):** default baseline plus a second congregation `buildCongregation({ id: 'seed-congregation-2', name: 'Congregação Vila Nova' })`; a user with role `SUPERINTENDENT` or `APP_ADMIN`
@@ -67,6 +72,7 @@ are in [`../domain/data-model.md`](../domain/data-model.md); pt-BR ↔ English v
 - **Priority:** P1 · **Gaps:** `signInAs('superintendent'|'app_admin')` harness extension needed; no `data-testid` on the `<select>` (use `lib-select`/`name="Cidade"` — note the attribute is literally `name="Cidade"`, a copy/paste artifact, not `"Congregação"`)
 
 #### UC-PROF-06 — Switching congregation persists the reference, updates state, and needs a fresh navigation (not a hard reload) to affect `/territories`
+
 - **Actor:** Superintendent or App Admin (harness extension needed)
 - **Route:** `/profile`
 - **Preconditions (seed):** default baseline plus `seed-congregation-2` (`Congregação Vila Nova`, cities `['Campinas']`); a `SUPERINTENDENT`/`APP_ADMIN` user on `seed-congregation`
@@ -77,6 +83,7 @@ are in [`../domain/data-model.md`](../domain/data-model.md); pt-BR ↔ English v
 - **Priority:** P1 · **Gaps:** `signInAs('superintendent'|'app_admin')` harness extension needed
 
 #### UC-PROF-07 — ⚠ `ProfileBO.changeUserCongregation` silently no-ops for a user without a congregation
+
 - **Actor:** Superintendent or App Admin (harness extension needed)
 - **Route:** `/profile`
 - **Preconditions (seed):** a `SUPERINTENDENT`/`APP_ADMIN` user document with `congregation` unset (no `DocumentReference` field at all)
@@ -87,6 +94,7 @@ are in [`../domain/data-model.md`](../domain/data-model.md); pt-BR ↔ English v
 - **Priority:** P2 · **Gaps:** `⚠ suspected defect`-adjacent (dead/unreachable guard from the UI); `signInAs('superintendent'|'app_admin')` harness extension needed to exercise even the reachable half
 
 #### UC-PROF-08 — ⚠ `ProfileBO.changeUserCongregation` throws for a non-privileged role, and the UI swallows the error silently
+
 - **Actor:** Any role outside `[APP_ADMIN, SUPERINTENDENT]`
 - **Route:** `/profile`
 - **Preconditions (seed):** default baseline; the target user's Firestore `role` is mutated (via `db.firestore`) to `PUBLISHER` **after** the switch card has already rendered (so the template-level `*libAuthorize` gate, evaluated once in `ngOnInit`, does not re-hide the card)
@@ -99,6 +107,7 @@ are in [`../domain/data-model.md`](../domain/data-model.md); pt-BR ↔ English v
 ### Logout
 
 #### UC-PROF-09 — Logout confirmation dialog, confirm → `/login` and cleared state
+
 - **Actor:** Admin (or Publisher — identical flow)
 - **Route:** `/profile`
 - **Preconditions (seed):** default baseline
@@ -109,6 +118,7 @@ are in [`../domain/data-model.md`](../domain/data-model.md); pt-BR ↔ English v
 - **Priority:** P0 · **Gaps:** no `data-testid` on the `SAIR` button or the dialog; select by role/text (`getByRole('button', { name: 'Sair' })`-style queries work since the icon has no separate accessible text)
 
 #### UC-PROF-10 — Logout cancel keeps the user on `/profile`
+
 - **Actor:** Admin
 - **Route:** `/profile`
 - **Preconditions (seed):** default baseline
@@ -121,6 +131,7 @@ are in [`../domain/data-model.md`](../domain/data-model.md); pt-BR ↔ English v
 ### Appearance settings
 
 #### UC-PROF-11 — Appearance settings renders theme options with current preference selected
+
 - **Actor:** Any user on `/profile`
 - **Route:** `/profile`
 - **Preconditions:** theme preference stored in `localStorage` or defaulting to `system`
@@ -128,6 +139,7 @@ are in [`../domain/data-model.md`](../domain/data-model.md); pt-BR ↔ English v
 - **Priority:** P0
 
 #### UC-PROF-12 — Changing theme preference updates application theme immediately and persists
+
 - **Actor:** Any user on `/profile`
 - **Route:** `/profile`
 - **Steps:** Click on `Claro`, `Escuro`, or `Padrão do sistema`.
@@ -136,6 +148,7 @@ are in [`../domain/data-model.md`](../domain/data-model.md); pt-BR ↔ English v
 - **Priority:** P0
 
 #### UC-PROF-13 — Appearance setting syncs across open browser tabs
+
 - **Actor:** Any user with multiple tabs open
 - **Steps:** Change theme in Tab A.
 - **Expected UI & State:** Tab B reacts to the `StorageEvent` and updates `html[data-theme]`, `html[data-resolved-theme]`, and meta theme-color without reload.

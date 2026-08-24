@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 import { ToastConfig } from './toaster.models';
 import { ToasterContainerComponent } from './toaster-container.component';
@@ -12,7 +12,7 @@ import { AttachedComponent, PortalService } from '../portal/portal.service';
  */
 @Injectable({ providedIn: 'root' })
 export class ToasterService {
-  constructor(private readonly portal: PortalService) {}
+  private readonly portal = inject(PortalService);
 
   /**
    * The attached container component reference. It is created on demand.

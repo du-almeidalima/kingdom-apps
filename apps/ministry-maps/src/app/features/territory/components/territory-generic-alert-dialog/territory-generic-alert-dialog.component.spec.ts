@@ -22,7 +22,7 @@ describe('TerritoryGenericAlertDialogComponent', () => {
             return EMPTY;
           },
         },
-      })
+      }),
   );
 
   it('should create', () => {
@@ -49,7 +49,7 @@ describe('TerritoryGenericAlertDialogComponent', () => {
             },
           },
         ],
-      }
+      },
     );
 
     const component = fixture.point.componentInstance;
@@ -89,7 +89,7 @@ describe('TerritoryGenericAlertDialogComponent', () => {
             },
           },
         ],
-      }
+      },
     );
 
     const component = fixture.point.componentInstance;
@@ -114,7 +114,7 @@ describe('TerritoryGenericAlertDialogComponent', () => {
             },
           },
         ],
-      }
+      },
     );
 
     const mockDialogRef = ngMocks.get(DialogRef);

@@ -6,12 +6,12 @@ provider sign-in outcomes, the `/welcome` and `/no-account` pages, the guard red
 
 **Routes** (from `auth-routes.ts` + `app-routes.ts`):
 
-| URL | Component | Guard | `data.roles` |
-|---|---|---|---|
-| `/login` | `LoginPageComponent` | — | — |
-| `/welcome` | `WelcomePageComponent` | `authGuard` | `[PUBLISHER]` |
-| `/no-account` | `NoAccountPageComponent` | — | — |
-| `/sign-in/:inviteId` | `SignInPageComponent` | — | — |
+| URL                  | Component                | Guard       | `data.roles`  |
+| -------------------- | ------------------------ | ----------- | ------------- |
+| `/login`             | `LoginPageComponent`     | —           | —             |
+| `/welcome`           | `WelcomePageComponent`   | `authGuard` | `[PUBLISHER]` |
+| `/no-account`        | `NoAccountPageComponent` | —           | —             |
+| `/sign-in/:inviteId` | `SignInPageComponent`    | —           | —             |
 
 The guard itself is fully documented in
 [`../domain/roles-and-permissions.md §3`](../domain/roles-and-permissions.md#3-authguard-semantics); the
@@ -24,7 +24,7 @@ English vocabulary in [`../domain/glossary.md`](../domain/glossary.md).
 >    `signInWithPopup(auth, new GoogleAuthProvider())` — a real browser popup against a Google account,
 >    which the Playwright suite does not exercise (see
 >    [`../testability-gaps.md`](../testability-gaps.md)). Entries whose core behaviour **requires** that
->    popup (marked *manual-only leg*) are documented with full steps/persistence contracts so they can be
+>    popup (marked _manual-only leg_) are documented with full steps/persistence contracts so they can be
 >    executed as manual acceptance checks today and automated later if the suite ever adopts the Auth
 >    emulator's popup automation. Everything else uses the `signInAs` custom-token fixture.
 > 2. **There is no `invitation_links` support in the seed harness yet.** The collection (note the
@@ -304,7 +304,7 @@ English vocabulary in [`../domain/glossary.md`](../domain/glossary.md).
 - **Steps:** 1. `page.goto('/home')` → 2. observe the shell during guard resolution
 - **Expected UI:** while `authGuard` awaits `resolveUserFromAuthProvider()`, `AuthService.isAuthenticating` is `true` and `app.component.html` renders the `.spinner` element **instead of** the `<router-outlet>`; once resolution completes (`finalize` sets it `false`), the outlet renders `/home` per UC-NAV-05
 - **Expected persistence:** N/A (transient UI state)
-- **Edge cases:** timing-sensitive — the spinner may be too fast to observe reliably against the local emulator; treat this as an assertion of the *mechanism* (`app.component.html`'s `@if (authService.isAuthenticating())`) rather than a must-catch visual state, and never write spec synchronisation logic that depends on catching the spinner (use settled-state waits on the final URL/heading instead)
+- **Edge cases:** timing-sensitive — the spinner may be too fast to observe reliably against the local emulator; treat this as an assertion of the _mechanism_ (`app.component.html`'s `@if (authService.isAuthenticating())`) rather than a must-catch visual state, and never write spec synchronisation logic that depends on catching the spinner (use settled-state waits on the final URL/heading instead)
 - **Priority:** P2 · **Gaps:** no `data-testid` on the spinner; overlap with UC-NAV-04 (same mechanism from the shell's perspective)
 
 ## Testability gaps (summary)

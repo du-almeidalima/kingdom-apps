@@ -37,7 +37,7 @@ describe('StatisticsTerritoriesPageComponent', () => {
       .mock(TerritoryStatisticsBO, {
         getTerritories: jest.fn().mockReturnValue(of(territories)),
       })
-      .mock(SpinnerComponent)
+      .mock(SpinnerComponent),
   );
 
   it('should create', () => {

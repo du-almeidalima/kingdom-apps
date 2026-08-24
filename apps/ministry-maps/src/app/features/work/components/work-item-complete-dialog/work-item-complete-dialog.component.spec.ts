@@ -13,7 +13,7 @@ describe('WorkItemCompleteDialogComponent', () => {
       .provide({
         provide: DIALOG_DATA,
         useValue: {} as WorkItemCompleteDialogData,
-      })
+      }),
   );
 
   it('should create', () => {

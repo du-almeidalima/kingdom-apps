@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { DialogComponent, DialogFooterComponent } from '../dialog';
@@ -22,8 +22,12 @@ export type ConfirmDialogData = {
       <p class="t-body1" [innerHTML]="bodyText"></p>
       <lib-dialog-footer>
         <div class="flex justify-end gap-4">
-          <button lib-button data-testid="confirm-dialog-cancel" (click)="handleCancel(false)" [tabIndex]="1">Cancelar</button>
-          <button lib-button btnType="primary" data-testid="confirm-dialog-confirm" (click)="handleCancel(true)">Confirmar</button>
+          <button lib-button data-testid="confirm-dialog-cancel" (click)="handleCancel(false)" [tabIndex]="1">
+            Cancelar
+          </button>
+          <button lib-button btnType="primary" data-testid="confirm-dialog-confirm" (click)="handleCancel(true)">
+            Confirmar
+          </button>
         </div>
       </lib-dialog-footer>
     </lib-dialog>
@@ -31,14 +35,16 @@ export type ConfirmDialogData = {
   imports: [DialogComponent, ButtonComponent, DialogFooterComponent],
 })
 export class ConfirmDialogComponent {
+  private readonly dialogRef = inject(DialogRef);
+  private readonly sanitizer = inject(DomSanitizer);
+  readonly data = inject<ConfirmDialogData>(DIALOG_DATA);
+
   title: string;
   bodyText: SafeHtml;
 
-  constructor(
-    private readonly dialogRef: DialogRef,
-    private readonly sanitizer: DomSanitizer,
-    @Inject(DIALOG_DATA) public readonly data: ConfirmDialogData
-  ) {
+  constructor() {
+    const data = this.data;
+
     this.title = data.title;
     this.bodyText = this.sanitizer.bypassSecurityTrustHtml(data.bodyText);
   }

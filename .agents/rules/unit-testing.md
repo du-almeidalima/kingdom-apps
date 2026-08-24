@@ -1,8 +1,8 @@
 ---
 globs:
-- '**/*.spec.ts'
-- '**/test/**'
-- '**/jest.config.ts'
+  - '**/*.spec.ts'
+  - '**/test/**'
+  - '**/jest.config.ts'
 description: Apply these rules when writing unit tests. The project uses Jest + jest-preset-angular
   + ng-mocks.
 ---
@@ -76,9 +76,13 @@ beforeEach(() =>
 Pass providers as the 3rd arg to `MockRender`:
 
 ```typescript
-const fixture = MockRender(MyComponent, {}, {
-  providers: [{ provide: DIALOG_DATA, useValue: { key: value } }],
-});
+const fixture = MockRender(
+  MyComponent,
+  {},
+  {
+    providers: [{ provide: DIALOG_DATA, useValue: { key: value } }],
+  },
+);
 ```
 
 ### `MockInstance` for per-test mock config
@@ -87,7 +91,7 @@ const fixture = MockRender(MyComponent, {}, {
 MockInstance.scope(); // auto-reset after each test
 
 it('configures mock', () => {
-  MockInstance(SomeService, instance => {
+  MockInstance(SomeService, (instance) => {
     instance.method.mockReturnValue(of(value));
   });
   const fixture = MockRender(MyComponent);
@@ -105,7 +109,7 @@ ngMocks.change(select, 'OPTION_VALUE');
 
 const service = ngMocks.get(UserStateService);
 service.setUser(null);
-ngMocks.flushTestBed();  // re-init after state change
+ngMocks.flushTestBed(); // re-init after state change
 fixture.detectChanges(); // propagate changes
 ```
 
@@ -117,11 +121,7 @@ describe('MyService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        MyService,
-        MockProvider(DependencyService, { method: jest.fn() }),
-        MockProvider(OtherService),
-      ],
+      providers: [MyService, MockProvider(DependencyService, { method: jest.fn() }), MockProvider(OtherService)],
     });
     service = TestBed.inject(MyService);
   });
@@ -146,11 +146,7 @@ Same pattern as service tests. BOs are pure Angular services with injected depen
 ```typescript
 beforeEach(() => {
   TestBed.configureTestingModule({
-    providers: [
-      MyBO,
-      MockProvider(UserStateService),
-      MockProvider(Repository, { method: () => of(mockData) }),
-    ],
+    providers: [MyBO, MockProvider(UserStateService), MockProvider(Repository, { method: () => of(mockData) })],
   });
   service = TestBed.inject(MyBO);
 });
@@ -188,7 +184,6 @@ Mock route/state as minimal objects using `as never`. Guards can return `boolean
 For components that require specific structural context (e.g., form controls), define a host component in the spec file:
 
 ```typescript
-
 @Component({
   template: `<form [formGroup]="form">
     <my-component formControlName="ctrl" />
@@ -205,7 +200,7 @@ beforeEach(() => MockBuilder([MyComponent, HostComponent, ReactiveFormsModule]))
 ## Key `ng-mocks` API
 
 | API                                   | Usage                     |
-|---------------------------------------|---------------------------|
+| ------------------------------------- | ------------------------- |
 | `MockBuilder(Comp, Module)`           | Create testing module     |
 | `MockRender(Comp, inputs, providers)` | Render component          |
 | `ngMocks.get(Type)`                   | Get service from injector |

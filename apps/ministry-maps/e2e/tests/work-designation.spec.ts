@@ -87,7 +87,7 @@ test.describe('Work designation — opening', () => {
     page.on('pageerror', () => {
       capturedError = true;
     });
-    page.on('console', message => {
+    page.on('console', (message) => {
       if (message.type() === 'error') {
         capturedError = true;
       }
@@ -168,7 +168,11 @@ test.describe('Work designation — completing visits', () => {
 
     // Persistence: subcollection gains 1 doc
     await expect(async () => {
-      const historyDocs = await db.getSubcollectionDocs(db.collections.territories, territoryId, db.historySubcollection);
+      const historyDocs = await db.getSubcollectionDocs(
+        db.collections.territories,
+        territoryId,
+        db.historySubcollection,
+      );
       expect(historyDocs.length).toBe(1);
       expect(historyDocs[0]['visitOutcome']).toBe(VisitOutcomeEnum.SPOKE);
       expect(historyDocs[0]['isRevisit']).toBe(false);
@@ -195,7 +199,11 @@ test.describe('Work designation — completing visits', () => {
     await dialog.submit();
 
     await expect(async () => {
-      const historyDocs = await db.getSubcollectionDocs(db.collections.territories, territoryId, db.historySubcollection);
+      const historyDocs = await db.getSubcollectionDocs(
+        db.collections.territories,
+        territoryId,
+        db.historySubcollection,
+      );
       expect(historyDocs.length).toBe(1);
       expect(historyDocs[0]['visitOutcome']).toBe(VisitOutcomeEnum.NOT_ANSWERED);
       const designationDoc = await db.getDoc(db.collections.designations, designationId);
@@ -216,7 +224,11 @@ test.describe('Work designation — completing visits', () => {
     await dialog.submit();
 
     await expect(async () => {
-      const historyDocs = await db.getSubcollectionDocs(db.collections.territories, territoryId, db.historySubcollection);
+      const historyDocs = await db.getSubcollectionDocs(
+        db.collections.territories,
+        territoryId,
+        db.historySubcollection,
+      );
       expect(historyDocs.length).toBe(1);
       expect(historyDocs[0]['visitOutcome']).toBe(VisitOutcomeEnum.MOVED);
       const designationDoc = await db.getDoc(db.collections.designations, designationId);
@@ -237,7 +249,11 @@ test.describe('Work designation — completing visits', () => {
     await dialog.submit();
 
     await expect(async () => {
-      const historyDocs = await db.getSubcollectionDocs(db.collections.territories, territoryId, db.historySubcollection);
+      const historyDocs = await db.getSubcollectionDocs(
+        db.collections.territories,
+        territoryId,
+        db.historySubcollection,
+      );
       expect(historyDocs.length).toBe(1);
       expect(historyDocs[0]['visitOutcome']).toBe(VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN);
       const designationDoc = await db.getDoc(db.collections.designations, designationId);
@@ -272,7 +288,11 @@ test.describe('Work designation — completing visits', () => {
     await dialog.submit();
 
     await expect(async () => {
-      const historyDocs = await db.getSubcollectionDocs(db.collections.territories, territoryId, db.historySubcollection);
+      const historyDocs = await db.getSubcollectionDocs(
+        db.collections.territories,
+        territoryId,
+        db.historySubcollection,
+      );
       expect(historyDocs.length).toBe(1);
       expect(historyDocs[0]['isRevisit']).toBe(true);
       expect(historyDocs[0]['name']).toBe('Roberto');
@@ -297,7 +317,11 @@ test.describe('Work designation — completing visits', () => {
     await dialog.submit();
 
     await expect(async () => {
-      const historyDocs = await db.getSubcollectionDocs(db.collections.territories, territoryId, db.historySubcollection);
+      const historyDocs = await db.getSubcollectionDocs(
+        db.collections.territories,
+        territoryId,
+        db.historySubcollection,
+      );
       expect(historyDocs.length).toBe(1);
       expect(historyDocs[0]['isRevisit']).toBe(false);
       expect(historyDocs[0]['name']).toBe('');
@@ -317,7 +341,11 @@ test.describe('Work designation — completing visits', () => {
     await dialog.submit();
 
     await expect(async () => {
-      const historyDocs = await db.getSubcollectionDocs(db.collections.territories, territoryId, db.historySubcollection);
+      const historyDocs = await db.getSubcollectionDocs(
+        db.collections.territories,
+        territoryId,
+        db.historySubcollection,
+      );
       expect(historyDocs.length).toBe(1);
       expect(historyDocs[0]['notes']).toBe('Conversamos sobre a Bíblia, ficou interessado.');
     }).toPass();
@@ -336,7 +364,11 @@ test.describe('Work designation — completing visits', () => {
     await dialog.submit();
 
     await expect(async () => {
-      const historyDocs = await db.getSubcollectionDocs(db.collections.territories, territoryId, db.historySubcollection);
+      const historyDocs = await db.getSubcollectionDocs(
+        db.collections.territories,
+        territoryId,
+        db.historySubcollection,
+      );
       expect(historyDocs.length).toBe(1);
       expect(historyDocs[0]['notes']).toBe('');
     }).toPass();
@@ -445,7 +477,11 @@ test.describe('Work designation — cancel, edit, undo', () => {
 
     // Persistence: same id and date, notes changed
     await expect(async () => {
-      const historyDocs = await db.getSubcollectionDocs(db.collections.territories, territoryId, db.historySubcollection);
+      const historyDocs = await db.getSubcollectionDocs(
+        db.collections.territories,
+        territoryId,
+        db.historySubcollection,
+      );
       expect(historyDocs.length).toBe(1);
       expect(historyDocs[0]['id']).toBe(knownHistoryId);
       expect(historyDocs[0]['notes']).toBe('Updated notes');
@@ -507,7 +543,11 @@ test.describe('Work designation — cancel, edit, undo', () => {
 
     // Persistence: subcollection empty, designation status PENDING, lastVisit null
     await expect(async () => {
-      const historyDocs = await db.getSubcollectionDocs(db.collections.territories, territoryId, db.historySubcollection);
+      const historyDocs = await db.getSubcollectionDocs(
+        db.collections.territories,
+        territoryId,
+        db.historySubcollection,
+      );
       expect(historyDocs.length).toBe(0);
       expect((await db.getDoc(db.collections.territories, territoryId))?.['lastVisit']).toBeNull();
     }).toPass();
@@ -590,8 +630,8 @@ test.describe('Work designation — conditional affordances', () => {
     const storedTerritories = (storedDesignation as Record<string, unknown>)['territories'] as Array<
       Record<string, unknown>
     >;
-    expect(storedTerritories.find(territory => territory['id'] === t1Id)?.['history']).toEqual([]);
-    expect((storedTerritories.find(territory => territory['id'] === t2Id)?.['history'] as unknown[]).length).toBe(1);
+    expect(storedTerritories.find((territory) => territory['id'] === t1Id)?.['history']).toEqual([]);
+    expect((storedTerritories.find((territory) => territory['id'] === t2Id)?.['history'] as unknown[]).length).toBe(1);
   });
 
   test('UC-WORK-19 — Maps button gated by mapsLink (Chromium _self)', async ({ page, seed, db }) => {
@@ -656,15 +696,15 @@ test.describe('Work designation — conditional affordances', () => {
     await row2.getByTestId('work-item-maps').click();
     const openedUrls = await getOpenedUrls(page);
     expect(openedUrls.length).toBeGreaterThanOrEqual(1);
-    expect(openedUrls.some(url => url.includes('maps.google.com'))).toBe(true);
+    expect(openedUrls.some((url) => url.includes('maps.google.com'))).toBe(true);
 
     const storedDesignation = await db.getDoc(db.collections.designations, designationId);
     expect(storedDesignation).toBeDefined();
     const storedTerritories = (storedDesignation as Record<string, unknown>)['territories'] as Array<
       Record<string, unknown>
     >;
-    expect(storedTerritories.find(territory => territory['id'] === t1Id)?.['mapsLink']).toBeUndefined();
-    expect(storedTerritories.find(territory => territory['id'] === t2Id)?.['mapsLink']).toBe(mapsUrl);
+    expect(storedTerritories.find((territory) => territory['id'] === t1Id)?.['mapsLink']).toBeUndefined();
+    expect(storedTerritories.find((territory) => territory['id'] === t2Id)?.['mapsLink']).toBe(mapsUrl);
   });
 });
 
@@ -692,7 +732,11 @@ test.describe('Work designation — expiry', () => {
     await expect(checkbox).toBeDisabled();
 
     // Persistence: no writes happened — subcollection empty
-    const historyDocs = await db.getSubcollectionDocs(db.collections.territories, designation.territories[0].id, db.historySubcollection);
+    const historyDocs = await db.getSubcollectionDocs(
+      db.collections.territories,
+      designation.territories[0].id,
+      db.historySubcollection,
+    );
     expect(historyDocs.length).toBe(0);
   });
 
@@ -723,9 +767,11 @@ test.describe('Work designation — expiry', () => {
     // BUT maps button NOT disabled (only maps responds to shouldDesignationBlockAfterExpired)
     const mapsButton = row.getByTestId('work-item-maps');
     await expect(mapsButton).toBeVisible();
-    await expect(mapsButton).not.toBeDisabled();
+    await expect(mapsButton).toBeEnabled();
 
-    expect(await db.getSubcollectionDocs(db.collections.territories, designation.territories[0].id, db.historySubcollection)).toHaveLength(0);
+    expect(
+      await db.getSubcollectionDocs(db.collections.territories, designation.territories[0].id, db.historySubcollection),
+    ).toHaveLength(0);
   });
 });
 
@@ -747,7 +793,9 @@ test.describe('Work designation — completion state', () => {
     // All-done message
     await expect(workPage.allDone).toBeVisible();
     await expect(workPage.allDone).toHaveText('Parabéns!');
-    await expect(page.getByText('Todos os territórios foram concluidos, que Jeová abençoe seu trabalho!')).toBeVisible();
+    await expect(
+      page.getByText('Todos os territórios foram concluidos, que Jeová abençoe seu trabalho!'),
+    ).toBeVisible();
 
     // Persistence: all territories DONE
     await expect(async () => {
@@ -806,7 +854,11 @@ test.describe('Work designation — completion state', () => {
 
     // Persistence: subcollection has 6 docs (5 pre-existing + 1 new)
     await expect(async () => {
-      const historyDocs = await db.getSubcollectionDocs(db.collections.territories, territoryId, db.historySubcollection);
+      const historyDocs = await db.getSubcollectionDocs(
+        db.collections.territories,
+        territoryId,
+        db.historySubcollection,
+      );
       expect(historyDocs.length).toBe(6);
     }).toPass();
 

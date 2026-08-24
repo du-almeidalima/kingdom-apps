@@ -2,6 +2,7 @@ import { expect, test } from '../fixtures';
 import { UsersPage } from '../page-objects/users.page';
 import { InviteCreateDialogPage } from '../page-objects/invite-create-dialog.page';
 import { SignInPage } from '../page-objects/sign-in.page';
+import { expectData } from '../utils/firestore-assert.util';
 
 /**
  * J-03 — Invite onboarding lifecycle: creation, valid open, consumed re-open.
@@ -38,9 +39,7 @@ test('J-03 — Invite creation → valid open → simulated consumption → INVA
   // UC-USERS-13: copy-link view.
   await expect(inviteDialog.copyLinkText).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Link de convite criado' })).toBeVisible();
-  await expect(
-    page.getByText('Compartilhe esse link com o irmão que vai acessar o aplicativo.'),
-  ).toBeVisible();
+  await expect(page.getByText('Compartilhe esse link com o irmão que vai acessar o aplicativo.')).toBeVisible();
   await expect(page.getByText('Esse link só pode ser usado uma vez.')).toBeVisible();
 
   const linkText = (await inviteDialog.copyLinkText.innerText()).trim();
@@ -49,7 +48,7 @@ test('J-03 — Invite creation → valid open → simulated consumption → INVA
 
   // ⟶ HAND-OFF (Firestore): creation-time shape.
   const inviteSnap = await db.firestore.collection(db.collections.invitation_links).doc(inviteId).get();
-  const inviteData = inviteSnap.data()!;
+  const inviteData = expectData(inviteSnap.data());
   expect(inviteData['role']).toBe('ORGANIZER');
   expect(inviteData['email']).toBe('novo.organizador@example.com');
   expect(inviteData['isValid']).toBe(true);
@@ -60,7 +59,11 @@ test('J-03 — Invite creation → valid open → simulated consumption → INVA
 
   // ── Leg 2 — Invitee opens the valid link (UC-AUTH-14) ─────────────────────
   // Switch identity to anonymous: sign out → the app navigates itself to /login.
-  await page.evaluate(() => (window as any).__E2E__.auth.signOut());
+  await page.evaluate(async () => {
+    const api = window.__E2E__;
+    if (!api) throw new Error('__E2E__ hook unavailable');
+    await api.auth.signOut();
+  });
   await expect(page).toHaveURL(/\/login/);
 
   await signInPage.goto(inviteId);
@@ -70,12 +73,12 @@ test('J-03 — Invite creation → valid open → simulated consumption → INVA
   await expect(page.getByText('Parar criar uma conta, clique no botão a baixo.')).toBeVisible();
   await expect(signInPage.googleButton).toBeVisible();
   await expect(signInPage.googleButton).toBeEnabled();
-  await expect(signInPage.errorMessage).not.toBeVisible();
+  await expect(signInPage.errorMessage).toBeHidden();
 
   // ⟶ HAND-OFF (Firestore): rendering never consumes the invite.
-  const afterOpen = (
-    await db.firestore.collection(db.collections.invitation_links).doc(inviteId).get()
-  ).data()!;
+  const afterOpen = expectData(
+    (await db.firestore.collection(db.collections.invitation_links).doc(inviteId).get()).data(),
+  );
   expect(afterOpen['isValid']).toBe(true);
   expect(afterOpen['usedAt']).toBeUndefined();
   expect(afterOpen['usedBy']).toBeUndefined();
@@ -91,9 +94,9 @@ test('J-03 — Invite creation → valid open → simulated consumption → INVA
   });
 
   // ⟶ HAND-OFF (Firestore): consumed shape.
-  const consumed = (
-    await db.firestore.collection(db.collections.invitation_links).doc(inviteId).get()
-  ).data()!;
+  const consumed = expectData(
+    (await db.firestore.collection(db.collections.invitation_links).doc(inviteId).get()).data(),
+  );
   expect(consumed['isValid']).toBe(false);
   expect(consumed['usedBy']).toBe('novo.organizador@example.com');
 
@@ -103,16 +106,14 @@ test('J-03 — Invite creation → valid open → simulated consumption → INVA
   await expect(signInPage.heading).toBeVisible(); // Cadastrar heading still renders
   await expect(signInPage.errorMessage).toBeVisible();
   await expect(signInPage.errorMessage).toHaveText('Esse link de convite não é mais válido.');
-  await expect(
-    page.getByText('Por favor, peça para um administrador criar outro link para você.'),
-  ).toBeVisible();
+  await expect(page.getByText('Por favor, peça para um administrador criar outro link para você.')).toBeVisible();
   // The Google button lives in the @else (valid) branch — absent when consumed.
   await expect(signInPage.googleButton).toHaveCount(0);
 
   // ⟶ HAND-OFF (Firestore): the page performs no write on a consumed re-open.
-  const unchanged = (
-    await db.firestore.collection(db.collections.invitation_links).doc(inviteId).get()
-  ).data()!;
+  const unchanged = expectData(
+    (await db.firestore.collection(db.collections.invitation_links).doc(inviteId).get()).data(),
+  );
   expect(unchanged['isValid']).toBe(false);
 
   // ── FINAL SWEEP (Firestore) ────────────────────────────────────────────────

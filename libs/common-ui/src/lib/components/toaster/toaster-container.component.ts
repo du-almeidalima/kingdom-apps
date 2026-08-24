@@ -25,7 +25,8 @@ type ToastItem = {
           (keydown.space)="dismiss(t.id)"
           tabindex="0"
           role="button"
-          aria-label="Dismiss notification">
+          aria-label="Dismiss notification"
+        >
           @if (t.icon) {
             <div class="toast__icon">
               <lib-icon [icon]="t.icon" fillColor="currentColor" />
@@ -53,7 +54,7 @@ export class ToasterContainerComponent {
       icon: config.icon,
     };
 
-    this.toasts.update(list => [...list, item]);
+    this.toasts.update((list) => [...list, item]);
 
     if (item.durationMs > 0) {
       window.setTimeout(() => this.dismiss(item.id), item.durationMs);
@@ -61,6 +62,6 @@ export class ToasterContainerComponent {
   }
 
   dismiss(id: number) {
-    this.toasts.update(list => list.filter(t => t.id !== id));
+    this.toasts.update((list) => list.filter((t) => t.id !== id));
   }
 }

@@ -54,9 +54,6 @@ export class SortFilterDialogPage {
 
   /** Select a filter option in a select-type filter identified by its title text. */
   async selectFilterByTitle(title: string, optionLabel: string): Promise<void> {
-    await this.selectFilters
-      .filter({ hasText: title })
-      .locator('select')
-      .selectOption({ label: optionLabel });
+    await this.selectFilters.filter({ hasText: title }).locator('select').selectOption({ label: optionLabel });
   }
 }

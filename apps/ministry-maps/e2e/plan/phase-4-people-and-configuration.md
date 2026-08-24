@@ -61,7 +61,7 @@
     derive it from the rendered text, never hardcode.
   - UC-USERS-11 persistence: `(await db.firestore.collection('invitation_links').doc(id).get()).data()`
     — `congregation` is a `DocumentReference` (assert `.path` or `.id`), `createdBy ===
-    'carlos.almeida@example.com'`, `role === 'ORGANIZER'` (default), `isValid === true`; the blank-email
+'carlos.almeida@example.com'`, `role === 'ORGANIZER'` (default), `isValid === true`; the blank-email
     leg asserts `email === ''`.
   - UC-USERS-13 clipboard: `context.grantPermissions(['clipboard-read','clipboard-write'])`, click copy,
     `navigator.clipboard.readText()` === rendered link; assert checkmark swap is optional.
@@ -86,7 +86,7 @@
     `congregationSelect`, `logoutButton`).
   - create `e2e/tests/profile.spec.ts`.
 - **Context to read first:** `docs/features/profile.md` (all entries); `docs/domain/roles-and-
-  permissions.md` §3.1, §4.
+permissions.md` §3.1, §4.
 - **Implementation notes:**
   - UC-PROF-03: assert verbatim placeholders `XX`, `Meu Nome`, `LS Congregação`, `Publicador` and **no**
     redirect.

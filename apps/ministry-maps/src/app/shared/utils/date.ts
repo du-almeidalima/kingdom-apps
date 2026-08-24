@@ -5,4 +5,4 @@ export const differenceInMonths = (firstDate: Date, secondDate: Date): number =>
   months += secondDate.getMonth();
 
   return months <= 0 ? 0 : months;
-}
+};

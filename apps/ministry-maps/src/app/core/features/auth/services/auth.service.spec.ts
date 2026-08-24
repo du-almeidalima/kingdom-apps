@@ -4,7 +4,10 @@ import { AuthService } from './auth.service';
 import { MockProvider, ngMocks } from 'ng-mocks';
 import { AuthRepository } from '../../../../repositories/auth.repository';
 import { UserStateService } from '../../../../state/user.state.service';
-import { FIREBASE_PROVIDERS, FirebaseAuthDatasourceService } from '../../../../repositories/firebase/firebase-auth-datasource.service';
+import {
+  FIREBASE_PROVIDERS,
+  FirebaseAuthDatasourceService,
+} from '../../../../repositories/firebase/firebase-auth-datasource.service';
 import { of } from 'rxjs';
 import { userMockBuilder } from '../../../../../test/mocks';
 import { RoleEnum } from '../../../../../models/enums/role';
@@ -22,19 +25,19 @@ describe('AuthService', () => {
         UserStateService,
         MockProvider(AuthRepository, {
           signInWithProvider: jest.fn().mockReturnValue(of(ADMIN_USER_MOCK)),
-          authStateChanged: jest.fn().mockReturnValue(of(true))
+          authStateChanged: jest.fn().mockReturnValue(of(true)),
         }),
         MockProvider(AuthUserStateService, {
-          setUser: jest.fn()
+          setUser: jest.fn(),
         }),
         MockProvider(FirebaseAuthDatasourceService, {
-          getUserFromAuthentication: jest.fn().mockReturnValue(of(ADMIN_USER_MOCK))
+          getUserFromAuthentication: jest.fn().mockReturnValue(of(ADMIN_USER_MOCK)),
         }),
         MockProvider(FirebaseUserDatasourceService, {
-          getById: jest.fn().mockReturnValue(of(ADMIN_USER_MOCK))
+          getById: jest.fn().mockReturnValue(of(ADMIN_USER_MOCK)),
         }),
         MockProvider(Router, {
-          navigate: jest.fn()
+          navigate: jest.fn(),
         }),
       ],
     });
@@ -46,7 +49,7 @@ describe('AuthService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should save user state', done => {
+  it('should save user state', (done) => {
     const userStateService = ngMocks.get(UserStateService);
     const authUserStateService = ngMocks.get(AuthUserStateService);
     const authRepository = ngMocks.get(AuthRepository);

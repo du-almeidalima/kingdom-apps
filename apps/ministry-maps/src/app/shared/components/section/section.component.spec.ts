@@ -9,7 +9,7 @@ describe('SectionComponent', () => {
     const fixture = MockRender(
       `<kingdom-apps-section title="My Section"><p data-testid="projected">content</p></kingdom-apps-section>`,
       {},
-      { detectChanges: false }
+      { detectChanges: false },
     );
     fixture.detectChanges();
 
@@ -20,7 +20,7 @@ describe('SectionComponent', () => {
   it('shows the loading spinner only while isLoading', () => {
     const fixture = MockRender<SectionComponent>(
       `<kingdom-apps-section [title]="'T'" [isLoading]="loading"><p>x</p></kingdom-apps-section>`,
-      { loading: true }
+      { loading: true },
     );
 
     expect(ngMocks.find(fixture, 'lib-spinner')).toBeTruthy();

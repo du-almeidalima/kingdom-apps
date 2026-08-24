@@ -39,14 +39,15 @@
     place-self: self-start;
     display: flex;
     align-items: center;
-    padding: .3em .5em;
-    border-radius: .4rem;
+    padding: 0.3em 0.5em;
+    border-radius: 0.4rem;
     background-color: var(--mm-color-user-role-badge-bg, #{variables.$grey-100});
     color: var(--mm-color-user-role-badge-text, white);
     font-weight: bold;
-    letter-spacing: .1rem;
+    letter-spacing: 0.1rem;
 
-    &--admin, &--app_admin {
+    &--admin,
+    &--app_admin {
       color: var(--kui-color-text, #{variables.$text});
       background-color: var(--kui-color-surface, #{variables.$white-100});
       border: 1px solid var(--kui-color-border, #{variables.$light-grey-100});

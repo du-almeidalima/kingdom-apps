@@ -5,8 +5,8 @@ $toggle-width: 3.75rem;
 $toggle-height: calc($toggle-width * 0.619); // ~2.6rem (height is 61.9% of width)
 $toggle-thumb-size: calc($toggle-width * 0.524); // ~2.2rem (thumb is 52.4% of width)
 $toggle-padding: calc($toggle-width * 0.048); // ~0.2rem (padding is 4.8% of width)
-$toggle-border-radius: calc($toggle-width * 0.310); // ~1.3rem (radius is 31% of width)
-$toggle-thumb-translate: calc($toggle-width * 0.380); // ~1.6rem (translate is 38.0% of width)
+$toggle-border-radius: calc($toggle-width * 0.31); // ~1.3rem (radius is 31% of width)
+$toggle-thumb-translate: calc($toggle-width * 0.38); // ~1.6rem (translate is 38.0% of width)
 $toggle-icon-left: calc($toggle-width * 0.143); // ~0.6rem (icon left is 14.3% of width)
 $toggle-icon-size: calc($toggle-width * 0.262); // ~1.1rem (icon size is 26.2% of width)
 

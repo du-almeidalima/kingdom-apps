@@ -21,9 +21,7 @@ export async function dragRowByMouse(page: Page, source: Locator, target: Locato
   const targetBox = await target.boundingBox();
 
   if (!sourceBox || !targetBox) {
-    throw new Error(
-      `dragRowByMouse: ${!sourceBox ? 'source' : 'target'} has no bounding box (not visible?).`,
-    );
+    throw new Error(`dragRowByMouse: ${!sourceBox ? 'source' : 'target'} has no bounding box (not visible?).`);
   }
 
   const startX = sourceBox.x + sourceBox.width / 2;

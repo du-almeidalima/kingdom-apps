@@ -46,7 +46,7 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
     // USERS COLLECTION
     this.userCollection = collection(
       this.firestore,
-      FirebaseUserDatasourceService.COLLECTION_NAME
+      FirebaseUserDatasourceService.COLLECTION_NAME,
     ) as CollectionReference<User, FirebaseUserModel>;
 
     // FUNCTIONS
@@ -63,7 +63,7 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
 
     return from(getDocFromServer(userReference)).pipe(
       map((userDocSnapshot) => userDocSnapshot.data()),
-      switchMap((user) => this.resolveUser(user, { useCache: false }))
+      switchMap((user) => this.resolveUser(user, { useCache: false })),
     );
   }
 
@@ -86,7 +86,7 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
         console.warn(`Error getting user from cache: `, err);
         // Fall back to the regular getById which tries cache then server
         return this.getById(id);
-      })
+      }),
     );
   }
 
@@ -112,7 +112,7 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
     const congregationDocRef = this.congregationDatasourceService.createDocumentRef(user.congregation.id);
     const congregation$ = FirebaseCongregationDatasourceService.resolveUserCongregationReference(
       congregationDocRef,
-      options
+      options,
     );
 
     return congregation$.pipe(
@@ -125,7 +125,7 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
 
         // Overriding congregation reference with congregation data
         return { ...user, congregation: { ...congregation } };
-      })
+      }),
     );
   }
 
@@ -156,7 +156,7 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
     ]).pipe(
       map(([_, congregation]) => {
         return { ...user, congregation };
-      })
+      }),
     );
   }
 
@@ -170,7 +170,7 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
       ...user,
       congregation: doc(
         this.firestore,
-        `/${FirebaseCongregationDatasourceService.COLLECTION_NAME}/${user.congregation?.id}`
+        `/${FirebaseCongregationDatasourceService.COLLECTION_NAME}/${user.congregation?.id}`,
       ) as DocumentReference<Congregation, FirebaseCongregationModel>,
     };
 
@@ -181,12 +181,12 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
     // The callable authorizes against the user doc, so it must run before the doc is deleted.
     // It is a cold observable — without a subscription it never executes at all.
     return this.deleteUserFn(userId).pipe(
-      catchError(err => {
+      catchError((err) => {
         this.loggerService.error(`Error calling deleteUserFn Cloud Function for ${userId}`, err);
         return of(undefined);
       }),
       switchMap(() => from(deleteDoc(doc(this.userCollection, userId)))),
-      map(() => undefined)
+      map(() => undefined),
     );
   }
 
@@ -203,16 +203,16 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
             return users.map((u) => {
               if (!congregation) {
                 this.loggerService.error(
-                  `Could not find Congregation ID: ${congregationId} when fetching congregation People`
+                  `Could not find Congregation ID: ${congregationId} when fetching congregation People`,
                 );
               }
 
               u.congregation = congregation;
               return u;
             });
-          })
+          }),
         );
-      })
+      }),
     );
   }
 }

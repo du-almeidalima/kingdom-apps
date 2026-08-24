@@ -54,9 +54,7 @@ test('J-08 — Empty congregation: list, assign, statistics and CSV export all b
   await expect(territoriesPage.territoryByAddress('Rua das Acácias, 45 - Pinheiros')).toHaveCount(0);
 
   // ⟶ HAND-OFF (Firestore): scoping — UC-TERR-01's core guarantee in its purest form.
-  expect(
-    await db.queryWhere(db.collections.territories, 'congregationId', '==', 'j08-congregation'),
-  ).toHaveLength(0);
+  expect(await db.queryWhere(db.collections.territories, 'congregationId', '==', 'j08-congregation')).toHaveLength(0);
   expect(await db.getCollectionDocs(db.collections.territories)).toHaveLength(3); // baseline untouched
 
   // ── Leg 2 — `/territories/assign` renders but cannot submit (UC-ASSIGN-03) ─
@@ -108,7 +106,7 @@ test('J-08 — Empty congregation: list, assign, statistics and CSV export all b
   expect(lines[0]).toBe(
     'Cidade;Endereço;Observação;Link do Mapa;Ícone;Estudante da Bíblia;Instrutor da Bíblia;Última Visita',
   );
-  const dataRows = lines.slice(1).filter(l => l.length > 0);
+  const dataRows = lines.slice(1).filter((l) => l.length > 0);
   expect(dataRows).toHaveLength(0);
 
   // ── FINAL SWEEP (Firestore) — the whole journey was write-free ────────────

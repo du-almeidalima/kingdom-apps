@@ -4,13 +4,7 @@ import { DEFAULT_SEED_IDS } from '../seed/default.seed';
 export const DEFAULT_PASSWORD = 'test-password-123';
 
 /** Roles supported by the auth fixture. */
-export type TestRole =
-  | 'admin'
-  | 'publisher'
-  | 'elder'
-  | 'organizer'
-  | 'superintendent'
-  | 'app_admin';
+export type TestRole = 'admin' | 'publisher' | 'elder' | 'organizer' | 'superintendent' | 'app_admin';
 
 /**
  * Maps test roles to seeded user uids from {@link DEFAULT_SEED_IDS} so the auth

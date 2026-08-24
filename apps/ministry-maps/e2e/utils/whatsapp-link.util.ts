@@ -41,10 +41,7 @@ export interface WhatsAppShareCapture {
  * expect(sharedUrl).toContain('/work/');
  * ```
  */
-export async function captureWhatsAppPopup(
-  page: Page,
-  trigger: () => Promise<void>,
-): Promise<WhatsAppShareCapture> {
+export async function captureWhatsAppPopup(page: Page, trigger: () => Promise<void>): Promise<WhatsAppShareCapture> {
   await page.addInitScript(installWhatsAppRecorder);
   await page.evaluate(installWhatsAppRecorder);
   await trigger();

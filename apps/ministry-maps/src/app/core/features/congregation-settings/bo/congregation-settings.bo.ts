@@ -5,7 +5,7 @@ import { CongregationSettings } from '../../../../../models/congregation';
 import { environment } from '../../../../../environments/environment';
 
 /** Handles the business logic for configuring the Congregation Settings */
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class CongregationSettingsBO {
   userStateService = inject(UserStateService);
   loggerService = inject(LoggerService);
@@ -36,7 +36,7 @@ export class CongregationSettingsBO {
    * developing a mechanism to do database migrations. For the moment, we'll rely on default values set in the
    * environment file.
    */
-  public getSettingOrDefault(setting: keyof CongregationSettings): any {
+  public getSettingOrDefault<K extends keyof CongregationSettings>(setting: K): CongregationSettings[K] {
     const settings = this.getCongregationSettings();
     const value = settings?.[setting];
 

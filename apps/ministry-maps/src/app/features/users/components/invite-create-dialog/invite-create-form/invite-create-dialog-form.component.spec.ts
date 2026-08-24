@@ -46,9 +46,7 @@ describe('InviteCreateDialogFormComponent', () => {
   it('renders the three role options', () => {
     const fixture = render(false);
 
-    const titles = ngMocks
-      .findAll(fixture, '.radio-option__title')
-      .map(el => el.nativeElement.textContent.trim());
+    const titles = ngMocks.findAll(fixture, '.radio-option__title').map((el) => el.nativeElement.textContent.trim());
 
     expect(titles).toEqual(['Publicador', 'Organizador', 'Ancião']);
   });

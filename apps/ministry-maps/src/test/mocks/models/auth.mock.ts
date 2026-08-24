@@ -13,8 +13,7 @@ export class AuthRepositoryMock implements AuthRepository {
     return EMPTY;
   }
 
-  signInWithProvider(providers: string, createUser: boolean, createUserEmail?: CreateUserConfig): Observable<User> {
+  signInWithProvider(_providers: string, _createUser: boolean, _createUserEmail?: CreateUserConfig): Observable<User> {
     return of(userMockBuilder({}));
   }
 }
-

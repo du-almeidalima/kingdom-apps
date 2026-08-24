@@ -50,7 +50,7 @@ async function waitForEmulator(name: string, hostPort: string): Promise<void> {
   throw new Error(
     `The ${name} emulator never answered on http://${hostPort} within ${READY_TIMEOUT_MS}ms (last error: ${lastError}).\n` +
       `Confirm the port matches firebase.json and e2e/config/emulator.config.ts, and check ` +
-      `dist/.playwright/apps/ministry-maps/logs/emulators.log for why it failed to boot.`
+      `dist/.playwright/apps/ministry-maps/logs/emulators.log for why it failed to boot.`,
   );
 }
 

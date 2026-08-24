@@ -76,7 +76,7 @@ returns its baseline visit.
     and the grouping pipe does not filter out cities absent from the select — so the non-negotiable
     "unreachable" assertion is the per-city view, not the `Todas` view.
 13. Contrast with the backend: `db.queryWhere(db.collections.territories, 'congregationId', '==',
-    seed.ids.congregation)` still returns **3** docs — the orphan is unreachable via city selection, but
+seed.ids.congregation)` still returns **3** docs — the orphan is unreachable via city selection, but
     alive in Firestore (not deleted).
 
 ⟶ **FINAL SWEEP (Firestore):** `congregations/{id}.cities === ['São Paulo Centro']`; territories =

@@ -1,8 +1,8 @@
 ---
 globs:
-- '**/repositories/**'
-- '**/*datasource*.ts'
-- '**/*repository*.ts'
+  - '**/repositories/**'
+  - '**/*datasource*.ts'
+  - '**/*repository*.ts'
 description: Firestore — the datasource-only access rule, dual models, converters, and security rules.
 ---
 

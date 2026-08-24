@@ -30,7 +30,7 @@ describe('TerritoryCsvExporterBO', () => {
             return userStateServiceMock;
           },
           'useFactory',
-          false
+          false,
         ),
         MockProvider(TerritoryRepository, {
           getAllByCongregation: jest

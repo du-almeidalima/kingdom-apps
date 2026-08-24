@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { catchError, concat, debounceTime, Observable, of, retry, Subscription, tap } from 'rxjs';
 
@@ -19,6 +19,11 @@ import { DesignationNotFoundComponent } from '../../components/designation-not-f
   imports: [NoteComponent, WorkItemComponent, DesignationNotFoundComponent],
 })
 export class WorkPageComponent implements OnInit, OnDestroy {
+  private readonly route = inject(ActivatedRoute);
+  private readonly designationRepository = inject(DesignationRepository);
+  private readonly territoryRepository = inject(TerritoryRepository);
+  private readonly workBO = inject(WorkBO);
+
   private designationTerritorySubscription: Subscription | undefined;
   isLoading = false;
   isNotFound = false;
@@ -27,13 +32,6 @@ export class WorkPageComponent implements OnInit, OnDestroy {
   doneTerritories: Designation['territories'] = [];
   isDisabled = false;
   isBlocked = false;
-
-  constructor(
-    private readonly route: ActivatedRoute,
-    private readonly designationRepository: DesignationRepository,
-    private readonly territoryRepository: TerritoryRepository,
-    private readonly workBO: WorkBO
-  ) {}
 
   ngOnInit(): void {
     this.isLoading = true;
@@ -45,7 +43,7 @@ export class WorkPageComponent implements OnInit, OnDestroy {
         debounceTime(100),
         tap(() => {
           this.isLoading = false;
-        })
+        }),
       )
       .subscribe((designation) => {
         // Designations deleted by the Firestore TTL policy (or otherwise missing) resolve to undefined.
@@ -77,7 +75,11 @@ export class WorkPageComponent implements OnInit, OnDestroy {
   }
 
   handleTerritoryUpdated(designationTerritory: DesignationTerritory) {
-    const updatedDesignation = this.workBO.updateDesignationTerritoryObject(this.designation!, designationTerritory);
+    if (!this.designation) {
+      return;
+    }
+    const designation = this.designation;
+    const updatedDesignation = this.workBO.updateDesignationTerritoryObject(designation, designationTerritory);
     const designationTerritoryUpdate$ = this.designationRepository.update(updatedDesignation);
 
     // Update Territory lastVisit and history
@@ -93,7 +95,7 @@ export class WorkPageComponent implements OnInit, OnDestroy {
       const visitEntry = designationTerritory.history[designationTerritory.history.length - 1];
       const stampedVisitEntry = {
         ...visitEntry,
-        congregationId: this.designation!.congregationId,
+        congregationId: designation.congregationId,
         territoryId: designationTerritory.id,
       };
       visitHistoryUpdate$ = this.territoryRepository.setVisitHistory(designationTerritory.id, stampedVisitEntry);
@@ -104,12 +106,12 @@ export class WorkPageComponent implements OnInit, OnDestroy {
     concat(designationTerritoryUpdate$, territoryUpdate$, visitHistoryUpdate$)
       .pipe(
         retry(2),
-        catchError(err => {
+        catchError((err) => {
           // TODO: Create a component to display errors
           alert('Um erro aconteceu ao salvar a visita, por favor tente novamente. Erro: ' + JSON.stringify(err));
 
           return of(undefined);
-        })
+        }),
       )
       .subscribe(() => {
         // TODO: Add a success message here
@@ -118,7 +120,7 @@ export class WorkPageComponent implements OnInit, OnDestroy {
             this.designation?.id +
             ' and territory: ' +
             designationTerritory.id +
-            ''
+            '',
         );
       });
   }
@@ -140,7 +142,7 @@ export class WorkPageComponent implements OnInit, OnDestroy {
           alert('Um erro aconteceu ao reverter visita, por favor tente novamente. Erro: ' + JSON.stringify(err));
 
           return of(undefined);
-        })
+        }),
       )
       .subscribe(() => {
         // TODO: Add a success message here
@@ -149,7 +151,7 @@ export class WorkPageComponent implements OnInit, OnDestroy {
             this.designation?.id +
             ' and territory: ' +
             designationTerritory.id +
-            ''
+            '',
         );
       });
   }

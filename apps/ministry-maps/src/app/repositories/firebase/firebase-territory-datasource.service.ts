@@ -46,7 +46,7 @@ export const convertTerritoryFirebaseTimestampsToDate = (data: FirebaseTerritory
 
 /** Converts the Firebase Timestamps to Date objects for FirebaseHistory  */
 export const convertTerritoryHistoryFirebaseTimestampsToDate = (
-  data: FirebaseTerritoryVisitHistoryModel
+  data: FirebaseTerritoryVisitHistoryModel,
 ): TerritoryVisitHistory => {
   return {
     ...data,
@@ -67,7 +67,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
   constructor() {
     this.territoriesCollection = collection(
       this.firestore,
-      FirebaseTerritoryDatasourceService.COLLECTION_NAME
+      FirebaseTerritoryDatasourceService.COLLECTION_NAME,
     ).withConverter<Territory>(firebaseEntityConverterFactory(convertTerritoryFirebaseTimestampsToDate));
   }
 
@@ -93,9 +93,9 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
         const historyGroupQuery = query(
           collectionGroup(this.firestore, this.historySubCollectionName),
           where('congregationId', '==', congregationId),
-          where('date', '>=', Timestamp.fromDate(oneYearAgo))
+          where('date', '>=', Timestamp.fromDate(oneYearAgo)),
         ).withConverter<TerritoryVisitHistory>(
-          firebaseEntityConverterFactory(convertTerritoryHistoryFirebaseTimestampsToDate)
+          firebaseEntityConverterFactory(convertTerritoryHistoryFirebaseTimestampsToDate),
         );
 
         return from(getDocs(historyGroupQuery)).pipe(
@@ -116,9 +116,9 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
               ...territory,
               history: historyByTerritoryId.get(territory.id) ?? [],
             }));
-          })
+          }),
         );
-      })
+      }),
     );
   }
 
@@ -128,7 +128,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
     return from(getDoc(territoryDocReference)).pipe(
       map((territoryDocSnapshot) => {
         return territoryDocSnapshot.data();
-      })
+      }),
     );
   }
 
@@ -136,7 +136,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
     const q = query(
       this.territoriesCollection,
       where('congregationId', '==', congregationId),
-      where('city', 'in', cities)
+      where('city', 'in', cities),
     );
 
     return from(collectionData<Territory>(q));
@@ -153,7 +153,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
 
           const path = `${FirebaseTerritoryDatasourceService.COLLECTION_NAME}/${territory.id}/${this.historySubCollectionName}`;
           const territoryVisitHistoryCollection = collection(this.firestore, path).withConverter<TerritoryVisitHistory>(
-            firebaseEntityConverterFactory(convertTerritoryHistoryFirebaseTimestampsToDate)
+            firebaseEntityConverterFactory(convertTerritoryHistoryFirebaseTimestampsToDate),
           );
 
           return from(getDocs(territoryVisitHistoryCollection)).pipe(
@@ -162,13 +162,13 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
                 ...territory,
                 history: territoryVisitHistorySnapshots.docs.map((visitHistorySnapshot) => visitHistorySnapshot.data()),
               };
-            })
+            }),
           );
         });
 
         // Combining all territoriesObservables into one array
         return combineLatest(territories$);
-      })
+      }),
     );
   }
 
@@ -187,8 +187,8 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
 
     return newTerritory$.pipe(
       switchMap(() =>
-        from(getDoc(newTerritoryDocRef)).pipe(map((territorySnapshot) => territorySnapshot.data() as Territory))
-      )
+        from(getDoc(newTerritoryDocRef)).pipe(map((territorySnapshot) => territorySnapshot.data() as Territory)),
+      ),
     );
   }
 
@@ -249,7 +249,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
             date: firebaseHistory['date']?.toDate(),
           } as TerritoryVisitHistory;
         });
-      })
+      }),
     );
   }
 
@@ -266,7 +266,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
       this.territoriesCollection,
       where('city', '==', city),
       orderBy('positionIndex', 'desc'),
-      limit(1)
+      limit(1),
     );
 
     return from(getDocs(lastPositionIndexQuery)).pipe(
@@ -278,7 +278,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
         const lastTerritory = territories.docs[0].data();
 
         return (lastTerritory.positionIndex ?? 0) + 1;
-      })
+      }),
     );
   }
 
@@ -306,7 +306,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
         };
 
         return this.update(updatedTerritory);
-      })
+      }),
     );
 
     return forkJoin([deleteRecentHistory$, deleteHistory$]).pipe(map((_) => undefined));

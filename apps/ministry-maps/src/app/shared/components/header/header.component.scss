@@ -23,7 +23,7 @@
     width: $size;
     height: $size;
 
-    padding: .75rem;
+    padding: 0.75rem;
     color: var(--mm-color-shell-header-content, #{variables.$white-100});
 
     &:is(:hover, :active) {

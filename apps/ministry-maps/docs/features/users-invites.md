@@ -8,7 +8,7 @@ user list, the edit-user dialog, the delete-user confirmation, and invitation-li
 [`../domain/roles-and-permissions.md`](../domain/roles-and-permissions.md)); `PUBLISHER` is redirected to
 `/welcome`; anonymous visitors are redirected to `/login`. Within the page, only `APP_ADMIN`,
 `SUPERINTENDENT` and `ADMIN` see the per-row overflow menu (edit/delete); only `ADMIN` (+ `APP_ADMIN`
-bypass) sees the "Criar Link de Convite" floating action button — see the *Role gating* group. Field/model
+bypass) sees the "Criar Link de Convite" floating action button — see the _Role gating_ group. Field/model
 shapes referenced below are defined in [`../domain/data-model.md`](../domain/data-model.md); pt-BR ↔
 English vocabulary is in [`../domain/glossary.md`](../domain/glossary.md).
 
@@ -20,6 +20,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 ### Listing and congregation scope
 
 #### UC-USERS-01 — List is scoped to the signed-in user's congregation and ordered by role priority
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline (8 users since WP-01: `seed-user-admin` `ADMIN`, `seed-user-publisher-1..3` `PUBLISHER`, plus `seed-user-elder` `ELDER`, `seed-user-organizer` `ORGANIZER`, `seed-user-superintendent` `SUPERINTENDENT`, `seed-user-app-admin` `APP_ADMIN`)
@@ -30,6 +31,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Priority:** P0 · **Gaps:** no `data-testid` on the list or its container; select rows by name text
 
 #### UC-USERS-02 — Each row shows initials, name and the translated role badge
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline
@@ -40,6 +42,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Priority:** P1 · **Gaps:** no `data-testid` on the initials figure or badge; select via row text
 
 #### UC-USERS-03 — A user from another congregation is never listed
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline; plus `buildCongregation()` (a second congregation) and `buildUser({ congregationId: <second congregation id>, role: 'ADMIN' })` in it
@@ -52,6 +55,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 ### Edit-user dialog
 
 #### UC-USERS-04 — Dialog fields and role options; `SUPERINTENDENT` is offered only to an `APP_ADMIN` editor
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline
@@ -62,6 +66,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Priority:** P1 · **Gaps:** no `data-testid` on the radio group or its options; select via the `kingdom-apps-icon-radio` label text (`Publicador`/`Organizador`/`Ancião`/`Administrador`/`Superintendente`)
 
 #### UC-USERS-05 — The edit form is disabled only for admin-level users edited by non-`APP_ADMIN` editors (fixed 2026-08)
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline
@@ -72,6 +77,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Priority:** P0 · **Gaps:** none — the former `⚠ suspected defect` (Gap #22) was fixed and verified by this test
 
 #### UC-USERS-06 — An `APP_ADMIN` editor gets a usable form and edits persist
+
 - **Actor:** App Admin (harness extension needed — only `admin`/`publisher` exist in `signInAs` today)
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline; an extra seeded user with `role: 'APP_ADMIN'`
@@ -82,6 +88,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Priority:** P1 · **Gaps:** `signInAs('appAdmin')` harness extension needed (no seeded `APP_ADMIN` uid in `ROLE_UIDS` today)
 
 #### UC-USERS-07 — Editing your own account is not special-cased
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline
@@ -94,6 +101,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 ### Delete user
 
 #### UC-USERS-08 — Delete confirmation dialog and Firestore doc removal
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline (`seed-user-publisher-1`, Ana Souza)
@@ -104,6 +112,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Priority:** P0 · **Gaps:** no `data-testid` on the confirm dialog, the row menu trigger, or the menu items; select via role/text
 
 #### UC-USERS-09 — ⚠ suspected defect: deleting a user removes the Firestore doc but the Auth account survives
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline (`seed-user-publisher-1`, Ana Souza — every seeded user also has an Auth emulator account, password `test-password-123`)
@@ -116,6 +125,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 ### Invitation-link creation
 
 #### UC-USERS-10 — "Criar Link de Convite" is an `ADMIN`-only floating action button
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline
@@ -126,6 +136,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Priority:** P0 · **Gaps:** the button carries no visible text, only an icon and a `title` attribute — select it with `page.getByTitle('Criar Link de Convite')`; no `data-testid`
 
 #### UC-USERS-11 — Invite dialog defaults to `ORGANIZER`, email is optional, and the persisted doc's `congregation` is a `DocumentReference`
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline
@@ -136,6 +147,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Priority:** P0 · **Gaps:** `invitation_links` harness extension needed — no `Collections` entry, no `buildInvitationLink` factory (raw `db.firestore.collection('invitation_links')` is the workaround today); this also means the `congregation`-as-reference finding above should be reconciled with `data-model.md §2.6`, which currently describes it as an "embedded object, not a reference" — that description matches the **hydrated, in-memory** `InvitationLink` type but not the raw persisted document; no `data-testid` on the role radios or email input
 
 #### UC-USERS-12 — Invite creation with no congregation is effectively unreachable via the UI; the guard only fires when the whole user is `null`
+
 - **Actor:** Admin (hypothetical — see Edge cases)
 - **Route:** `/users`
 - **Preconditions (seed):** none reproducible through normal seed + UI flow
@@ -148,6 +160,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 ### Invitation-link sharing
 
 #### UC-USERS-13 — The generated link is `${environment.baseUrl}sign-in/{id}` and is copyable to the clipboard
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline; continues right after UC-USERS-11's successful submit
@@ -158,6 +171,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Priority:** P1 · **Gaps:** no `data-testid` on the copy button, the link text, or the help text; the exact `environment.baseUrl` used by the app under test must come from the harness's own config, not be hardcoded in the spec
 
 #### UC-USERS-14 — "Enviar" builds a `whatsapp://` link; desktop opens a new window, mobile navigates in place
+
 - **Actor:** Admin
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline; continues right after UC-USERS-13
@@ -170,6 +184,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 ### Role gating
 
 #### UC-USERS-15 — `ORGANIZER`/`ELDER` see the list but not the edit/delete menu or the invite FAB
+
 - **Actor:** Organizer (harness extension needed — only `admin`/`publisher` exist in `signInAs` today)
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline; an extra user with `role: 'ORGANIZER'` in `seed-congregation`
@@ -180,6 +195,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Priority:** P1 · **Gaps:** `signInAs('organizer')`/`signInAs('elder')` harness extension needed
 
 #### UC-USERS-16 — Publisher is redirected to `/welcome`
+
 - **Actor:** Publisher
 - **Route:** `/users`
 - **Preconditions (seed):** default baseline
@@ -190,6 +206,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Priority:** P0 · **Gaps:** none
 
 #### UC-USERS-17 — Anonymous access redirects to `/login`
+
 - **Actor:** Anonymous
 - **Route:** `/users`
 - **Preconditions (seed):** none required

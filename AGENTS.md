@@ -43,18 +43,18 @@ Repository-wide instructions for coding agents. [`README.md`](./README.md) has s
 
 Rules live in `.agents/rules/`. oh-my-pi and Antigravity load them natively, scoped by the frontmatter `globs`; other harnesses should read the rules relevant to the files being changed:
 
-| Context | Rules |
-|---|---|
-| Components, services, state | `.agents/rules/angular-components.md`, `angular-services.md` |
-| Styling, theming, tokens | `.agents/rules/styling.md` |
-| Unit tests (ng-mocks + Jest) | `.agents/rules/unit-testing.md` |
-| E2E (Playwright + emulators) | `.agents/rules/e2e-testing.md` and `apps/ministry-maps/e2e/README.md` |
-| Data access, Firestore, security rules | `.agents/rules/repositories.md`, `firestore.md` |
-| Cloud Functions | `.agents/rules/firebase-functions.md` |
-| Nx workspace, project targets | `.agents/rules/monorepo.md` |
-| Build, CI, deployment | `.agents/rules/deployment.md` |
-| Commits, branches, PRs | `.agents/rules/git-commits.md` |
-| Shared UI library internals | `.agents/rules/common-ui.md`, `patterns.md` |
+| Context                                | Rules                                                                 |
+| -------------------------------------- | --------------------------------------------------------------------- |
+| Components, services, state            | `.agents/rules/angular-components.md`, `angular-services.md`          |
+| Styling, theming, tokens               | `.agents/rules/styling.md`                                            |
+| Unit tests (ng-mocks + Jest)           | `.agents/rules/unit-testing.md`                                       |
+| E2E (Playwright + emulators)           | `.agents/rules/e2e-testing.md` and `apps/ministry-maps/e2e/README.md` |
+| Data access, Firestore, security rules | `.agents/rules/repositories.md`, `firestore.md`                       |
+| Cloud Functions                        | `.agents/rules/firebase-functions.md`                                 |
+| Nx workspace, project targets          | `.agents/rules/monorepo.md`                                           |
+| Build, CI, deployment                  | `.agents/rules/deployment.md`                                         |
+| Commits, branches, PRs                 | `.agents/rules/git-commits.md`                                        |
+| Shared UI library internals            | `.agents/rules/common-ui.md`, `patterns.md`                           |
 
 For Ministry Maps behavior or data changes, also read the relevant material under `apps/ministry-maps/docs/`.
 
@@ -62,13 +62,13 @@ For Ministry Maps behavior or data changes, also read the relevant material unde
 
 Use Nx through `npx`. Run the focused target first, then every relevant downstream target required by the change.
 
-| Change | Minimum relevant checks |
-|---|---|
-| `apps/ministry-maps` | `npx nx test ministry-maps`, `npx nx lint ministry-maps`, `npx nx build ministry-maps` |
-| `libs/common-ui` | `npx nx test common-ui`, `npx nx lint common-ui` |
-| E2E | `npx nx typecheck-e2e ministry-maps`, then the relevant `npx nx e2e ministry-maps` scope |
+| Change                    | Minimum relevant checks                                                                                                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/ministry-maps`      | `npx nx test ministry-maps`, `npx nx lint ministry-maps`, `npx nx build ministry-maps`                                                                                                |
+| `libs/common-ui`          | `npx nx test common-ui`, `npx nx lint common-ui`                                                                                                                                      |
+| E2E                       | `npx nx typecheck-e2e ministry-maps`, then the relevant `npx nx e2e ministry-maps` scope                                                                                              |
 | `functions/ministry-maps` | `npm --prefix functions/ministry-maps run lint`, `npm --prefix functions/ministry-maps test`, `npm --prefix functions/ministry-maps run build` plus an emulator-backed behavior check |
-| Documentation only | Validate changed links and commands; run `git diff --check` |
+| Documentation only        | Validate changed links and commands; run `git diff --check`                                                                                                                           |
 
 Add or update tests for behavior changes. Do not weaken, skip, or delete a failing test to make a change pass.
 

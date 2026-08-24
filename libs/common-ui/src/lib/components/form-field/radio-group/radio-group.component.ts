@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  forwardRef,
-  input,
-  model,
-  output,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, forwardRef, input, model, output, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { IconComponent } from '../../icon/icon.component';
 import { Icons } from '../../icon/icon-type';
@@ -51,8 +43,12 @@ export class RadioGroupComponent<T = never> implements ControlValueAccessor {
 
   private internalDisabled = signal(false);
 
-  private onChange: (val: T) => void = () => { /* empty */ };
-  private onTouched: () => void = () => { /* empty */ };
+  private onChange: (val: T) => void = () => {
+    /* empty */
+  };
+  private onTouched: () => void = () => {
+    /* empty */
+  };
 
   isSelected(optionValue: T): boolean {
     return this.value() === optionValue;

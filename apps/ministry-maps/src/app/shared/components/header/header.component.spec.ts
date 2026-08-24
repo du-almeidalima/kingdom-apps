@@ -5,9 +5,7 @@ import { organizerUserStateServiceMock } from '../../../../test/mocks';
 
 describe('HeaderComponent', () => {
   beforeEach(() => {
-    return MockBuilder(HeaderComponent).provide(
-      MockProvider(UserStateService, organizerUserStateServiceMock)
-    );
+    return MockBuilder(HeaderComponent).provide(MockProvider(UserStateService, organizerUserStateServiceMock));
   });
 
   it('should create', () => {

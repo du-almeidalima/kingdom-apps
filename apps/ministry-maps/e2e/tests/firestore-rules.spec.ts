@@ -1,16 +1,8 @@
 import { expect, test } from '../fixtures';
-import {
-  createDocAs,
-  deleteDocAs,
-  mintIdToken,
-  readDocAs,
-  updateDocAs,
-} from '../firebase/firestore-rules.util';
+import { createDocAs, deleteDocAs, mintIdToken, readDocAs, updateDocAs } from '../firebase/firestore-rules.util';
 
 test.describe('Firestore Security Rules', () => {
-  test('UC-RULES-01 — Anonymous read access to public collections (200 allowed)', async ({
-    seed,
-  }) => {
+  test('UC-RULES-01 — Anonymous read access to public collections (200 allowed)', async ({ seed }) => {
     const invite = seed.factories.buildInvitationLink({
       congregationId: seed.ids.congregation,
     });
@@ -33,10 +25,7 @@ test.describe('Firestore Security Rules', () => {
     expect(inviteStatus).toBe(200);
   });
 
-  test('UC-RULES-02 — Anonymous read access to non-public collections is denied (403)', async ({
-    db,
-    seed,
-  }) => {
+  test('UC-RULES-02 — Anonymous read access to non-public collections is denied (403)', async ({ db, seed }) => {
     // Seed a log document via Admin SDK
     await db.firestore.collection(db.collections.logs).doc('seed-log-for-read').set({
       message: 'Seed log message',
@@ -52,10 +41,7 @@ test.describe('Firestore Security Rules', () => {
     expect(logStatus).toBe(403);
   });
 
-  test('UC-RULES-03 — Logs read access: PUBLISHER denied (403) vs APP_ADMIN allowed (200)', async ({
-    db,
-    seed,
-  }) => {
+  test('UC-RULES-03 — Logs read access: PUBLISHER denied (403) vs APP_ADMIN allowed (200)', async ({ db, seed }) => {
     await db.firestore.collection('logs').doc('audit-log-entry').set({
       message: 'Audit log entry',
       expireAt: new Date(),
@@ -152,14 +138,8 @@ test.describe('Firestore Security Rules', () => {
     });
     expect(createStatus).toBe(200);
 
-    const historyDocs = await db.getSubcollectionDocs(
-      db.collections.territories,
-      territoryId,
-      db.historySubcollection,
-    );
-    const created = historyDocs.find(
-      (h) => h['notes'] === 'Visita realizada por publicador anônimo',
-    );
+    const historyDocs = await db.getSubcollectionDocs(db.collections.territories, territoryId, db.historySubcollection);
+    const created = historyDocs.find((h) => h['notes'] === 'Visita realizada por publicador anônimo');
     expect(created).toBeDefined();
 
     // Seed an existing history entry for update/delete attempts
@@ -174,10 +154,9 @@ test.describe('Firestore Security Rules', () => {
       });
 
     // Anonymous update history doc (edit visit) -> 200 allowed
-    const updateStatus = await updateDocAs(
-      `territories/${territoryId}/history/fixed-history-entry`,
-      { notes: 'Updated note by anonymous publisher' },
-    );
+    const updateStatus = await updateDocAs(`territories/${territoryId}/history/fixed-history-entry`, {
+      notes: 'Updated note by anonymous publisher',
+    });
     expect(updateStatus).toBe(200);
 
     const fixedDoc = await db.firestore
@@ -189,9 +168,7 @@ test.describe('Firestore Security Rules', () => {
     expect(fixedDoc.data()?.['notes']).toBe('Updated note by anonymous publisher');
 
     // Anonymous delete history doc (undo visit) -> 200 allowed
-    const deleteStatus = await deleteDocAs(
-      `territories/${territoryId}/history/fixed-history-entry`,
-    );
+    const deleteStatus = await deleteDocAs(`territories/${territoryId}/history/fixed-history-entry`);
     expect(deleteStatus).toBe(200);
 
     const survivingDoc = await db.firestore
@@ -214,11 +191,7 @@ test.describe('Firestore Security Rules', () => {
     expect(readStatus).toBe(200);
 
     // Update users/{uid} as authenticated user -> 200
-    const updateStatus = await updateDocAs(
-      `users/${seed.ids.adminUser}`,
-      { name: 'Admin Name Updated' },
-      adminToken,
-    );
+    const updateStatus = await updateDocAs(`users/${seed.ids.adminUser}`, { name: 'Admin Name Updated' }, adminToken);
     expect(updateStatus).toBe(200);
 
     const updatedUser = await db.getDoc(db.collections.users, seed.ids.adminUser);
@@ -241,10 +214,7 @@ test.describe('Firestore Security Rules', () => {
     expect(await readDocAs(`users/${seed.ids.publisherUsers[0]}`, organizerToken)).toBe(200);
   });
 
-  test('UC-RULES-09 — Users documents can never be created client-side (403 for everyone)', async ({
-    db,
-    seed,
-  }) => {
+  test('UC-RULES-09 — Users documents can never be created client-side (403 for everyone)', async ({ db, seed }) => {
     const publisherToken = await mintIdToken(seed.ids.publisherUsers[0]);
 
     // Anonymous forged create -> 403
@@ -257,23 +227,18 @@ test.describe('Firestore Security Rules', () => {
     expect(await db.getDoc(db.collections.users, 'authed-forged')).toBeUndefined();
   });
 
-  test('UC-RULES-10 — Self-update matrix: name allowed (200), role escalation denied (403)', async ({
-    db,
-    seed,
-  }) => {
+  test('UC-RULES-10 — Self-update matrix: name allowed (200), role escalation denied (403)', async ({ db, seed }) => {
     const publisherToken = await mintIdToken(seed.ids.publisherUsers[0]);
 
     // Publisher updates own name -> 200
     expect(
-      await updateDocAs(`users/${seed.ids.publisherUsers[0]}`, { name: 'Ana Souza Renomeada' }, publisherToken)
+      await updateDocAs(`users/${seed.ids.publisherUsers[0]}`, { name: 'Ana Souza Renomeada' }, publisherToken),
     ).toBe(200);
     const stored = await db.getDoc(db.collections.users, seed.ids.publisherUsers[0]);
     expect(stored?.['name']).toBe('Ana Souza Renomeada');
 
     // Publisher self-escalates to ADMIN -> 403
-    expect(
-      await updateDocAs(`users/${seed.ids.publisherUsers[0]}`, { role: 'ADMIN' }, publisherToken)
-    ).toBe(403);
+    expect(await updateDocAs(`users/${seed.ids.publisherUsers[0]}`, { role: 'ADMIN' }, publisherToken)).toBe(403);
     const roleStored = await db.getDoc(db.collections.users, seed.ids.publisherUsers[0]);
     expect(roleStored?.['role']).toBe('PUBLISHER');
   });
@@ -287,25 +252,21 @@ test.describe('Firestore Security Rules', () => {
 
     // ADMIN renames a same-congregation publisher -> 200
     expect(
-      await updateDocAs(`users/${seed.ids.publisherUsers[0]}`, { name: 'Ana Editada Pelo Admin' }, adminToken)
+      await updateDocAs(`users/${seed.ids.publisherUsers[0]}`, { name: 'Ana Editada Pelo Admin' }, adminToken),
     ).toBe(200);
 
     // ADMIN touches a SUPERINTENDENT profile -> 403
-    expect(
-      await updateDocAs(`users/${seed.ids.superintendentUser}`, { name: 'Felipe Hackeado' }, adminToken)
-    ).toBe(403);
+    expect(await updateDocAs(`users/${seed.ids.superintendentUser}`, { name: 'Felipe Hackeado' }, adminToken)).toBe(
+      403,
+    );
 
     // ADMIN grants SUPERINTENDENT to a publisher -> 403
-    expect(
-      await updateDocAs(`users/${seed.ids.publisherUsers[0]}`, { role: 'SUPERINTENDENT' }, adminToken)
-    ).toBe(403);
+    expect(await updateDocAs(`users/${seed.ids.publisherUsers[0]}`, { role: 'SUPERINTENDENT' }, adminToken)).toBe(403);
     const stored = await db.getDoc(db.collections.users, seed.ids.publisherUsers[0]);
     expect(stored?.['role']).toBe('PUBLISHER');
 
     // Publisher edits another user -> 403
-    expect(
-      await updateDocAs(`users/${seed.ids.adminUser}`, { name: 'Carlos Hackeado' }, publisherToken)
-    ).toBe(403);
+    expect(await updateDocAs(`users/${seed.ids.adminUser}`, { name: 'Carlos Hackeado' }, publisherToken)).toBe(403);
     const adminStored = await db.getDoc(db.collections.users, seed.ids.adminUser);
     expect(adminStored?.['name']).toBe('Carlos Almeida');
   });

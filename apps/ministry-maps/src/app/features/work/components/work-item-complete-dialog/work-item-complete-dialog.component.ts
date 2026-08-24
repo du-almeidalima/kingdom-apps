@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit, Optional } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -11,9 +11,9 @@ import {
   DialogComponent,
   DialogFooterComponent,
   FormFieldComponent,
-  grey400,
   IconComponent,
-  InputComponent, LabelComponent,
+  InputComponent,
+  LabelComponent,
 } from '@kingdom-apps/common-ui';
 import { IconRadioComponent } from '../../../../shared/components/visit-outcome-option/icon-radio.component';
 import { VisitOutcomeToIconPipe } from '../../../../shared/pipes/visit-outcome-to-icon/visit-outcome-to-icon.pipe';
@@ -41,7 +41,8 @@ type WorkItemCompleteForm = ControlsOf<WorkItemCompleteDialogData>;
           <lib-icon
             class="icon-radio__icon"
             [icon]="VisitOutcome.NOT_ANSWERED | visitOutcomeToIcon"
-            [fillColor]="iconColor" />
+            [fillColor]="iconColor"
+          />
           Ninguém atendeu
         </kingdom-apps-icon-radio>
         <kingdom-apps-icon-radio formControlName="visitOutcome" [value]="VisitOutcome.MOVED" class="mt-3">
@@ -51,11 +52,13 @@ type WorkItemCompleteForm = ControlsOf<WorkItemCompleteDialogData>;
         <kingdom-apps-icon-radio
           formControlName="visitOutcome"
           [value]="VisitOutcome.ASKED_TO_NOT_VISIT_AGAIN"
-          class="mt-3">
+          class="mt-3"
+        >
           <lib-icon
             class="icon-radio__icon"
             [icon]="VisitOutcome.ASKED_TO_NOT_VISIT_AGAIN | visitOutcomeToIcon"
-            [fillColor]="iconColor" />
+            [fillColor]="iconColor"
+          />
           Morador pediu para não ser visitado
         </kingdom-apps-icon-radio>
 
@@ -68,13 +71,14 @@ type WorkItemCompleteForm = ControlsOf<WorkItemCompleteDialogData>;
         <!-- Name -->
         <lib-form-field class="mt-5">
           <label lib-label for="publisher-name">
-            Seu Nome @if (isNameRequired) {
-            <span style="color: red"> *</span>
+            Seu Nome
+            @if (isNameRequired) {
+              <span style="color: red"> *</span>
             }
           </label>
           <input lib-input formControlName="name" type="text" id="publisher-name" autocomplete="publisher-name" />
           @if (isNameRequired && form.controls.name.invalid) {
-          <span class="form-control-error" data-testid="work-complete-name-error">Por favor, coloque o seu nome</span>
+            <span class="form-control-error" data-testid="work-complete-name-error">Por favor, coloque o seu nome</span>
           }
         </lib-form-field>
 
@@ -89,14 +93,22 @@ type WorkItemCompleteForm = ControlsOf<WorkItemCompleteDialogData>;
             type="text"
             formControlName="notes"
             class="resize-y"
-            style="font-size: 1.4rem">
+            style="font-size: 1.4rem"
+          >
           </textarea>
         </lib-form-field>
       </form>
       <lib-dialog-footer class="sticky bottom-0 left-0 right-0">
         <div class="flex justify-end gap-4">
           <button lib-button libDialogClose data-testid="work-complete-cancel">Cancelar</button>
-          <button lib-button btnType="primary" type="submit" form="work-item-complete" [disabled]="form.invalid" data-testid="work-complete-submit">
+          <button
+            lib-button
+            btnType="primary"
+            type="submit"
+            form="work-item-complete"
+            [disabled]="form.invalid"
+            data-testid="work-complete-submit"
+          >
             {{ isEdit ? 'Atualizar' : 'Concluir' }}
           </button>
         </div>
@@ -118,6 +130,9 @@ type WorkItemCompleteForm = ControlsOf<WorkItemCompleteDialogData>;
   ],
 })
 export class WorkItemCompleteDialogComponent implements OnInit {
+  private readonly dialogRef = inject(DialogRef);
+  readonly data = inject<WorkItemCompleteDialogData>(DIALOG_DATA, { optional: true });
+
   public readonly VisitOutcome = VisitOutcomeEnum;
   public readonly iconColor = 'currentColor';
   isEdit = false;
@@ -126,10 +141,7 @@ export class WorkItemCompleteDialogComponent implements OnInit {
 
   form!: FormGroup<WorkItemCompleteForm>;
 
-  constructor(
-    private readonly dialogRef: DialogRef,
-    @Optional() @Inject(DIALOG_DATA) public readonly data: WorkItemCompleteDialogData
-  ) {
+  constructor() {
     this.dialogRef.disableClose = true;
   }
 
@@ -162,7 +174,7 @@ export class WorkItemCompleteDialogComponent implements OnInit {
   }
 
   private _setIsRevisitListener() {
-    this.form.controls.isRevisit.valueChanges.subscribe(value => {
+    this.form.controls.isRevisit.valueChanges.subscribe((value) => {
       if (value) {
         this.form.controls.name.addValidators(Validators.required);
         this.form.controls.name.updateValueAndValidity();

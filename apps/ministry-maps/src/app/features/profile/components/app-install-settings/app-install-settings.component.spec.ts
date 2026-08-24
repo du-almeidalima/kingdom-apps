@@ -33,9 +33,7 @@ describe('AppInstallSettingsComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [AppInstallSettingsComponent],
-      providers: [
-        { provide: PwaInstallService, useValue: mockPwaService },
-      ],
+      providers: [{ provide: PwaInstallService, useValue: mockPwaService }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AppInstallSettingsComponent);

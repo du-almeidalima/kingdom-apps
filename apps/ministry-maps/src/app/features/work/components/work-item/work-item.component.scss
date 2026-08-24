@@ -26,9 +26,9 @@
     display: flex;
     flex-flow: column nowrap;
     justify-content: space-between;
-    gap: .5rem;
+    gap: 0.5rem;
 
-    padding: 1rem .5rem .5rem 1.5rem;
+    padding: 1rem 0.5rem 0.5rem 1.5rem;
 
     background-color: var(--kui-color-surface-elevated, #{variables.$white-100});
     color: var(--kui-color-text, #{variables.$text});
@@ -41,7 +41,10 @@
     justify-content: center;
     align-items: center;
 
-    background-color: var(--mm-color-work-state-pending-bg, var(--kui-color-action-primary, #{variables.$primary-green}));
+    background-color: var(
+      --mm-color-work-state-pending-bg,
+      var(--kui-color-action-primary, #{variables.$primary-green})
+    );
     color: var(--mm-color-work-state-pending-fg, var(--kui-color-on-action-primary, #{variables.$white-100}));
     cursor: pointer;
 
@@ -94,7 +97,7 @@
 
     display: flex;
     flex-flow: column nowrap;
-    gap: .5rem;
+    gap: 0.5rem;
   }
 
   &__title {

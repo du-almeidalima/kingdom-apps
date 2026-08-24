@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, inject } from '@angular/core';
 import { FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 
@@ -8,7 +8,6 @@ import {
   DialogComponent,
   DialogFooterComponent,
   FormFieldComponent,
-  grey400,
   InputComponent,
   SpinnerComponent,
   white100,
@@ -87,14 +86,14 @@ export type UserEditDialogData = {
             </div>
           </kingdom-apps-icon-radio>
           @if (canEditAdminRoles) {
-          <kingdom-apps-icon-radio formControlName="role" [value]="RoleEnum.SUPERINTENDENT" class="mt-3">
-            <div class="radio-option">
-              <span class="radio-option__title" data-testid="user-edit-role-title">Superintendente</span>
-              <span class="radio-option__description">
-                Tem as mesmas permissões de um Ancião, mas pode mudar de congregações.
-              </span>
-            </div>
-          </kingdom-apps-icon-radio>
+            <kingdom-apps-icon-radio formControlName="role" [value]="RoleEnum.SUPERINTENDENT" class="mt-3">
+              <div class="radio-option">
+                <span class="radio-option__title" data-testid="user-edit-role-title">Superintendente</span>
+                <span class="radio-option__description">
+                  Tem as mesmas permissões de um Ancião, mas pode mudar de congregações.
+                </span>
+              </div>
+            </kingdom-apps-icon-radio>
           }
         </lib-form-field>
       </form>
@@ -103,11 +102,17 @@ export type UserEditDialogData = {
       <lib-dialog-footer>
         <div class="flex flex-nowrap justify-end gap-4">
           <button lib-button libDialogClose>Cancelar</button>
-          <button lib-button btnType="primary" type="submit" form="move-alert-resolution-form" data-testid="user-edit-save">
+          <button
+            lib-button
+            btnType="primary"
+            type="submit"
+            form="move-alert-resolution-form"
+            data-testid="user-edit-save"
+          >
             @if (isSubmitting()) {
-            <lib-spinner class="login-button__spinner" height="1.75rem" width="1.75rem" [color]="white" />
+              <lib-spinner class="login-button__spinner" height="1.75rem" width="1.75rem" [color]="white" />
             } @else {
-            <span>Salvar</span>
+              <span>Salvar</span>
             }
           </button>
         </div>
@@ -116,6 +121,11 @@ export type UserEditDialogData = {
   `,
 })
 export class UsersEditDialogComponent {
+  readonly data = inject<UserEditDialogData>(DIALOG_DATA);
+  private readonly dialogRef = inject(DialogRef);
+  private readonly userRepository = inject(UserRepository);
+  protected readonly userState = inject(UserStateService);
+
   protected readonly RoleEnum = RoleEnum;
   protected readonly white = white100;
   protected readonly iconColor = 'currentColor';
@@ -125,13 +135,11 @@ export class UsersEditDialogComponent {
   isSubmitting = signal(false);
   canEditAdminRoles = false;
 
-  constructor(
-    @Inject(DIALOG_DATA) public readonly data: UserEditDialogData,
-    private readonly dialogRef: DialogRef,
-    private readonly userRepository: UserRepository,
-    protected readonly userState: UserStateService,
-    formBuilder: NonNullableFormBuilder
-  ) {
+  constructor() {
+    const data = this.data;
+    const userState = this.userState;
+    const formBuilder = inject(NonNullableFormBuilder);
+
     this.canEditAdminRoles = userState.currentUser?.role === RoleEnum.APP_ADMIN;
     this.form = formBuilder.group({
       role: formBuilder.control(data.user.role),
@@ -140,7 +148,7 @@ export class UsersEditDialogComponent {
 
     // Only APP_ADMINs may edit users that already hold an admin-level role.
     const editedUserHasAdminRole = [RoleEnum.SUPERINTENDENT, RoleEnum.ADMIN, RoleEnum.APP_ADMIN].includes(
-      data.user.role
+      data.user.role,
     );
     if (editedUserHasAdminRole && userState.currentUser?.role !== RoleEnum.APP_ADMIN) {
       this.form.disable();
@@ -158,9 +166,9 @@ export class UsersEditDialogComponent {
       .pipe(
         finalize(() => {
           this.isSubmitting.set(false);
-        })
+        }),
       )
-      .subscribe(_ => {
+      .subscribe((_) => {
         this.dialogRef.close();
       });
   }

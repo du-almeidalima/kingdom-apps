@@ -44,7 +44,7 @@ describe('InviteCreateDialogCopyLinkComponent', () => {
     // Real newlines (encoded) instead of a literal %0a%0a inside the text
     expect(whatsappUrl).toContain('%0A%0A');
     expect(decodeURIComponent(whatsappUrl.replace('whatsapp://send?text=', ''))).toBe(
-      `Por favor, acesse o link abaixo e conecte com sua conta Google para acessar o MM.\n\n${INVITE_LINK}`
+      `Por favor, acesse o link abaixo e conecte com sua conta Google para acessar o MM.\n\n${INVITE_LINK}`,
     );
   });
 

@@ -73,9 +73,9 @@ describe('ProfileBO', () => {
           expect(userRepository.update).toHaveBeenCalled();
           expect(result?.congregation?.id).toBe(congregationMock2.id);
         } else {
-          await expect(
-            lastValueFrom(profileBO.changeUserCongregation('USER-3', congregationMock2.id))
-          ).rejects.toThrow('Changing congregations is not authorized by Non-Admin users.');
+          await expect(lastValueFrom(profileBO.changeUserCongregation('USER-3', congregationMock2.id))).rejects.toThrow(
+            'Changing congregations is not authorized by Non-Admin users.',
+          );
           expect(userRepository.update).not.toHaveBeenCalled();
         }
       });

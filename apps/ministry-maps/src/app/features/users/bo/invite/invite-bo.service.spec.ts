@@ -47,24 +47,21 @@ describe('InviteBO', () => {
     it.each([
       ['no user', null],
       ['user without congregation', userMockBuilder({ congregation: undefined })],
-    ])(
-      'completes without emitting and does not hit the repository when there is %s',
-      (_desc, user) => {
-        userState.setUser(user);
+    ])('completes without emitting and does not hit the repository when there is %s', (_desc, user) => {
+      userState.setUser(user);
 
-        let completed = false;
-        const emitted: InvitationLink[] = [];
-        inviteBO.createInviteLink({ role: RoleEnum.PUBLISHER }).subscribe({
-          next: link => emitted.push(link),
-          complete: () => (completed = true),
-        });
+      let completed = false;
+      const emitted: InvitationLink[] = [];
+      inviteBO.createInviteLink({ role: RoleEnum.PUBLISHER }).subscribe({
+        next: (link) => emitted.push(link),
+        complete: () => (completed = true),
+      });
 
-        expect(emitted).toEqual([]);
-        expect(completed).toBe(true);
-        expect(inviteRepository.add).not.toHaveBeenCalled();
-        expect(loggerService.error).toHaveBeenCalled();
-      }
-    );
+      expect(emitted).toEqual([]);
+      expect(completed).toBe(true);
+      expect(inviteRepository.add).not.toHaveBeenCalled();
+      expect(loggerService.error).toHaveBeenCalled();
+    });
 
     it('persists a valid invitation link payload and emits the created link', async () => {
       const createdLink: InvitationLink = { id: 'INVITE-1' } as InvitationLink;
@@ -73,7 +70,9 @@ describe('InviteBO', () => {
       jest.useFakeTimers();
       jest.setSystemTime(new Date(2024, 5, 15));
 
-      const result = await lastValueFrom(inviteBO.createInviteLink({ email: 'invited@email.com', role: RoleEnum.ELDER }));
+      const result = await lastValueFrom(
+        inviteBO.createInviteLink({ email: 'invited@email.com', role: RoleEnum.ELDER }),
+      );
 
       expect(inviteRepository.add).toHaveBeenCalledTimes(1);
       const payload = inviteRepository.add.mock.calls[0][0];

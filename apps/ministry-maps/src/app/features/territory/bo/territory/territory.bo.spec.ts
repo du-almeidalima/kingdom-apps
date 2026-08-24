@@ -62,31 +62,32 @@ describe('TerritoryBO', () => {
     loggerService = TestBed.inject(LoggerService);
   });
 
-  describe('createDesignationForTerritories', () => it.each([
-    ['no user', null],
-    ['user without congregation', userMockBuilder({ congregation: undefined })],
-  ])('completes without emitting or hitting repositories when there is %s', (_desc, user) => {
-    userState.setUser(user);
+  describe('createDesignationForTerritories', () =>
+    it.each([
+      ['no user', null],
+      ['user without congregation', userMockBuilder({ congregation: undefined })],
+    ])('completes without emitting or hitting repositories when there is %s', (_desc, user) => {
+      userState.setUser(user);
 
-    let completed = false;
-    const emitted: unknown[] = [];
-    territoryBO.createDesignationForTerritories(['T1']).subscribe({
-      next: value => emitted.push(value),
-      complete: () => (completed = true),
-    });
+      let completed = false;
+      const emitted: unknown[] = [];
+      territoryBO.createDesignationForTerritories(['T1']).subscribe({
+        next: (value) => emitted.push(value),
+        complete: () => (completed = true),
+      });
 
-    expect(emitted).toEqual([]);
-    expect(completed).toBe(true);
-    expect(territoryRepository.getAllInIds).not.toHaveBeenCalled();
-    expect(designationRepository.add).not.toHaveBeenCalled();
-    expect(loggerService.error).toHaveBeenCalled();
-  }));
+      expect(emitted).toEqual([]);
+      expect(completed).toBe(true);
+      expect(territoryRepository.getAllInIds).not.toHaveBeenCalled();
+      expect(designationRepository.add).not.toHaveBeenCalled();
+      expect(loggerService.error).toHaveBeenCalled();
+    }));
 
   it('completes without emitting for an empty list of territory ids', () => {
     let completed = false;
     const emitted: unknown[] = [];
     territoryBO.createDesignationForTerritories([]).subscribe({
-      next: value => emitted.push(value),
+      next: (value) => emitted.push(value),
       complete: () => (completed = true),
     });
 
@@ -107,7 +108,7 @@ describe('TerritoryBO', () => {
 
     it('splits ids into batches of 10 for more than 10 ids and flattens the results in order', async () => {
       const ids = Array.from({ length: 11 }, (_, i) => `T${i + 1}`);
-      const fetched: Territory[] = ids.map(id => territoryMockBuilder({ id }));
+      const fetched: Territory[] = ids.map((id) => territoryMockBuilder({ id }));
       territoryRepository.getAllInIds
         .mockReturnValueOnce(of(fetched.slice(0, 10)))
         .mockReturnValueOnce(of(fetched.slice(10)));
@@ -119,7 +120,7 @@ describe('TerritoryBO', () => {
       expect(territoryRepository.getAllInIds.mock.calls[1][0]).toEqual(ids.slice(10));
 
       const persisted = designationRepository.add.mock.calls[0][0];
-      expect(persisted.territories.map(t => t.id)).toEqual(ids);
+      expect(persisted.territories.map((t) => t.id)).toEqual(ids);
     });
   });
 
@@ -145,9 +146,11 @@ describe('TerritoryBO', () => {
       expect(persisted.congregationId).toBe(congregationMock.id);
       expect(persisted.createdBy).toBe(userMockBuilder({}).id);
       expect(persisted.createdAt).toEqual(new Date(2024, 5, 15, 12, 0, 0));
-      expect(persisted.expiresAt).toEqual(new Date(new Date(2024, 5, 15, 12, 0, 0).getTime() + 45 * 24 * 60 * 60 * 1000));
+      expect(persisted.expiresAt).toEqual(
+        new Date(new Date(2024, 5, 15, 12, 0, 0).getTime() + 45 * 24 * 60 * 60 * 1000),
+      );
       expect(persisted.settings).toEqual({ shouldDesignationBlockAfterExpired: false });
-      expect(persisted.territories.every(t => t.status === DesignationStatusEnum.PENDING)).toBe(true);
+      expect(persisted.territories.every((t) => t.status === DesignationStatusEnum.PENDING)).toBe(true);
     });
 
     it('strips recentHistory and keeps only the last 5 history entries per territory', async () => {
@@ -159,7 +162,7 @@ describe('TerritoryBO', () => {
 
       const persistedTerritory = designationRepository.add.mock.calls[0][0].territories[0];
       expect('recentHistory' in persistedTerritory).toBe(false);
-      expect(persistedTerritory.history?.map(h => h.id)).toEqual(['H3', 'H4', 'H5', 'H6', 'H7']);
+      expect(persistedTerritory.history?.map((h) => h.id)).toEqual(['H3', 'H4', 'H5', 'H6', 'H7']);
     });
 
     it('defaults history to an empty array when the territory has none', async () => {
@@ -180,7 +183,7 @@ describe('TerritoryBO', () => {
     let completed = false;
     const emitted: unknown[] = [];
     territoryBO.createDesignationForTerritories(['T1']).subscribe({
-      next: value => emitted.push(value),
+      next: (value) => emitted.push(value),
       complete: () => (completed = true),
     });
 

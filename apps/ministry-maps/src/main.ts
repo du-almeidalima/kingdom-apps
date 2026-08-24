@@ -7,8 +7,8 @@ console.log('>>> Environment: ', environment.env);
 console.log('>>> Use Firebase on the cloud', environment.useCloud ?? false);
 
 bootstrapApplication(AppComponent, appConfig)
-  .then(_ => {
+  .then((_) => {
     // const spinnerElement = createCustomElement(SpinnerComponent, { injector: app.injector });
     // customElements.define('web-lib-spinner', spinnerElement);
   })
-  .catch(err => console.error(err));
+  .catch((err) => console.error(err));

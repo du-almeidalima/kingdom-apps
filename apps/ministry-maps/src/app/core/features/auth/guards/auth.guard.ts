@@ -49,6 +49,6 @@ export const authGuard: CanActivateFn = (route) => {
       }
 
       return canAccessRoute(user, roles);
-    })
+    }),
   );
 };

@@ -68,7 +68,7 @@ describe('WorkBO', () => {
   describe('undoLastVisitChanges', () => {
     it('throws synchronously when the territory has no history', () => {
       expect(() => workBO.undoLastVisitChanges(designation(), designationTerritory({ history: [] }))).toThrow(
-        "Territory don't have any history to undo."
+        "Territory don't have any history to undo.",
       );
     });
 
@@ -77,7 +77,7 @@ describe('WorkBO', () => {
       delete (noHistory as Partial<DesignationTerritory>).history;
 
       expect(() => workBO.undoLastVisitChanges(designation(), noHistory)).toThrow(
-        "Territory don't have any history to undo."
+        "Territory don't have any history to undo.",
       );
       expect(designationRepository.update).not.toHaveBeenCalled();
     });
@@ -144,7 +144,7 @@ describe('WorkBO', () => {
 
       const result = workBO.updateDesignationTerritoryObject(designation([t1, t2, t3]), replacement);
 
-      expect(result.territories.map(t => t.id)).toEqual(['T1', 'T2', 'T3']);
+      expect(result.territories.map((t) => t.id)).toEqual(['T1', 'T2', 'T3']);
       expect(result.territories[1]).toEqual(replacement);
       expect(result.territories[0]).toEqual(t1);
     });

@@ -3,19 +3,12 @@
     "codegraph": {
       "type": "stdio",
       "command": "codegraph",
-      "args": [
-        "serve",
-        "--mcp"
-      ]
+      "args": ["serve", "--mcp"]
     },
     "angular-cli": {
       "type": "stdio",
       "command": "npx",
-      "args": [
-        "-y",
-        "@angular/cli",
-        "mcp"
-      ]
+      "args": ["-y", "@angular/cli", "mcp"]
     }
   }
 }

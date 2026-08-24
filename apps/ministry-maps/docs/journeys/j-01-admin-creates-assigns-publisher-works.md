@@ -88,7 +88,7 @@ grown from 2 to **3** docs, the newest with `visitOutcome: 0`, `isRevisit: false
 14. Assert the page renders **exactly** D2's two addresses (`Rua das Acácias, 45 - Pinheiros`,
     `Rua Harmonia, 300 - Vila Madalena`) and none of D1's new territories.
 15. Assert `Rua das Acácias, 45 - Pinheiros` renders here as **pending with an enabled checkbox**, even
-    though the *same physical territory* was completed on D1 in leg 4 — D2's embedded snapshot was frozen
+    though the _same physical territory_ was completed on D1 in leg 4 — D2's embedded snapshot was frozen
     at creation time (UC-WORK-05).
 
 ⟶ **FINAL SWEEP (Firestore):** 3 designations total; D1 = 1 `DONE` + 2 `PENDING`; D2 = 2 `PENDING`;

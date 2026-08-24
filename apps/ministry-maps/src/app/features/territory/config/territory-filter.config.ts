@@ -1,5 +1,5 @@
 import { SelectFilterConfig, SortFilterConfig, ToggleFilterConfig } from '@kingdom-apps/common-ui';
-import { TerritoriesOrderBy } from '../../../shared/utils/territories-filter-pipe';
+import { TerritoriesOrderBy, TerritoryFilterSettings } from '../../../shared/utils/territories-filter-pipe';
 import { TerritoryIcon } from '../../../../models/territory';
 
 export type TerritoryFilterConfig = {
@@ -8,7 +8,13 @@ export type TerritoryFilterConfig = {
   icon: SelectFilterConfig;
 };
 
-export const TERRITORY_SORT_FILTER_CONFIG: SortFilterConfig<TerritoryFilterConfig> = {
+/**
+ * The intersection pins `initial` to the real domain filter shape so consumers read it
+ * without casts while the literal stays checked against {@link TerritoryFilterSettings}.
+ */
+export const TERRITORY_SORT_FILTER_CONFIG: SortFilterConfig<TerritoryFilterConfig> & {
+  filterConfigs: { initial: TerritoryFilterSettings['filters'] };
+} = {
   sortConfigs: {
     initial: TerritoriesOrderBy.SAVED_INDEX,
     options: [

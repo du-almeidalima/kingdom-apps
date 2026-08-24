@@ -31,7 +31,7 @@ describe('SelectFilterComponent', () => {
     const fixture = render();
 
     expect(ngMocks.formatText(fixture)).toContain('Cidade');
-    const optionTexts = ngMocks.findAll(fixture, 'option').map(el => el.nativeElement.textContent.trim());
+    const optionTexts = ngMocks.findAll(fixture, 'option').map((el) => el.nativeElement.textContent.trim());
     expect(optionTexts).toEqual(['Todas', 'City A', 'City B']);
   });
 

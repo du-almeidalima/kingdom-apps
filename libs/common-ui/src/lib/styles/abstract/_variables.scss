@@ -1,7 +1,7 @@
-@use "sass:color";
+@use 'sass:color';
 
 // COLORS
-$primary-green: #07AB3BFF;
+$primary-green: #07ab3bff;
 
 // Red colors
 $red-50: #fef7f7;
@@ -264,20 +264,19 @@ $neutral-900: #171717;
 $neutral-950: #0a0a0a;
 
 // White colors
-$white-100: #FDFDFD;
-$white-200: #F8F8F8;
-$white-300: #E7E6E4;
-$white-400: #D1D0CE;
-$white-500: #BBBAB8;
-
+$white-100: #fdfdfd;
+$white-200: #f8f8f8;
+$white-300: #e7e6e4;
+$white-400: #d1d0ce;
+$white-500: #bbbab8;
 
 // Gray colors
-$gray-100: #615D5C;
-$gray-200: #4D4947;
+$gray-100: #615d5c;
+$gray-200: #4d4947;
 $gray-300: #363332;
 $gray-400: #202020;
 
-$light-grey-100: #BAB7B5;
+$light-grey-100: #bab7b5;
 $light-grey-200: #8d8d8d;
 
 // Grey aliases for gray colors
@@ -299,34 +298,46 @@ $stone-800: #292524;
 $stone-900: #1c1917;
 $stone-950: #0c0a09;
 
-$link: #4171AEFF;
-$link-dark: #2A4970FF;
+$link: #4171aeff;
+$link-dark: #2a4970ff;
 
-$blue-btn: #2A4970;
+$blue-btn: #2a4970;
 $light-blue-btn: color.adjust($blue-btn, $lightness: 15%);
 
 $disabled: $gray-400;
 $disabled-light: #8d8d8d;
 
 // SHADOWS
-$shadow-z1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-$shadow-z2: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
-$shadow-z3: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-$shadow-z4: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
-$shadow-z5: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
-$shadow-z6: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
+$shadow-z1:
+  0 1px 3px rgba(0, 0, 0, 0.12),
+  0 1px 2px rgba(0, 0, 0, 0.24);
+$shadow-z2:
+  0 14px 28px rgba(0, 0, 0, 0.25),
+  0 10px 10px rgba(0, 0, 0, 0.22);
+$shadow-z3:
+  0 3px 6px rgba(0, 0, 0, 0.16),
+  0 3px 6px rgba(0, 0, 0, 0.23);
+$shadow-z4:
+  0 10px 20px rgba(0, 0, 0, 0.19),
+  0 6px 6px rgba(0, 0, 0, 0.23);
+$shadow-z5:
+  0 14px 28px rgba(0, 0, 0, 0.25),
+  0 10px 10px rgba(0, 0, 0, 0.22);
+$shadow-z6:
+  0 19px 38px rgba(0, 0, 0, 0.3),
+  0 15px 12px rgba(0, 0, 0, 0.22);
 
 // SIZES
-$control-padding: .8rem;
+$control-padding: 0.8rem;
 $control-height: 3.75rem;
-$icon-button-padding: .5rem;
+$icon-button-padding: 0.5rem;
 
 // ANIMATIONS TIMING
 $background-transition: 125ms ease-out background;
 
 // TYPOGRAPHY
 $text: rgba(0, 0, 0, 0.87);
-$text-medium: rgba(0, 0, 0, 0.60);
+$text-medium: rgba(0, 0, 0, 0.6);
 $text-low: rgba(0, 0, 0, 0.38);
 $text-primary: $green-500;
 $text-secondary: $green-100;

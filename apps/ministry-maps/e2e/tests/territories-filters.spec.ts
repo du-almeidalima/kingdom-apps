@@ -2,6 +2,7 @@ import { expect, test } from '../fixtures';
 import { TerritoriesPage } from '../page-objects/territories.page';
 import { SortFilterDialogPage } from '../page-objects/sort-filter-dialog.page';
 import { VisitOutcomeEnum } from '../../src/models/enums/visit-outcome';
+import { expectData } from '../utils/firestore-assert.util';
 
 // ─── WP-14: sort/filter dialog ────────────────────────────────────────────────
 
@@ -71,7 +72,7 @@ test.describe('Territories page — sort/filter dialog (WP-14)', () => {
 
     const stored = await db.getDoc(db.collections.territories, moved.id);
     const rh = stored?.['recentHistory'] as Array<Record<string, unknown>>;
-    expect(rh.some(h => h['visitOutcome'] === VisitOutcomeEnum.MOVED && h['isResolved'] === false)).toBe(true);
+    expect(rh.some((h) => h['visitOutcome'] === VisitOutcomeEnum.MOVED && h['isResolved'] === false)).toBe(true);
   });
 
   test('UC-TERR-11 — Icon <select> filter narrows the list to one TerritoryIcon', async ({ authenticatedPage, db }) => {
@@ -133,7 +134,7 @@ test.describe('Territories page — sort/filter dialog (WP-14)', () => {
     // localStorage holds the persisted sort/filter state.
     const stored = await authenticatedPage.evaluate(() => localStorage.getItem('sort-filter-state'));
     expect(stored).toBeTruthy();
-    expect(JSON.parse(stored!)).toEqual({
+    expect(JSON.parse(expectData(stored))).toEqual({
       sort: 'LAST_VISIT',
       filters: { includeBibleStudent: true, includeMoved: true, icon: '' },
     });

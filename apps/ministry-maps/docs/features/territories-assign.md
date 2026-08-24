@@ -51,8 +51,8 @@ This document describes the behavioural use cases for the `/territories/assign` 
 - **Expected UI:** `ngOnInit` runs the identical buggy ternary found on `/territories`
   (`const firstCity = cities.length >= 0 ? cities[0] : ALL_OPTION;`) — since an array's `.length` is **always** `>= 0`, `cities[0]` (`undefined`) is assigned instead of falling back to `ALL_OPTION`. The
   `<select>` then binds `[ngModel]='selectedCity'` to `undefined`, so **no** `<option>` appears selected (only the synthetic `Todas` option exists in the DOM, since `cities` is empty); `fetchTerritories(id,
-  undefined)` takes the `getAllByCongregationAndCities(id, [undefined])` branch (because `undefined !==
-  'ALL'`), which Firestore rejects when the query executes — the resulting observable errors, so
+undefined)` takes the `getAllByCongregationAndCities(id, [undefined])` branch (because `undefined !==
+'ALL'`), which Firestore rejects when the query executes — the resulting observable errors, so
   `filteredTerritories$ | async` never emits and the `@for` block renders zero checkbox rows. **Verified
   reality:** unlike `/territories` (whose whole page collapses — see UC-TERR-04), this page still renders
   its heading, city `<select>` (with only `Todas`), search box and submit FAB; only the checkbox list is
@@ -218,7 +218,7 @@ This document describes the behavioural use cases for the `/territories/assign` 
 - **Route:** `/territories/assign`
 - **Preconditions (seed):** default baseline
 - **Steps:** 1. tick `Rua das Acácias, 45 - Pinheiros` (`seed-territory-1`) and `Rua Harmonia, 300 - Vila Madalena` (`seed-territory-3`) → 2. submit, capture id `D1` from the share link → 3. reload `/territories/assign`, tick `Rua das Acácias, 45 - Pinheiros` and `Av. dos Autonomistas, 1200 - Centro` (`seed-territory-2`) → 4. submit, capture id `D2`
-- **Expected UI:** each submission independently opens its own share link/dialog; nothing on screen indicates `seed-territory-1` is already "in flight" on another designation. Note the session mechanics that make step 3 possible: after step 2's submit, `assignedTerritories` (a plain component field) holds the submitted ids and their checkboxes render checked-and-**disabled** — but both Sets are component state, so the full reload in step 3 re-creates the component with **empty** Sets and every checkbox becomes tickable again (the Sets are only ever preserved across *city switches* and submissions, never across reloads — see UC-ASSIGN-20 for the more severe optimistic-marking case that survives within one session)
+- **Expected UI:** each submission independently opens its own share link/dialog; nothing on screen indicates `seed-territory-1` is already "in flight" on another designation. Note the session mechanics that make step 3 possible: after step 2's submit, `assignedTerritories` (a plain component field) holds the submitted ids and their checkboxes render checked-and-**disabled** — but both Sets are component state, so the full reload in step 3 re-creates the component with **empty** Sets and every checkbox becomes tickable again (the Sets are only ever preserved across _city switches_ and submissions, never across reloads — see UC-ASSIGN-20 for the more severe optimistic-marking case that survives within one session)
 - **Expected persistence:** `db.getDoc(db.collections.designations, D1).territories` contains `seed-territory-1` and `seed-territory-3`, both `status: 'PENDING'`; `db.getDoc(db.collections.designations, D2).territories` contains `seed-territory-1` and `seed-territory-2`, both `status: 'PENDING'` — the two docs are entirely independent rows; `db.getCollectionDocs(db.collections.designations)` has grown by 2 (from the 1 baseline doc to 3)
 - **Edge cases:** mutating `D1.territories[0].status` to `'DONE'` (simulating a completed visit on `/work/:id`) must **not** change `D2.territories[0].status`, since each is an independently-written snapshot, not a shared reference
 - **Priority:** P0 · **Gaps:** none
@@ -266,7 +266,7 @@ This document describes the behavioural use cases for the `/territories/assign` 
 - **Expected persistence:** N/A (UI-only observation)
 - **Edge cases:** a test author expecting `navigator.clipboard.writeText` (a common pattern in similar apps)
   must not write that assertion here — it would test a feature that does not exist. If a future PR adds a copy button, this entry must be rewritten and a `page.context().grantPermissions(['clipboard-read',
-  'clipboard-write'])` step added before reading `navigator.clipboard.readText()`
+'clipboard-write'])` step added before reading `navigator.clipboard.readText()`
 - **Priority:** P2 · **Gaps:** documents the current absence; no automatable clipboard flow exists today
 
 #### UC-ASSIGN-21 — ⚠ suspected defect: on a failed creation, ticked territories are optimistically marked "already assigned" with no rollback and no error shown

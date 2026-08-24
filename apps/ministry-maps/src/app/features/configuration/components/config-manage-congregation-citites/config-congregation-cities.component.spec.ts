@@ -80,7 +80,7 @@ describe('ConfigCongregationCitiesComponent', () => {
       render();
 
       ngMocks.click(ngMocks.find('[data-testid="config-add-city"]'));
-      component.cancelEdit(component.cities.at(-1)!, component.cities.length - 1);
+      component.cancelEdit(component.cities[component.cities.length - 1], component.cities.length - 1);
       expect(component.cities).toHaveLength(congregationMock.cities.length);
 
       component.editCity(component.cities[0]);
@@ -115,7 +115,10 @@ describe('ConfigCongregationCitiesComponent', () => {
     it.each([
       ['a rename', (c: ConfigCongregationCitiesComponent) => (c.cities[0].currentName = 'Renamed')],
       ['a new city', (c: ConfigCongregationCitiesComponent) => c.addCity()],
-      ['a deletion (regression: delete-only changes must be savable)', (c: ConfigCongregationCitiesComponent) => c.deleteCity(0)],
+      [
+        'a deletion (regression: delete-only changes must be savable)',
+        (c: ConfigCongregationCitiesComponent) => c.deleteCity(0),
+      ],
     ])('enables Save after %s', (_desc, mutate) => {
       jest.spyOn(window, 'confirm').mockReturnValue(true);
       const fixture = render();
@@ -131,7 +134,6 @@ describe('ConfigCongregationCitiesComponent', () => {
   describe('saveChanges', () => {
     it('rejects empty city names with a toast and no repository call', () => {
       render();
-      
 
       component.addCity();
       component.saveChanges();
@@ -156,7 +158,7 @@ describe('ConfigCongregationCitiesComponent', () => {
 
     it('sends rename/add/delete DTOs, shows a success toast and resets the local state', () => {
       render();
-      
+
       jest.spyOn(window, 'confirm').mockReturnValue(true);
 
       // rename first city, delete second, add a new one
@@ -164,7 +166,7 @@ describe('ConfigCongregationCitiesComponent', () => {
       component.cities[0].currentName = 'Renamed City';
       component.deleteCity(1);
       component.addCity();
-      component.cities.at(-1)!.currentName = 'Brand New City';
+      component.cities[component.cities.length - 1].currentName = 'Brand New City';
 
       component.saveChanges();
 
@@ -175,15 +177,18 @@ describe('ConfigCongregationCitiesComponent', () => {
       ]);
       expect(toasterMock.success).toHaveBeenCalledWith('Cities updated successfully!');
       expect(component.isLoading).toBe(false);
-      expect(component.cities.map(c => c.currentName)).toEqual(['Renamed City', congregationMock.cities[2], 'Brand New City']);
-      expect(component.cities.every(c => !c.isNew && !c.isEditing)).toBe(true);
+      expect(component.cities.map((c) => c.currentName)).toEqual([
+        'Renamed City',
+        congregationMock.cities[2],
+        'Brand New City',
+      ]);
+      expect(component.cities.every((c) => !c.isNew && !c.isEditing)).toBe(true);
       jest.restoreAllMocks();
     });
 
     it('shows an error toast and stops loading when the update fails', () => {
       updateCongregationCities.mockReturnValue(throwError(() => new Error('boom')));
       render();
-      
 
       component.editCity(component.cities[0]);
       component.cities[0].currentName = 'Renamed City';

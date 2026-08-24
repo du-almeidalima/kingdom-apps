@@ -18,7 +18,9 @@
       text-decoration: none;
       color: var(--kui-color-link, #{variables.$link});
 
-      &:focus, &:active, &:hover {
+      &:focus,
+      &:active,
+      &:hover {
         color: var(--kui-color-link-hover, #{variables.$link-dark});
       }
 

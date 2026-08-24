@@ -64,7 +64,7 @@ test.describe('Territories page', () => {
 test.describe('Territories page — list scope and filters (WP-13)', () => {
   test.use({ role: 'admin' });
 
-  test('UC-TERR-01 — list shows only the signed-in user\'s congregation territories', async ({
+  test("UC-TERR-01 — list shows only the signed-in user's congregation territories", async ({
     authenticatedPage,
     seed,
     db,
@@ -86,12 +86,7 @@ test.describe('Territories page — list scope and filters (WP-13)', () => {
     await expect(territoriesPage.territoryByAddress('Rua Estrangeira, 1')).toHaveCount(0);
 
     // Persistence: congregation-scoped query returns exactly the 3 baseline; full collection has 4.
-    const own = await db.queryWhere(
-      db.collections.territories,
-      'congregationId',
-      '==',
-      seed.ids.congregation,
-    );
+    const own = await db.queryWhere(db.collections.territories, 'congregationId', '==', seed.ids.congregation);
     expect(own).toHaveLength(3);
     const all = await db.getCollectionDocs(db.collections.territories);
     expect(all).toHaveLength(4);
@@ -201,10 +196,7 @@ test.describe('Territories page — list scope and filters (WP-13)', () => {
     expect(String(stored?.['note'])).toContain('porteiro');
   });
 
-  test('UC-TERR-06 — search is case-insensitive but accent-sensitive', async ({
-    authenticatedPage,
-    db,
-  }) => {
+  test('UC-TERR-06 — search is case-insensitive but accent-sensitive', async ({ authenticatedPage, db }) => {
     const territoriesPage = new TerritoriesPage(authenticatedPage);
     await territoriesPage.goto();
     await territoriesPage.showAllCities();
@@ -274,10 +266,7 @@ test.describe('Territories page — list scope and filters (WP-13)', () => {
     expect(t3?.['lastVisit']).toBeTruthy();
   });
 
-  test('UC-TERR-33 — no "open in Maps" affordance on this screen (⚠ defect)', async ({
-    authenticatedPage,
-    db,
-  }) => {
+  test('UC-TERR-33 — no "open in Maps" affordance on this screen (⚠ defect)', async ({ authenticatedPage, db }) => {
     const territoriesPage = new TerritoriesPage(authenticatedPage);
     await territoriesPage.goto();
     await territoriesPage.showAllCities();

@@ -30,7 +30,7 @@
     justify-content: space-between;
     align-items: center;
 
-    padding: .8rem;
+    padding: 0.8rem;
 
     background-color: var(--kui-color-surface-inverse, #{variables.$grey-100});
     color: var(--kui-color-on-inverse, #{variables.$white-100});
@@ -49,7 +49,7 @@
 
     width: $size;
     height: $size;
-    padding: .75rem;
+    padding: 0.75rem;
     border: none;
     border-radius: 50%;
 

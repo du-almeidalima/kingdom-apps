@@ -19,7 +19,7 @@ import { FormFieldComponent, LabelComponent, SelectComponent } from '../../form-
       >
         <option value="">{{ placeholder() || 'Selecione' }}</option>
         @for (option of options(); track option.value) {
-        <option [value]="option.value">{{ option.label }}</option>
+          <option [value]="option.value">{{ option.label }}</option>
         }
       </select>
     </lib-form-field>
@@ -38,12 +38,12 @@ export class SelectFilterComponent implements ControlValueAccessor {
   title = input<string>('');
   controlName = input<string>('');
   placeholder = input<string>('');
-  options = input<{ value: any; label: string }[]>([]);
+  options = input<{ value: string; label: string }[]>([]);
 
-  value = signal<any>('');
+  value = signal('');
   isDisabled = signal(false);
 
-  private onChange: (value: any) => void = () => undefined;
+  private onChange: (value: string) => void = () => undefined;
   private onTouched: () => void = () => undefined;
 
   handleChange(event: Event): void {
@@ -53,11 +53,11 @@ export class SelectFilterComponent implements ControlValueAccessor {
     this.onTouched();
   }
 
-  writeValue(value: any): void {
+  writeValue(value: string): void {
     this.value.set(value ?? '');
   }
 
-  registerOnChange(fn: (value: any) => void): void {
+  registerOnChange(fn: (value: string) => void): void {
     this.onChange = fn;
   }
 

@@ -1,4 +1,4 @@
-import { Directive, input, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
+import { Directive, input, OnInit, TemplateRef, ViewContainerRef, inject } from '@angular/core';
 import { AuthUserStateService } from '../../state/';
 
 /** Generic App Admin Role.*/
@@ -9,15 +9,11 @@ export const APP_ADMIN_ROLE = 'APP_ADMIN' as const;
   standalone: true,
 })
 export class AuthorizeDirective implements OnInit {
+  private readonly templateRef = inject<TemplateRef<unknown>>(TemplateRef);
+  private readonly viewContainerRef = inject(ViewContainerRef);
+  private readonly authUserStateService = inject(AuthUserStateService);
 
   roles = input.required<string | string[]>({ alias: 'libAuthorize' });
-
-  constructor(
-    private readonly templateRef: TemplateRef<unknown>,
-    private readonly viewContainerRef: ViewContainerRef,
-    private readonly authUserStateService: AuthUserStateService,
-  ) {
-  }
 
   ngOnInit(): void {
     if (!this.roles() || !this.roles()?.length) {
@@ -38,7 +34,7 @@ export class AuthorizeDirective implements OnInit {
     // @ts-expect-error: TypeScript is not correctly inferring types when using signals
     const directiveRoles: string[] = typeof this.roles() === 'string' ? [this.roles()] : this.roles();
 
-    const containsRoles = directiveRoles.some(directiveRole => userRoles.includes(directiveRole));
+    const containsRoles = directiveRoles.some((directiveRole) => userRoles.includes(directiveRole));
 
     if (containsRoles || userRoles.includes(APP_ADMIN_ROLE)) {
       this._createEmbeddedView();

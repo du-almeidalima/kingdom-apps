@@ -28,7 +28,7 @@ describe('TerritoryAlertsBO (static helpers)', () => {
   describe('hasRecentRevisit', () => {
     it('is true when any recent history entry is a revisit', () => {
       expect(
-        TerritoryAlertsBO.hasRecentRevisit(territory({ recentHistory: [historyEntry({ isRevisit: true })] }))
+        TerritoryAlertsBO.hasRecentRevisit(territory({ recentHistory: [historyEntry({ isRevisit: true })] })),
       ).toBe(true);
     });
 
@@ -64,22 +64,45 @@ describe('TerritoryAlertsBO (static helpers)', () => {
     const monthsAgo = (months: number) => new Date(2024, 5 - months, 15);
 
     it.each([
-      ['asked 3 months ago (unresolved)', historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: monthsAgo(3) }), true],
-      ['asked 23 months ago (unresolved)', historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: monthsAgo(23) }), true],
-      ['asked exactly 24 months ago (window boundary)', historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: monthsAgo(24) }), false],
-      ['asked more than 24 months ago', historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: monthsAgo(30) }), false],
-      ['asked but already resolved', historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, isResolved: true, date: monthsAgo(3) }), false],
+      [
+        'asked 3 months ago (unresolved)',
+        historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: monthsAgo(3) }),
+        true,
+      ],
+      [
+        'asked 23 months ago (unresolved)',
+        historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: monthsAgo(23) }),
+        true,
+      ],
+      [
+        'asked exactly 24 months ago (window boundary)',
+        historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: monthsAgo(24) }),
+        false,
+      ],
+      [
+        'asked more than 24 months ago',
+        historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: monthsAgo(30) }),
+        false,
+      ],
+      [
+        'asked but already resolved',
+        historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, isResolved: true, date: monthsAgo(3) }),
+        false,
+      ],
       // differenceInMonths clamps future dates to 0, so future-dated reports stay flagged.
-      ['asked with a future date', historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: new Date(2025, 5, 15) }), true],
-      ['entry without a date', historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: undefined as unknown as Date }), false],
-    ])(
-      'is %p for %s',
-      (_desc, entry, expected) => {
-        expect(
-          TerritoryAlertsBO.hasRecentlyAskedToStopVisiting(territory({ recentHistory: [entry] }))
-        ).toBe(expected);
-      }
-    );
+      [
+        'asked with a future date',
+        historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: new Date(2025, 5, 15) }),
+        true,
+      ],
+      [
+        'entry without a date',
+        historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: undefined as unknown as Date }),
+        false,
+      ],
+    ])('is %p for %s', (_desc, entry, expected) => {
+      expect(TerritoryAlertsBO.hasRecentlyAskedToStopVisiting(territory({ recentHistory: [entry] }))).toBe(expected);
+    });
   });
 
   describe('isBibleStudent', () => {
@@ -115,8 +138,8 @@ describe('TerritoryAlertsBO (static helpers)', () => {
     it('returns null when all alerts are resolved or absent', () => {
       expect(
         TerritoryAlertsBO.findImportantAlert(
-          territory({ recentHistory: [historyEntry({ visitOutcome: VisitOutcomeEnum.MOVED, isResolved: true })] })
-        )
+          territory({ recentHistory: [historyEntry({ visitOutcome: VisitOutcomeEnum.MOVED, isResolved: true })] }),
+        ),
       ).toBeNull();
       expect(TerritoryAlertsBO.findImportantAlert(territory())).toBeNull();
     });
@@ -166,7 +189,7 @@ describe('TerritoryAlertsBO.resolveTerritoryHistoryAlert', () => {
 
     bo.resolveTerritoryHistoryAlert(input, [movedEntry, spokeEntry], VisitOutcomeEnum.MOVED).subscribe();
 
-    const savedIds = territoryRepository.setVisitHistory.mock.calls.map(call => call[1].id);
+    const savedIds = territoryRepository.setVisitHistory.mock.calls.map((call) => call[1].id);
     expect(savedIds).toEqual(['H-MOVED', 'H-SPOKE']);
     const savedMoved = territoryRepository.setVisitHistory.mock.calls[0][1];
     const savedSpoke = territoryRepository.setVisitHistory.mock.calls[1][1];
@@ -177,13 +200,11 @@ describe('TerritoryAlertsBO.resolveTerritoryHistoryAlert', () => {
   it('clears the isRevisit flag on revisit entries when resolving the REVISIT outcome', () => {
     const revisitEntry = historyEntry({ id: 'H-REVISIT', isRevisit: true });
 
-    bo
-      .resolveTerritoryHistoryAlert(
-        territory({ recentHistory: [revisitEntry] }),
-        [revisitEntry],
-        VisitOutcomeEnum.REVISIT
-      )
-      .subscribe();
+    bo.resolveTerritoryHistoryAlert(
+      territory({ recentHistory: [revisitEntry] }),
+      [revisitEntry],
+      VisitOutcomeEnum.REVISIT,
+    ).subscribe();
 
     const saved = territoryRepository.setVisitHistory.mock.calls[0][1];
     expect(saved.isRevisit).toBe(false);
@@ -199,18 +220,23 @@ describe('TerritoryAlertsBO.resolveTerritoryHistoryAlert', () => {
     expect(territoryRepository.setVisitHistory).toHaveBeenCalledTimes(1);
     // invocationCallOrder is global across mocks: territory update must come first
     expect(territoryRepository.update.mock.invocationCallOrder[0]).toBeLessThan(
-      territoryRepository.setVisitHistory.mock.invocationCallOrder[0]
+      territoryRepository.setVisitHistory.mock.invocationCallOrder[0],
     );
   });
 
   it('passes the territory id with each history entry to setVisitHistory', () => {
     const entry = historyEntry({ id: 'H1', visitOutcome: VisitOutcomeEnum.MOVED });
 
-    bo
-      .resolveTerritoryHistoryAlert(territory({ id: 'TERRITORY-A', recentHistory: [entry] }), [entry], VisitOutcomeEnum.MOVED)
-      .subscribe();
+    bo.resolveTerritoryHistoryAlert(
+      territory({ id: 'TERRITORY-A', recentHistory: [entry] }),
+      [entry],
+      VisitOutcomeEnum.MOVED,
+    ).subscribe();
 
-    expect(territoryRepository.setVisitHistory).toHaveBeenCalledWith('TERRITORY-A', expect.objectContaining({ id: 'H1', isResolved: true }));
+    expect(territoryRepository.setVisitHistory).toHaveBeenCalledWith(
+      'TERRITORY-A',
+      expect.objectContaining({ id: 'H1', isResolved: true }),
+    );
   });
 
   it('keeps unrelated recentHistory entries on the territory document when resolving a subset', () => {
@@ -218,16 +244,14 @@ describe('TerritoryAlertsBO.resolveTerritoryHistoryAlert', () => {
     const revisitEntry = historyEntry({ id: 'H-REVISIT', isRevisit: true, date: new Date(2024, 1, 1) });
     const input = territory({ recentHistory: [movedEntry, revisitEntry] });
 
-    bo
-      .resolveTerritoryHistoryAlert(input, [revisitEntry], VisitOutcomeEnum.REVISIT)
-      .subscribe();
+    bo.resolveTerritoryHistoryAlert(input, [revisitEntry], VisitOutcomeEnum.REVISIT).subscribe();
 
     const updatedTerritory = territoryRepository.update.mock.calls[0][0];
     // The `history` field is what the datasource uses to re-derive `recentHistory`:
     // resolving a revisit alert must not drop the MOVED entry from the territory document.
-    expect(updatedTerritory.history?.map(h => h.id)).toEqual(['H-MOVED', 'H-REVISIT']);
-    expect(updatedTerritory.history?.find(h => h.id === 'H-REVISIT')?.isRevisit).toBe(false);
-    expect(updatedTerritory.history?.find(h => h.id === 'H-MOVED')?.isRevisit).toBe(false);
+    expect(updatedTerritory.history?.map((h) => h.id)).toEqual(['H-MOVED', 'H-REVISIT']);
+    expect(updatedTerritory.history?.find((h) => h.id === 'H-REVISIT')?.isRevisit).toBe(false);
+    expect(updatedTerritory.history?.find((h) => h.id === 'H-MOVED')?.isRevisit).toBe(false);
   });
 
   it('does not mutate the input territory nor the input histories', () => {

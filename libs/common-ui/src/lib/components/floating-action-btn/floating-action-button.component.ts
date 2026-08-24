@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, Renderer2 } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, Renderer2, inject } from '@angular/core';
 import { SpinnerComponent } from '../spinner/spinner.component';
 
 @Component({
@@ -15,6 +15,9 @@ import { SpinnerComponent } from '../spinner/spinner.component';
   imports: [SpinnerComponent],
 })
 export class FloatingActionButtonComponent implements OnInit {
+  private readonly renderer = inject(Renderer2);
+  private readonly elRef = inject<ElementRef<HTMLButtonElement>>(ElementRef);
+
   spinnerColor = 'currentColor';
 
   @Input()
@@ -22,8 +25,6 @@ export class FloatingActionButtonComponent implements OnInit {
 
   @Input()
   loading = false;
-
-  constructor(private readonly renderer: Renderer2, private readonly elRef: ElementRef<HTMLButtonElement>) {}
 
   ngOnInit() {
     this.renderer.addClass(this.elRef.nativeElement, `floating-action-btn`);

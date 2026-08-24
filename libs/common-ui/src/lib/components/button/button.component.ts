@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, Renderer2 } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, Renderer2, inject } from '@angular/core';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -8,10 +8,11 @@ import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, Renderer
   template: ` <ng-content></ng-content> `,
 })
 export class ButtonComponent implements OnInit {
+  private readonly renderer = inject(Renderer2);
+  private readonly elRef = inject<ElementRef<HTMLButtonElement>>(ElementRef);
+
   @Input()
   btnType: 'secondary' | 'primary' = 'secondary';
-
-  constructor(private readonly renderer: Renderer2, private readonly elRef: ElementRef<HTMLButtonElement>) {}
 
   ngOnInit() {
     this.renderer.addClass(this.elRef.nativeElement, `button--${this.btnType}`);

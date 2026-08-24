@@ -15,7 +15,7 @@ export class InvitationLinkRepositoryMock implements InvitationLinkRepository {
     return of(mockBuilderFn(invitationLinkMock, invitationLink));
   }
 
-  update(invitationLink: Partial<InvitationLink>): Observable<void> {
+  update(_invitationLink: Partial<InvitationLink>): Observable<void> {
     return EMPTY;
   }
 }
@@ -30,4 +30,3 @@ export const invitationLinkMock: InvitationLink = {
   isValid: true,
   email: 'user.123@test.com',
 };
-

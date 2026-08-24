@@ -11,4 +11,4 @@ export type CongregationSettings = {
   designationAccessExpiryDays: number;
   /** Once a {@link Designation} is expired, should all buttons be disabled. */
   shouldDesignationBlockAfterExpired: boolean;
-}
+};

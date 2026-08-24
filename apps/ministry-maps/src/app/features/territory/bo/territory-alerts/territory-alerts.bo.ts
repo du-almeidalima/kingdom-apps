@@ -2,20 +2,20 @@ import { type Territory } from '../../../../../models/territory';
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 import { differenceInMonths } from '../../../../shared/utils/date';
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { concat, Observable, retry } from 'rxjs';
 
 @Injectable()
 export class TerritoryAlertsBO {
-  constructor(private readonly territoryRepository: TerritoryRepository) {}
+  private readonly territoryRepository = inject(TerritoryRepository);
 
   /**
    * Looks into territory [recentHistory]{@link Territory.recentHistory} to find if it has recently been visited.
    * @return boolean if found.
    */
   static hasRecentRevisit(territory: Territory) {
-    return !!territory.recentHistory?.some(history => history.isRevisit);
+    return !!territory.recentHistory?.some((history) => history.isRevisit);
   }
 
   /**
@@ -23,7 +23,7 @@ export class TerritoryAlertsBO {
    * @return boolean if found.
    */
   static hasRecentlyMoved(territory: Territory) {
-    return !!territory.recentHistory?.some(history => {
+    return !!territory.recentHistory?.some((history) => {
       if (history.isResolved) {
         return false;
       }
@@ -38,7 +38,7 @@ export class TerritoryAlertsBO {
    * @return boolean if found.
    */
   static hasRecentlyAskedToStopVisiting(territory: Territory) {
-    return !!territory.recentHistory?.some(history => {
+    return !!territory.recentHistory?.some((history) => {
       if (history.isResolved) {
         return false;
       }
@@ -112,11 +112,11 @@ export class TerritoryAlertsBO {
   resolveTerritoryHistoryAlert(
     territory: Territory,
     histories: TerritoryVisitHistory[],
-    visitOutcome: VisitOutcomeEnum
+    visitOutcome: VisitOutcomeEnum,
   ): Observable<void> {
     const copiedTerritory = structuredClone(territory);
     // Update all entries for the given outcome
-    const updatedHistories = histories.map(history => {
+    const updatedHistories = histories.map((history) => {
       const historyClone: TerritoryVisitHistory = structuredClone(history);
 
       if (history.visitOutcome === visitOutcome) {
@@ -133,16 +133,16 @@ export class TerritoryAlertsBO {
     // The repository derives `recentHistory` from the `history` field on update. Callers may pass
     // only a subset of recentHistory (e.g., only revisit entries), so we merge the updated entries
     // back into the full recentHistory to avoid dropping unrelated entries from the document.
-    const updatedById = new Map(updatedHistories.map(history => [history.id, history]));
+    const updatedById = new Map(updatedHistories.map((history) => [history.id, history]));
     const currentRecentHistory = copiedTerritory.recentHistory ?? [];
     copiedTerritory.history = [
-      ...currentRecentHistory.map(history => updatedById.get(history.id) ?? history),
-      ...updatedHistories.filter(history => !currentRecentHistory.some(h => h.id === history.id)),
+      ...currentRecentHistory.map((history) => updatedById.get(history.id) ?? history),
+      ...updatedHistories.filter((history) => !currentRecentHistory.some((h) => h.id === history.id)),
     ];
     const updateRecentHistoryArray$ = this.territoryRepository.update(copiedTerritory);
 
     // Updating the history collection
-    const updateHistoryCollection$ = updatedHistories.map(history => {
+    const updateHistoryCollection$ = updatedHistories.map((history) => {
       return this.territoryRepository.setVisitHistory(territory.id, history);
     });
 

@@ -1,13 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import {
-  collection,
-  collectionData,
-  collectionGroup,
-  doc,
-  getDocs,
-  Firestore,
-  query,
-} from '@angular/fire/firestore';
+import { collection, collectionData, collectionGroup, doc, getDocs, Firestore, query } from '@angular/fire/firestore';
 import { lastValueFrom, of } from 'rxjs';
 import { MockProvider } from 'ng-mocks';
 
@@ -100,9 +92,7 @@ describe('FirebaseTerritoryDatasourceService — getAllByCongregation with histo
       { data: historyEntry('H3', 'T1'), parentTerritoryId: 'T1' },
     ]);
 
-    const result = await lastValueFrom(
-      service.getAllByCongregation('CONGREGATION-1', { getHistory: true })
-    );
+    const result = await lastValueFrom(service.getAllByCongregation('CONGREGATION-1', { getHistory: true }));
 
     // One collection-group read instead of one subcollection query per territory.
     expect(getDocs).toHaveBeenCalledTimes(1);
@@ -119,9 +109,7 @@ describe('FirebaseTerritoryDatasourceService — getAllByCongregation with histo
     const unstamped = { ...historyEntry('H1', ''), territoryId: undefined };
     mockHistoryGroupQuery([{ data: unstamped as TerritoryVisitHistory, parentTerritoryId: 'T1' }]);
 
-    const result = await lastValueFrom(
-      service.getAllByCongregation('CONGREGATION-1', { getHistory: true })
-    );
+    const result = await lastValueFrom(service.getAllByCongregation('CONGREGATION-1', { getHistory: true }));
 
     expect(result[0].history?.map((h) => h.id)).toEqual(['H1']);
   });
@@ -129,9 +117,7 @@ describe('FirebaseTerritoryDatasourceService — getAllByCongregation with histo
   it('returns an empty array immediately for congregations without territories (no hang)', async () => {
     mockTerritoriesSnapshot([]);
 
-    const result = await lastValueFrom(
-      service.getAllByCongregation('EMPTY-CONGREGATION', { getHistory: true })
-    );
+    const result = await lastValueFrom(service.getAllByCongregation('EMPTY-CONGREGATION', { getHistory: true }));
 
     expect(result).toEqual([]);
     expect(getDocs).not.toHaveBeenCalled();

@@ -12,6 +12,7 @@ Close-out work once every other box is checked.
 #### Tasks
 
 1. **Full-suite verification**
+
    - `npx nx typecheck-e2e ministry-maps` green.
    - `npx nx e2e ministry-maps --no-tui` green **twice back-to-back** (isolation proof — the suite's own
      README requirement).
@@ -21,11 +22,13 @@ Close-out work once every other box is checked.
      documented in their WPs, e.g. UC-PROF-07).
 
 2. **Catalog bookkeeping** (`docs/test-catalog.md` — the only docs file this plan mutates)
+
    - Flip every implemented row's **Covered** cell to `✅ <spec file>` (and journeys likewise).
    - Leave the 11 not-automated rows marked as they are (✋ / blocked / unit-only).
    - Update the coverage summary table totals.
 
 3. **Manual acceptance checklist** (publish as `e2e/MANUAL-ACCEPTANCE.md`)
+
    - One section per OAuth leg — UC-AUTH-04, UC-AUTH-05, UC-AUTH-06, UC-AUTH-07 (login outcomes) and
      UC-AUTH-17, UC-AUTH-18, UC-AUTH-19, UC-AUTH-20 (invite redemption matrix) — each with
      preconditions, exact steps, and the expected UI + Firestore persistence copied verbatim from
@@ -35,6 +38,7 @@ Close-out work once every other box is checked.
    - This file is what a human runs before a release until/unless emulator popup automation is adopted.
 
 4. **HX-4 decision record** (fault injection)
+
    - Add a short note to `docs/test-catalog.md` §HX-4: either "implemented as …" (if someone built it)
      or "deliberately deferred — UC-ASSIGN-21 and UC-AUTH-21 remain documented risks; candidates for
      unit/integration coverage instead".
@@ -42,6 +46,7 @@ Close-out work once every other box is checked.
      `territories-assign.spec.ts` / `auth.spec.ts` instead of listing them above.
 
 5. **Docs drift check**
+
    - Re-read `docs/README.md`'s "derived artifact" note: for each feature doc, skim its **Sources**
      list and confirm no entry contradicted reality during implementation (every deviation found during
      the WPs should already have been patched into the docs per plan README §2.8 — this is the audit).

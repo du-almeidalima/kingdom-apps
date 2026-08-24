@@ -38,7 +38,7 @@ describe('ToasterContainerComponent', () => {
           message: 'Test message',
           type: 'info',
           durationMs: DEFAULT_TOAST_DURATION_MS,
-        })
+        }),
       );
     });
 

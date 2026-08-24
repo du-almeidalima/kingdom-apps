@@ -21,7 +21,7 @@ describe('TerritoryManageDialogComponent', () => {
           cities: congregationMock.cities,
           congregationId: congregationMock.id,
         } as TerritoryDialogData,
-      })
+      }),
   );
 
   it('should create', () => {

@@ -21,13 +21,12 @@ export class WorkBO {
   undoLastVisitChanges(designation: Designation, designationTerritory: DesignationTerritory) {
     const designationTerritoryCopy = structuredClone(designationTerritory);
 
-    if (!designationTerritoryCopy.history?.length) {
+    const removedHistory = designationTerritoryCopy.history?.pop();
+    if (!removedHistory) {
       throw Error(`Territory don't have any history to undo.`);
     }
-
-    // Remove the last entry
-    const removedHistory = designationTerritoryCopy.history.pop()!;
-    designationTerritoryCopy.lastVisit = designationTerritoryCopy.history?.[designationTerritoryCopy.history.length - 1]?.date ?? null;
+    designationTerritoryCopy.lastVisit =
+      designationTerritoryCopy.history?.[designationTerritoryCopy.history.length - 1]?.date ?? null;
     designationTerritoryCopy.status = DesignationStatusEnum.PENDING;
 
     const { status: _status, ...territory } = designationTerritoryCopy;
@@ -53,11 +52,11 @@ export class WorkBO {
     const designationCopy = structuredClone(designation);
     // Manually mutating the designations territories so order is preserved. Maybe it should be collection?
     const designationTerritories = designationCopy.territories;
-    const updatedDesignationTerritories = designationTerritories.map(t => {
+    const updatedDesignationTerritories = designationTerritories.map((t) => {
       return t.id === territory.id
         ? {
-          ...territory,
-        }
+            ...territory,
+          }
         : t;
     });
 

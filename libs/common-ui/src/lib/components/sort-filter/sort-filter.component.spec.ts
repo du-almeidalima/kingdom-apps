@@ -32,18 +32,14 @@ describe('SortFilterComponent', () => {
 
   const render = (
     inputs: Partial<Record<'config' | 'initialValue' | 'storeFilterState' | 'storageKey', unknown>> = {},
-    options: { detectChanges?: boolean } = {}
+    options: { detectChanges?: boolean } = {},
   ) => {
-    fixture = MockRender(
-      SortFilterComponent,
-      { config: CONFIG, ...inputs } as never,
-      {
-        providers: [{ provide: Dialog, useValue: dialogMock }],
-        ...(options.detectChanges === false ? { detectChanges: false } : {}),
-      }
-    );
+    fixture = MockRender(SortFilterComponent, { config: CONFIG, ...inputs } as never, {
+      providers: [{ provide: Dialog, useValue: dialogMock }],
+      ...(options.detectChanges === false ? { detectChanges: false } : {}),
+    });
     component = fixture.point.componentInstance as SortFilterComponent;
-    component.changed.subscribe(value => changedValues.push(value));
+    component.changed.subscribe((value) => changedValues.push(value));
     if (options.detectChanges === false) {
       fixture.detectChanges();
     }
@@ -111,7 +107,7 @@ describe('SortFilterComponent', () => {
             sortConfigs: expect.objectContaining({ initial: 'name' }),
             filterConfigs: expect.objectContaining({ initial: expect.objectContaining({ city: 'B' }) }),
           }),
-        })
+        }),
       );
     });
 
@@ -164,7 +160,7 @@ describe('SortFilterComponent', () => {
 
       expect(localStorage.setItem).toHaveBeenCalledWith(
         'custom-key',
-        JSON.stringify({ sort: 'name', filters: { city: 'B' } })
+        JSON.stringify({ sort: 'name', filters: { city: 'B' } }),
       );
     });
   });

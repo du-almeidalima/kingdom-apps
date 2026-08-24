@@ -1,8 +1,8 @@
 ---
 globs:
-- '**/*.service.ts'
-- '**/services/**'
-- '**/state/**/*.ts'
+  - '**/*.service.ts'
+  - '**/services/**'
+  - '**/state/**/*.ts'
 description: Services, state services, business objects (BOs), and the repository/datasource data-access layer.
 ---
 
@@ -27,9 +27,7 @@ export abstract class UserRepository {
 }
 
 // app/repositories/repositories-providers.ts
-export const REPOSITORIES_PROVIDERS = [
-  { provide: UserRepository, useClass: FirebaseUserDatasourceService },
-];
+export const REPOSITORIES_PROVIDERS = [{ provide: UserRepository, useClass: FirebaseUserDatasourceService }];
 // spread into appConfig.providers (app.config.ts)
 ```
 

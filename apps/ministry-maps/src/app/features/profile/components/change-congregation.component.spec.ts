@@ -40,7 +40,7 @@ describe('ChangeCongregationComponent', () => {
     expect((select.nativeElement as HTMLSelectElement).value).toBe(select.nativeElement.options[1].value);
     expect(profileBo.changeUserCongregation).toHaveBeenCalledWith(
       user.currentUser?.id,
-      select.nativeElement.options[1].value
+      select.nativeElement.options[1].value,
     );
   });
 });

@@ -1,3 +1,5 @@
+import type { Page } from '@playwright/test';
+
 import { expect, test } from '../fixtures';
 import { ConfigurationPage } from '../page-objects/configuration.page';
 import { RoleEnum } from '../../src/models/enums/role';
@@ -8,12 +10,12 @@ test.describe('Configuration — Cities (WP-25)', () => {
   test.use({ role: 'admin' });
 
   // Helper to ensure UserStateService is fully hydrated before client-side navigation to /configuration
-  async function gotoConfigWithResolvedUser(page: any) {
+  async function gotoConfigWithResolvedUser(page: Page) {
     await page.goto('/home');
     await expect(page).toHaveURL(/\/(home|welcome)/, { timeout: 15000 });
-    await expect(
-      page.getByTestId('welcome-heading').or(page.getByTestId('home-heading'))
-    ).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('welcome-heading').or(page.getByTestId('home-heading'))).toBeVisible({
+      timeout: 15000,
+    });
 
     // Client-side Angular Router navigation via popstate so in-memory UserState is preserved
     await page.evaluate(() => {
@@ -117,11 +119,7 @@ test.describe('Configuration — Cities (WP-25)', () => {
     await expect(configPage.saveButton).toBeDisabled();
   });
 
-  test('UC-CFG-07 — Save changes cascades city rename to territories', async ({
-    authenticatedPage,
-    seed,
-    db,
-  }) => {
+  test('UC-CFG-07 — Save changes cascades city rename to territories', async ({ authenticatedPage, seed, db }) => {
     const configPage = await gotoConfigWithResolvedUser(authenticatedPage);
 
     await configPage.editCity('São Paulo');
@@ -163,9 +161,7 @@ test.describe('Configuration — Cities (WP-25)', () => {
     await expect(authenticatedPage.locator('text=All cities must have a name.')).toBeVisible();
   });
 
-  test('UC-CFG-09 — Duplicate city name triggers validation toast and blocks save', async ({
-    authenticatedPage,
-  }) => {
+  test('UC-CFG-09 — Duplicate city name triggers validation toast and blocks save', async ({ authenticatedPage }) => {
     const configPage = await gotoConfigWithResolvedUser(authenticatedPage);
 
     await configPage.addCity();
@@ -202,7 +198,7 @@ test.describe('Configuration — Cities (WP-25)', () => {
 
     await expect(configPage.noCongregationBanner).toBeVisible();
     await expect(configPage.noCongregationBanner).toContainText(
-      'No congregation found. Please ensure you are logged in.'
+      'No congregation found. Please ensure you are logged in.',
     );
   });
 

@@ -22,8 +22,8 @@ await seed.write({ congregations: [congregation], users: [admin] });
 `seed-user-admin` of the **baseline** congregation — it cannot sign in as `j08-admin` today. Required
 extension: a way to mint a token for an arbitrary seeded uid (e.g. `signInAsUser(uid)`), or a named
 `ROLE_UIDS` entry for this journey. **Interim workaround:** none that preserves the journey's meaning
-(scoping to the empty congregation *is* the point) — mark this journey **blocked** on the extension, or run
-it with the baseline admin against a *city with no territories* (UC-TERR-03's partial approximation, which
+(scoping to the empty congregation _is_ the point) — mark this journey **blocked** on the extension, or run
+it with the baseline admin against a _city with no territories_ (UC-TERR-03's partial approximation, which
 does not cover assign/statistics/CSV scoping).
 
 ## Script
@@ -82,7 +82,7 @@ browsed.
 
 ## Contrast entry (documented, not exercised)
 
-A congregation with **zero cities** (`cities: []`) is a *different* condition from zero territories, and a
+A congregation with **zero cities** (`cities: []`) is a _different_ condition from zero territories, and a
 buggy one: the city-filter ternary defect (`UC-TERR-04` / `UC-ASSIGN-04`, ⚠ suspected defect) collapses the
 list instead of rendering it empty. Keep that scenario **out** of this happy-path journey — it has its own
 entries and needs the same harness extension.

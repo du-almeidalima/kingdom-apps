@@ -35,9 +35,9 @@ test('J-05 — City rename cascades to territories; city delete leaves an orphan
   async function gotoConfig(): Promise<ConfigurationPage> {
     await page.goto('/home');
     await expect(page).toHaveURL(/\/(home|welcome)/, { timeout: 15000 });
-    await expect(
-      page.getByTestId('welcome-heading').or(page.getByTestId('home-heading')),
-    ).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('welcome-heading').or(page.getByTestId('home-heading'))).toBeVisible({
+      timeout: 15000,
+    });
     await page.evaluate(() => {
       window.history.pushState({}, '', '/configuration');
       window.dispatchEvent(new Event('popstate'));
@@ -148,9 +148,9 @@ test('J-05 — City rename cascades to territories; city delete leaves an orphan
 
   // Contrast with the backend: the orphan is unreachable via city selection, but
   // it is alive in Firestore (not deleted).
-  expect(
-    await db.queryWhere(db.collections.territories, 'congregationId', '==', seed.ids.congregation),
-  ).toHaveLength(3);
+  expect(await db.queryWhere(db.collections.territories, 'congregationId', '==', seed.ids.congregation)).toHaveLength(
+    3,
+  );
 
   // ── FINAL SWEEP (Firestore) ────────────────────────────────────────────────
   expect((await db.getDoc(db.collections.congregations, seed.ids.congregation))?.['cities']).toEqual([

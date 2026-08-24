@@ -23,7 +23,7 @@ export class IconButtonComponent implements OnInit {
         `style`,
         `${currentStyle}
           --background-hover-color: ${this.hoverBackgroundColor};
-        `
+        `,
       );
     }
   }

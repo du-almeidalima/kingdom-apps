@@ -17,21 +17,24 @@ describe('ProviderLoginButtonComponent', () => {
       'Microsoft',
       'https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Microsoft_icon.svg/240px-Microsoft_icon.svg.png',
     ],
-  ])('renders the %s logo and pt-BR text (regression: branding must follow the provider input)', (provider, altText, imgUrl) => {
-    const fixture = MockRender(ProviderLoginButtonComponent, { provider });
-    const component = fixture.point.componentInstance as ProviderLoginButtonComponent;
+  ])(
+    'renders the %s logo and pt-BR text (regression: branding must follow the provider input)',
+    (provider, altText, imgUrl) => {
+      const fixture = MockRender(ProviderLoginButtonComponent, { provider });
+      const component = fixture.point.componentInstance as ProviderLoginButtonComponent;
 
-    const image = ngMocks.find<HTMLImageElement>(fixture, 'img');
-    expect(image.nativeElement.alt).toBe(altText);
-    expect(component.imgUrl).toBe(imgUrl);
-    expect(ngMocks.formatText(fixture)).toContain(`Entrar com uma conta do ${altText}`);
-  });
+      const image = ngMocks.find<HTMLImageElement>(fixture, 'img');
+      expect(image.nativeElement.alt).toBe(altText);
+      expect(component.imgUrl).toBe(imgUrl);
+      expect(ngMocks.formatText(fixture)).toContain(`Entrar com uma conta do ${altText}`);
+    },
+  );
 
   it('emits the bound provider on click', () => {
     const fixture = MockRender(ProviderLoginButtonComponent, { provider: FIREBASE_PROVIDERS.MICROSOFT });
     let emitted: FIREBASE_PROVIDERS | undefined;
     (fixture.point.componentInstance as ProviderLoginButtonComponent).providerClick.subscribe(
-      provider => (emitted = provider)
+      (provider) => (emitted = provider),
     );
 
     ngMocks.click(ngMocks.find(fixture, 'button'));
@@ -40,7 +43,10 @@ describe('ProviderLoginButtonComponent', () => {
   });
 
   it('disables the button and shows the spinner while loading', () => {
-    const notLoading = MockRender(ProviderLoginButtonComponent, { provider: FIREBASE_PROVIDERS.GOOGLE, loading: false });
+    const notLoading = MockRender(ProviderLoginButtonComponent, {
+      provider: FIREBASE_PROVIDERS.GOOGLE,
+      loading: false,
+    });
     expect(ngMocks.find(notLoading, 'button').nativeElement.disabled).toBe(false);
     expect(ngMocks.find(notLoading, 'lib-spinner', undefined)).toBeUndefined();
 

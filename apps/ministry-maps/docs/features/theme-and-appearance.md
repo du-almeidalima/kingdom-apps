@@ -78,6 +78,7 @@ Located in `apps/ministry-maps/src/index.html` inside `<head>` prior to any styl
 The theme state management is provided as a shared feature in `libs/common-ui/src/lib/features/theme/` and exported via `@kingdom-apps/common-ui`.
 
 ### Provider Function: `provideTheme(config?: ThemeConfig)`
+
 Configures and initializes `ThemeService` at application bootstrap in `app.config.ts`:
 
 ```typescript
@@ -94,7 +95,9 @@ export const appConfig: ApplicationConfig = {
 ```
 
 ### `ThemeService` API
+
 Injected anywhere via `inject(ThemeService)`:
+
 - `preference`: `Signal<ThemePreference>` (`'system'` | `'light'` | `'dark'`)
 - `resolvedTheme`: `Signal<ResolvedTheme>` (`'light'` | `'dark'`)
 - `setPreference(preference: ThemePreference)`: Updates signals, persists to `localStorage`, applies DOM root attributes, updates `theme-color` meta tag, and synchronizes cross-tab storage events.
@@ -131,6 +134,7 @@ Injected anywhere via `inject(ThemeService)`:
 ## 8. Generic Form & Button Components (`@kingdom-apps/common-ui`)
 
 - **`RadioGroupComponent` (`lib-radio-group`):**
+
   - Location: `libs/common-ui/src/lib/components/form-field/radio-group/`
   - Reusable card/option radio group implementing `ControlValueAccessor` with keyboard accessibility (`Space`, `Enter`).
   - Defaults to `'vertical'` stacked list layout.

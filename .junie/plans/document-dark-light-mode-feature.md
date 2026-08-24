@@ -21,6 +21,7 @@ Create a documentation-only implementation packet at `apps/ministry-maps/backlog
 ### Functional requirements
 
 1. **Preference control**
+
    - Add an `Aparência` card/section to `ProfilePageComponent`.
    - Use a native `fieldset`/`legend` and three radio inputs, not a custom switch. The three states are mutually exclusive and keyboard operable.
    - Show concise Portuguese helper text explaining that `Sistema` tracks the device setting.
@@ -28,6 +29,7 @@ Create a documentation-only implementation packet at `apps/ministry-maps/backlog
    - Keep profile account details, congregation change, and logout behavior unchanged.
 
 2. **Persistence contract**
+
    - Use the storage key `ministry-maps.theme-preference`.
    - Persist only the literal values `system`, `light`, or `dark`.
    - Treat a missing, malformed, or inaccessible value as `system`; never fail application startup because storage is unavailable.
@@ -36,18 +38,19 @@ Create a documentation-only implementation packet at `apps/ministry-maps/backlog
 
 3. **Theme resolution**
 
- Stored preference | OS preference | Effective scheme |
----|---|---|
- `system` or no valid value | light/no preference | `light` |
- `system` or no valid value | dark | `dark` |
- `light` | either | `light` |
- `dark` | either | `dark` |
+| Stored preference          | OS preference       | Effective scheme |
+| -------------------------- | ------------------- | ---------------- |
+| `system` or no valid value | light/no preference | `light`          |
+| `system` or no valid value | dark                | `dark`           |
+| `light`                    | either              | `light`          |
+| `dark`                     | either              | `dark`           |
 
 - A `matchMedia('(prefers-color-scheme: dark)')` change updates the effective scheme immediately only when the preference is `system`.
 - The root element exposes `data-theme="system|light|dark"` and `data-resolved-theme="light|dark"` for CSS, diagnostics, and E2E assertions.
 - The browser `color-scheme` and `theme-color` metadata follow the effective scheme so native controls and browser chrome are coherent.
 
 4. **First paint**
+
    - A minimal defensive script in `apps/ministry-maps/src/index.html`, placed before render-blocking application styles, validates local storage, evaluates the media query, and sets both root attributes before content paints.
    - CSS provides a light default when JavaScript or storage is unavailable.
    - Angular takes ownership after bootstrap without visibly changing an already-correct root state.
@@ -104,6 +107,7 @@ All artifacts are Markdown; Mermaid diagrams stay embedded in Markdown, so no ge
 ### File responsibilities
 
 - `README.md`
+
   - Entry point for the local model.
   - State `Status: Ready for implementation` and `Scope: planning only; production code unchanged`.
   - Record the confirmed decisions and non-goals.
@@ -112,39 +116,47 @@ All artifacts are Markdown; Mermaid diagrams stay embedded in Markdown, so no ge
   - Tell the implementer to complete one phase, its focused tests, and its matrix rows before moving on.
 
 - `requirements.md`
+
   - Copy the behavioral contract and acceptance criteria from the Requirements tab.
   - Assign stable IDs such as `FR-01`, `A11Y-01`, and `AC-01` so implementation and tests can cross-reference them.
   - Include the resolution truth table and Portuguese profile copy.
 
 - `current-state-audit.md`
+
   - Explain the current light-only Sass palette, global styles, runtime TypeScript colors, profile composition, overlays, and test/doc locations.
   - Record concrete files and risky patterns; do not merely say “update all components.”
   - Clearly distinguish files known to render hard-coded colors from files that only require visual verification.
 
 - `technical-design.md`
+
   - Contain the architecture, data flow, service API, bootstrap behavior, CSS selector strategy, token ownership, failure handling, and file-level design in the Technical Design tab.
   - Include the Mermaid architecture diagram.
   - Record rejected alternatives: Firestore persistence, app-level overrides of library internals, Tailwind-only dark classes, and Angular-only post-bootstrap application.
 
 - `style-migration-matrix.md`
+
   - Provide one row per affected style/component group with columns: `ID`, `surface`, `files`, `current assumption`, `target semantic token/state`, `unit-test impact`, `E2E/manual scenario`, and `status`.
   - Seed every group named in the Migration Inventory tab; use `Not started`, `In progress`, `Blocked`, or `Done` only.
 
 - `implementation-runbook.md`
+
   - Reproduce the ordered phases in the Implementation Runbook tab as checkbox-sized tasks.
   - Every task names exact files/symbols, expected end state, tests to update immediately, and a stop condition.
   - Warn the model not to perform opportunistic module, routing, or design-system refactors.
 
 - `testing-and-documentation.md`
+
   - Specify unit, integration/E2E, visual/manual, accessibility, regression, and Nx validation scenarios.
   - List durable documentation updates under `apps/ministry-maps/docs` that happen with implementation, not during packet creation.
   - Provide a requirement-to-test traceability table.
 
 - `assets/theme-token-contract.md`
+
   - List every generic and app token, exact light/dark seed values, intended usage, forbidden usage, contrast pairing, and migration examples.
   - Mark token names as contracts; components must not introduce unreviewed one-off theme values.
 
 - `assets/route-component-matrix.md`
+
   - List each route/shell/overlay, its component directories, reachable states, required role/fixture, and light/dark/system checks.
 
 - `assets/acceptance-checklist.md`
@@ -192,14 +204,17 @@ graph TD
 ### Key decisions and rationale
 
 1. **Preference on the root, effective scheme exposed separately**
+
    - `data-theme` stores `system|light|dark`; `data-resolved-theme` stores `light|dark`.
    - CSS can react natively to OS changes for `data-theme='system'`, while Angular exposes effective state for metadata, tests, and any unavoidable runtime behavior.
 
 2. **CSS custom properties over Sass theme branching**
+
    - Sass variables remain useful primitives at build time but cannot change at runtime.
    - Components consume semantic `var(--...)` values. Explicit hover/active tokens replace attempts to run Sass color functions on CSS variables.
 
 3. **Split ownership**
+
    - Add generic `--kui-*` contracts in `libs/common-ui/src/lib/styles/base/_theme.scss`, imported by `base/_index.scss`/`styles/index.scss`.
    - Add app aliases/domain tokens in `apps/ministry-maps/src/styles/_theme.scss`, imported from `apps/ministry-maps/src/styles.scss`.
    - `common-ui` must never reference `--mm-*` tokens or Ministry Maps status concepts.
@@ -270,30 +285,30 @@ Both generic and app theme files follow the same ordering:
 
 The token asset must finalize and contrast-check these seed values. Existing primitive Sass variables may back the light values, but rendered properties consume the CSS variables.
 
- Token | Light seed | Dark seed | Intended use |
----|---:|---:|---|
- `--kui-color-canvas` | `#E7E6E4` | `#121212` | body/app background |
- `--kui-color-surface` | `#F8F8F8` | `#1E1E1E` | cards/dialog content |
- `--kui-color-surface-elevated` | `#FDFDFD` | `#27272A` | inputs, menus, elevated content |
- `--kui-color-surface-muted` | `#D1D0CE` | `#363332` | subdued/selected regions |
- `--kui-color-surface-hover` | `#E7E6E4` | `#3F3F46` | neutral hover/pressed state |
- `--kui-color-surface-inverse` | `#4D4947` | `#0F172A` | branded/inverse headers |
- `--kui-color-text` | `rgba(0,0,0,.87)` | `rgba(255,255,255,.87)` | primary text/icons |
- `--kui-color-text-muted` | `rgba(0,0,0,.60)` | `rgba(255,255,255,.68)` | secondary/caption text |
- `--kui-color-text-disabled` | `rgba(0,0,0,.38)` | `rgba(255,255,255,.38)` | disabled content only |
- `--kui-color-on-inverse` | `#FDFDFD` | `#F8FAFC` | content on inverse surface |
- `--kui-color-border` | `#BAB7B5` | `#525252` | standard control/divider border |
- `--kui-color-border-strong` | `#615D5C` | `#78716C` | emphasized boundaries |
- `--kui-color-action-primary` | `#2A4970` | `#60A5FA` | primary controls |
- `--kui-color-on-action-primary` | `#FDFDFD` | `#0F172A` | primary-control content |
- `--kui-color-link` | `#4171AE` | `#93C5FD` | links |
- `--kui-color-danger` | `#DC2727` | `#FCA5A5` | destructive/error content |
- `--kui-color-success` | `#15803D` | `#86EFAC` | successful state |
- `--kui-color-warning` | `#B45309` | `#FCD34D` | warning state |
- `--kui-color-focus` | `#2563EB` | `#93C5FD` | focus indicator |
- `--kui-color-backdrop` | `rgba(0,0,0,.48)` | `rgba(0,0,0,.72)` | CDK overlay backdrop |
- `--kui-shadow-surface` | current `$shadow-z1` | `0 8px 24px rgba(0,0,0,.55)` | cards/menus |
- `--kui-shadow-dialog` | current `$shadow-z6` | `0 16px 40px rgba(0,0,0,.65)` | dialogs |
+| Token                           |           Light seed |                     Dark seed | Intended use                    |
+| ------------------------------- | -------------------: | ----------------------------: | ------------------------------- |
+| `--kui-color-canvas`            |            `#E7E6E4` |                     `#121212` | body/app background             |
+| `--kui-color-surface`           |            `#F8F8F8` |                     `#1E1E1E` | cards/dialog content            |
+| `--kui-color-surface-elevated`  |            `#FDFDFD` |                     `#27272A` | inputs, menus, elevated content |
+| `--kui-color-surface-muted`     |            `#D1D0CE` |                     `#363332` | subdued/selected regions        |
+| `--kui-color-surface-hover`     |            `#E7E6E4` |                     `#3F3F46` | neutral hover/pressed state     |
+| `--kui-color-surface-inverse`   |            `#4D4947` |                     `#0F172A` | branded/inverse headers         |
+| `--kui-color-text`              |    `rgba(0,0,0,.87)` |       `rgba(255,255,255,.87)` | primary text/icons              |
+| `--kui-color-text-muted`        |    `rgba(0,0,0,.60)` |       `rgba(255,255,255,.68)` | secondary/caption text          |
+| `--kui-color-text-disabled`     |    `rgba(0,0,0,.38)` |       `rgba(255,255,255,.38)` | disabled content only           |
+| `--kui-color-on-inverse`        |            `#FDFDFD` |                     `#F8FAFC` | content on inverse surface      |
+| `--kui-color-border`            |            `#BAB7B5` |                     `#525252` | standard control/divider border |
+| `--kui-color-border-strong`     |            `#615D5C` |                     `#78716C` | emphasized boundaries           |
+| `--kui-color-action-primary`    |            `#2A4970` |                     `#60A5FA` | primary controls                |
+| `--kui-color-on-action-primary` |            `#FDFDFD` |                     `#0F172A` | primary-control content         |
+| `--kui-color-link`              |            `#4171AE` |                     `#93C5FD` | links                           |
+| `--kui-color-danger`            |            `#DC2727` |                     `#FCA5A5` | destructive/error content       |
+| `--kui-color-success`           |            `#15803D` |                     `#86EFAC` | successful state                |
+| `--kui-color-warning`           |            `#B45309` |                     `#FCD34D` | warning state                   |
+| `--kui-color-focus`             |            `#2563EB` |                     `#93C5FD` | focus indicator                 |
+| `--kui-color-backdrop`          |    `rgba(0,0,0,.48)` |             `rgba(0,0,0,.72)` | CDK overlay backdrop            |
+| `--kui-shadow-surface`          | current `$shadow-z1` |  `0 8px 24px rgba(0,0,0,.55)` | cards/menus                     |
+| `--kui-shadow-dialog`           | current `$shadow-z6` | `0 16px 40px rgba(0,0,0,.65)` | dialogs                         |
 
 Add explicit primary hover/active, danger-surface/on-danger, success-surface/on-success, warning-surface/on-warning, placeholder, and control-autofill tokens while writing the token asset. Do not derive these with Sass functions at component call sites.
 
@@ -580,6 +595,7 @@ For the present documentation-only packet creation, validate relative links/comm
 # Delivery Steps
 
 ### ✓ Step 1: Create the backlog scaffold and freeze the feature contract
+
 The dark/light-mode backlog has a navigable entry point, explicit requirements, and a concrete current-state audit without changing production code.
 
 - Create `apps/ministry-maps/backlog/dark-light-mode-feature` and its `assets` subdirectory with the exact kebab-case Markdown tree defined in the proposal.
@@ -589,6 +605,7 @@ The dark/light-mode backlog has a navigable entry point, explicit requirements, 
 - Cross-link the three documents and explicitly state that this change contains plans only.
 
 ### ✓ Step 2: Document the runtime architecture and exhaustive style migration map
+
 The packet defines an implementable theme runtime/token contract and accounts for every shared, shell, auth, feature, and overlay surface.
 
 - Write `technical-design.md` with the pre-paint initializer, standalone Angular initializer/service, signals, browser events, root attributes, metadata, failure handling, ownership boundaries, Mermaid flow, and exact planned files/APIs.
@@ -597,7 +614,8 @@ The packet defines an implementable theme runtime/token contract and accounts fo
 - Write `assets/route-component-matrix.md` with route states, component directories, fixtures/roles, and light/dark/system coverage.
 - Ensure the design preserves light defaults for unrelated `common-ui` consumers and forbids Ministry Maps domain concepts in the shared library.
 
-### * Step 3: Publish the local-model execution, testing, and documentation package
+### \* Step 3: Publish the local-model execution, testing, and documentation package
+
 A constrained phase-by-phase runbook, traceable validation plan, and final acceptance gate are ready for a smaller model to execute later.
 
 - Write `implementation-runbook.md` as atomic checkbox tasks with exact files/symbols, per-phase test updates, stop conditions, and anti-refactoring guardrails.

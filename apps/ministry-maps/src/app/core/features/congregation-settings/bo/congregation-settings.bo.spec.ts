@@ -63,7 +63,7 @@ describe('CongregationSettingsBO', () => {
             ...congregationMock,
             settings: { designationAccessExpiryDays: 30, shouldDesignationBlockAfterExpired: true },
           },
-        })
+        }),
       );
 
       expect(bo.getSettingOrDefault('designationAccessExpiryDays')).toBe(30);
@@ -80,17 +80,17 @@ describe('CongregationSettingsBO', () => {
             ...congregationMock,
             settings: partialSettings({ designationAccessExpiryDays: storedValue }),
           },
-        })
+        }),
       );
 
       expect(bo.getSettingOrDefault('designationAccessExpiryDays')).toBe(
-        environment.congregationSettingsDefaultValues.designationAccessExpiryDays
+        environment.congregationSettingsDefaultValues.designationAccessExpiryDays,
       );
     });
 
     it('falls back to the environment default when the congregation has no settings at all', () => {
       userState.setUser(
-        userMockBuilder({ congregation: { ...congregationMock, settings: undefined } as unknown as Congregation })
+        userMockBuilder({ congregation: { ...congregationMock, settings: undefined } as unknown as Congregation }),
       );
 
       expect(bo.getSettingOrDefault('designationAccessExpiryDays')).toBe(45);
@@ -104,7 +104,7 @@ describe('CongregationSettingsBO', () => {
             ...congregationMock,
             settings: partialSettings({ shouldDesignationBlockAfterExpired: false }),
           },
-        })
+        }),
       );
 
       expect(bo.getSettingOrDefault('shouldDesignationBlockAfterExpired')).toBe(false);

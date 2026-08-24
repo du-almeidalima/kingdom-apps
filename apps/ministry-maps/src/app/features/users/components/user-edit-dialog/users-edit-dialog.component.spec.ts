@@ -52,7 +52,7 @@ describe('UsersEditDialogComponent', () => {
     const { fixture: asAdmin } = render(RoleEnum.PUBLISHER, RoleEnum.APP_ADMIN);
     const adminTitles = ngMocks
       .findAll(asAdmin, '[data-testid="user-edit-role-title"]')
-      .map(el => el.nativeElement.textContent.trim());
+      .map((el) => el.nativeElement.textContent.trim());
     expect(adminTitles).toContain('Superintendente');
   });
 
@@ -60,7 +60,7 @@ describe('UsersEditDialogComponent', () => {
     const { fixture: asElder } = render(RoleEnum.PUBLISHER, RoleEnum.ELDER);
     const elderTitles = ngMocks
       .findAll(asElder, '[data-testid="user-edit-role-title"]')
-      .map(el => el.nativeElement.textContent.trim());
+      .map((el) => el.nativeElement.textContent.trim());
     expect(elderTitles).not.toContain('Superintendente');
   });
 

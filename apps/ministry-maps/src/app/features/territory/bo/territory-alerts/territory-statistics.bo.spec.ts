@@ -57,7 +57,13 @@ export const mockRevisitTerritory = territoryMockBuilder({ recentHistory: [mockR
 export const mockStudentTerritory = territoryMockBuilder({ isBibleStudent: true });
 
 // PLEASE DO NOT MODIFY IT, AS THIS IS BEING USED IN OTHER TESTS
-export const mockTerritories = [mockMovedTerritory, mockRevisitTerritory, mockStudentTerritory, mockNotAnsweredTerritory, mockNotVisitTerritory];
+export const mockTerritories = [
+  mockMovedTerritory,
+  mockRevisitTerritory,
+  mockStudentTerritory,
+  mockNotAnsweredTerritory,
+  mockNotVisitTerritory,
+];
 
 describe('TerritoryStatisticsBO', () => {
   let territoryStatisticsBO: TerritoryStatisticsBO;
@@ -84,7 +90,7 @@ describe('TerritoryStatisticsBO', () => {
           peopleCount: 5,
           movedCount: 1,
           bibleStudiesCount: 1,
-        } as TerritoryStatisticsDTO)
+        } as TerritoryStatisticsDTO),
       );
     });
 
@@ -98,7 +104,7 @@ describe('TerritoryStatisticsBO', () => {
       });
 
       expect(territoryStatisticsBO.deriveTerritoryStatistics([territoryWithOldMove])).toEqual(
-        expect.objectContaining({ movedCount: 1 })
+        expect.objectContaining({ movedCount: 1 }),
       );
     });
 
@@ -226,7 +232,7 @@ describe('TerritoryStatisticsBO', () => {
     it('should not count for dynamic statistics', () => {
       const result = territoryStatisticsBO.deriveTerritoryDynamicStatistics(
         [mockMovedTerritory, mockNotAnsweredTerritory, mockNotVisitTerritory],
-        'ONE_MONTH'
+        'ONE_MONTH',
       );
 
       expect(result).toEqual({

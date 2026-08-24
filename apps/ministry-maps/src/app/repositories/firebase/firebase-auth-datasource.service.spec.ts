@@ -139,7 +139,7 @@ describe('FirebaseAuthService', () => {
     const createUserConfig: CreateUserConfig = {
       inviteId: 'invite123',
       role: RoleEnum.PUBLISHER,
-      congregation: elderUser.congregation!,
+      congregation: elderUser.congregation as NonNullable<typeof elderUser.congregation>,
     };
 
     service.signInWithProvider(FIREBASE_PROVIDERS.GOOGLE, true, createUserConfig).subscribe((userRes) => {
@@ -173,7 +173,7 @@ describe('FirebaseAuthService', () => {
     const createUserConfig: CreateUserConfig = {
       inviteId: 'invite123',
       role: RoleEnum.PUBLISHER,
-      congregation: elderUser.congregation!,
+      congregation: elderUser.congregation as NonNullable<typeof elderUser.congregation>,
       email: 'different.email@test.com',
     };
 
@@ -192,7 +192,7 @@ describe('FirebaseAuthService', () => {
         }),
         finalize(() => {
           done();
-        })
+        }),
       )
       .subscribe(() => {
         // This should not be called if an error is thrown

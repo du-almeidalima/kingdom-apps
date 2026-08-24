@@ -22,7 +22,9 @@ export class PortalService {
    */
   attachComponent<T>(component: ComponentType<T>): AttachedComponent<T> {
     if (!this.outlet) {
-      throw new Error("No outlet found for attaching component. Is the PortalAnchorComponent added to the application?");
+      throw new Error(
+        'No outlet found for attaching component. Is the PortalAnchorComponent added to the application?',
+      );
     }
 
     const portal = new ComponentPortal(component);

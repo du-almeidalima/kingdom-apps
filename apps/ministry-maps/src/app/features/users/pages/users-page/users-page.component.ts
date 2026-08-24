@@ -28,13 +28,7 @@ import { UserListItemComponent } from '../../components/user-list-item/user-list
   selector: 'kingdom-apps-users-page',
   templateUrl: './users-page.component.html',
   styleUrls: ['./users-page.component.scss'],
-  imports: [
-    UserListItemComponent,
-    AuthorizeDirective,
-    FloatingActionButtonComponent,
-    IconComponent,
-    SpinnerComponent,
-  ],
+  imports: [UserListItemComponent, AuthorizeDirective, FloatingActionButtonComponent, IconComponent, SpinnerComponent],
 })
 export class UsersPageComponent implements OnInit {
   protected readonly CREATE_INVITE_LINK_ALLOWED = CREATE_INVITE_LINK_ALLOWED;
@@ -62,17 +56,17 @@ export class UsersPageComponent implements OnInit {
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         filter((user): user is User & { congregation: { id: string } } => !!user?.congregation?.id),
-        switchMap(user => {
+        switchMap((user) => {
           this.isLoading = true;
           return this.userRepository.getAllByCongregation(user.congregation.id);
-        })
+        }),
       )
       .subscribe({
-        next: users => {
+        next: (users) => {
           this.isLoading = false;
           this.users = users.sort(this.sortUserFn.bind(this));
         },
-        error: err => {
+        error: (err) => {
           this.isLoading = false;
           console.error('Error fetching users', err);
         },
@@ -90,10 +84,10 @@ export class UsersPageComponent implements OnInit {
           `,
         },
       })
-      .closed.subscribe(res => {
+      .closed.subscribe((res) => {
         if (res) {
           this.userRepository.delete(userId).subscribe({
-            error: err => console.error(`Error deleting user ${userId}`, err),
+            error: (err) => console.error(`Error deleting user ${userId}`, err),
           });
         }
       });

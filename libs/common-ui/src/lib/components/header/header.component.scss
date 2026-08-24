@@ -2,8 +2,8 @@
   display: flex;
   margin-bottom: 3rem;
 
-  background-color: var(--backgroundColor, var(--kui-color-surface-inverse, #4D4947));
-  color: var(--kui-color-on-inverse, #FDFDFD);
+  background-color: var(--backgroundColor, var(--kui-color-surface-inverse, #4d4947));
+  color: var(--kui-color-on-inverse, #fdfdfd);
 
   &__logo-link-container {
     text-decoration: none;
@@ -19,7 +19,7 @@
 
     font-size: 2rem;
     font-weight: bold;
-    color: var(--logoColor, var(--kui-color-on-inverse, #FDFDFD));
-    background-color: var(--logoBackgroundColor, var(--kui-color-surface-inverse, #4D4947));
+    color: var(--logoColor, var(--kui-color-on-inverse, #fdfdfd));
+    background-color: var(--logoBackgroundColor, var(--kui-color-surface-inverse, #4d4947));
   }
 }

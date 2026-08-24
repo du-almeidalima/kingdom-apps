@@ -36,16 +36,17 @@ CSS custom properties are the rendering mechanism. Angular does not walk compone
 
 The root `html` element always exposes both dimensions:
 
-| Attribute | Allowed values | Meaning |
-|---|---|---|
-| `data-theme` | `system`, `light`, `dark` | Persisted/in-memory preference. |
-| `data-resolved-theme` | `light`, `dark` | Effective scheme after resolving `system`. |
+| Attribute             | Allowed values            | Meaning                                    |
+| --------------------- | ------------------------- | ------------------------------------------ |
+| `data-theme`          | `system`, `light`, `dark` | Persisted/in-memory preference.            |
+| `data-resolved-theme` | `light`, `dark`           | Effective scheme after resolving `system`. |
 
 Examples:
 
 ```html
 <html data-theme="system" data-resolved-theme="dark">
-<html data-theme="light" data-resolved-theme="light">
+  <html data-theme="light" data-resolved-theme="light"></html>
+</html>
 ```
 
 Do not replace `data-theme="system"` with the current resolved value. Diagnostics, CSS media behavior, unit/E2E tests, and live OS following depend on retaining both attributes.
@@ -70,8 +71,7 @@ export const THEME_STORAGE_KEY = 'ministry-maps.theme-preference';
 export const DARK_MODE_QUERY = '(prefers-color-scheme: dark)';
 export const THEME_ATTRIBUTE = 'data-theme';
 export const RESOLVED_THEME_ATTRIBUTE = 'data-resolved-theme';
-export const THEME_COLOR_META_SELECTOR =
-  'meta[name="theme-color"][data-mm-theme-color]';
+export const THEME_COLOR_META_SELECTOR = 'meta[name="theme-color"][data-mm-theme-color]';
 
 export const THEME_META_COLORS: Readonly<Record<ResolvedTheme, string>> = {
   light: '#E7E6E4',
@@ -162,7 +162,7 @@ Keep the script minimal: no framework import, JSON parsing, DOM readiness listen
 Modify `apps/ministry-maps/src/app/app-config.ts` with the standalone API:
 
 ```ts
-provideAppInitializer(() => inject(ThemeService).initialize())
+provideAppInitializer(() => inject(ThemeService).initialize());
 ```
 
 Do not create an NgModule or use deprecated `APP_INITIALIZER` boilerplate. Initialization is synchronous; it does not block on authentication, profile data, Firestore, or routing.
@@ -203,18 +203,18 @@ The tab that invokes `setPreference()` already updates itself synchronously; bro
 
 ## Failure matrix
 
-| Boundary/failure | Required result |
-|---|---|
-| Missing storage key | Preference `system`; resolve from media query. |
-| Invalid stored value | Treat as `system`; do not crash or propagate invalid state. |
-| Storage getter throws | Preference `system`; continue startup. |
-| Storage setter throws | Keep selected preference/effective scheme in memory; reload may lose it. |
-| `defaultView` unavailable | Preference `system`, resolved light; set document state if possible. |
-| `matchMedia` absent/throws | Treat system as light; explicit preferences still work. |
-| Invalid/removed storage event | Switch to `system`; do not write back. |
-| Theme-color meta missing | Root theme still works; application method must not throw. Unit test the degraded path. |
-| Repeated `initialize()` | No duplicate listeners and no unexpected persistence write. |
-| Service destruction | Remove media and storage listeners exactly once. |
+| Boundary/failure              | Required result                                                                         |
+| ----------------------------- | --------------------------------------------------------------------------------------- |
+| Missing storage key           | Preference `system`; resolve from media query.                                          |
+| Invalid stored value          | Treat as `system`; do not crash or propagate invalid state.                             |
+| Storage getter throws         | Preference `system`; continue startup.                                                  |
+| Storage setter throws         | Keep selected preference/effective scheme in memory; reload may lose it.                |
+| `defaultView` unavailable     | Preference `system`, resolved light; set document state if possible.                    |
+| `matchMedia` absent/throws    | Treat system as light; explicit preferences still work.                                 |
+| Invalid/removed storage event | Switch to `system`; do not write back.                                                  |
+| Theme-color meta missing      | Root theme still works; application method must not throw. Unit test the degraded path. |
+| Repeated `initialize()`       | No duplicate listeners and no unexpected persistence write.                             |
+| Service destruction           | Remove media and storage listeners exactly once.                                        |
 
 No failure may block Angular bootstrap.
 
@@ -348,17 +348,17 @@ Add one test that reads or otherwise checks `apps/ministry-maps/src/index.html` 
 
 ## Rejected alternatives
 
-| Alternative | Why rejected |
-|---|---|
-| Firestore/user-model persistence | Adds schema/backend/offline/auth timing work, delays signed-out first paint, and conflicts with device-local product scope. |
-| App-level overrides of library internals | Couples Ministry Maps to private `common-ui` selectors and leaves other consumers without a coherent generic contract. |
-| Library owns all app tokens | Leaks Ministry Maps statuses and business semantics into a reusable library. |
-| Tailwind-only `dark:` classes | Duplicates state across templates and cannot consistently govern Sass components, overlays, runtime SVGs, or metadata. |
-| Sass-only theme branches | Compile-time variables cannot react to preference changes at runtime. |
-| Angular-only post-bootstrap application | Allows visible wrong-theme paint and inconsistent signed-out/loading states. |
-| Overlay-container theme class | Creates a second synchronization mechanism when root custom properties already inherit through `body`. |
-| Global animated theme transition | Can flash intermediate colors, complicate validation, and violate the immediate/reduced-motion contract. |
-| Boolean dark flag | Cannot represent the persistent `system` choice or diagnose preference separately from resolution. |
+| Alternative                              | Why rejected                                                                                                                |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Firestore/user-model persistence         | Adds schema/backend/offline/auth timing work, delays signed-out first paint, and conflicts with device-local product scope. |
+| App-level overrides of library internals | Couples Ministry Maps to private `common-ui` selectors and leaves other consumers without a coherent generic contract.      |
+| Library owns all app tokens              | Leaks Ministry Maps statuses and business semantics into a reusable library.                                                |
+| Tailwind-only `dark:` classes            | Duplicates state across templates and cannot consistently govern Sass components, overlays, runtime SVGs, or metadata.      |
+| Sass-only theme branches                 | Compile-time variables cannot react to preference changes at runtime.                                                       |
+| Angular-only post-bootstrap application  | Allows visible wrong-theme paint and inconsistent signed-out/loading states.                                                |
+| Overlay-container theme class            | Creates a second synchronization mechanism when root custom properties already inherit through `body`.                      |
+| Global animated theme transition         | Can flash intermediate colors, complicate validation, and violate the immediate/reduced-motion contract.                    |
+| Boolean dark flag                        | Cannot represent the persistent `system` choice or diagnose preference separately from resolution.                          |
 
 ## Architecture completion gate
 

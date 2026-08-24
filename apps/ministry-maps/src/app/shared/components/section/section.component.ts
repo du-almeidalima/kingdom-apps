@@ -13,7 +13,7 @@ import { CardComponent, green200, SpinnerComponent } from '@kingdom-apps/common-
       <header class="flex justify-between items-center h-8">
         <h3 class="section__title">{{ title() }}</h3>
         @if (isLoading()) {
-        <lib-spinner height="2rem" width="2rem" [color]="green200" />
+          <lib-spinner height="2rem" width="2rem" [color]="green200" />
         }
       </header>
       <div class="section__body">

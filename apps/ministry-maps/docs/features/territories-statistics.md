@@ -30,6 +30,7 @@ Two properties follow from this design:
 ### Gerais (Static totals)
 
 #### UC-STAT-01 — Displays static totals for all cities
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline seed (3 territories: São Paulo x2, Osasco x1)
@@ -40,6 +41,7 @@ Two properties follow from this design:
 - **Priority:** P0 · **Gaps:** no data-testids
 
 #### UC-STAT-02 — Filters static totals by city
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline seed
@@ -50,6 +52,7 @@ Two properties follow from this design:
 - **Priority:** P1 · **Gaps:** no data-testids
 
 #### UC-STAT-03 — Displays "Moved" count from unresolved-MOVED visits in the fetched history
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline; plus 1 territory whose `history` contains a visit with `visitOutcome: 2` (MOVED) and `isResolved: false` (the seeder stamps the subcollection docs)
@@ -60,6 +63,7 @@ Two properties follow from this design:
 - **Priority:** P1 · **Gaps:** no data-testids
 
 #### UC-STAT-03b — "Moved" counts an unresolved MOVED beyond the last 5 visits
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** 1 territory with six visits within the last year: five newer `NOT_ANSWERED` visits (weekly) fill `recentHistory`, plus one unresolved `MOVED` dated ~2 months ago — pushed out of `recentHistory` but inside the query window
@@ -70,9 +74,10 @@ Two properties follow from this design:
 
 ### Por período (Dynamic metrics)
 
-*Note: All dynamic periods start at the 1st day of the calculated month. Tests must seed history dates using `new Date()` arithmetic relative to the current execution time. Baseline history (2024) is ignored by all periods today.*
+_Note: All dynamic periods start at the 1st day of the calculated month. Tests must seed history dates using `new Date()` arithmetic relative to the current execution time. Baseline history (2024) is ignored by all periods today._
 
 #### UC-STAT-04 — Dynamic metrics for "Este Mês" (THIS_MONTH)
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline; seed 1 territory with a visit today: `visitOutcome: 0` (SPOKE), `isRevisit: true`
@@ -83,6 +88,7 @@ Two properties follow from this design:
 - **Priority:** P0 · **Gaps:** no data-testids
 
 #### UC-STAT-05 — Dynamic metrics for "1 Mês" (ONE_MONTH)
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline; seed 1 visit today (`visitOutcome: 0`) and 1 visit on the 15th of the PREVIOUS month (`visitOutcome: 0`, `isRevisit: true`)
@@ -93,6 +99,7 @@ Two properties follow from this design:
 - **Priority:** P1 · **Gaps:** no data-testids
 
 #### UC-STAT-06 — Dynamic metrics for "3 Meses" (THREE_MONTHS)
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline; seed 1 visit today and 1 visit 2 months ago (both `visitOutcome: 4` REVISIT, `isRevisit: true`)
@@ -103,6 +110,7 @@ Two properties follow from this design:
 - **Priority:** P1 · **Gaps:** no data-testids
 
 #### UC-STAT-07 — Dynamic metrics for "6 meses" (SIX_MONTHS)
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline; seed 1 visit 5 months ago
@@ -112,6 +120,7 @@ Two properties follow from this design:
 - **Priority:** P1 · **Gaps:** no data-testids
 
 #### UC-STAT-08 — Dynamic metrics for "1 ano" (ONE_YEAR)
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline; seed 1 visit 11 months ago
@@ -121,6 +130,7 @@ Two properties follow from this design:
 - **Priority:** P1 · **Gaps:** no data-testids
 
 #### UC-STAT-09 — Dynamic metrics for "Este Ano" (YEAR_TO_DATE)
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline; seed 1 visit on Jan 1st of the current year
@@ -130,6 +140,7 @@ Two properties follow from this design:
 - **Priority:** P1 · **Gaps:** no data-testids
 
 #### UC-STAT-10 — Visit counting rule (Outcome logic)
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** seed 1 territory with 5 visits today: `SPOKE` (0), `NOT_ANSWERED` (1), `MOVED` (2), `ASKED_TO_NOT_VISIT_AGAIN` (3), `REVISIT` (4)
@@ -139,6 +150,7 @@ Two properties follow from this design:
 - **Priority:** P0 · **Gaps:** no data-testids
 
 #### UC-STAT-11 — Revisit counting rule (Boolean logic)
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** seed 1 territory with 2 visits today: (A) `visitOutcome: 0`, `isRevisit: true`; (B) `visitOutcome: 4`, `isRevisit: false`
@@ -148,6 +160,7 @@ Two properties follow from this design:
 - **Priority:** P0 · **Gaps:** no data-testids
 
 #### UC-STAT-12 — Statistics read from full history subcollection
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline; seed 1 territory with 7 visits today (all `visitOutcome: 0`)
@@ -160,6 +173,7 @@ Two properties follow from this design:
 ### Boundary and Access cases
 
 #### UC-STAT-13 — Empty congregation
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** congregation with 0 territories
@@ -170,6 +184,7 @@ Two properties follow from this design:
 - **Priority:** P2 · **Gaps:** no data-testids
 
 #### UC-STAT-14 — Loading state
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline
@@ -179,6 +194,7 @@ Two properties follow from this design:
 - **Priority:** P2 · **Gaps:** no data-testid on spinner
 
 #### UC-STAT-15 — Access control (Organizer)
+
 - **Actor:** Organizer (Harness extension needed)
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** user with role `ORGANIZER`
@@ -188,6 +204,7 @@ Two properties follow from this design:
 - **Priority:** P1 · **Gaps:** `signInAs('organizer')` extension needed
 
 #### UC-STAT-16 — Access control (Publisher redirect)
+
 - **Actor:** Publisher
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** default baseline
@@ -197,6 +214,7 @@ Two properties follow from this design:
 - **Priority:** P1 · **Gaps:** none
 
 #### UC-STAT-17 — Access control (Anonymous redirect)
+
 - **Actor:** Anonymous
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** N/A
@@ -206,6 +224,7 @@ Two properties follow from this design:
 - **Priority:** P1 · **Gaps:** none
 
 #### UC-STAT-18 — Territories with no history
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** 1 territory with `history: []` (no visits)
@@ -215,6 +234,7 @@ Two properties follow from this design:
 - **Priority:** P2 · **Gaps:** no data-testids
 
 #### UC-STAT-19 — Visits outside selected period
+
 - **Actor:** Admin
 - **Route:** `/territories/statistics`
 - **Preconditions (seed):** seed 1 visit exactly 2 months ago

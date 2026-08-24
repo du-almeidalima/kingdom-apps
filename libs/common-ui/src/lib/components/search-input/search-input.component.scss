@@ -7,7 +7,6 @@
   align-items: stretch;
 }
 
-
 .search-input {
   @extend .form-control;
 
@@ -18,7 +17,7 @@
   width: 100%;
   padding: 0;
 
-  background-color: var(--kui-color-surface-elevated, #FFFFFF);
+  background-color: var(--kui-color-surface-elevated, #ffffff);
   color: var(--kui-color-text, #{variables.$text});
 
   &:focus-within {

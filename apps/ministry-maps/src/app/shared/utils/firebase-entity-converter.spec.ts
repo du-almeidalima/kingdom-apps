@@ -76,15 +76,13 @@ describe('firebaseEntityConverterFactory', () => {
     });
 
     it('overlays the custom converter output last, on top of the injected id', () => {
-      const converter = firebaseEntityConverterFactory<{ id: string; lastVisit?: Date }>(data => ({
+      const converter = firebaseEntityConverterFactory<{ id: string; lastVisit?: Date }>((data) => ({
         lastVisit: (data as { lastVisit: string }).lastVisit
           ? new Date((data as { lastVisit: string }).lastVisit)
           : undefined,
       }));
 
-      const result = converter.fromFirestore(
-        makeSnapshot('TERRITORY-1', { lastVisit: '2024-05-01T10:00:00.000Z' })
-      );
+      const result = converter.fromFirestore(makeSnapshot('TERRITORY-1', { lastVisit: '2024-05-01T10:00:00.000Z' }));
 
       expect(result.id).toBe('TERRITORY-1');
       expect(result.lastVisit).toEqual(new Date('2024-05-01T10:00:00.000Z'));

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, EventEmitter, input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
-import { AuthorizeDirective, grey400, IconButtonComponent, IconComponent, red300 } from '@kingdom-apps/common-ui';
+import { AuthorizeDirective, IconButtonComponent, IconComponent, red300 } from '@kingdom-apps/common-ui';
 
 import { User } from '../../../../../models/user';
 import { getUserInitials } from '../../../../shared/utils/user-utils';
@@ -26,7 +26,8 @@ import { getTranslatedRole, RoleEnum } from '../../../../../models/enums/role';
           <span
             class="user-item__privilege-badge"
             data-testid="user-item-role-badge"
-            [ngClass]="'user-item__privilege-badge--' + user().role.toLowerCase()">
+            [ngClass]="'user-item__privilege-badge--' + user().role.toLowerCase()"
+          >
             {{ role() }}
           </span>
         </div>
@@ -37,7 +38,8 @@ import { getTranslatedRole, RoleEnum } from '../../../../../models/enums/role';
           [cdkMenuTriggerFor]="menu"
           type="button"
           data-testid="user-item-menu"
-          *libAuthorize="[RoleEnum.APP_ADMIN, RoleEnum.SUPERINTENDENT, RoleEnum.ADMIN]">
+          *libAuthorize="[RoleEnum.APP_ADMIN, RoleEnum.SUPERINTENDENT, RoleEnum.ADMIN]"
+        >
           <lib-icon [fillColor]="greyButtonColor" icon="menu-dot-vertical-filled"></lib-icon>
         </button>
 

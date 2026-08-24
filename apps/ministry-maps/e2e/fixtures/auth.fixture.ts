@@ -10,11 +10,11 @@ import { AUTH_EMULATOR_HOST } from '../config/emulator.config';
  * (see `app.config.ts`). Only the members of the fixture drives are typed here.
  */
 interface E2EAuthHook {
-  auth: { currentUser: { uid: string } | null };
-  signInWithCustomToken: (
-    auth: E2EAuthHook['auth'],
-    token: string,
-  ) => Promise<{ user?: { uid?: string } }>;
+  auth: {
+    currentUser: { uid: string } | null;
+    signOut: () => Promise<void>;
+  };
+  signInWithCustomToken: (auth: E2EAuthHook['auth'], token: string) => Promise<{ user?: { uid?: string } }>;
 }
 
 declare global {
@@ -24,9 +24,7 @@ declare global {
 }
 
 /** Serializable result returned from the in-browser sign-in `page.evaluate`. */
-type SignInResult =
-  | { success: true }
-  | { success: false; error: string; code?: string };
+type SignInResult = { success: true } | { success: false; error: string; code?: string };
 
 /** Max time to wait for the dev-only `window.__E2E__` hook to appear after navigating to `/login`. */
 const E2E_HOOK_TIMEOUT_MS = 10_000;
@@ -87,21 +85,15 @@ async function signInWithUid(page: Page, uid: string, uidGuidance: string): Prom
   }, token);
 
   if (result.success === false) {
-    throw new Error(
-      `signInWithCustomToken failed: ${result.error}${
-        result.code ? ` (code: ${result.code})` : ''
-      }`,
-    );
+    throw new Error(`signInWithCustomToken failed: ${result.error}${result.code ? ` (code: ${result.code})` : ''}`);
   }
 
   // Wait for the Firebase session to settle (currentUser populated) so the
   // Angular auth guard resolves the user on the caller's first navigation.
   try {
-    await page.waitForFunction(
-      (expectedUid) => window.__E2E__?.auth.currentUser?.uid === expectedUid,
-      uid,
-      { timeout: SESSION_SETTLE_TIMEOUT_MS },
-    );
+    await page.waitForFunction((expectedUid) => window.__E2E__?.auth.currentUser?.uid === expectedUid, uid, {
+      timeout: SESSION_SETTLE_TIMEOUT_MS,
+    });
   } catch {
     throw new Error(
       `auth.currentUser did not settle to uid '${uid}' within ${SESSION_SETTLE_TIMEOUT_MS}ms. ` +
@@ -155,11 +147,7 @@ export const test = dbTest.extend<AuthOptions & AuthFixtures>({
     // No `resetAndSeed` dependency needed: the returned function runs inside
     // the test body, i.e. after all auto fixtures have already completed.
     await use((role) =>
-      signInWithUid(
-        page,
-        ROLE_UIDS[role],
-        `'${role}' maps to a seeded uid in ROLE_UIDS (config/auth.config.ts)`,
-      ),
+      signInWithUid(page, ROLE_UIDS[role], `'${role}' maps to a seeded uid in ROLE_UIDS (config/auth.config.ts)`),
     );
   },
 
@@ -178,11 +166,7 @@ export const test = dbTest.extend<AuthOptions & AuthFixtures>({
     // wipe+seed — declaring `resetAndSeed` makes Playwright guarantee that
     // ordering instead of it being an accident of registration order.
     void resetAndSeed;
-    await signInWithUid(
-      page,
-      ROLE_UIDS[role],
-      `'${role}' maps to a seeded uid in ROLE_UIDS (config/auth.config.ts)`,
-    );
+    await signInWithUid(page, ROLE_UIDS[role], `'${role}' maps to a seeded uid in ROLE_UIDS (config/auth.config.ts)`);
     await use(page);
   },
 });

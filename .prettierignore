@@ -4,3 +4,11 @@
 /.nx/cache
 /.nx/workspace-data
 .angular
+
+# Generated / machine-managed files
+package-lock.json
+/test-results
+/playwright-report
+
+# Firebase emulator seed snapshots (generated exports)
+/tools/executors/firebase-emulator/seed

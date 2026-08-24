@@ -184,7 +184,7 @@ test.describe('Territories page — CRUD and reorder (WP-15)', () => {
     const orphaned = await db.getSubcollectionDocs(
       db.collections.territories,
       'seed-territory-1',
-      db.historySubcollection
+      db.historySubcollection,
     );
     expect(orphaned).toHaveLength(2);
   });

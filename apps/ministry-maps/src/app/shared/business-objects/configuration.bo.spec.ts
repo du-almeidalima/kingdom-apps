@@ -74,7 +74,7 @@ describe('ConfigurationBO', () => {
     service.updateCongregationCities(updated).subscribe({
       next: () => {
         expect(congregationRepository.update).toHaveBeenCalledWith(
-          expect.objectContaining({ cities: ['CityA', 'CityB'] })
+          expect.objectContaining({ cities: ['CityA', 'CityB'] }),
         );
         expect(territoryRepository.getAllByCongregationAndCities).not.toHaveBeenCalled();
         done();
@@ -98,20 +98,15 @@ describe('ConfigurationBO', () => {
 
     service.updateCongregationCities(updated).subscribe({
       next: () => {
-        expect(congregationRepository.update).toHaveBeenCalledWith(
-          expect.objectContaining({ cities: ['NewCity'] })
-        );
+        expect(congregationRepository.update).toHaveBeenCalledWith(expect.objectContaining({ cities: ['NewCity'] }));
 
-        expect(territoryRepository.getAllByCongregationAndCities).toHaveBeenCalledWith(
-          congregationMock.id,
-          ['OldCity']
-        );
+        expect(territoryRepository.getAllByCongregationAndCities).toHaveBeenCalledWith(congregationMock.id, [
+          'OldCity',
+        ]);
 
         // batchUpdate should receive only territories that had city changed
         expect(territoryRepository.batchUpdate).toHaveBeenCalledWith(
-          expect.arrayContaining([
-            expect.objectContaining({ id: 't1', city: 'NewCity' }),
-          ])
+          expect.arrayContaining([expect.objectContaining({ id: 't1', city: 'NewCity' })]),
         );
 
         done();
@@ -141,7 +136,7 @@ describe('ConfigurationBO', () => {
       next: () => {
         expect(territoryRepository.batchUpdate).toHaveBeenCalled();
 
-        const updatedArgs = (territoryRepository.batchUpdate.mock.calls[0][0] as Territory[]);
+        const updatedArgs = territoryRepository.batchUpdate.mock.calls[0][0] as Territory[];
         // only t1 and t2 should be updated
         expect(updatedArgs.length).toBe(2);
 
@@ -239,7 +234,7 @@ describe('ConfigurationBO', () => {
     userState.setUser(null);
 
     expect(() => service.updateCongregationCities([{ newCityName: 'X' }])).toThrow(
-      'No User or Congregation found while updating congregation cities.'
+      'No User or Congregation found while updating congregation cities.',
     );
   });
 });

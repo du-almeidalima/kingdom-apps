@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
-import { grey400, IconComponent } from '@kingdom-apps/common-ui';
+import { IconComponent } from '@kingdom-apps/common-ui';
 
 /**
  * Full-screen state shown when a designation no longer exists (e.g. deleted by the

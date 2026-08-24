@@ -14,31 +14,31 @@ const mockDateBuilder = (daysAgo = 0) => {
 
 // MOCK CLASSES
 export class TerritoryRepositoryMock implements TerritoryRepository {
-  getTerritoryVisitHistory(id: string): Observable<TerritoryVisitHistory[]> {
+  getTerritoryVisitHistory(_id: string): Observable<TerritoryVisitHistory[]> {
     return of([]);
   }
 
-  batchUpdate(territories: Territory[]): Observable<void> {
+  batchUpdate(_territories: Territory[]): Observable<void> {
     return EMPTY;
   }
 
-  getAllByCongregation(congregationId: string): Observable<Territory[]> {
+  getAllByCongregation(_congregationId: string): Observable<Territory[]> {
     return of([]);
   }
 
-  getAllInIds(ids: string[]): Observable<Territory[]> {
+  getAllInIds(_ids: string[]): Observable<Territory[]> {
     return of([]);
   }
 
-  getNextPositionIndexForCity(city: string): Observable<number> {
+  getNextPositionIndexForCity(_city: string): Observable<number> {
     return of(0);
   }
 
-  setVisitHistory(territoryId: string, visitHistory: TerritoryVisitHistory): Observable<void> {
+  setVisitHistory(_territoryId: string, _visitHistory: TerritoryVisitHistory): Observable<void> {
     return EMPTY;
   }
 
-  getAllByCongregationAndCities(congregationId: string, cities: string[]): Observable<Territory[]> {
+  getAllByCongregationAndCities(_congregationId: string, _cities: string[]): Observable<Territory[]> {
     return of([]);
   }
 
@@ -46,15 +46,15 @@ export class TerritoryRepositoryMock implements TerritoryRepository {
     return of({ ...territory, id: 'MOCK_TERRITORY_ID' } as Territory);
   }
 
-  delete(id: string): Observable<void> {
+  delete(_id: string): Observable<void> {
     return EMPTY;
   }
 
-  update(territory: Territory): Observable<void> {
+  update(_territory: Territory): Observable<void> {
     return EMPTY;
   }
 
-  deleteVisitHistory(territoryId: string, historyId: string): Observable<void> {
+  deleteVisitHistory(_territoryId: string, _historyId: string): Observable<void> {
     return EMPTY;
   }
 }

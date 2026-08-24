@@ -1,9 +1,9 @@
 ---
 globs:
-- '**/*.component.ts'
-- '**/*.component.html'
-- '**/*.component.scss'
-- '**/components/**'
+  - '**/*.component.ts'
+  - '**/*.component.html'
+  - '**/*.component.scss'
+  - '**/components/**'
 description: Create or modify Angular components — selectors, templates, signal APIs, dialogs, forms, and folder placement.
 ---
 
@@ -26,18 +26,14 @@ description: Create or modify Angular components — selectors, templates, signa
   <h1>{{ user.name }}</h1>
 } @else {
   <lib-spinner />
-}
-
-@for (territory of territories(); track territory.id) {
+} @for (territory of territories(); track territory.id) {
   <kingdom-apps-territory-list-item [territory]="territory" />
 } @empty {
   <p>Nenhum território.</p>
-}
-
-@let total = items().length;
+} @let total = items().length;
 ```
 
-- Track inline (`track territory.id`); a `trackBy` *method* survives in one legacy file only.
+- Track inline (`track territory.id`); a `trackBy` _method_ survives in one legacy file only.
 - Keep logic out of templates — expose computed values from the class.
 
 ## Inputs, outputs, state
@@ -47,11 +43,11 @@ Signal APIs are the convention in new code (`@Input()`/`@Output()` decorators ar
 ```typescript
 value = input<T | null>(null);
 label = input.required<string>();
-selection = model<T | null>(null);   // two-way binding
+selection = model<T | null>(null); // two-way binding
 saved = output<Item>();
 
 items = signal<Item[]>([]);
-filtered = computed(() => this.items().filter(i => i.active));
+filtered = computed(() => this.items().filter((i) => i.active));
 user = toSignal(this.userState.$user); // bridge Observable state into the template
 ```
 

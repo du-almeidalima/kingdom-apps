@@ -1,3 +1,5 @@
+import type { Page } from '@playwright/test';
+
 import { expect, test } from '../fixtures';
 import { ProfilePage } from '../page-objects/profile.page';
 import { ConfirmDialogPage } from '../page-objects/confirm-dialog.page';
@@ -8,13 +10,13 @@ test.describe('Profile page (WP-24)', () => {
   test.use({ role: 'admin' });
 
   // Helper to ensure UserStateService is fully hydrated after auth session restoration
-  async function gotoProfileWithResolvedUser(page: any) {
+  async function gotoProfileWithResolvedUser(page: Page) {
     await page.goto('/home');
     // Wait for auth restoration redirect to settle on /home or /welcome
     await expect(page).toHaveURL(/\/(home|welcome)/, { timeout: 15000 });
-    await expect(
-      page.getByTestId('welcome-heading').or(page.getByTestId('home-heading'))
-    ).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('welcome-heading').or(page.getByTestId('home-heading'))).toBeVisible({
+      timeout: 15000,
+    });
 
     const profilePage = new ProfilePage(page);
     await profilePage.goto();
@@ -40,11 +42,7 @@ test.describe('Profile page (WP-24)', () => {
     expect(adminDoc?.['role']).toBe('ADMIN');
   });
 
-  test('UC-PROF-02 — Identity card renders for a PUBLISHER (badge "Publicador")', async ({
-    signInAs,
-    page,
-    db,
-  }) => {
+  test('UC-PROF-02 — Identity card renders for a PUBLISHER (badge "Publicador")', async ({ signInAs, page, db }) => {
     await signInAs('publisher');
     const profilePage = await gotoProfileWithResolvedUser(page);
 
@@ -73,11 +71,7 @@ test.describe('Profile page (WP-24)', () => {
 
   // ── Congregation switch ──────────────────────────────────────────────────────
 
-  test('UC-PROF-04 — Switch card is hidden for ADMIN and PUBLISHER', async ({
-    authenticatedPage,
-    signInAs,
-    page,
-  }) => {
+  test('UC-PROF-04 — Switch card is hidden for ADMIN and PUBLISHER', async ({ authenticatedPage, signInAs, page }) => {
     const adminProfile = await gotoProfileWithResolvedUser(authenticatedPage);
     await expect(adminProfile.changeCongregationCard).toHaveCount(0);
 
@@ -146,13 +140,11 @@ test.describe('Profile page (WP-24)', () => {
     expect(cityOptions).toContain('Campinas');
   });
 
-  test.fixme(
-    'UC-PROF-07 — ⚠ ProfileBO.changeUserCongregation silently no-ops for a user without a congregation (dead guard)',
-    async () => {
-      // Documented dead-guard: resolveUser substitutes EMPTY_CONGREGATION for missing references,
-      // making this scenario unreachable through normal UI state.
-    }
-  );
+  // eslint-disable-next-line playwright/expect-expect -- deliberately empty: documents an unreachable dead guard (see below)
+  test.fixme('UC-PROF-07 — ⚠ ProfileBO.changeUserCongregation silently no-ops for a user without a congregation (dead guard)', async () => {
+    // Documented dead-guard: resolveUser substitutes EMPTY_CONGREGATION for missing references,
+    // making this scenario unreachable through normal UI state.
+  });
 
   test('UC-PROF-08 — ⚠ Non-privileged switch throws, swallowed silently; select reverts', async ({
     signInAs,
@@ -183,9 +175,7 @@ test.describe('Profile page (WP-24)', () => {
 
   // ── Logout ───────────────────────────────────────────────────────────────────
 
-  test('UC-PROF-09 — Logout confirmation dialog, confirm → /login and cleared state', async ({
-    authenticatedPage,
-  }) => {
+  test('UC-PROF-09 — Logout confirmation dialog, confirm → /login and cleared state', async ({ authenticatedPage }) => {
     const profilePage = await gotoProfileWithResolvedUser(authenticatedPage);
 
     await profilePage.logoutButton.click();

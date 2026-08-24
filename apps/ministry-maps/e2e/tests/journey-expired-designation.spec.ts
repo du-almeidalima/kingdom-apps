@@ -97,9 +97,9 @@ test('J-06 — Expired designation: blocking disables everything; non-blocking s
   expect(
     await db.getSubcollectionDocs(db.collections.territories, 'j06-t-blocked', db.historySubcollection),
   ).toHaveLength(0);
-  expect(
-    (await db.getDoc(db.collections.designations, 'j06-d-blocked'))?.['territories'][0]['status'],
-  ).toBe(DesignationStatusEnum.PENDING);
+  expect((await db.getDoc(db.collections.designations, 'j06-d-blocked'))?.['territories'][0]['status']).toBe(
+    DesignationStatusEnum.PENDING,
+  );
 
   // ── Leg 2 — Expired + non-blocking: ⚠ checkbox STILL disabled; only maps usable (UC-WORK-21) ──
   await workPage.goto('j06-d-nonblocking');
@@ -117,15 +117,15 @@ test('J-06 — Expired designation: blocking disables everything; non-blocking s
   // The maps button alone binds to `isBlocked` (false here) → the only enabled action.
   const openMaps = openRow.getByTestId('work-item-maps');
   await expect(openMaps).toBeVisible();
-  await expect(openMaps).not.toBeDisabled();
+  await expect(openMaps).toBeEnabled();
 
   // ⟶ HAND-OFF (Firestore): no write occurred.
-  expect(
-    await db.getSubcollectionDocs(db.collections.territories, 'j06-t-open', db.historySubcollection),
-  ).toHaveLength(0);
-  expect(
-    (await db.getDoc(db.collections.designations, 'j06-d-nonblocking'))?.['territories'][0]['status'],
-  ).toBe(DesignationStatusEnum.PENDING);
+  expect(await db.getSubcollectionDocs(db.collections.territories, 'j06-t-open', db.historySubcollection)).toHaveLength(
+    0,
+  );
+  expect((await db.getDoc(db.collections.designations, 'j06-d-nonblocking'))?.['territories'][0]['status']).toBe(
+    DesignationStatusEnum.PENDING,
+  );
 
   // ── FINAL SWEEP (Firestore) ────────────────────────────────────────────────
   // Both j06 territories: empty history subcollections, null lastVisit, fully PENDING.

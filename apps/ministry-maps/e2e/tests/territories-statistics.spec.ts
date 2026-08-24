@@ -37,7 +37,7 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
         0,
       );
       expect(peopleSum).toBe(3);
-      expect(territories.filter(t => t['isBibleStudent'] === true)).toHaveLength(1);
+      expect(territories.filter((t) => t['isBibleStudent'] === true)).toHaveLength(1);
 
       // ⚠ Edge case (suspected defect): a territory with `peopleQuantity: 0`
       // is counted as 1 person by the BO (`cur.peopleQuantity ? cur.peopleQuantity : 1`).
@@ -55,10 +55,7 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
       await expect(statisticsPage.tilePeople).toContainText('Pessoas: 4');
     });
 
-    test('UC-STAT-02 — Filters static totals by city (and restores via "Todas")', async ({
-      authenticatedPage,
-      db,
-    }) => {
+    test('UC-STAT-02 — Filters static totals by city (and restores via "Todas")', async ({ authenticatedPage, db }) => {
       const statisticsPage = new StatisticsPage(authenticatedPage);
       await statisticsPage.goto();
 
@@ -69,12 +66,7 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
       await expect(statisticsPage.tileBibleStudies).toContainText('Estudos bíblicos: 1');
       await expect(statisticsPage.tileMoved).toContainText('Mudaram: 0');
 
-      const saoPaulo = await db.queryWhere(
-        db.collections.territories,
-        'city',
-        '==',
-        'São Paulo',
-      );
+      const saoPaulo = await db.queryWhere(db.collections.territories, 'city', '==', 'São Paulo');
       expect(saoPaulo).toHaveLength(2);
 
       // Edge case: switching back to "Todas" restores the UC-STAT-01 totals.
@@ -112,9 +104,7 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
 
       const stored = await db.getDoc(db.collections.territories, moved.id);
       const rh = stored?.['recentHistory'] as Array<Record<string, unknown>>;
-      expect(
-        rh.some(h => h['visitOutcome'] === VisitOutcomeEnum.MOVED && h['isResolved'] === false),
-      ).toBe(true);
+      expect(rh.some((h) => h['visitOutcome'] === VisitOutcomeEnum.MOVED && h['isResolved'] === false)).toBe(true);
       // The subcollection doc carries the stamps that power the single collection-group query.
       const historyDocs = await db.getSubcollectionDocs(db.collections.territories, moved.id, db.historySubcollection);
       expect(historyDocs[0]['congregationId']).toBe(seed.ids.congregation);
@@ -133,7 +123,7 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
         seed.factories.buildVisitHistory({
           visitOutcome: VisitOutcomeEnum.NOT_ANSWERED,
           date: new Date(now - (i + 1) * 7 * 86_400_000),
-        })
+        }),
       );
       visits.push(
         seed.factories.buildVisitHistory({
@@ -141,7 +131,7 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
           isResolved: false,
           date: new Date(now - 60 * 86_400_000),
           notes: 'Morador se mudou há dois meses.',
-        })
+        }),
       );
 
       const movedBeyondRecent = seed.factories.buildTerritory({
@@ -195,11 +185,7 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
       // increment `visitCount` → 2. Baseline visits live in 2024 → excluded.
       await expect(statisticsPage.tileVisits).toContainText('Visitas: 2');
 
-      const subDocs = await db.getSubcollectionDocs(
-        db.collections.territories,
-        territory.id,
-        db.historySubcollection,
-      );
+      const subDocs = await db.getSubcollectionDocs(db.collections.territories, territory.id, db.historySubcollection);
       expect(subDocs).toHaveLength(5);
     });
 
@@ -234,11 +220,7 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
 
       await expect(statisticsPage.tileRevisits).toContainText('Revisitas: 1');
 
-      const subDocs = await db.getSubcollectionDocs(
-        db.collections.territories,
-        territory.id,
-        db.historySubcollection,
-      );
+      const subDocs = await db.getSubcollectionDocs(db.collections.territories, territory.id, db.historySubcollection);
       expect(subDocs).toHaveLength(2);
     });
 
@@ -268,11 +250,7 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
 
       await expect(statisticsPage.tileVisits).toContainText('Visitas: 7');
 
-      const subDocs = await db.getSubcollectionDocs(
-        db.collections.territories,
-        territory.id,
-        db.historySubcollection,
-      );
+      const subDocs = await db.getSubcollectionDocs(db.collections.territories, territory.id, db.historySubcollection);
       expect(subDocs).toHaveLength(7);
 
       const parent = await db.getDoc(db.collections.territories, territory.id);
@@ -325,12 +303,8 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
       const firstDayOfCurrentMonth = new Date();
       firstDayOfCurrentMonth.setDate(1);
       firstDayOfCurrentMonth.setHours(0, 0, 0, 0);
-      const subDocs = await db.getSubcollectionDocs(
-        db.collections.territories,
-        territory.id,
-        db.historySubcollection,
-      );
-      const qualifying = subDocs.filter(d => {
+      const subDocs = await db.getSubcollectionDocs(db.collections.territories, territory.id, db.historySubcollection);
+      const qualifying = subDocs.filter((d) => {
         const visitDate = (d['date'] as { toDate: () => Date }).toDate();
         return visitDate >= firstDayOfCurrentMonth;
       });
@@ -376,12 +350,8 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
       const firstDayPrevMonth = new Date();
       firstDayPrevMonth.setMonth(firstDayPrevMonth.getMonth() - 1, 1);
       firstDayPrevMonth.setHours(0, 0, 0, 0);
-      const subDocs = await db.getSubcollectionDocs(
-        db.collections.territories,
-        territory.id,
-        db.historySubcollection,
-      );
-      const qualifying = subDocs.filter(d => {
+      const subDocs = await db.getSubcollectionDocs(db.collections.territories, territory.id, db.historySubcollection);
+      const qualifying = subDocs.filter((d) => {
         const visitDate = (d['date'] as { toDate: () => Date }).toDate();
         return visitDate >= firstDayPrevMonth;
       });
@@ -427,23 +397,15 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
       const firstDayThreeMonthsAgo = new Date();
       firstDayThreeMonthsAgo.setMonth(firstDayThreeMonthsAgo.getMonth() - 3, 1);
       firstDayThreeMonthsAgo.setHours(0, 0, 0, 0);
-      const subDocs = await db.getSubcollectionDocs(
-        db.collections.territories,
-        territory.id,
-        db.historySubcollection,
-      );
-      const qualifying = subDocs.filter(d => {
+      const subDocs = await db.getSubcollectionDocs(db.collections.territories, territory.id, db.historySubcollection);
+      const qualifying = subDocs.filter((d) => {
         const visitDate = (d['date'] as { toDate: () => Date }).toDate();
         return visitDate >= firstDayThreeMonthsAgo;
       });
       expect(qualifying).toHaveLength(2);
     });
 
-    test('UC-STAT-07 — Period "6 meses" includes a visit 5 months ago', async ({
-      authenticatedPage,
-      seed,
-      db,
-    }) => {
+    test('UC-STAT-07 — Period "6 meses" includes a visit 5 months ago', async ({ authenticatedPage, seed, db }) => {
       const fiveMonthsAgo = new Date();
       fiveMonthsAgo.setMonth(fiveMonthsAgo.getMonth() - 5);
       fiveMonthsAgo.setHours(12, 0, 0, 0);
@@ -470,23 +432,15 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
       const firstDaySixMonthsAgo = new Date();
       firstDaySixMonthsAgo.setMonth(firstDaySixMonthsAgo.getMonth() - 6, 1);
       firstDaySixMonthsAgo.setHours(0, 0, 0, 0);
-      const subDocs = await db.getSubcollectionDocs(
-        db.collections.territories,
-        territory.id,
-        db.historySubcollection,
-      );
-      const qualifying = subDocs.filter(d => {
+      const subDocs = await db.getSubcollectionDocs(db.collections.territories, territory.id, db.historySubcollection);
+      const qualifying = subDocs.filter((d) => {
         const visitDate = (d['date'] as { toDate: () => Date }).toDate();
         return visitDate >= firstDaySixMonthsAgo;
       });
       expect(qualifying).toHaveLength(1);
     });
 
-    test('UC-STAT-08 — Period "1 ano" includes a visit 11 months ago', async ({
-      authenticatedPage,
-      seed,
-      db,
-    }) => {
+    test('UC-STAT-08 — Period "1 ano" includes a visit 11 months ago', async ({ authenticatedPage, seed, db }) => {
       const elevenMonthsAgo = new Date();
       elevenMonthsAgo.setMonth(elevenMonthsAgo.getMonth() - 11);
       elevenMonthsAgo.setHours(12, 0, 0, 0);
@@ -514,12 +468,8 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
       firstDayCurrentMonthLastYear.setFullYear(firstDayCurrentMonthLastYear.getFullYear() - 1);
       firstDayCurrentMonthLastYear.setDate(1);
       firstDayCurrentMonthLastYear.setHours(0, 0, 0, 0);
-      const subDocs = await db.getSubcollectionDocs(
-        db.collections.territories,
-        territory.id,
-        db.historySubcollection,
-      );
-      const qualifying = subDocs.filter(d => {
+      const subDocs = await db.getSubcollectionDocs(db.collections.territories, territory.id, db.historySubcollection);
+      const qualifying = subDocs.filter((d) => {
         const visitDate = (d['date'] as { toDate: () => Date }).toDate();
         return visitDate >= firstDayCurrentMonthLastYear;
       });
@@ -553,24 +503,15 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
       await expect(statisticsPage.tileVisits).toContainText('Visitas: 1');
 
       const firstDayOfCurrentYear = new Date(new Date().getFullYear(), 0, 1, 0, 0, 0, 0);
-      const subDocs = await db.getSubcollectionDocs(
-        db.collections.territories,
-        territory.id,
-        db.historySubcollection,
-      );
-      const qualifying = subDocs.filter(d => {
+      const subDocs = await db.getSubcollectionDocs(db.collections.territories, territory.id, db.historySubcollection);
+      const qualifying = subDocs.filter((d) => {
         const visitDate = (d['date'] as { toDate: () => Date }).toDate();
         return visitDate >= firstDayOfCurrentYear;
       });
       expect(qualifying).toHaveLength(1);
     });
 
-    test('UC-STAT-13 — Empty congregation renders clean zero totals', async ({
-      seed,
-      signInAsUser,
-      db,
-      page,
-    }) => {
+    test('UC-STAT-13 — Empty congregation renders clean zero totals', async ({ seed, signInAsUser, db, page }) => {
       // With zero territories, `FirebaseTerritoryDatasourceService.getAllByCongregation
       //   ({ getHistory: true })` guards the empty snapshot and returns `of([])` immediately —
       //   no history query is issued. `isLoading` flips to false and the page renders every
@@ -595,12 +536,7 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
       await expect(page.getByTestId('statistic-tile-bible-studies')).toContainText('Estudos bíblicos: 0');
       await expect(page.getByTestId('statistic-tile-moved')).toContainText('Mudaram: 0');
 
-      const scoped = await db.queryWhere(
-        db.collections.territories,
-        'congregationId',
-        '==',
-        congregation.id,
-      );
+      const scoped = await db.queryWhere(db.collections.territories, 'congregationId', '==', congregation.id);
       expect(scoped).toHaveLength(0);
     });
 
@@ -656,11 +592,7 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
       await expect(statisticsPage.tileVisits).toContainText('Visitas: 0');
       await expect(statisticsPage.tileRevisits).toContainText('Revisitas: 0');
 
-      const subDocs = await db.getSubcollectionDocs(
-        db.collections.territories,
-        territory.id,
-        db.historySubcollection,
-      );
+      const subDocs = await db.getSubcollectionDocs(db.collections.territories, territory.id, db.historySubcollection);
       expect(subDocs).toHaveLength(0);
     });
 
@@ -695,12 +627,8 @@ test.describe('Territories statistics (WP-20 + WP-21)', () => {
       const firstDayOfCurrentMonth = new Date();
       firstDayOfCurrentMonth.setDate(1);
       firstDayOfCurrentMonth.setHours(0, 0, 0, 0);
-      const subDocs = await db.getSubcollectionDocs(
-        db.collections.territories,
-        territory.id,
-        db.historySubcollection,
-      );
-      const excluded = subDocs.filter(d => {
+      const subDocs = await db.getSubcollectionDocs(db.collections.territories, territory.id, db.historySubcollection);
+      const excluded = subDocs.filter((d) => {
         const visitDate = (d['date'] as { toDate: () => Date }).toDate();
         return visitDate < firstDayOfCurrentMonth;
       });

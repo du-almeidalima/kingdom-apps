@@ -5,7 +5,13 @@ import { TerritoryVisitHistory } from '../../../models/territory-visit-history';
 import { VisitOutcomeEnum } from '../../../models/enums/visit-outcome';
 import { territoryMockBuilder } from '../../../test/mocks';
 
-import { ALL_OPTION, cityFilter, TerritoriesOrderBy, territoriesFilterPipe, TerritoryFilterSettings } from './territories-filter-pipe';
+import {
+  ALL_OPTION,
+  cityFilter,
+  TerritoriesOrderBy,
+  territoriesFilterPipe,
+  TerritoryFilterSettings,
+} from './territories-filter-pipe';
 
 const historyEntry = (partial: Partial<TerritoryVisitHistory> = {}): TerritoryVisitHistory => ({
   id: 'HISTORY-1',
@@ -31,11 +37,11 @@ const territory = (partial: Partial<Territory>): Territory =>
 
 const runPipe = (territories: Territory[], settings: TerritoryFilterSettings): Territory[] => {
   const emissions: Territory[][] = [];
-  territoriesFilterPipe(of(territories), settings).subscribe(result => emissions.push(result));
+  territoriesFilterPipe(of(territories), settings).subscribe((result) => emissions.push(result));
   return emissions[0];
 };
 
-const ids = (territories: Territory[]) => territories.map(t => t.id);
+const ids = (territories: Territory[]) => territories.map((t) => t.id);
 
 describe('cityFilter', () => {
   it('passes any territory when city is ALL_OPTION', () => {
@@ -57,29 +63,26 @@ describe('territoriesFilterPipe', () => {
 
   describe('city', () => {
     it('keeps only territories of the selected city', () => {
-      const result = runPipe(
-        [territory({ id: 'T1', city: 'City 1' }), territory({ id: 'T2', city: 'City 2' })],
-        { city: 'City 2' }
-      );
+      const result = runPipe([territory({ id: 'T1', city: 'City 1' }), territory({ id: 'T2', city: 'City 2' })], {
+        city: 'City 2',
+      });
 
       expect(ids(result)).toEqual(['T2']);
     });
   });
 
   describe('bible students', () => {
-    const territories = () => [
-      territory({ id: 'T1' }),
-      territory({ id: 'T2', isBibleStudent: true }),
-    ];
+    const territories = () => [territory({ id: 'T1' }), territory({ id: 'T2', isBibleStudent: true })];
 
     it('hides bible students by default', () => {
       expect(ids(runPipe(territories(), baseSettings))).toEqual(['T1']);
     });
 
     it('keeps bible students when includeBibleStudent is set', () => {
-      expect(
-        ids(runPipe(territories(), { ...baseSettings, filters: { includeBibleStudent: true } }))
-      ).toEqual(['T1', 'T2']);
+      expect(ids(runPipe(territories(), { ...baseSettings, filters: { includeBibleStudent: true } }))).toEqual([
+        'T1',
+        'T2',
+      ]);
     });
   });
 
@@ -113,7 +116,7 @@ describe('territoriesFilterPipe', () => {
     it('keeps only territories matching the selected icon', () => {
       const result = runPipe(
         [territory({ id: 'T1', icon: TerritoryIcon.MAN }), territory({ id: 'T2', icon: TerritoryIcon.WOMAN })],
-        { ...baseSettings, filters: { icon: TerritoryIcon.WOMAN } }
+        { ...baseSettings, filters: { icon: TerritoryIcon.WOMAN } },
       );
 
       expect(ids(result)).toEqual(['T2']);
@@ -122,7 +125,7 @@ describe('territoriesFilterPipe', () => {
     it('keeps every icon when no icon filter is set', () => {
       const result = runPipe(
         [territory({ id: 'T1', icon: TerritoryIcon.MAN }), territory({ id: 'T2', icon: TerritoryIcon.WOMAN })],
-        baseSettings
+        baseSettings,
       );
 
       expect(ids(result)).toEqual(['T1', 'T2']);
@@ -143,16 +146,8 @@ describe('territoriesFilterPipe', () => {
       ['no match at all', 'zeta', []],
       ['empty search term passes everything', '', ['T1', 'T2', 'T3']],
       ['null search term passes everything', null, ['T1', 'T2', 'T3']],
-      [
-        'multiple words are AND-ed and can span address and note',
-        'alpha gate',
-        ['T1'],
-      ],
-      [
-        'multiple consecutive spaces do not break the search',
-        'alpha  gate',
-        ['T1'],
-      ],
+      ['multiple words are AND-ed and can span address and note', 'alpha gate', ['T1']],
+      ['multiple consecutive spaces do not break the search', 'alpha  gate', ['T1']],
     ])('%s', (_desc, searchTerm, expected) => {
       expect(ids(runPipe(territories(), { ...baseSettings, searchTerm }))).toEqual(expected);
     });
@@ -161,18 +156,19 @@ describe('territoriesFilterPipe', () => {
   describe('sorting', () => {
     it('sorts by positionIndex ascending (SAVED_INDEX default)', () => {
       const result = runPipe(
-        [territory({ id: 'T1', positionIndex: 5 }), territory({ id: 'T2', positionIndex: 1 }), territory({ id: 'T3', positionIndex: 3 })],
-        { city: 'City 1' }
+        [
+          territory({ id: 'T1', positionIndex: 5 }),
+          territory({ id: 'T2', positionIndex: 1 }),
+          territory({ id: 'T3', positionIndex: 3 }),
+        ],
+        { city: 'City 1' },
       );
 
       expect(ids(result)).toEqual(['T2', 'T3', 'T1']);
     });
 
     it('treats a missing positionIndex as 0', () => {
-      const result = runPipe(
-        [territory({ id: 'T1', positionIndex: 1 }), territory({ id: 'T2' })],
-        { city: 'City 1' }
-      );
+      const result = runPipe([territory({ id: 'T1', positionIndex: 1 }), territory({ id: 'T2' })], { city: 'City 1' });
 
       expect(ids(result)).toEqual(['T2', 'T1']);
     });
@@ -183,7 +179,7 @@ describe('territoriesFilterPipe', () => {
           territory({ id: 'T1', lastVisit: new Date(2024, 2, 1), positionIndex: 0 }),
           territory({ id: 'T2', lastVisit: new Date(2024, 0, 1), positionIndex: 1 }),
         ],
-        { city: 'City 1', orderBy: TerritoriesOrderBy.LAST_VISIT }
+        { city: 'City 1', orderBy: TerritoriesOrderBy.LAST_VISIT },
       );
 
       expect(ids(result)).toEqual(['T2', 'T1']);
@@ -195,7 +191,7 @@ describe('territoriesFilterPipe', () => {
           territory({ id: 'T1', city: 'City 2', positionIndex: 0, lastVisit: new Date(2024, 2, 1) }),
           territory({ id: 'T2', city: 'City 1', positionIndex: 1, lastVisit: new Date(2024, 0, 1) }),
         ],
-        { city: ALL_OPTION, orderBy: TerritoriesOrderBy.LAST_VISIT }
+        { city: ALL_OPTION, orderBy: TerritoriesOrderBy.LAST_VISIT },
       );
 
       expect(ids(result)).toEqual(['T2', 'T1']);
@@ -207,10 +203,7 @@ describe('territoriesFilterPipe', () => {
   });
 
   it('does not mutate the source array order', () => {
-    const source = [
-      territory({ id: 'T1', positionIndex: 2 }),
-      territory({ id: 'T2', positionIndex: 1 }),
-    ];
+    const source = [territory({ id: 'T1', positionIndex: 2 }), territory({ id: 'T2', positionIndex: 1 })];
 
     runPipe(source, baseSettings);
 

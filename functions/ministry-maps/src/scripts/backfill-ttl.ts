@@ -120,7 +120,7 @@ async function main(): Promise<void> {
     console.log(`${collection.name} (basis: ${collection.dateField}):`);
     console.log(
       `  scanned: ${stats.scanned}, skipped: ${stats.skipped}, backfilled: ${stats.backfilled}` +
-        `${dryRun ? ' (would write)' : ''}, deleted: ${stats.deleted}${dryRun ? ' (would delete)' : ''}`
+        `${dryRun ? ' (would write)' : ''}, deleted: ${stats.deleted}${dryRun ? ' (would delete)' : ''}`,
     );
     for (const path of stats.fallbacks) {
       console.log(`  fallback (missing ${collection.dateField}, used now + 180d): ${path}`);

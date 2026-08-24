@@ -1,9 +1,9 @@
 ---
 globs:
-- '**/*.scss'
-- '**/*.css'
-- '**/styles/**'
-- '**/tailwind.config.js'
+  - '**/*.scss'
+  - '**/*.css'
+  - '**/styles/**'
+  - '**/tailwind.config.js'
 description: Styling — design tokens, the light/dark theme system, common-ui SCSS layers, and Tailwind usage.
 ---
 

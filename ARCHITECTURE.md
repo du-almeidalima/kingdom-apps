@@ -19,12 +19,12 @@ Cloud Functions or another trusted backend.
 
 ## Workspace units
 
-| Path | Nx project | Responsibility |
-|---|---|---|
-| `apps/ministry-maps` | `ministry-maps` | Angular PWA, unit tests, and Playwright E2E suite. |
-| `libs/common-ui` | `common-ui` | Generic UI components, directives, styles, and non-domain UI state. |
-| `functions/ministry-maps` | — | Separate Node 22 Firebase Functions v2 codebase. |
-| `tools/executors/firebase-emulator` | `firebase-emulator` | Local emulator orchestration and baseline seed. |
+| Path                                | Nx project          | Responsibility                                                      |
+| ----------------------------------- | ------------------- | ------------------------------------------------------------------- |
+| `apps/ministry-maps`                | `ministry-maps`     | Angular PWA, unit tests, and Playwright E2E suite.                  |
+| `libs/common-ui`                    | `common-ui`         | Generic UI components, directives, styles, and non-domain UI state. |
+| `functions/ministry-maps`           | —                   | Separate Node 22 Firebase Functions v2 codebase.                    |
+| `tools/executors/firebase-emulator` | `firebase-emulator` | Local emulator orchestration and baseline seed.                     |
 
 `functions/ministry-maps` is deployed by Firebase rather than Nx and has its own `package.json` and
 lockfile.
@@ -44,13 +44,13 @@ lockfile.
 
 ## Firebase boundary
 
-| Service | Usage |
-|---|---|
-| Auth | Google and Microsoft OAuth; emulator custom-token sign-in is exposed only in local development. |
-| Cloud Firestore | Primary application data, accessed through AngularFire repositories. |
-| Cloud Functions v2 | The `deleteUser` callable performs privileged Firebase Auth deletion. |
-| Remote Config | Runtime configuration; no local emulator is wired in `app.config.ts`. |
-| Hosting | `prod` targets `du-ministry-maps`; `beta` targets `du-ministry-maps-beta`. |
+| Service            | Usage                                                                                           |
+| ------------------ | ----------------------------------------------------------------------------------------------- |
+| Auth               | Google and Microsoft OAuth; emulator custom-token sign-in is exposed only in local development. |
+| Cloud Firestore    | Primary application data, accessed through AngularFire repositories.                            |
+| Cloud Functions v2 | The `deleteUser` callable performs privileged Firebase Auth deletion.                           |
+| Remote Config      | Runtime configuration; no local emulator is wired in `app.config.ts`.                           |
+| Hosting            | `prod` targets `du-ministry-maps`; `beta` targets `du-ministry-maps-beta`.                      |
 
 The application models six roles: `APP_ADMIN`, `ADMIN`, `ELDER`, `ORGANIZER`, `SUPERINTENDENT`, and
 `PUBLISHER`. Route guards and `libAuthorize` control client navigation and visibility; they are not a

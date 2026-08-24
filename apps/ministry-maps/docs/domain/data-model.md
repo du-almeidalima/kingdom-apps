@@ -8,13 +8,13 @@ Everything an E2E author needs to build **realistic seeds** and write **backend 
 ## 1. Firestore collections
 
 | Collection                 | Doc id                                    | Written by                               | Notes                                              |
-|----------------------------|-------------------------------------------|------------------------------------------|----------------------------------------------------|
+| -------------------------- | ----------------------------------------- | ---------------------------------------- | -------------------------------------------------- |
 | `congregations`            | free-form (seed uses `seed-congregation`) | Configuration screen (`cities` only)     | Holds `cities[]` + `settings`.                     |
 | `users`                    | **=== Firebase Auth `uid`**               | sign-in (auto-create), Users screen      | `congregation` is a `DocumentReference`.           |
 | `territories`              | auto-id (`doc(collection)`)               | Territories screen, Work page write-back | Parent doc carries `recentHistory` + `lastVisit`.  |
 | `territories/{id}/history` | visit id (client-generated)               | Work page (complete/edit/undo visit)     | **Full** visit log, one doc per visit.             |
 | `designations`             | auto-id                                   | Assign page                              | Embeds a **snapshot** of the assigned territories. |
-| `invitation_links`         | auto-id                                   | Users screen (invite dialog)             | ⚠ note the **underscore** in the collection name. |
+| `invitation_links`         | auto-id                                   | Users screen (invite dialog)             | ⚠ note the **underscore** in the collection name.  |
 
 The E2E layer re-declares the first five in `e2e/seed/collections.ts`
 (`db.collections.congregations | users | territories | designations`, `db.historySubcollection === 'history'`).
@@ -29,8 +29,7 @@ designations/{designationId}     → congregationId: string, territories: Design
 invitation_links/{linkId}        → congregation: DocumentReference on create, embedded object after update (§2.6)
 ```
 
-> **Mixed linking styles are intentional and must be reproduced exactly.**
-> `users` link by reference, `territories`/`designations` link by plain `congregationId` string.
+> **Mixed linking styles are intentional and must be reproduced exactly.** > `users` link by reference, `territories`/`designations` link by plain `congregationId` string.
 
 ---
 
@@ -39,35 +38,35 @@ invitation_links/{linkId}        → congregation: DocumentReference on create, 
 ### 2.1 `Territory` — `src/models/territory.ts`
 
 | Field             | Type                       | Required | Meaning / test relevance                                                                            |
-|-------------------|----------------------------|----------|-----------------------------------------------------------------------------------------------------|
-| `id`              | `string`                   | ✔       | Also stored **inside** the document (the app writes `id` on create).                                |
-| `city`            | `string`                   | ✔       | Must be one of `congregation.cities` for the UI filter to show it.                                  |
-| `address`         | `string`                   | ✔       | Primary visible label on the list; search matches on it.                                            |
-| `note`            | `string`                   | ✔       | Free text. **Gates alert-badge rendering** (see §4.4).                                              |
-| `mapsLink`        | `string?`                  | ✖       | When absent the "maps" affordance is hidden.                                                        |
-| `congregationId`  | `string`                   | ✔       | Plain id. Scoping key for every list query.                                                         |
-| `isBibleStudent`  | `boolean?`                 | ✖       | Drives the bible-student badge, statistics count and a filter toggle.                               |
-| `bibleInstructor` | `string?`                  | ✖       | A **user id** (not a name). Only meaningful with `isBibleStudent: true`.                            |
-| `positionIndex`   | `number?`                  | ✖       | Manual sort order, **allocated per city** (§4.3).                                                   |
-| `icon`            | `TerritoryIcon`            | ✔       | `'m' \| 'w' \| 'c' \| 'cp' \| 'o'` (see §3.1).                                                      |
-| `lastVisit`       | `Date?` → `Timestamp`      | ✖       | Denormalised date of the newest visit.                                                              |
-| `history`         | `TerritoryVisitHistory[]?` | ✖       | **Never persisted on the parent doc** — stripped on `add`/`update` and stored in the subcollection. |
-| `recentHistory`   | `TerritoryVisitHistory[]?` | ✖       | Denormalised **last 5** visits, ascending by date (§4.1).                                           |
-| `peopleQuantity`  | `number?`                  | ✖       | Usually `1`; summed by statistics.                                                                  |
+| ----------------- | -------------------------- | -------- | --------------------------------------------------------------------------------------------------- |
+| `id`              | `string`                   | ✔        | Also stored **inside** the document (the app writes `id` on create).                                |
+| `city`            | `string`                   | ✔        | Must be one of `congregation.cities` for the UI filter to show it.                                  |
+| `address`         | `string`                   | ✔        | Primary visible label on the list; search matches on it.                                            |
+| `note`            | `string`                   | ✔        | Free text. **Gates alert-badge rendering** (see §4.4).                                              |
+| `mapsLink`        | `string?`                  | ✖        | When absent the "maps" affordance is hidden.                                                        |
+| `congregationId`  | `string`                   | ✔        | Plain id. Scoping key for every list query.                                                         |
+| `isBibleStudent`  | `boolean?`                 | ✖        | Drives the bible-student badge, statistics count and a filter toggle.                               |
+| `bibleInstructor` | `string?`                  | ✖        | A **user id** (not a name). Only meaningful with `isBibleStudent: true`.                            |
+| `positionIndex`   | `number?`                  | ✖        | Manual sort order, **allocated per city** (§4.3).                                                   |
+| `icon`            | `TerritoryIcon`            | ✔        | `'m' \| 'w' \| 'c' \| 'cp' \| 'o'` (see §3.1).                                                      |
+| `lastVisit`       | `Date?` → `Timestamp`      | ✖        | Denormalised date of the newest visit.                                                              |
+| `history`         | `TerritoryVisitHistory[]?` | ✖        | **Never persisted on the parent doc** — stripped on `add`/`update` and stored in the subcollection. |
+| `recentHistory`   | `TerritoryVisitHistory[]?` | ✖        | Denormalised **last 5** visits, ascending by date (§4.1).                                           |
+| `peopleQuantity`  | `number?`                  | ✖        | Usually `1`; summed by statistics.                                                                  |
 
 ### 2.2 `TerritoryVisitHistory` — `src/models/territory-visit-history.ts`
 
 | Field            | Type                 | Required | Meaning / test relevance                                                                                                                                           |
-|------------------|----------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`             | `string`             | ✔       | Same id in the subcollection doc **and** in the `recentHistory` array element.                                                                                     |
-| `notes`          | `string`             | ✔       | Free text captured in the complete-visit dialog.                                                                                                                   |
-| `isRevisit`      | `boolean`            | ✔       | Counted separately in statistics.                                                                                                                                  |
-| `isResolved`     | `boolean?`           | ✖       | Used by the "not answered" / "moved" alert resolution flow.                                                                                                        |
-| `name`           | `string?`            | ✖       | Name of the publisher who did the visit; required by the dialog when `isRevisit` is ticked.                                                                        |
-| `date`           | `Date` → `Timestamp` | ✔       | Drives `lastVisit`, `recentHistory` ordering and every statistics period.                                                                                          |
-| `visitOutcome`   | `VisitOutcomeEnum`   | ✔       | **Numeric** on the wire (§3.2).                                                                                                                                    |
-| `congregationId` | `string?`            | ✖       | Plain id, stamped at write time. Enables the single collection-group statistics query (§4.7). Backfill stamps legacy docs (`functions` `backfill:history-stamps`). |
-| `territoryId`    | `string?`            | ✖       | Plain id of the parent territory document, stamped at write time alongside `congregationId`.                                                                       |
+| ---------------- | -------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`             | `string`             | ✔        | Same id in the subcollection doc **and** in the `recentHistory` array element.                                                                                     |
+| `notes`          | `string`             | ✔        | Free text captured in the complete-visit dialog.                                                                                                                   |
+| `isRevisit`      | `boolean`            | ✔        | Counted separately in statistics.                                                                                                                                  |
+| `isResolved`     | `boolean?`           | ✖        | Used by the "not answered" / "moved" alert resolution flow.                                                                                                        |
+| `name`           | `string?`            | ✖        | Name of the publisher who did the visit; required by the dialog when `isRevisit` is ticked.                                                                        |
+| `date`           | `Date` → `Timestamp` | ✔        | Drives `lastVisit`, `recentHistory` ordering and every statistics period.                                                                                          |
+| `visitOutcome`   | `VisitOutcomeEnum`   | ✔        | **Numeric** on the wire (§3.2).                                                                                                                                    |
+| `congregationId` | `string?`            | ✖        | Plain id, stamped at write time. Enables the single collection-group statistics query (§4.7). Backfill stamps legacy docs (`functions` `backfill:history-stamps`). |
+| `territoryId`    | `string?`            | ✖        | Plain id of the parent territory document, stamped at write time alongside `congregationId`.                                                                       |
 
 ### 2.3 `Designation` / `DesignationTerritory` — `src/models/designation.ts`
 
@@ -77,19 +76,19 @@ type DesignationSettings = Partial<Pick<CongregationSettings, 'shouldDesignation
 ```
 
 | Field            | Type                     | Required | Meaning / test relevance                                           |
-|------------------|--------------------------|----------|--------------------------------------------------------------------|
-| `id`             | `string`                 | ✔       | The `:id` in `/work/:id`. Anyone holding it can open the page.     |
-| `congregationId` | `string`                 | ✔       | Plain id.                                                          |
-| `territories`    | `DesignationTerritory[]` | ✔       | **Embedded snapshot** (§4.2), each with its own `status`.          |
-| `createdAt`      | `Date` → `Timestamp`     | ✔       |                                                                    |
-| `createdBy`      | `string`                 | ✔       | Creator's user id / uid.                                           |
-| `expiresAt`      | `Date` → `Timestamp`     | ✔       | Derived on creation from `designationAccessExpiryDays`.            |
-| `settings`       | `DesignationSettings?`   | ✖       | Snapshot of `shouldDesignationBlockAfterExpired` at creation time. |
+| ---------------- | ------------------------ | -------- | ------------------------------------------------------------------ |
+| `id`             | `string`                 | ✔        | The `:id` in `/work/:id`. Anyone holding it can open the page.     |
+| `congregationId` | `string`                 | ✔        | Plain id.                                                          |
+| `territories`    | `DesignationTerritory[]` | ✔        | **Embedded snapshot** (§4.2), each with its own `status`.          |
+| `createdAt`      | `Date` → `Timestamp`     | ✔        |                                                                    |
+| `createdBy`      | `string`                 | ✔        | Creator's user id / uid.                                           |
+| `expiresAt`      | `Date` → `Timestamp`     | ✔        | Derived on creation from `designationAccessExpiryDays`.            |
+| `settings`       | `DesignationSettings?`   | ✖        | Snapshot of `shouldDesignationBlockAfterExpired` at creation time. |
 
 ### 2.4 `User` — `src/models/user.ts`
 
-| Field          | Type                        | Required         | Meaning / test relevance                                                        |
-|----------------|-----------------------------|------------------|---------------------------------------------------------------------------------|
+| Field          | Type                        | Required        | Meaning / test relevance                                                        |
+| -------------- | --------------------------- | --------------- | ------------------------------------------------------------------------------- |
 | `id`           | `string`                    | ✔               | **=== Auth uid** and === doc id.                                                |
 | `name`         | `string`                    | ✔               | Split on spaces for initials and the home greeting ("Bem-Vindo {firstName}!").  |
 | `email`        | `string`                    | ✔               | Compared against `InvitationLink.email` during invite sign-in.                  |
@@ -103,7 +102,7 @@ Reading a user resolves the reference. If the congregation document is missing, 
 ### 2.5 `Congregation` / `CongregationSettings` — `src/models/congregation.ts`
 
 | Field                                         | Type       | Meaning / test relevance                                                                     |
-|-----------------------------------------------|------------|----------------------------------------------------------------------------------------------|
+| --------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------- |
 | `id`                                          | `string`   |                                                                                              |
 | `name`                                        | `string`   | Shown on the profile card.                                                                   |
 | `locatedOn`                                   | `string`   | e.g. `'São Paulo, SP'`.                                                                      |
@@ -114,7 +113,7 @@ Reading a user resolves the reference. If the congregation document is missing, 
 ### 2.6 `InvitationLink` — `src/models/invitation-link.ts`
 
 | Field          | Type                 | Meaning / test relevance                                                                                                                                  |
-|----------------|----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `id`           | `string`             | Appears in the link: `${environment.baseUrl}sign-in/{id}`. Also written **inside** the document body on `add`.                                            |
 | `createdBy`    | `string`             | Creator's **email** (`currentUser.email`), not the uid.                                                                                                   |
 | `congregation` | `Congregation`       | **Shape drifts per write path** — see the caveat below. Read code may rely on either shape.                                                               |
@@ -129,8 +128,7 @@ Reading a user resolves the reference. If the congregation document is missing, 
 > re-wraps the hydrated `Congregation` into a **`DocumentReference`** before `setDoc`, so a freshly created
 > invite stores `congregation` as a reference. Consumption moved server-side: the
 > `provisionUserFromInvite` Cloud Function consumes the invite with a field-level
-> `transaction.update(invite, { isValid, usedAt, usedBy })`, so a consumed invite's `congregation`
-> **stays a `DocumentReference`** (the legacy full-doc-overwrite drift via the repository `update()`
+> `transaction.update(invite, { isValid, usedAt, usedBy })`, so a consumed invite's `congregation` > **stays a `DocumentReference`** (the legacy full-doc-overwrite drift via the repository `update()`
 > no longer has any callers — `InviteBO.consumeInviteLink` was removed). Reads only access
 > `congregation.id`, which works for both shapes. When seeding invites raw, always write
 > `congregation` as a `DocumentReference` (the creation-time shape).
@@ -142,7 +140,7 @@ Reading a user resolves the reference. If the congregation document is missing, 
 ### 3.1 `TerritoryIcon`
 
 | Enum     | Stored value | pt-BR label   |
-|----------|--------------|---------------|
+| -------- | ------------ | ------------- |
 | `MAN`    | `'m'`        | Homem         |
 | `WOMAN`  | `'w'`        | Mulher        |
 | `CHILD`  | `'c'`        | Criança/Jovem |
@@ -152,7 +150,7 @@ Reading a user resolves the reference. If the congregation document is missing, 
 ### 3.2 `VisitOutcomeEnum` — **numeric**
 
 | Enum                       | Stored value |
-|----------------------------|--------------|
+| -------------------------- | ------------ |
 | `SPOKE`                    | `0`          |
 | `NOT_ANSWERED`             | `1`          |
 | `MOVED`                    | `2`          |
@@ -173,7 +171,7 @@ Assertions must compare against numbers: `expect(visit.visitOutcome).toBe(2)` (o
 ### 3.4 `RoleEnum` — string, plus `getTranslatedRole()` labels
 
 | Enum value       | pt-BR label rendered in the UI                      |
-|------------------|-----------------------------------------------------|
+| ---------------- | --------------------------------------------------- |
 | `APP_ADMIN`      | `App Admin.`                                        |
 | `ADMIN`          | `Admin`                                             |
 | `ORGANIZER`      | `Organizador`                                       |
@@ -198,7 +196,7 @@ Assertions must compare against numbers: `expect(visit.visitOutcome).toBe(2)` (o
 **Consequences for tests:**
 
 | Read path                                                                                      | Data source                                                                                                 | Implication                                                |
-|------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|------------------------------------------------------------|
+| ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
 | `/territories` list badges & alerts, and the history lists inside the alert-resolution dialogs | `recentHistory` on the parent doc                                                                           | Visits older than the last 5 are invisible here.           |
 | `/territories` "Histórico" dialog                                                              | **full `history` subcollection** (`getTerritoryVisitHistory`, one-shot, no `orderBy`, reversed client-side) | Shows every visit ever, not just 5 (`UC-TERR-28`).         |
 | `/work/:id` history dialog                                                                     | the `history` array **embedded in the designation snapshot**                                                | Absent when the snapshot carries no `history` (`UC-WORK`). |
@@ -241,7 +239,7 @@ and the underlying promise is created **eagerly** when the method is called. Con
 `getNextPositionIndexForCity(city)` queries `where('city','==',city)`, `orderBy('positionIndex','desc')`,
 `limit(1)` and returns `(last.positionIndex ?? 0) + 1`, or `0` when the city has no territories.
 
-- The query is **not** scoped by `congregationId` → in a multi-congregation emulator state the next index is influenced by *other* congregations' territories sharing the same city name.
+- The query is **not** scoped by `congregationId` → in a multi-congregation emulator state the next index is influenced by _other_ congregations' territories sharing the same city name.
 - It requires `positionIndex` to exist on the documents; territories seeded without it are not returned by that query (Firestore skips docs missing the `orderBy` field), so always seed `positionIndex`.
 - Drag-and-drop reorder rewrites `positionIndex` for the affected territories via `batchUpdate`
   (a Firestore transaction).
@@ -258,7 +256,7 @@ The alert badges (bible student / recently moved / unresolved "not answered") ar
 ### 4.6 Realtime vs one-shot reads
 
 | Read                                                      | API              | UI updates without reload?                                                              |
-|-----------------------------------------------------------|------------------|-----------------------------------------------------------------------------------------|
+| --------------------------------------------------------- | ---------------- | --------------------------------------------------------------------------------------- |
 | Territories list (`getAllByCongregation`)                 | `collectionData` | **Yes** — live listener.                                                                |
 | Territories by city (`getAllByCongregationAndCities`)     | `collectionData` | **Yes**.                                                                                |
 | Users list (`getAllByCongregation`)                       | `collectionData` | **Yes**.                                                                                |
@@ -294,7 +292,7 @@ Consequences:
 Applied automatically before **every** test by the `resetAndSeed` auto fixture (the emulator starts empty). Ids come from `DEFAULT_SEED_IDS` (`seed.ids`).
 
 | Entity         | Id                         | Key values                                                                                                                                                                                       |
-|----------------|----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Congregation   | `seed-congregation`        | `Congregação Jardim Primavera`, `São Paulo, SP`, cities `['São Paulo', 'Osasco']`, settings `{ designationAccessExpiryDays: 7, shouldDesignationBlockAfterExpired: true }`                       |
 | Admin user     | `seed-user-admin`          | `Carlos Almeida`, `carlos.almeida@example.com`, `ADMIN`                                                                                                                                          |
 | Publishers     | `seed-user-publisher-1..3` | `Ana Souza`, `Pedro Lima`, `Mariana Costa`, `PUBLISHER`, emails `seed-user-publisher-N@example.com`                                                                                              |
@@ -322,7 +320,7 @@ Every seeded user gets an Auth emulator account with `DEFAULT_PASSWORD = 'test-p
 ### Factory defaults (only override what a use case cares about)
 
 | Factory                     | Notable defaults                                                                                                                                                                                                        |
-|-----------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `buildCongregation`         | `Congregação Central`, cities `['São Paulo', 'Guarulhos']`, `designationAccessExpiryDays: 7`, `shouldDesignationBlockAfterExpired: true`                                                                                |
 | `buildUser`                 | role `PUBLISHER`, `name 'João da Silva'`, `email '{id}@example.com'`, `congregationId: ''` (**always override**)                                                                                                        |
 | `buildTerritory`            | `São Paulo`, `Rua das Flores, 123 - Vila Mariana`, non-empty `note`, `mapsLink` set, `icon COUPLE`, `positionIndex 0`, `peopleQuantity 1`, `history: [buildVisitHistory()]`, `congregationId: ''` (**always override**) |

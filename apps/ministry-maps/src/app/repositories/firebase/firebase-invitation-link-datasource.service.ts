@@ -36,7 +36,7 @@ export class FirebaseInvitationLinkDataSourceService
     // USERS COLLECTION
     this.invitationLinkCollection = collection(
       this.firestore,
-      FirebaseInvitationLinkDataSourceService.COLLECTION_NAME
+      FirebaseInvitationLinkDataSourceService.COLLECTION_NAME,
     ).withConverter<InvitationLink>(firebaseEntityConverterFactory());
   }
 
@@ -73,7 +73,7 @@ export class FirebaseInvitationLinkDataSourceService
           map((congregation) => {
             if (!congregation) {
               this.loggerService.error(
-                `Could not find Congregation ID: ${invitationLink.congregation?.id} for Invitation Link ID: ${invitationLink.id}`
+                `Could not find Congregation ID: ${invitationLink.congregation?.id} for Invitation Link ID: ${invitationLink.id}`,
               );
               // User with congregation deleted
               return { ...invitationLink, congregation: EMPTY_CONGREGATION };
@@ -81,15 +81,15 @@ export class FirebaseInvitationLinkDataSourceService
 
             // Overriding congregation reference with congregation data
             return { ...invitationLink, congregation: { ...congregation } };
-          })
+          }),
         );
-      })
+      }),
     );
   }
 
   add(invitationLink: Omit<InvitationLink, 'id'>): Observable<InvitationLink> {
     const congregationDocReference = this.congregationDatasourceService.createDocumentRef(
-      invitationLink.congregation.id
+      invitationLink.congregation.id,
     );
 
     const data = {
@@ -106,7 +106,7 @@ export class FirebaseInvitationLinkDataSourceService
     return newInvitationLink$.pipe(
       switchMap(() => {
         return this.getById(newInvitationLinkDocRef.id) as Observable<InvitationLink>;
-      })
+      }),
     );
   }
 

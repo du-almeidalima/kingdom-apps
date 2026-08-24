@@ -1,19 +1,25 @@
-<div class='container'>
+<div class="container">
   <div class="flex items-center justify-between mb-8">
-    <h2 class='t-headline2' data-testid="territories-heading">Territórios</h2>
+    <h2 class="t-headline2" data-testid="territories-heading">Territórios</h2>
     <!-- VERTICAL MENU -->
     <button
       lib-icon-button
       [cdkMenuTriggerFor]="menu"
       type="button"
       data-testid="territories-overflow-menu"
-      *libAuthorize="[RoleEnum.APP_ADMIN, RoleEnum.SUPERINTENDENT, RoleEnum.ADMIN]">
+      *libAuthorize="[RoleEnum.APP_ADMIN, RoleEnum.SUPERINTENDENT, RoleEnum.ADMIN]"
+    >
       <lib-icon icon="menu-dot-vertical-filled"></lib-icon>
     </button>
 
     <ng-template #menu>
       <menu class="menu" cdkMenu>
-        <li class="menu__item" data-testid="territories-export-item" cdkMenuItem (cdkMenuItemTriggered)="handleExportTerritories()">
+        <li
+          class="menu__item"
+          data-testid="territories-export-item"
+          cdkMenuItem
+          (cdkMenuItemTriggered)="handleExportTerritories()"
+        >
           <button lib-icon-button type="button">
             <lib-icon icon="download-20"></lib-icon>
           </button>
@@ -24,44 +30,41 @@
   </div>
   <select
     lib-select
-    class='w-full'
-    name='Cidade'
+    class="w-full"
+    name="Cidade"
     data-testid="territories-city-filter"
-    [ngModel]='selectedCity'
-    (ngModelChange)='handleSelectedCityChange($event)'>
+    [ngModel]="selectedCity"
+    (ngModelChange)="handleSelectedCityChange($event)"
+  >
     @for (city of cities; track city) {
-      <option [value]='city'>{{ city }}</option>
-
+      <option [value]="city">{{ city }}</option>
     }
-    <option [value]='ALL_OPTION'>Todas</option>
+    <option [value]="ALL_OPTION">Todas</option>
   </select>
 
   <!-- Search, Filters, and Sort -->
   <div class="flex mt-5 gap-5">
-    <lib-search-input class="flex-1" (searched)='handleTerritorySearchTermChange($event)' />
-    <lib-sort-filter
-      storeFilterState
-      [config]="sortFilterConfig"
-      (changed)="handleSortFilterChange($event)"
-    />
+    <lib-search-input class="flex-1" (searched)="handleTerritorySearchTermChange($event)" />
+    <lib-sort-filter storeFilterState [config]="sortFilterConfig" (changed)="handleSortFilterChange($event)" />
   </div>
 
   @if (filteredTerritories$ | async; as territories) {
-    <section class='territories-list mt-8 pb-56'
-             data-testid="territories-list"
-             cdkDropList
-             (cdkDropListDropped)='handleTerritoryDrop($event, territories)'
+    <section
+      class="territories-list mt-8 pb-56"
+      data-testid="territories-list"
+      cdkDropList
+      (cdkDropListDropped)="handleTerritoryDrop($event, territories)"
     >
       @for (territory of territories; track trackByRepositoryId(territory)) {
         <kingdom-apps-territory-list-item
-          class='territory-list-item mb-3'
+          class="territory-list-item mb-3"
           cdkDrag
-          [cdkDragDisabled]='selectedCity === ALL_OPTION || sortBy !== TerritoriesOrderBy.SAVED_INDEX'
-          [territory]='territory'
-          (edit)='handleOpenManageTerritoryDialog($event)'
-          (history)='handleOpenHistory($event)'
-          (remove)='handleRemoveTerritory($event)'
-          (resolveMove)='handleResolveMoveAlert($event)'
+          [cdkDragDisabled]="selectedCity === ALL_OPTION || sortBy !== TerritoriesOrderBy.SAVED_INDEX"
+          [territory]="territory"
+          (edit)="handleOpenManageTerritoryDialog($event)"
+          (history)="handleOpenHistory($event)"
+          (remove)="handleRemoveTerritory($event)"
+          (resolveMove)="handleResolveMoveAlert($event)"
           (resolveRevisit)="handleResolveRevisitAlert($event)"
           (resolveStopVisiting)="handleResolveStopVisitingAlert($event)"
         >
@@ -72,14 +75,15 @@
               data-testid="territory-item-drag-handle"
               [cdkDragHandleDisabled]="sortBy !== TerritoriesOrderBy.SAVED_INDEX"
               [disabled]="sortBy !== TerritoriesOrderBy.SAVED_INDEX"
-              type='button'
-              style='cursor: grab'
-              [title]="sortBy === TerritoriesOrderBy.SAVED_INDEX ? '' : 'Para ordernar manualmente, use a ordenação Ordem de Cadastro'"
+              type="button"
+              style="cursor: grab"
+              [title]="
+                sortBy === TerritoriesOrderBy.SAVED_INDEX
+                  ? ''
+                  : 'Para ordernar manualmente, use a ordenação Ordem de Cadastro'
+              "
             >
-              <lib-icon
-                icon='cursor-23'
-                fillColor='currentColor'
-              />
+              <lib-icon icon="cursor-23" fillColor="currentColor" />
             </button>
           }
         </kingdom-apps-territory-list-item>
@@ -87,9 +91,12 @@
     </section>
   }
 
-  <button lib-floating-action-button title='Adicionar Território'
-          data-testid="territories-add-button"
-          (click)='handleOpenManageTerritoryDialog()'>
-    <lib-icon icon='plus-lined'></lib-icon>
+  <button
+    lib-floating-action-button
+    title="Adicionar Território"
+    data-testid="territories-add-button"
+    (click)="handleOpenManageTerritoryDialog()"
+  >
+    <lib-icon icon="plus-lined"></lib-icon>
   </button>
 </div>

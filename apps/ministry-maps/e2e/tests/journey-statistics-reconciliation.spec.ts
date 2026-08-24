@@ -23,26 +23,57 @@ test('J-07 — Statistics reconcile per period and per city against the history 
   // ── Seed: clock-relative visits on period boundaries ──────────────────────
   const now = new Date();
   const firstOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const firstOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
   const visits = [
     // IN — every period's window (today)
-    seed.factories.buildVisitHistory({ id: 'j07-v-today', visitOutcome: VisitOutcomeEnum.SPOKE, isRevisit: true, date: now }),
+    seed.factories.buildVisitHistory({
+      id: 'j07-v-today',
+      visitOutcome: VisitOutcomeEnum.SPOKE,
+      isRevisit: true,
+      date: now,
+    }),
     // IN — this month, ON its first day (boundary-inclusive)
-    seed.factories.buildVisitHistory({ id: 'j07-v-month-1st', visitOutcome: VisitOutcomeEnum.SPOKE, isRevisit: false, date: firstOfThisMonth }),
+    seed.factories.buildVisitHistory({
+      id: 'j07-v-month-1st',
+      visitOutcome: VisitOutcomeEnum.SPOKE,
+      isRevisit: false,
+      date: firstOfThisMonth,
+    }),
     // IN — previous month; OUT of "Este Mês" (boundary-exclusive)
-    seed.factories.buildVisitHistory({ id: 'j07-v-prev-mid', visitOutcome: VisitOutcomeEnum.REVISIT, isRevisit: false, date: new Date(now.getFullYear(), now.getMonth() - 1, 15) }),
+    seed.factories.buildVisitHistory({
+      id: 'j07-v-prev-mid',
+      visitOutcome: VisitOutcomeEnum.REVISIT,
+      isRevisit: false,
+      date: new Date(now.getFullYear(), now.getMonth() - 1, 15),
+    }),
     // OUT — 28th of month −2; only inside "3 Meses"+ windows
-    seed.factories.buildVisitHistory({ id: 'j07-v-old', visitOutcome: VisitOutcomeEnum.SPOKE, isRevisit: false, date: new Date(now.getFullYear(), now.getMonth() - 2, 28) }),
+    seed.factories.buildVisitHistory({
+      id: 'j07-v-old',
+      visitOutcome: VisitOutcomeEnum.SPOKE,
+      isRevisit: false,
+      date: new Date(now.getFullYear(), now.getMonth() - 2, 28),
+    }),
   ];
   await seed.write({
     territories: [
-      seed.factories.buildTerritory({ id: 'j07-territory-sp', congregationId: seed.ids.congregation, city: 'São Paulo', history: visits }),
+      seed.factories.buildTerritory({
+        id: 'j07-territory-sp',
+        congregationId: seed.ids.congregation,
+        city: 'São Paulo',
+        history: visits,
+      }),
       seed.factories.buildTerritory({
         id: 'j07-territory-os',
         congregationId: seed.ids.congregation,
         city: 'Osasco',
-        history: [seed.factories.buildVisitHistory({ id: 'j07-v-os', visitOutcome: VisitOutcomeEnum.SPOKE, isRevisit: true, date: now })],
+        history: [
+          seed.factories.buildVisitHistory({
+            id: 'j07-v-os',
+            visitOutcome: VisitOutcomeEnum.SPOKE,
+            isRevisit: true,
+            date: now,
+          }),
+        ],
       }),
     ],
   });
@@ -78,7 +109,11 @@ test('J-07 — Statistics reconcile per period and per city against the history 
 
   // ⟶ HAND-OFF (Firestore, per row — UC-STAT-12): the UI number reconciles with
   // the subcollection filtered to the same window.
-  const spHistoryDocs = await db.getSubcollectionDocs(db.collections.territories, 'j07-territory-sp', db.historySubcollection);
+  const spHistoryDocs = await db.getSubcollectionDocs(
+    db.collections.territories,
+    'j07-territory-sp',
+    db.historySubcollection,
+  );
   expect(spHistoryDocs).toHaveLength(4);
 
   // ── Leg 3 — City scoping vs "Todas" (UC-STAT-02) ──────────────────────────

@@ -7,7 +7,7 @@ import {
   getDoc,
   getDocSnapshot,
   getSubcollectionDocs,
-  queryWhere
+  queryWhere,
 } from '../firebase/firestore-read.util';
 import { resetEmulators } from '../firebase/reset.util';
 import * as factories from '../seed/factories';

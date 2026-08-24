@@ -55,11 +55,7 @@ test.describe('Users page (WP-22)', () => {
     expect(stored?.['role']).toBe('ADMIN');
   });
 
-  test('UC-USERS-03 — A user from another congregation is never listed', async ({
-    authenticatedPage,
-    seed,
-    db,
-  }) => {
+  test('UC-USERS-03 — A user from another congregation is never listed', async ({ authenticatedPage, seed, db }) => {
     const foreignCongregation = seed.factories.buildCongregation();
     const foreignAdmin = seed.factories.buildUser({
       role: RoleEnum.ADMIN,

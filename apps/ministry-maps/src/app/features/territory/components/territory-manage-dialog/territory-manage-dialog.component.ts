@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { finalize, Observable, retry, switchMap } from 'rxjs';
@@ -7,14 +7,17 @@ import { TerritoryRepository } from '../../../../repositories/territories.reposi
 import { Congregation } from '../../../../../models/congregation';
 import { Territory, TerritoryIcon } from '../../../../../models/territory';
 import {
-  ButtonComponent, DialogCloseDirective,
+  ButtonComponent,
+  DialogCloseDirective,
   DialogComponent,
   DialogFooterComponent,
   FormFieldComponent,
-  InputComponent, LabelComponent, OnlyNumbersDirective,
+  InputComponent,
+  LabelComponent,
+  OnlyNumbersDirective,
   SelectComponent,
   SpinnerComponent,
-  white100
+  white100,
 } from '@kingdom-apps/common-ui';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TerritoryIconTranslatorPipe } from '../../../../shared/pipes/territory-icon-translator/territory-icon-translator.pipe';
@@ -60,16 +63,19 @@ type TerritoryForm = {
     DialogCloseDirective,
   ],
   template: `
-    <lib-dialog title="{{ isEdit ? 'Editar Território' : 'Adicionar Território' }}" data-testid="territory-manage-dialog">
+    <lib-dialog
+      title="{{ isEdit ? 'Editar Território' : 'Adicionar Território' }}"
+      data-testid="territory-manage-dialog"
+    >
       <form [formGroup]="form" (ngSubmit)="handleSubmission()" id="territory-form">
         <!-- City -->
         <lib-form-field>
           <label lib-label for="territory-city">Cidade</label>
           <select lib-select formControlName="city" id="territory-city" data-testid="territory-city-select">
             @for (city of data.cities; track city) {
-            <option [value]="city">
-              {{ city }}
-            </option>
+              <option [value]="city">
+                {{ city }}
+              </option>
             }
           </select>
         </lib-form-field>
@@ -78,9 +84,9 @@ type TerritoryForm = {
           <label lib-label for="territory-icon">Ícone</label>
           <select lib-select formControlName="icon" id="territory-icon" data-testid="territory-icon-select">
             @for (territoryIcon of territoryIcons; track territoryIcon) {
-            <option [value]="territoryIcon">
-              {{ territoryIcon | territoryIconTranslator }}
-            </option>
+              <option [value]="territoryIcon">
+                {{ territoryIcon | territoryIconTranslator }}
+              </option>
             }
           </select>
         </lib-form-field>
@@ -92,7 +98,14 @@ type TerritoryForm = {
         <!-- People Quantity -->
         <lib-form-field class="mt-5">
           <label lib-label for="people-quantity">Quantidade de pessoas</label>
-          <input lib-input type="number" libOnlyNumbers formControlName="peopleQuantity" id="people-quantity" data-testid="territory-people-input"/>
+          <input
+            lib-input
+            type="number"
+            libOnlyNumbers
+            formControlName="peopleQuantity"
+            id="people-quantity"
+            data-testid="territory-people-input"
+          />
         </lib-form-field>
         <!-- Note  -->
         <lib-form-field class="mt-5">
@@ -122,21 +135,26 @@ type TerritoryForm = {
         <!-- Revisit -->
         <lib-form-field class="mt-4" orientation="horizontal">
           <label lib-label for="bible-student-checkbox">Estudando a Bíblia</label>
-          <input formControlName="isBibleStudent" type="checkbox" id="bible-student-checkbox" data-testid="territory-bible-student-checkbox" />
-        </lib-form-field>
-        @if (this.form.controls.isBibleStudent.value) {
-        <!-- Bible Instructor -->
-        <lib-form-field class="mt-5">
-          <label lib-label for="bible-instructor">Instrutor</label>
           <input
-            lib-input
-            formControlName="bibleInstructor"
-            type="text"
-            id="bible-instructor"
-            data-testid="territory-instructor-input"
-            placeholder="Nome do Instrutor"
+            formControlName="isBibleStudent"
+            type="checkbox"
+            id="bible-student-checkbox"
+            data-testid="territory-bible-student-checkbox"
           />
         </lib-form-field>
+        @if (this.form.controls.isBibleStudent.value) {
+          <!-- Bible Instructor -->
+          <lib-form-field class="mt-5">
+            <label lib-label for="bible-instructor">Instrutor</label>
+            <input
+              lib-input
+              formControlName="bibleInstructor"
+              type="text"
+              id="bible-instructor"
+              data-testid="territory-instructor-input"
+              placeholder="Nome do Instrutor"
+            />
+          </lib-form-field>
         }
       </form>
       <lib-dialog-footer>
@@ -151,9 +169,9 @@ type TerritoryForm = {
             [disabled]="!this.form.valid || isSubmitting"
           >
             @if (isSubmitting) {
-            <lib-spinner height="1.75rem" width="1.75rem" [color]="white" />
+              <lib-spinner height="1.75rem" width="1.75rem" [color]="white" />
             } @else {
-            <ng-container>{{ isEdit ? 'Salvar' : 'Adicionar' }}</ng-container>
+              <ng-container>{{ isEdit ? 'Salvar' : 'Adicionar' }}</ng-container>
             }
           </button>
         </div>
@@ -162,6 +180,10 @@ type TerritoryForm = {
   `,
 })
 export class TerritoryManageDialogComponent implements OnInit {
+  readonly data = inject<TerritoryDialogData>(DIALOG_DATA);
+  private readonly territoriesRepository = inject(TerritoryRepository);
+  private readonly dialogRef = inject(DialogRef);
+
   private readonly destroyRef = inject(DestroyRef);
 
   public readonly territoryIcons: TerritoryIcon[] = Object.values(TerritoryIcon);
@@ -171,11 +193,7 @@ export class TerritoryManageDialogComponent implements OnInit {
   isEdit: boolean;
   form!: FormGroup<TerritoryForm>;
 
-  constructor(
-    @Inject(DIALOG_DATA) public readonly data: TerritoryDialogData,
-    private readonly territoriesRepository: TerritoryRepository,
-    private readonly dialogRef: DialogRef
-  ) {
+  constructor() {
     this.isEdit = !!this.data.territory;
   }
 
@@ -234,7 +252,7 @@ export class TerritoryManageDialogComponent implements OnInit {
           territory.positionIndex = positionIndex;
 
           return this.territoriesRepository.add(territory);
-        })
+        }),
       );
     }
 
@@ -243,7 +261,7 @@ export class TerritoryManageDialogComponent implements OnInit {
         retry(3),
         finalize(() => {
           this.isSubmitting = false;
-        })
+        }),
       )
       .subscribe(() => {
         this.dialogRef.close();
@@ -252,7 +270,9 @@ export class TerritoryManageDialogComponent implements OnInit {
 
   private setIsBibleStudentListener() {
     this.form.controls.isBibleStudent.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
-      value && this.form.controls.bibleInstructor.reset();
+      if (value) {
+        this.form.controls.bibleInstructor.reset();
+      }
     });
   }
 }

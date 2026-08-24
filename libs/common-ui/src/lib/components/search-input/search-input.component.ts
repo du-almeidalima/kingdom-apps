@@ -3,7 +3,6 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { debounceTime, distinctUntilChanged, Subscription } from 'rxjs';
 
-import { grey400 } from '../../styles/abstract/variables';
 import { IconComponent } from '../icon/icon.component';
 
 @Component({

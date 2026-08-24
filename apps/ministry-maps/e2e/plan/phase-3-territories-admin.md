@@ -42,7 +42,7 @@ spec files.
 - **Context to read first:** `docs/features/territories-management.md` §Sort/filter dialog.
 - **Implementation notes:**
   - UC-TERR-10 needs an unresolved-`MOVED` territory (`recentHistory: [{ visitOutcome: 2, isResolved:
-    false }]`) — patch the parent doc via `db.firestore` after `seed.write` (the seeder derives
+false }]`) — patch the parent doc via `db.firestore` after `seed.write` (the seeder derives
     `recentHistory` from `history`; a direct patch is the documented route).
   - UC-TERR-13: read `localStorage` via `page.evaluate`; assert JSON shape
     `{ sort: 'LAST_VISIT', filters: { includeBibleStudent: true, includeMoved: true, icon: '' } }`;
@@ -126,7 +126,7 @@ spec files.
 
 - **Goal:** the assign page's listing, filtering and selection mechanics.
 - **Covers:** UC-ASSIGN-01 (render + disabled submit), UC-ASSIGN-02 (city select + `Todas` alphabetical),
-  UC-ASSIGN-03 (zero territories — no crash, submit impossible), UC-ASSIGN-04 (⚠ empty `cities`), 
+  UC-ASSIGN-03 (zero territories — no crash, submit impossible), UC-ASSIGN-04 (⚠ empty `cities`),
   UC-ASSIGN-05 (search), UC-ASSIGN-06 (bible-student toggle), UC-ASSIGN-07 (moved → `Se Mudou` confirm),
   UC-ASSIGN-08 (no-visit → `Não visitar` confirm), UC-ASSIGN-09 (checkbox ↔ submit disabled),
   UC-ASSIGN-10 (decline confirm → unticked), UC-ASSIGN-11 (selections persist across city switches).
@@ -164,7 +164,7 @@ spec files.
   creation, §The generated share link, §Access control.
 - **Implementation notes:**
   - Prevent the whatsapp popup from derailing the page: capture via `captureWhatsAppPopup(page, () =>
-    fab.click())` and assert `sharedUrl` starts with `page.url()`'s origin + `/work/` — decode the id
+fab.click())` and assert `sharedUrl` starts with `page.url()`'s origin + `/work/` — decode the id
     from `sharedUrl` for all persistence assertions.
   - UC-ASSIGN-13: assert `expiresAt.toMillis()` ≈ `createdAt.toMillis() + 7 * 86_400_000` (few-seconds
     tolerance).

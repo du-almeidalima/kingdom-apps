@@ -46,11 +46,23 @@ describe('TerritoryCheckboxComponent', () => {
 
   describe('alert badges', () => {
     it.each([
-      ['revisit', { recentHistory: [historyEntry({ isRevisit: true })] }, '.territory-alert-badge--revisit', 'Revisita'],
-      ['moved', { recentHistory: [historyEntry({ visitOutcome: VisitOutcomeEnum.MOVED })] }, '.territory-alert-badge--moved', 'Mudou'],
+      [
+        'revisit',
+        { recentHistory: [historyEntry({ isRevisit: true })] },
+        '.territory-alert-badge--revisit',
+        'Revisita',
+      ],
+      [
+        'moved',
+        { recentHistory: [historyEntry({ visitOutcome: VisitOutcomeEnum.MOVED })] },
+        '.territory-alert-badge--moved',
+        'Mudou',
+      ],
       [
         'asked to stop visiting',
-        { recentHistory: [historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: new Date() })] },
+        {
+          recentHistory: [historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: new Date() })],
+        },
         '.territory-alert-badge--stop-visiting',
         'Não quer visitas',
       ],
