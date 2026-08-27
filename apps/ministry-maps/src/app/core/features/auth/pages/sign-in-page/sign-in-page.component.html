@@ -4,9 +4,9 @@
     <div class="img-container">
       <img class="image" alt="MM Image" ngSrc="assets/images/map-image.png" priority="1" fill="contain" />
     </div>
-    @if (errorCode) {
+    @if (errorCode()) {
       <p class="t-body1 mt-10" data-testid="sign-in-error">
-        @switch (errorCode) {
+        @switch (errorCode()) {
           @case ('INVALID_LINK') {
             Esse link de convite não é mais válido.
           }
@@ -29,7 +29,7 @@
       <div class="providers-container mt-10">
         <kingdom-apps-provider-login-button
           [provider]="FIREBASE_PROVIDERS.GOOGLE"
-          [loading]="loading"
+          [loading]="loading()"
           (providerClick)="handleProviderLoginClick($event)"
         />
       </div>

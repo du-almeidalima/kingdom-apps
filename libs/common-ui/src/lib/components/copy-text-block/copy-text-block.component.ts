@@ -1,13 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  inject,
-  input,
-  OnDestroy,
-  Output,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, OnDestroy, output, signal } from '@angular/core';
 
 import { Clipboard } from '@angular/cdk/clipboard';
 import { IconComponent } from '../icon/icon.component';
@@ -44,8 +35,7 @@ export class CopyTextBlockComponent implements OnDestroy {
   isTextCopied = signal(false);
   timer?: ReturnType<typeof setTimeout>;
 
-  //TODO: Transform this to output() on new Angular version
-  @Output() copyClick = new EventEmitter<string>();
+  copyClick = output<string>();
 
   ngOnDestroy(): void {
     clearTimeout(this.timer);

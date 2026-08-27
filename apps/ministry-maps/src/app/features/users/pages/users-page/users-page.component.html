@@ -1,12 +1,12 @@
 <main class="container">
   <h2 class="t-headline2 mb-8" data-testid="users-heading">Pessoas</h2>
-  @if (isLoading) {
+  @if (isLoading()) {
     <div class="flex items-center justify-center mt-52 py-6" data-testid="users-loading">
       <lib-spinner [height]="'5rem'" [width]="'5rem'" class="mx-auto" />
     </div>
   } @else {
     <ul class="list-none" data-testid="users-list">
-      @for (user of users; track user.id) {
+      @for (user of users(); track user.id) {
         <li class="[&:not(:first-child)]:mt-3">
           <kingdom-apps-user-list-item
             [user]="user"

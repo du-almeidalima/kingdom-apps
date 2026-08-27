@@ -1,19 +1,20 @@
-import { Component, Input, OnInit, ViewEncapsulation, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation, inject, input, signal } from '@angular/core';
 import { ControlValueAccessor, FormsModule, NgControl } from '@angular/forms';
 import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'kingdom-apps-icon-radio',
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./icon-radio.component.scss'],
   template: `
     <label
-      for="icon-radio-{{ value }}"
+      for="icon-radio-{{ value() }}"
       class="icon-radio"
       tabindex="0"
-      [ngClass]="{ 'icon-radio--active': value === modelValue }"
-      (keydown.enter)="valueChanged(value)"
-      (keydown.space)="valueChanged(value)"
+      [ngClass]="{ 'icon-radio--active': value() === modelValue() }"
+      (keydown.enter)="valueChanged(value())"
+      (keydown.space)="valueChanged(value())"
     >
       <!-- Icon -->
       <ng-content select="lib-icon"></ng-content>
@@ -21,10 +22,10 @@ import { NgClass } from '@angular/common';
       <input
         class="icon-radio__input"
         type="radio"
-        id="icon-radio-{{ value }}"
+        id="icon-radio-{{ value() }}"
         [(ngModel)]="modelValue"
-        [name]="name"
-        [value]="value"
+        [name]="name()"
+        [value]="value()"
         (change)="valueChanged()"
       />
     </label>
@@ -34,15 +35,13 @@ import { NgClass } from '@angular/common';
 export class IconRadioComponent implements OnInit, ControlValueAccessor {
   private ngControl = inject(NgControl, { self: true });
 
-  disabled = false;
+  disabled = signal(false);
 
-  modelValue!: string | number;
+  modelValue = signal<string | number | undefined>(undefined);
 
-  @Input()
-  name = 'visit-outcome-option';
+  name = input('visit-outcome-option');
 
-  @Input()
-  value!: string | number;
+  value = input.required<string | number>();
 
   constructor() {
     const ngControl = this.ngControl;
@@ -55,7 +54,7 @@ export class IconRadioComponent implements OnInit, ControlValueAccessor {
     // Doing this work manually here.
     // https://stackoverflow.com/questions/58236023/how-to-create-a-custom-radio-button-angular-component-that-works-with-reactivefo
     this.ngControl.control?.valueChanges.subscribe((value) => {
-      if (this.modelValue === value) {
+      if (this.modelValue() === value) {
         return;
       }
 
@@ -66,7 +65,7 @@ export class IconRadioComponent implements OnInit, ControlValueAccessor {
   // Control Value Accessor
   onTouched!: () => void;
 
-  onChange: (value: string | number) => void = () => {
+  onChange: (value: string | number | undefined) => void = () => {
     return;
   };
   // Control Value Accessor
@@ -79,11 +78,11 @@ export class IconRadioComponent implements OnInit, ControlValueAccessor {
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
+    this.disabled.set(isDisabled);
   }
 
   writeValue(value: string | number): void {
-    this.modelValue = value;
+    this.modelValue.set(value);
   }
 
   /**
@@ -94,10 +93,10 @@ export class IconRadioComponent implements OnInit, ControlValueAccessor {
   valueChanged(value?: string | number) {
     // Manually updating the input state
     if (value !== undefined) {
-      this.modelValue = value;
+      this.modelValue.set(value);
     }
 
-    this.onChange(this.modelValue);
+    this.onChange(this.modelValue());
     this.onTouched();
   }
 }

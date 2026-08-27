@@ -1,4 +1,4 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -16,6 +16,7 @@ export type TPeriodOption = {
 @Component({
   selector: 'kingdom-apps-territory-statistics-dynamic-section',
   imports: [SelectComponent, ReactiveFormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: [
     './territory-statistics-dynamic-section.component.scss',
     '../../pages/statistics-territories-page/statistics-territories-page.component.scss',

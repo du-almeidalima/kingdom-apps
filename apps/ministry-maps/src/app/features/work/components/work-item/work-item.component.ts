@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 
 import {
@@ -29,28 +29,28 @@ import { NgClass } from '@angular/common';
       <!-- Checkbox -->
       <label
         class="work-item__checkbox-container"
-        [title]="done ? 'Apagar Visita' : 'Concluir visita'"
-        [ngClass]="{ 'work-item__checkbox-container--disabled': done || disabled }"
-        [for]="territory.id"
+        [title]="done() ? 'Apagar Visita' : 'Concluir visita'"
+        [ngClass]="{ 'work-item__checkbox-container--disabled': done() || disabled() }"
+        [for]="territory().id"
       >
-        @if (done) {
+        @if (done()) {
           <button
             lib-icon-button
             type="button"
             data-testid="work-item-undo"
-            [disabled]="disabled"
+            [disabled]="disabled()"
             [hoverBackgroundColor]="disabledButtonBackgroundColor"
             (click)="handleUndo()"
           >
-            <lib-icon [fillColor]="disabled ? disabledLight : whiteButtonColor" icon="eraser-2"></lib-icon>
+            <lib-icon [fillColor]="disabled() ? disabledLight : whiteButtonColor" icon="eraser-2"></lib-icon>
           </button>
         } @else {
           <input
             class="work-item__checkbox"
             type="checkbox"
             data-testid="work-item-checkbox"
-            [id]="territory.id"
-            [disabled]="disabled"
+            [id]="territory().id"
+            [disabled]="disabled()"
             (click)="handleCheck($event)"
           />
         }
@@ -62,36 +62,36 @@ import { NgClass } from '@angular/common';
           <!-- Icon -->
           <lib-icon
             class="work-item__icon"
-            [ngClass]="{ 'work-item__icon--large': isIconLarge }"
+            [ngClass]="{ 'work-item__icon--large': isIconLarge() }"
             [fillColor]="iconColor"
-            [icon]="icon"
+            [icon]="icon()"
           />
           <!-- Title and Subtitle -->
           <div class="work-item__title-subtitle-container">
-            <h3 class="work-item__title">{{ territory.address }}</h3>
-            <span class="work-item__subtitle">{{ territory.note }}</span>
+            <h3 class="work-item__title">{{ territory().address }}</h3>
+            <span class="work-item__subtitle">{{ territory().note }}</span>
           </div>
         </div>
         <!-- Footer -->
         <div class="work-item__footer">
-          <span class="work-item__city">{{ territory.city }}</span>
+          <span class="work-item__city">{{ territory().city }}</span>
           <div class="work-item__buttons-container">
-            @if (territory.status === DesignationStatusEnum.DONE) {
-              <button lib-icon-button data-testid="work-item-edit" [disabled]="disabled" (click)="handleEdit()">
-                <lib-icon [fillColor]="disabled ? disabledColor : buttonIconColor" icon="pencil-lined" />
+            @if (territory().status === DesignationStatusEnum.DONE) {
+              <button lib-icon-button data-testid="work-item-edit" [disabled]="disabled()" (click)="handleEdit()">
+                <lib-icon [fillColor]="disabled() ? disabledColor : buttonIconColor" icon="pencil-lined" />
               </button>
             }
-            @if (territory.mapsLink) {
+            @if (territory().mapsLink; as mapsLink) {
               <button
                 lib-icon-button
                 data-testid="work-item-maps"
-                [disabled]="blocked"
-                (click)="handleOpenMaps(territory.mapsLink)"
+                [disabled]="blocked()"
+                (click)="handleOpenMaps(mapsLink)"
               >
-                <lib-icon [fillColor]="blocked ? disabledColor : buttonIconColor" icon="map-5" />
+                <lib-icon [fillColor]="blocked() ? disabledColor : buttonIconColor" icon="map-5" />
               </button>
             }
-            @if (territory.history && territory.history.length > 0) {
+            @if (territory().history?.length) {
               <button lib-icon-button data-testid="work-item-history" (click)="handleOpenHistory()">
                 <lib-icon [fillColor]="buttonIconColor" icon="time-17" />
               </button>
@@ -103,7 +103,7 @@ import { NgClass } from '@angular/common';
   `,
   imports: [IconComponent, NgClass, IconButtonComponent],
 })
-export class WorkItemComponent implements OnInit {
+export class WorkItemComponent {
   private readonly dialog = inject(Dialog);
 
   protected readonly DesignationStatusEnum = DesignationStatusEnum;
@@ -114,31 +114,21 @@ export class WorkItemComponent implements OnInit {
   protected readonly buttonIconColor = 'var(--kui-color-action-primary)';
   protected readonly iconColor = 'currentColor';
 
-  public icon: Icons = 'generation-3';
-  public isIconLarge = false;
+  territory = input.required<DesignationTerritory>();
+  done = input(false);
+  disabled = input(false);
+  blocked = input(false);
 
-  @Input()
-  territory!: DesignationTerritory;
-  @Input()
-  done = false;
-  @Input()
-  disabled = false;
-  @Input()
-  blocked = false;
-  @Output()
-  territoryUpdated = new EventEmitter<DesignationTerritory>();
-  @Output()
-  lastVisitReverted = new EventEmitter<DesignationTerritory>();
+  icon = computed<Icons>(() => mapTerritoryIcon(this.territory().icon));
+  isIconLarge = computed(() => isIconLarge(this.icon()));
 
-  ngOnInit(): void {
-    this.icon = mapTerritoryIcon(this.territory.icon);
-    this.isIconLarge = isIconLarge(this.icon);
-  }
+  territoryUpdated = output<DesignationTerritory>();
+  lastVisitReverted = output<DesignationTerritory>();
 
   handleCheck(e: MouseEvent) {
     e.preventDefault();
 
-    if (this.done || this.disabled) {
+    if (this.done() || this.disabled()) {
       return;
     }
 
@@ -153,9 +143,9 @@ export class WorkItemComponent implements OnInit {
         };
 
         const updateDesignationTerritory: DesignationTerritory = {
-          ...this.territory,
+          ...this.territory(),
           status: DesignationStatusEnum.DONE,
-          history: [...(this.territory.history ?? []), historyEntry],
+          history: [...(this.territory().history ?? []), historyEntry],
           lastVisit: nowDate,
         };
 
@@ -165,21 +155,21 @@ export class WorkItemComponent implements OnInit {
   }
 
   handleOpenMaps(mapsLink: string) {
-    openGoogleMapsHandler(mapsLink, this.territory);
+    openGoogleMapsHandler(mapsLink, this.territory());
   }
 
   handleOpenHistory() {
     this.dialog.open<HistoryDialogComponent, TerritoryVisitHistory[]>(HistoryDialogComponent, {
-      data: this.territory.history?.slice().reverse() ?? [],
+      data: this.territory().history?.slice().reverse() ?? [],
     });
   }
 
   handleEdit() {
-    if (this.disabled) {
+    if (this.disabled()) {
       return;
     }
 
-    const lastHistoryEntry = this.territory.history?.slice().reverse()[0];
+    const lastHistoryEntry = this.territory().history?.slice().reverse()[0];
 
     this.dialog
       .open<WorkItemCompleteDialogData>(WorkItemCompleteDialogComponent, {
@@ -196,10 +186,10 @@ export class WorkItemComponent implements OnInit {
           };
 
           // Update last history entry
-          const historyWithoutLastEntry = this.territory.history?.slice(0, -1) ?? [];
+          const historyWithoutLastEntry = this.territory().history?.slice(0, -1) ?? [];
 
           const updatedDesignationTerritory: DesignationTerritory = {
-            ...this.territory,
+            ...this.territory(),
             history: [...historyWithoutLastEntry, historyEntry],
           };
 
@@ -221,7 +211,7 @@ export class WorkItemComponent implements OnInit {
       })
       .closed.subscribe((res) => {
         if (res) {
-          this.lastVisitReverted.emit(this.territory);
+          this.lastVisitReverted.emit(this.territory());
         }
       });
   }

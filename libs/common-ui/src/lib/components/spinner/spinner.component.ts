@@ -1,25 +1,25 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 @Component({
   selector: 'lib-spinner',
   styleUrls: ['./spinner.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="spinner" [style]="{ '--height': height, '--width': width, '--color': color }" [hidden]="hide">
+    <div
+      class="spinner"
+      [style]="{ '--height': height(), '--width': width(), '--color': color() }"
+      [hidden]="hide()"
+    >
       <div class="spinner__inner-block"></div>
     </div>
   `,
 })
 export class SpinnerComponent {
-  @Input()
-  height = '2rem';
+  height = input('2rem');
 
-  @Input()
-  width = '2rem';
+  width = input('2rem');
 
-  @Input()
-  hide = false;
+  hide = input(false);
 
-  @Input()
-  color = 'var(--kui-color-action-primary, #07AB3B)';
+  color = input('var(--kui-color-action-primary, #07AB3B)');
 }

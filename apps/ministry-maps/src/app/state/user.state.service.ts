@@ -1,24 +1,24 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
 import { User } from '../../models/user';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserStateService {
-  private userSubject: BehaviorSubject<User | null> = new BehaviorSubject<User | null>(null);
+  private readonly userSignal = signal<User | null>(null);
 
-  public $user = this.userSubject.asObservable();
+  /** Read-only signal with the current user. */
+  public readonly user = this.userSignal.asReadonly();
 
   public get currentUser() {
-    return this.userSubject.getValue();
+    return this.userSignal();
   }
 
   public get isLoggedIn() {
-    return !!this.userSubject.getValue();
+    return !!this.userSignal();
   }
 
   setUser(user: User | null) {
-    this.userSubject.next(user);
+    this.userSignal.set(user);
   }
 }

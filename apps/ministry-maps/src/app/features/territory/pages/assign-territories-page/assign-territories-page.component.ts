@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal, viewChild } from '@angular/core';
 import { finalize, Observable, of, shareReplay } from 'rxjs';
 
 import {
@@ -40,6 +40,7 @@ import { AsyncPipe } from '@angular/common';
   selector: 'kingdom-apps-assign-territories-page',
   templateUrl: './assign-territories-page.component.html',
   styleUrls: ['./assign-territories-page.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     SelectComponent,
     FormsModule,
@@ -75,24 +76,23 @@ export class AssignTerritoriesPageComponent implements OnInit {
   public readonly green200 = green200;
   public readonly white200 = white200;
 
-  isCreatingAssignment = false;
+  isCreatingAssignment = signal(false);
   cities: string[] = [];
   selectedCity = '';
   searchTerm?: string | null;
   searchFilters: TerritoryFilterSettings['filters'] = TERRITORY_SORT_FILTER_CONFIG.filterConfigs.initial;
   orderBy: TerritoriesOrderBy = TerritoriesOrderBy.SAVED_INDEX;
   filteredTerritories$: Observable<Territory[]> = of([]);
-  selectedTerritoriesModel = new Set<string>();
-  assignedTerritories = new Set<string>();
+  selectedTerritoriesModel = signal(new Set<string>());
+  assignedTerritories = signal(new Set<string>());
 
   public sortFilterConfig = TERRITORY_SORT_FILTER_CONFIG;
 
-  @ViewChild(SearchInputComponent)
-  searchInputComponent!: SearchInputComponent;
+  searchInputComponent = viewChild.required(SearchInputComponent);
 
   ngOnInit(): void {
     const { id, cities } = this.currentCongregation;
-    const firstCity = cities.length >= 0 ? cities[0] : ALL_OPTION;
+    const firstCity = cities.length > 0 ? cities[0] : ALL_OPTION;
 
     this.selectedCity = firstCity;
     this.cities = cities;
@@ -107,22 +107,22 @@ export class AssignTerritoriesPageComponent implements OnInit {
    * @param territoryId
    */
   hasAlreadyBeenSelected(territoryId: string): boolean {
-    return this.selectedTerritoriesModel.has(territoryId) || this.assignedTerritories.has(territoryId);
+    return this.selectedTerritoriesModel().has(territoryId) || this.assignedTerritories().has(territoryId);
   }
 
   handleTerritoryFormSubmit() {
-    this.assignedTerritories = new Set([...this.selectedTerritoriesModel, ...this.assignedTerritories]);
-    const selectedTerritories = [...this.selectedTerritoriesModel.values()];
-    this.selectedTerritoriesModel.clear();
+    this.assignedTerritories.update((assigned) => new Set([...this.selectedTerritoriesModel(), ...assigned]));
+    const selectedTerritories = [...this.selectedTerritoriesModel().values()];
+    this.selectedTerritoriesModel.set(new Set());
 
     // Loading Spinner on Button
-    this.isCreatingAssignment = true;
+    this.isCreatingAssignment.set(true);
 
     this.territoryBO
       .createDesignationForTerritories(selectedTerritories)
       .pipe(
         finalize(() => {
-          this.isCreatingAssignment = false;
+          this.isCreatingAssignment.set(false);
         }),
       )
       .subscribe((designation) => {
@@ -167,7 +167,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
   handleSelectedCityChange(city: string) {
     this.selectedCity = city;
     this.searchTerm = '';
-    this.searchInputComponent.resetSearch();
+    this.searchInputComponent().resetSearch();
     this.fetchTerritories(this.currentCongregation.id, city);
   }
 
@@ -179,19 +179,26 @@ export class AssignTerritoriesPageComponent implements OnInit {
     // Adding the value here regardless of the alert because we need to tell Angular that something has changed
     // In order for the TerritoryCheckBox component to render correctly
     // Otherwise, even by not adding this, the TerritoryCheckBox would display as selected
-    if (value) {
-      this.selectedTerritoriesModel.add(territoryId);
-    } else {
-      this.selectedTerritoriesModel.delete(territoryId);
-    }
+    this.setTerritorySelection(territoryId, value);
 
     if (value && importantAlert) {
       this.openConfirmAssignmentDialog(importantAlert).subscribe((result) => {
         if (!result) {
-          this.selectedTerritoriesModel.delete(territoryId);
+          this.setTerritorySelection(territoryId, false);
         }
       });
     }
+  }
+
+  private setTerritorySelection(territoryId: string, selected: boolean) {
+    this.selectedTerritoriesModel.update((selectedIds) => {
+      const next = new Set(selectedIds);
+      if (selected) {
+        next.add(territoryId);
+      } else {
+        next.delete(territoryId);
+      }
+      return next;    });
   }
 
   shareDesignation(designationId: string) {

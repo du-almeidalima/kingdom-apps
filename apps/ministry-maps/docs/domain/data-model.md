@@ -263,7 +263,7 @@ The alert badges (bible student / recently moved / unresolved "not answered") ar
 | Designation (`getById`)                                   | `docData`        | **Yes**.                                                                                |
 | Congregation (`getById`)                                  | `docData`        | **Yes**.                                                                                |
 | Territory by id, `getAllInIds`, visit history, statistics | `getDocs`        | **No** — snapshot at call time.                                                         |
-| `UserStateService` (`BehaviorSubject`)                    | in-memory        | Only when explicitly `setUser(...)`; a congregation edit made elsewhere needs a reload. |
+| `UserStateService` (signal-backed)                       | in-memory        | Only when explicitly `setUser(...)`; a congregation edit made elsewhere needs a reload. |
 
 So: a background Admin-SDK write is expected to appear on `/territories` **without** a reload, but the statistics page and the profile/configuration user state require a navigation or reload.
 

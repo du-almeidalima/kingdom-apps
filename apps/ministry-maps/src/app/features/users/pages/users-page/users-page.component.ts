@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { filter, switchMap } from 'rxjs';
 import { User } from '../../../../../models/user';
 import { UserStateService } from '../../../../state/user.state.service';
@@ -15,7 +15,7 @@ import {
   white200,
 } from '@kingdom-apps/common-ui';
 import { Dialog } from '@angular/cdk/dialog';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import {
   UserEditDialogData,
   UsersEditDialogComponent,
@@ -28,6 +28,7 @@ import { UserListItemComponent } from '../../components/user-list-item/user-list
   selector: 'kingdom-apps-users-page',
   templateUrl: './users-page.component.html',
   styleUrls: ['./users-page.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [UserListItemComponent, AuthorizeDirective, FloatingActionButtonComponent, IconComponent, SpinnerComponent],
 })
 export class UsersPageComponent implements OnInit {
@@ -39,6 +40,7 @@ export class UsersPageComponent implements OnInit {
   private readonly userRepository = inject(UserRepository);
   private readonly userState = inject(UserStateService);
   private readonly dialog = inject(Dialog);
+  private readonly user$ = toObservable(this.userState.user);
   private readonly userPriorityMap = new Map<RoleEnum, number>([
     [RoleEnum.APP_ADMIN, 1],
     [RoleEnum.SUPERINTENDENT, 2],
@@ -48,26 +50,26 @@ export class UsersPageComponent implements OnInit {
     [RoleEnum.PUBLISHER, 6],
   ]);
 
-  isLoading = true;
-  users: User[] = [];
+  isLoading = signal(true);
+  users = signal<User[]>([]);
 
   ngOnInit(): void {
-    this.userState.$user
+    this.user$
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         filter((user): user is User & { congregation: { id: string } } => !!user?.congregation?.id),
         switchMap((user) => {
-          this.isLoading = true;
+          this.isLoading.set(true);
           return this.userRepository.getAllByCongregation(user.congregation.id);
         }),
       )
       .subscribe({
         next: (users) => {
-          this.isLoading = false;
-          this.users = users.sort(this.sortUserFn.bind(this));
+          this.isLoading.set(false);
+          this.users.set(users.sort(this.sortUserFn.bind(this)));
         },
         error: (err) => {
-          this.isLoading = false;
+          this.isLoading.set(false);
           console.error('Error fetching users', err);
         },
       });

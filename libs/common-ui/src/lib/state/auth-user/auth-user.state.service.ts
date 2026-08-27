@@ -1,5 +1,4 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
 import { AuthUser } from '../../models/auth-user';
 
 /** This service contains generic information about the user and its roles.
@@ -11,19 +10,20 @@ import { AuthUser } from '../../models/auth-user';
   providedIn: 'root',
 })
 export class AuthUserStateService {
-  private userSubject: BehaviorSubject<AuthUser | null> = new BehaviorSubject<AuthUser | null>(null);
+  private readonly userSignal = signal<AuthUser | null>(null);
 
-  public $user = this.userSubject.asObservable();
+  /** Read-only signal with the current auth user. */
+  public readonly user = this.userSignal.asReadonly();
 
   public get currentUser() {
-    return this.userSubject.getValue();
+    return this.userSignal();
   }
 
   public get isLoggedIn() {
-    return !!this.userSubject.getValue();
+    return !!this.userSignal();
   }
 
   setUser(user: AuthUser | null) {
-    this.userSubject.next(user);
+    this.userSignal.set(user);
   }
 }

@@ -1,5 +1,5 @@
 import { CdkPortalOutlet } from '@angular/cdk/portal';
-import { AfterViewInit, Component, inject, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, inject, viewChild } from '@angular/core';
 import { PortalService } from './portal.service';
 
 /**
@@ -10,14 +10,15 @@ import { PortalService } from './portal.service';
   selector: 'lib-portal-anchor',
   standalone: true,
   imports: [CdkPortalOutlet],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: '<ng-template cdkPortalOutlet />',
 })
 export class PortalAnchorComponent implements AfterViewInit {
   portalService = inject(PortalService);
 
-  @ViewChild(CdkPortalOutlet) portalOutlet!: CdkPortalOutlet;
+  portalOutlet = viewChild.required(CdkPortalOutlet);
 
   ngAfterViewInit(): void {
-    this.portalService.setOutlet(this.portalOutlet);
+    this.portalService.setOutlet(this.portalOutlet());
   }
 }

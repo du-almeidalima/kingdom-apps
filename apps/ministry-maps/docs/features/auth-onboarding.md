@@ -59,7 +59,7 @@ English vocabulary in [`../domain/glossary.md`](../domain/glossary.md).
 - **Steps:** 1. `page.goto('/login')`
 - **Expected UI:** exactly one `button.provider-login-button` inside the card, with the verbatim label `Entrar com uma conta do Google`, `type="button"`, not disabled; although `FIREBASE_PROVIDERS` defines `GOOGLE` and `MICROSOFT`, only the Google button is rendered; while `loading` is true (after a click) the button becomes `disabled` and shows a `lib-spinner`
 - **Expected persistence:** N/A (render-only); assert `db.getCollectionDocs(db.collections.users)` unchanged
-- **Edge cases:** `ProviderLoginButtonComponent` resolves its provider in the **constructor** (before `@Input` binding), so its alt text always falls back to the Google default — invisible today since Google is the only provider ever passed; clicking the button opens the OAuth popup (manual-only leg, see the header note) — do not click it in an automated spec
+- **Edge cases:** `ProviderLoginButtonComponent` resolves its provider in `ngOnInit` via its signal input (`provider()`); alt text falls back to the Google default only when the input is missing — invisible today since Google is the only provider ever passed; clicking the button opens the OAuth popup (manual-only leg, see the header note) — do not click it in an automated spec
 - **Priority:** P0 · **Gaps:** no `data-testid` on the button; select by CSS class `button.provider-login-button` or by name `Entrar com uma conta do Google`
 
 #### UC-AUTH-03 — An already-signed-in user on `/login` is NOT auto-redirected (fixture invariant)

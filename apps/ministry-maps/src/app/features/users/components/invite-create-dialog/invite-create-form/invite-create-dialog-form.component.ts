@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import {
   ButtonComponent,
   DialogCloseDirective,
@@ -100,6 +100,5 @@ export class InviteCreateDialogFormComponent {
   form = input.required<TCreateLinkForm>();
   isSubmitting = input.required<boolean>();
 
-  //TODO: Transform this to output() on new Angular version
-  @Output() formSubmit = new EventEmitter<void>();
+  formSubmit = output<void>();
 }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, output } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { debounceTime, distinctUntilChanged, Subscription } from 'rxjs';
@@ -36,9 +36,7 @@ export class SearchInputComponent implements OnInit, OnDestroy {
   searchControl = new FormControl('');
   searchControlSubscription?: Subscription;
 
-  @Output()
-  searched = new EventEmitter<string | null>();
-
+  searched = output<string | null>();
   ngOnInit(): void {
     this.searchControlSubscription = this.searchControl.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged())

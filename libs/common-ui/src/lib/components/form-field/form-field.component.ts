@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ContentChild, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, contentChild, input } from '@angular/core';
 import { InputComponent } from './input/input.component';
 import { LabelComponent } from './label/label.component';
 import { NgClass } from '@angular/common';
@@ -8,7 +8,7 @@ import { NgClass } from '@angular/common';
   styleUrls: ['./form-field.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="form-field" [ngClass]="{ 'form-field--horizontal': orientation === 'horizontal' }">
+    <div class="form-field" [ngClass]="{ 'form-field--horizontal': orientation() === 'horizontal' }">
       <ng-content select="[lib-label]"></ng-content>
       <ng-content></ng-content>
     </div>
@@ -16,10 +16,9 @@ import { NgClass } from '@angular/common';
   imports: [NgClass],
 })
 export class FormFieldComponent {
-  @Input()
-  orientation: 'vertical' | 'horizontal' = 'vertical';
+  orientation = input<'vertical' | 'horizontal'>('vertical');
 
   // TODO: Create abstract class for inputs so it's possible to use this class as a token
-  @ContentChild(InputComponent) inputComponent?: InputComponent;
-  @ContentChild(LabelComponent) labelComponent?: LabelComponent;
+  inputComponent = contentChild(InputComponent);
+  labelComponent = contentChild(LabelComponent);
 }

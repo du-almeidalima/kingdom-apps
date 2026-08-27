@@ -1,4 +1,4 @@
-import { ApplicationConfig, isDevMode, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, isDevMode } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideTheme } from '@kingdom-apps/common-ui';
 import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
@@ -25,7 +25,6 @@ export const appConfig: ApplicationConfig = {
       metaSelector: 'meta[name="theme-color"][data-mm-theme-color]',
     }),
     ...REPOSITORIES_PROVIDERS,
-    provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(APP_ROUTES),
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => {

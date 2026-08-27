@@ -1,7 +1,7 @@
 import { IconRadioComponent } from './icon-radio.component';
 import { MockBuilder, MockRender } from 'ng-mocks';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Component, ViewChild } from '@angular/core';
+import { Component, viewChild } from '@angular/core';
 import { grey400, IconComponent } from '@kingdom-apps/common-ui';
 import { MoveResolutionActionsEnum } from '../../../features/territory/components/territory-move-alert-dialog/territory-move-alert-dialog.component';
 
@@ -24,8 +24,7 @@ class TestingInputComponent {
     radioInput: new FormControl(MoveResolutionActionsEnum.MARK_AS_RESOLVED),
   });
 
-  @ViewChild(IconRadioComponent)
-  iconRadioComponent!: IconRadioComponent;
+  iconRadioComponent = viewChild.required(IconRadioComponent);
 }
 
 describe('IconRadioComponent', () => {
@@ -35,6 +34,6 @@ describe('IconRadioComponent', () => {
     const fixture = MockRender(TestingInputComponent);
     await fixture.whenStable();
 
-    expect(fixture.point.componentInstance.iconRadioComponent).toBeTruthy();
+    expect(fixture.point.componentInstance.iconRadioComponent()).toBeTruthy();
   });
 });

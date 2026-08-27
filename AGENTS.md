@@ -5,6 +5,7 @@ Repository-wide instructions for coding agents. [`README.md`](./README.md) has s
 ## Core Rules
 
 - **Standalone Angular only:** no NgModules in new code. Existing feature-routing NgModules are migration debt, not examples to copy.
+- **Zoneless + signals:** no Zone.js anywhere (no `zone.js` polyfill, `provideZoneChangeDetection`, or `NgZone`). Every component is OnPush; use signal inputs/outputs/queries and `host` objects. State mutated in async callbacks (subscribe/finalize) must be a signal or it won't render. Unit tests run zoneless (`setupZonelessTestEnv`) — `fakeAsync`/`tick` don't work; use jest fake timers.
 - **Prefer `inject()`** for new dependency injection. Legacy constructor DI exists in older files — don't copy it, don't mass-migrate it.
 - **npm + Node 22:** use `npm`/`npx` (e.g. `npx nx … ministry-maps`); never introduce another package manager. Java 21 is required for the Firebase emulators.
 - **Lean dependencies:** keep third-party packages minimal. Before adding one, check whether `common-ui` already provides the component or the shared styles cover it; otherwise build it yourself (standalone + Tailwind/SCSS + design tokens). Adopt a library only when its logic is complex enough that maintaining it in-house would cost more than the dependency's weight.

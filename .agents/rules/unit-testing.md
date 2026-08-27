@@ -27,7 +27,7 @@ pipe-name.pipe.spec.ts
 
 ## Global Test Setup
 
-`apps/ministry-maps/src/test-setup.ts` configures the Zone env with strict template checking. `apps/ministry-maps/src/test/setup-test-mocks.ts` globally configures:
+`apps/ministry-maps/src/test-setup.ts` configures the **zoneless** env (`setupZonelessTestEnv`, no Zone.js — `fakeAsync`/`tick` are unavailable) with strict template checking. `apps/ministry-maps/src/test/setup-test-mocks.ts` globally configures:
 
 - `ngMocks.autoSpy('jest')` — all mocked methods become jest spies
 - `ngMocks.defaultMock(Token, factory)` — global default mocks for app-wide repositories/services
@@ -216,5 +216,6 @@ beforeEach(() => MockBuilder([MyComponent, HostComponent, ReactiveFormsModule]))
 ## Async Patterns
 
 - Use `done` callback for observable-based tests
-- Use `fakeAsync` / `tick` for timer-based async
+- Timer-based async: `jest.useFakeTimers()` + `jest.advanceTimersByTime(n)` (+ `await Promise.resolve()` to flush microtasks) in `try/finally` with `jest.useRealTimers()` — **not** `fakeAsync`/`tick` (they require Zone.js; the suite is zoneless)
+- Mutating component state directly in a test (bypassing template events) doesn't notify OnPush/zoneless change detection — call `fixture.point.injector.get(ChangeDetectorRef).markForCheck()` or use signals
 - `jest.spyOn(instance, 'method')` for spying on existing instances

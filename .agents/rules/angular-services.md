@@ -48,15 +48,19 @@ Reference implementation: `repositories/firebase/firebase-user-datasource.servic
 
 ## State services
 
+Signal-backed — no `BehaviorSubject`:
+
 ```typescript
 // state/user.state.service.ts
-private readonly userSubject = new BehaviorSubject<User | null>(null);
-public $user = this.userSubject.asObservable();   // $-prefix (not user$ suffix)
-public get currentUser() { return this.userSubject.getValue(); }
-public get isLoggedIn() { return !!this.userSubject.getValue(); }
+private readonly userSignal = signal<User | null>(null);
+public readonly user = this.userSignal.asReadonly(); // read-only signal for templates
+public get currentUser() { return this.userSignal(); }
+public get isLoggedIn() { return !!this.userSignal(); }
+public setUser(user: User | null) { this.userSignal.set(user); }
 ```
 
-- Components bridge to signals: `user = toSignal(this.userState.$user)`.
+- Components read the signal directly: `user = this.userState.user` (getters reading the signal stay template-reactive; no `toSignal` bridge needed).
+- Need it as an Observable? `toObservable(this.userState.user)` in a field initializer (injection context).
 - Twins kept in sync by `AuthService`: `UserStateService` (app — full domain `User`) and `AuthUserStateService` (common-ui — `{roles, name}`).
 - Cross-feature state → `app/state/`; UI-only, domain-free state → `lib/state/` in common-ui.
 

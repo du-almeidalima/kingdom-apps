@@ -16,7 +16,6 @@
         "outputPath": "dist/apps/ministry-maps",
         "index": "apps/ministry-maps/src/index.html",
         "main": "apps/ministry-maps/src/main.ts",
-        "polyfills": ["zone.js"],
         "tsConfig": "apps/ministry-maps/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [

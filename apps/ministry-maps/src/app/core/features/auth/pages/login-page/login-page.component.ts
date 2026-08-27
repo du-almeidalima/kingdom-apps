@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FIREBASE_PROVIDERS } from '../../../../../repositories/firebase/firebase-auth-datasource.service';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
@@ -13,6 +13,7 @@ import { ProviderLoginButtonComponent } from '../../components/provider-login-bu
   selector: 'kingdom-apps-login-page',
   templateUrl: './login-page.component.html',
   styleUrls: ['./login-page.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CardComponent, ProviderLoginButtonComponent],
 })
 export class LoginPageComponent {
@@ -21,13 +22,13 @@ export class LoginPageComponent {
 
   protected readonly FIREBASE_PROVIDERS = FIREBASE_PROVIDERS;
 
-  loading = false;
+  loading = signal(false);
 
   handleProviderLoginClick(firebaseProvider: FIREBASE_PROVIDERS) {
-    this.loading = true;
+    this.loading.set(true);
     this.authService
       .signInWithProvider(firebaseProvider)
-      .pipe(finalize(() => (this.loading = false)))
+      .pipe(finalize(() => this.loading.set(false)))
       .subscribe((user) => {
         if (!user) {
           this.router.navigate([AuthRoutesEnum.NO_ACCOUNT]);

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import {
   ButtonComponent,
@@ -52,7 +52,7 @@ export type TerritoryGenericAlertDialogData = {
         <div class="flex flex-nowrap justify-end gap-4">
           <button lib-button libDialogClose>Cancelar</button>
           <button lib-button btnType="primary" data-testid="alert-resolve-save" (click)="handleResolveAlert()">
-            @if (!isSubmitting) {
+            @if (!isSubmitting()) {
               <div class="flex gap-1.5 items-center">
                 <lib-icon class="h-7 w-7" icon="check-mark-circle-lined" />
                 <span>Remover Marcação</span>
@@ -82,16 +82,16 @@ export class TerritoryGenericAlertDialogComponent {
 
   protected readonly white = white100;
 
-  public isSubmitting = false;
+  public isSubmitting = signal(false);
 
   handleResolveAlert() {
-    this.isSubmitting = true;
+    this.isSubmitting.set(true);
 
     this.data
       .markAsResolvedCallback(this.data.history)
       .pipe(
         finalize(() => {
-          this.isSubmitting = false;
+          this.isSubmitting.set(false);
         }),
       )
       .subscribe(() => {

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { HeaderComponent } from './shared/components/header/header.component';
@@ -9,6 +9,7 @@ import { AuthService } from './core/features/auth/services/auth.service';
   imports: [RouterModule, HeaderComponent, PortalAnchorComponent],
   selector: 'kingdom-apps-root',
   templateUrl: './app.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [
     `
       :host {
