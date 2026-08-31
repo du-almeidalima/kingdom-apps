@@ -1,21 +1,15 @@
 import { inject, Injectable } from '@angular/core';
-import {
-  collection,
-  CollectionReference,
-  doc,
-  docData,
-  DocumentReference,
-  Firestore,
-  setDoc,
-  Timestamp,
-} from '@angular/fire/firestore';
-import { from, Observable, switchMap, take, defer } from 'rxjs';
+import { collection, CollectionReference, doc, setDoc, Timestamp } from 'firebase/firestore';
+import type { DocumentReference } from 'firebase/firestore';
+import { from, map, Observable, switchMap, take, defer } from 'rxjs';
 
 import { Designation } from '../../../models/designation';
 import { FirebaseDesignationModel } from '../../../models/firebase/firebase-designation-territory-model';
 import { firebaseEntityConverterFactory } from '../../shared/utils/firebase-entity-converter';
 import { DesignationRepository } from '../designation.repository';
 import { FirebaseDatasource } from './firebase-datasource';
+import { docData$ } from './firebase-rxjs-interop';
+import { FIRESTORE } from './firebase-providers';
 
 const convertHistoryDateFirebaseTimestampToDate = (data: FirebaseDesignationModel): Designation => {
   return {
@@ -45,7 +39,7 @@ export class FirebaseDesignationDatasourceService implements DesignationReposito
   private readonly collectionName = 'designations';
   private readonly designationCollection: CollectionReference<Designation>;
 
-  private readonly firestore = inject(Firestore);
+  private readonly firestore = inject(FIRESTORE);
 
   constructor() {
     this.designationCollection = collection(this.firestore, this.collectionName).withConverter<Designation>(
@@ -60,9 +54,7 @@ export class FirebaseDesignationDatasourceService implements DesignationReposito
   getById(id: string): Observable<Designation | undefined> {
     const designationDocReference = doc(this.designationCollection, `${id}`);
 
-    return docData(designationDocReference, {
-      idField: 'id',
-    }) as Observable<Designation | undefined>;
+    return docData$<Designation>(designationDocReference);
   }
 
   add(designation: Designation): Observable<Designation> {
@@ -78,9 +70,9 @@ export class FirebaseDesignationDatasourceService implements DesignationReposito
     );
 
     return newDesignation$.pipe(
-      switchMap(() => {
-        return docData(newDesignationDocRef, { idField: 'id' }) as Observable<Designation>;
-      }),
+      switchMap(() => docData$<Designation>(newDesignationDocRef)),
+      // The document was just written, so the first snapshot always carries it.
+      map((designation) => designation as Designation),
       take(1),
     );
   }

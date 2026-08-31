@@ -221,7 +221,7 @@ Because `recentHistory` is omitted but `history` is not, an embedded designation
 
 > **⚠ The `history` field is mandatory in practice.** `FirebaseDesignationDatasourceService`'s read
 > converter runs `t.history.map(...)` on every embedded territory **without a null-guard**, so a designation
-> whose embedded territory has no `history` field makes `/work/:id` throw inside the `docData` pipeline and
+> whose embedded territory has no `history` field makes `/work/:id` throw inside the `docData$` pipeline and
 > hang on its loading state (`UC-WORK-04`). Always seed `history: []` (empty array is fine) on every
 > `buildDesignationTerritory`. The **default baseline `seed-designation` omits it**, so it cannot be opened
 > as-is — see §5.
@@ -257,11 +257,11 @@ The alert badges (bible student / recently moved / unresolved "not answered") ar
 
 | Read                                                      | API              | UI updates without reload?                                                              |
 | --------------------------------------------------------- | ---------------- | --------------------------------------------------------------------------------------- |
-| Territories list (`getAllByCongregation`)                 | `collectionData` | **Yes** — live listener.                                                                |
-| Territories by city (`getAllByCongregationAndCities`)     | `collectionData` | **Yes**.                                                                                |
-| Users list (`getAllByCongregation`)                       | `collectionData` | **Yes**.                                                                                |
-| Designation (`getById`)                                   | `docData`        | **Yes**.                                                                                |
-| Congregation (`getById`)                                  | `docData`        | **Yes**.                                                                                |
+| Territories list (`getAllByCongregation`)                 | `collectionData$`| **Yes** — live listener.                                                                |
+| Territories by city (`getAllByCongregationAndCities`)     | `collectionData$`| **Yes**.                                                                                |
+| Users list (`getAllByCongregation`)                       | `collectionData$`| **Yes**.                                                                                |
+| Designation (`getById`)                                   | `docData$`       | **Yes**.                                                                                |
+| Congregation (`getById`)                                  | `docData$`       | **Yes**.                                                                                |
 | Territory by id, `getAllInIds`, visit history, statistics | `getDocs`        | **No** — snapshot at call time.                                                         |
 | `UserStateService` (signal-backed)                       | in-memory        | Only when explicitly `setUser(...)`; a congregation edit made elsewhere needs a reload. |
 

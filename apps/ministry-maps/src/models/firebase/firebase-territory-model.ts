@@ -1,4 +1,4 @@
-import { Timestamp } from '@angular/fire/firestore';
+import { Timestamp } from 'firebase/firestore';
 import { TerritoryVisitHistory } from '../territory-visit-history';
 import { Territory } from '../territory';
 

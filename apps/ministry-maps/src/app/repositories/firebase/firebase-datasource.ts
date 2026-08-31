@@ -1,4 +1,4 @@
-import { DocumentReference } from '@angular/fire/firestore';
+import { DocumentReference } from 'firebase/firestore';
 
 export interface FirebaseDatasource<T> {
   /**

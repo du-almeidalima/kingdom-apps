@@ -10,7 +10,7 @@ description: Firebase Cloud Functions v2 (TypeScript) — a standalone npm packa
 
 - **Not an Nx project** — no `project.json`, own manifest and lockfile. Everything runs via `npm --prefix functions/ministry-maps run <script>`: `build`, `build:watch`, `lint`, `test`, `deploy`, `backfill:ttl`. Never `nx run functions…`.
 - TypeScript, Functions **v2**, Node 22. One callable per file in `src/functions/`, re-exported from `src/index.ts`.
-- **Export name = callable name.** The frontend invokes by string: `httpsCallableData(functions, 'deleteUser')` / `'provisionUserFromInvite'` — renaming an export breaks callers.
+- **Export name = callable name.** The frontend invokes by string: `httpsCallableData$(functions, 'deleteUser')` / `'provisionUserFromInvite'` — renaming an export breaks callers.
 - Single Admin SDK init in `src/config/firebase.ts` (`db`, `auth`; emulator projectId fallback `du-ministry-maps`).
 
 ## Function shape

@@ -130,14 +130,15 @@
       }
     },
     "deploy": {
-      "executor": "@angular/fire:deploy",
+      "executor": "nx:run-commands",
+      "dependsOn": [{ "target": "build" }],
       "options": {
-        "version": 2
+        "command": "npx firebase deploy --only hosting:prod"
       },
       "configurations": {
-        "production": {
-          "buildTarget": "ministry-maps:build:production",
-          "serveTarget": "ministry-maps:serve:production"
+        "production": {},
+        "beta": {
+          "command": "npx firebase deploy --only hosting:beta"
         }
       },
       "defaultConfiguration": "production"

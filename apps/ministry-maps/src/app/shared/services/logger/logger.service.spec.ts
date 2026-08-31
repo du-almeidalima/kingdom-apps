@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
-import { addDoc, collection, Firestore, Timestamp } from '@angular/fire/firestore';
-import { MockProvider } from 'ng-mocks';
+import { addDoc, collection, Timestamp } from 'firebase/firestore';
 
 import { LoggerService, LogLevelEnum } from './logger.service';
+import { FIRESTORE } from '../../../repositories/firebase/firebase-providers';
 import { environment } from '../../../../environments/environment';
 
-jest.mock('@angular/fire/firestore', () => ({
-  ...jest.requireActual('@angular/fire/firestore'),
+jest.mock('firebase/firestore', () => ({
+  ...jest.requireActual('firebase/firestore'),
   addDoc: jest.fn(),
   collection: jest.fn(),
 }));
@@ -20,7 +20,7 @@ describe('LoggerService', () => {
   // Setup for all tests
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [MockProvider(Firestore)],
+      providers: [{ provide: FIRESTORE, useValue: {} }],
     });
 
     service = TestBed.inject(LoggerService);

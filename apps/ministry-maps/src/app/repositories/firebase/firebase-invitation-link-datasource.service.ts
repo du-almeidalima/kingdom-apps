@@ -1,13 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import {
-  collection,
-  CollectionReference,
-  doc,
-  DocumentReference,
-  Firestore,
-  getDoc,
-  setDoc,
-} from '@angular/fire/firestore';
+import { collection, CollectionReference, doc, DocumentReference, getDoc, setDoc } from 'firebase/firestore';
 import { from, map, Observable, of, switchMap } from 'rxjs';
 
 import { InvitationLink } from '../../../models/invitation-link';
@@ -18,6 +10,7 @@ import { firebaseEntityConverterFactory } from '../../shared/utils/firebase-enti
 import { FirebaseDatasource } from './firebase-datasource';
 import { environment } from '../../../environments/environment';
 import { LoggerService } from '../../shared/services/logger/logger.service';
+import { FIRESTORE } from './firebase-providers';
 
 @Injectable({
   providedIn: 'root',
@@ -29,7 +22,7 @@ export class FirebaseInvitationLinkDataSourceService
   private readonly invitationLinkCollection: CollectionReference<InvitationLink>;
   private readonly loggerService = inject(LoggerService);
 
-  private readonly firestore = inject(Firestore);
+  private readonly firestore = inject(FIRESTORE);
   private readonly congregationDatasourceService = inject(FirebaseCongregationDatasourceService);
 
   constructor() {

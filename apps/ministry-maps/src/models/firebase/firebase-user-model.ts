@@ -1,4 +1,4 @@
-import { DocumentReference } from '@angular/fire/firestore';
+import { DocumentReference } from 'firebase/firestore';
 
 import { User } from '../user';
 import { Congregation } from '../congregation';

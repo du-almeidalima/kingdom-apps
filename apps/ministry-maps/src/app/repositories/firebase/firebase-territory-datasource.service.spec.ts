@@ -1,21 +1,26 @@
 import { TestBed } from '@angular/core/testing';
-import { collection, collectionData, collectionGroup, doc, getDocs, Firestore, query } from '@angular/fire/firestore';
+import { collection, collectionGroup, doc, getDocs, query } from 'firebase/firestore';
 import { lastValueFrom, of } from 'rxjs';
-import { MockProvider } from 'ng-mocks';
 
 import { FirebaseTerritoryDatasourceService } from './firebase-territory-datasource.service';
+import { FIRESTORE } from './firebase-providers';
+import { collectionData$ } from './firebase-rxjs-interop';
 import { Territory, TerritoryIcon } from '../../../models/territory';
 import { TerritoryVisitHistory } from '../../../models/territory-visit-history';
 import { VisitOutcomeEnum } from '../../../models/enums/visit-outcome';
 
-jest.mock('@angular/fire/firestore', () => ({
-  ...jest.requireActual('@angular/fire/firestore'),
+jest.mock('firebase/firestore', () => ({
+  ...jest.requireActual('firebase/firestore'),
   collection: jest.fn(),
-  collectionData: jest.fn(),
   collectionGroup: jest.fn(),
   doc: jest.fn(),
   getDocs: jest.fn(),
   query: jest.fn(),
+}));
+
+jest.mock('./firebase-rxjs-interop', () => ({
+  ...jest.requireActual('./firebase-rxjs-interop'),
+  collectionData$: jest.fn(),
 }));
 
 const territory = (id: string): Territory =>
@@ -44,7 +49,7 @@ describe('FirebaseTerritoryDatasourceService — getAllByCongregation with histo
 
   /** Makes the mocked territories collection emit the given snapshot. */
   const mockTerritoriesSnapshot = (territories: Territory[]) => {
-    (collectionData as jest.Mock).mockReturnValue(of(territories));
+    (collectionData$ as jest.Mock).mockReturnValue(of(territories));
   };
 
   /** Makes the mocked collection-group query return history docs whose parent path encodes the territory id. */
@@ -65,7 +70,7 @@ describe('FirebaseTerritoryDatasourceService — getAllByCongregation with histo
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [MockProvider(Firestore)],
+      providers: [{ provide: FIRESTORE, useValue: {} }],
     });
 
     (collection as jest.Mock).mockReturnValue({ withConverter: jest.fn().mockReturnThis() });

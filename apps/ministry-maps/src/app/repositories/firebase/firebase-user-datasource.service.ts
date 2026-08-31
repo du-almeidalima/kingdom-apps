@@ -1,18 +1,16 @@
 import { inject, Injectable } from '@angular/core';
 import {
   collection,
-  collectionData,
-  CollectionReference,
   deleteDoc,
   doc,
-  DocumentReference,
-  Firestore,
   getDocFromCache,
   getDocFromServer,
   query,
   setDoc,
   where,
-} from '@angular/fire/firestore';
+} from 'firebase/firestore';
+import type { CollectionReference, DocumentReference } from 'firebase/firestore';
+
 import { catchError, forkJoin, from, map, Observable, of, switchMap } from 'rxjs';
 
 import { Congregation } from '../../../models/congregation';
@@ -22,8 +20,9 @@ import { User } from '../../../models/user';
 import { UserRepository } from '../user.repository';
 import { FirebaseCongregationModel } from '../../../models/firebase/firebase-congregation-model';
 import { FirebaseCongregationDatasourceService } from './firebase-congregation-datasource.service';
-import { Functions, httpsCallableData } from '@angular/fire/functions';
 import { FirebaseDatasource } from './firebase-datasource';
+import { collectionData$, httpsCallableData$ } from './firebase-rxjs-interop';
+import { FIRESTORE, FUNCTIONS } from './firebase-providers';
 import { environment } from '../../../environments/environment';
 import { LoggerService } from '../../shared/services/logger/logger.service';
 
@@ -38,8 +37,8 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
   private readonly provisionFromInviteFn: (data: { inviteId: string }) => Observable<unknown>;
   private readonly loggerService = inject(LoggerService);
 
-  private readonly firestore = inject(Firestore);
-  private readonly functions = inject(Functions);
+  private readonly firestore = inject(FIRESTORE);
+  private readonly functions = inject(FUNCTIONS);
   private readonly congregationDatasourceService = inject(FirebaseCongregationDatasourceService);
 
   constructor() {
@@ -50,8 +49,8 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
     ) as CollectionReference<User, FirebaseUserModel>;
 
     // FUNCTIONS
-    this.deleteUserFn = httpsCallableData(this.functions, 'deleteUser');
-    this.provisionFromInviteFn = httpsCallableData(this.functions, 'provisionUserFromInvite');
+    this.deleteUserFn = httpsCallableData$<string, void>(this.functions, 'deleteUser');
+    this.provisionFromInviteFn = httpsCallableData$<{ inviteId: string }, unknown>(this.functions, 'provisionUserFromInvite');
   }
 
   createDocumentRef(id: string): DocumentReference<User> {
@@ -196,7 +195,7 @@ export class FirebaseUserDatasourceService implements UserRepository, FirebaseDa
 
     // This is a little nested. However, it's to avoid performing multiple calls to FireStore to resolve the congregation ref
     // Once the Users have been fetched, we resolve the congregationRef used as a query param only once and map to all users.
-    return from(collectionData<User>(q)).pipe(
+    return collectionData$<User>(q).pipe(
       switchMap((users) => {
         return FirebaseCongregationDatasourceService.resolveUserCongregationReference(congregationDocRef).pipe(
           map((congregation) => {

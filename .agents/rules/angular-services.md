@@ -14,7 +14,7 @@ There is **no HTTP/REST layer** — all I/O is Firebase (Firestore, Auth, callab
 
 ```
 pages/components → BOs (domain use cases) → abstract repositories ← Firebase datasources
-                        ↘ state services (UserStateService)           ↘ httpsCallableData (Functions)
+                        ↘ state services (UserStateService)           ↘ httpsCallableData$ (Functions)
 ```
 
 ## Repositories — abstract class + provider binding
@@ -42,7 +42,7 @@ Reference implementation: `repositories/firebase/firebase-user-datasource.servic
 - Return **Observables only** — wrap promises with `from()`: `from(getDocFromServer(ref))`.
 - `static readonly COLLECTION_NAME`; typed `CollectionReference<Model, FirebaseModel>` built in the constructor.
 - Cache-first reads where sensible: `getDocFromCache` → fall back to server.
-- Callables: `httpsCallableData(functions, 'deleteUser')` — **the export name in `functions/src/index.ts` is the callable name**; renaming breaks callers.
+- Callables: `httpsCallableData$(functions, 'deleteUser')` (from `firebase-rxjs-interop.ts`) — **the export name in `functions/src/index.ts` is the callable name**; renaming breaks callers.
 - `implements <Entity>Repository, FirebaseDatasource<T>` (`createDocumentRef`) — used to resolve cross-collection `DocumentReference`s (user → congregation).
 - Strip `undefined` before writes with `removeUndefined`; convert via `firebaseEntityConverterFactory` (the timestamp factory is `@deprecated`).
 

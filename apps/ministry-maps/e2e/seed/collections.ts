@@ -4,8 +4,8 @@
  *
  * These MUST stay in sync with the app's datasource services (the values are
  * intentionally re-declared here rather than imported, because those classes
- * are Angular `@Injectable`s that pull in `@angular/fire` and therefore cannot
- * be loaded in Playwright's Node context):
+ * are Angular `@Injectable`s that pull in the browser Firebase SDK and therefore
+ * cannot be loaded in Playwright's Node context):
  *
  * - `FirebaseCongregationDatasourceService.COLLECTION_NAME` → 'congregations'
  * - `FirebaseUserDatasourceService.COLLECTION_NAME` → 'users'
