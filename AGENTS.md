@@ -76,7 +76,7 @@ Add or update tests for behavior changes. Do not weaken, skip, or delete a faili
 ## Gotchas
 
 - `functions/ministry-maps` is **not an Nx project**: separate manifest and lockfile, driven by `npm --prefix functions/ministry-maps run <script>`.
-- `NX_*` values are injected at build time (webpack DefinePlugin) from `apps/ministry-maps/.env.development`/`.env.production` — not read dynamically in the browser.
+- `NX_*` values are injected at build time (esbuild `define` via `apps/ministry-maps/tools/esbuild/define-env.plugin.js`) from `apps/ministry-maps/.env.development`/`.env.production` — not read dynamically in the browser.
 - Root flat ESLint config covers the Angular workspace; Functions has its own `functions/ministry-maps/eslint.config.mjs`.
 - `npm start` imports the emulator seed on start and exports it back on graceful exit; snapshot manually with `npx firebase emulators:export tools/executors/firebase-emulator/seed --force`.
 - Deploy order when both change: functions first, then Firestore rules. Hosting deploys happen in CI on merge to `main`.

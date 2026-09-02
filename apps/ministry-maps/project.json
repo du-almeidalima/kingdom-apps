@@ -7,16 +7,20 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/angular:webpack-browser",
-      "outputs": ["{options.outputPath}"],
+      "executor": "@nx/angular:application",
+      "outputs": ["{options.outputPath.base}"],
       "options": {
-        "customWebpackConfig": {
-          "path": "apps/ministry-maps/webpack.config.js"
+        "outputPath": {
+          "base": "dist/apps/ministry-maps",
+          "browser": ""
         },
-        "outputPath": "dist/apps/ministry-maps",
         "index": "apps/ministry-maps/src/index.html",
-        "main": "apps/ministry-maps/src/main.ts",
         "tsConfig": "apps/ministry-maps/tsconfig.app.json",
+        "plugins": [
+          {
+            "path": "apps/ministry-maps/tools/esbuild/define-env.plugin.js"
+          }
+        ],
         "inlineStyleLanguage": "scss",
         "assets": [
           {
@@ -36,19 +40,19 @@
         ],
         "styles": ["libs/common-ui/src/lib/styles/index.scss", "apps/ministry-maps/src/styles/main.scss"],
         "stylePreprocessorOptions": {
-          "includePaths": ["libs/common-ui/src/lib/styles"]
+          "includePaths": ["."]
         },
         "scripts": [],
-        "serviceWorker": true,
-        "ngswConfigPath": "apps/ministry-maps/ngsw-config.json"
+        "serviceWorker": "apps/ministry-maps/ngsw-config.json",
+        "browser": "apps/ministry-maps/src/main.ts"
       },
       "configurations": {
         "production": {
           "budgets": [
             {
               "type": "initial",
-              "maximumWarning": "2mb",
-              "maximumError": "2.5mb"
+              "maximumWarning": "1.4mb",
+              "maximumError": "1.6mb"
             },
             {
               "type": "anyComponentStyle",
@@ -59,9 +63,7 @@
           "outputHashing": "all"
         },
         "development": {
-          "buildOptimizer": false,
           "optimization": false,
-          "vendorChunk": true,
           "extractLicenses": false,
           "sourceMap": true,
           "namedChunks": true
@@ -104,12 +106,6 @@
         "cwd": "{workspaceRoot}"
       }
     },
-    "extract-i18n": {
-      "executor": "@angular-devkit/build-angular:extract-i18n",
-      "options": {
-        "buildTarget": "ministry-maps:build"
-      }
-    },
     "lint": {
       "executor": "@nx/eslint:lint"
     },
@@ -131,7 +127,11 @@
     },
     "deploy": {
       "executor": "nx:run-commands",
-      "dependsOn": [{ "target": "build" }],
+      "dependsOn": [
+        {
+          "target": "build"
+        }
+      ],
       "options": {
         "command": "npx firebase deploy --only hosting:prod"
       },

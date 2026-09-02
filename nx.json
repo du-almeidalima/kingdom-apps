@@ -16,10 +16,23 @@
   },
   "nxCloudId": "67cdce85ce286f6be6202ed4",
   "targetDefaults": {
-    "@angular-devkit/build-angular:browser": {
+    "@nx/angular:application": {
       "cache": true,
       "dependsOn": ["^build"],
-      "inputs": ["production", "^production"]
+      "inputs": [
+        "production",
+        "^production",
+        { "env": "NX_ENV" },
+        { "env": "NX_USE_CLOUD" },
+        { "env": "NX_APP_BASE_URL" },
+        { "env": "NX_FIREBASE_PROJECT_ID" },
+        { "env": "NX_FIREBASE_APP_ID" },
+        { "env": "NX_FIREBASE_STORAGE_BUCKET" },
+        { "env": "NX_FIREBASE_API_KEY" },
+        { "env": "NX_FIREBASE_AUTH_DOMAIN" },
+        { "env": "NX_FIREBASE_MESSAGING_SENDER_ID" },
+        { "env": "NX_FIREBASE_MEASUREMENT_ID" }
+      ]
     },
     "@nx/eslint:lint": {
       "cache": true,

@@ -32,8 +32,7 @@ lockfile.
 ## Frontend structure
 
 - **Bootstrap and components:** the app uses `bootstrapApplication()` and standalone components.
-  Legacy route NgModules remain under the home, territory, users, and work features; do not add new
-  NgModules.
+  A legacy route NgModule remains under the work feature; do not add new NgModules.
 - **Feature loading:** top-level features are lazy-loaded from `app-routes.ts`.
 - **Data access:** repository abstractions are registered in `repositories-providers.ts`; Firebase
   datasource services implement them.
@@ -61,7 +60,8 @@ The authoritative collection shapes and invariants are documented in
 
 ## Environments
 
-- `NX_*` values are embedded at build time by `apps/ministry-maps/webpack.config.js`; they are not
+- `NX_*` values are embedded at build time by the esbuild `define` plugin at
+  `apps/ministry-maps/tools/esbuild/define-env.plugin.js`; they are not
   read dynamically from the deployed browser environment.
 - Local development connects Auth (`9099`), Firestore (`8080`), and Functions (`5001`) to emulators.
   The Emulator UI runs on `4000`.

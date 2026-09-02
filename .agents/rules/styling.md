@@ -46,7 +46,7 @@ Repo-root-relative `@use` (the established pattern in 14+ app files):
 }
 ```
 
-`stylePreprocessorOptions.includePaths` contains the common-ui styles dir, so short forms like `@use 'components/form-control' as *` also work.
+Repo-root-relative `@use` is the only supported form (resolves for the esbuild builder via `stylePreprocessorOptions.includePaths: ["."]` and for IDEs from the project root — JetBrains editors do not read `includePaths`):
 
 ## Global classes — apply, don't restyle
 

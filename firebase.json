@@ -10,7 +10,7 @@
       "ignore": ["**/.*"],
       "headers": [
         {
-          "source": "**/*.[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]*.@(js|css)",
+          "source": "**/*[-.][0-9A-Za-z][0-9A-Za-z][0-9A-Za-z][0-9A-Za-z][0-9A-Za-z][0-9A-Za-z][0-9A-Za-z][0-9A-Za-z]*.@(js|css)",
           "headers": [
             {
               "key": "Cache-Control",
@@ -41,7 +41,7 @@
       "ignore": ["**/.*"],
       "headers": [
         {
-          "source": "**/*.[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]*.@(js|css)",
+          "source": "**/*[-.][0-9A-Za-z][0-9A-Za-z][0-9A-Za-z][0-9A-Za-z][0-9A-Za-z][0-9A-Za-z][0-9A-Za-z][0-9A-Za-z]*.@(js|css)",
           "headers": [
             {
               "key": "Cache-Control",
