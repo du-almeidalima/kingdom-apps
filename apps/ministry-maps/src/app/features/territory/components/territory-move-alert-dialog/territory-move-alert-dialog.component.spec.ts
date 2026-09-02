@@ -3,14 +3,15 @@ import {
   TerritoryMoveAlertDialogData,
 } from './territory-move-alert-dialog.component';
 import { MockBuilder, MockRender } from 'ng-mocks';
-import { TerritoryModule } from '../../territory.module';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { TerritoryAlertsBO } from '../../bo/territory-alerts/territory-alerts.bo';
+import { TerritoryBO } from '../../bo/territory/territory.bo';
+import { TerritoryStatisticsBO } from '../../bo/territory-statistics/territory-statistics.bo';
 import { EMPTY } from 'rxjs';
 
 describe('TerritoryMoveAlertDialogComponent', () => {
   beforeEach(() =>
-    MockBuilder(TerritoryMoveAlertDialogComponent, TerritoryModule)
-      .provide({
+    MockBuilder(TerritoryMoveAlertDialogComponent, [TerritoryAlertsBO, TerritoryBO, TerritoryStatisticsBO]).provide({
         provide: DialogRef,
         useValue: {},
       })

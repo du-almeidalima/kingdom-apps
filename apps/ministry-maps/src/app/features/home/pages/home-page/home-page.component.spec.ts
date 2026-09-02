@@ -1,11 +1,10 @@
 import { HomePageComponent } from './home-page.component';
 import { MockBuilder, MockRender, ngMocks } from 'ng-mocks';
-import { HomeModule } from '../../home.module';
 import { By } from '@angular/platform-browser';
 import { UserStateService } from '../../../../state/user.state.service';
 
 describe('HomePageComponent', () => {
-  beforeEach(() => MockBuilder(HomePageComponent, HomeModule));
+  beforeEach(() => MockBuilder(HomePageComponent));
 
   it('should create', () => {
     const fixture = MockRender(HomePageComponent);
