@@ -4,11 +4,14 @@ import { Locator, Page } from '@playwright/test';
  * Page object for the `/territories/assign` route.
  *
  * Wraps the `assign-*` testids (WP-05). The submit FAB has no testid — it is
- * targeted by its stable `title="Enviar Designação"`. The search input has no
+ * targeted by its stable `title="Enviar Designação"`; its selected-count badge
+ * (the `fab-badge` testid added by `FloatingActionButtonComponent`) is exposed
+ * as {@link AssignTerritoriesPage.selectedCount}. The search input has no
  * testid, so its inner `<input>` is targeted. Checkbox rows are the
  * `assign-territory-checkbox` components; ticking happens by clicking the row
  * (the testid sits on the wrapping `<label>`), and the checked state is read
- * from the hidden inner `input[type=checkbox]:checked`.
+ * from the hidden inner `input[type=checkbox]:checked`. Clicking a row that is
+ * already assigned (checked-and-disabled) re-triggers the designation share.
  */
 export class AssignTerritoriesPage {
   readonly heading: Locator;
@@ -16,6 +19,7 @@ export class AssignTerritoriesPage {
   readonly list: Locator;
   readonly checkboxes: Locator;
   readonly fab: Locator;
+  readonly selectedCount: Locator;
   readonly searchInput: Locator;
 
   constructor(private readonly page: Page) {
@@ -23,7 +27,11 @@ export class AssignTerritoriesPage {
     this.cityFilter = page.getByTestId('assign-city-filter');
     this.list = page.getByTestId('assign-territory-list');
     this.checkboxes = page.getByTestId('assign-territory-checkbox');
-    this.fab = page.getByTitle('Enviar Designação');
+    // Exact match: assigned rows carry `title="Enviar designação novamente"`,
+    // which would otherwise substring-match this title (getByTitle is
+    // case-insensitive by default) and break strict-mode locators.
+    this.fab = page.getByTitle('Enviar Designação', { exact: true });
+    this.selectedCount = this.fab.getByTestId('fab-badge');
     this.searchInput = page.locator('lib-search-input input');
   }
 

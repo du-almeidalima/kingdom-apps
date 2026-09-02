@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal, viewChild } from '@angular/core';
 import { finalize, Observable, of, shareReplay } from 'rxjs';
 
 import {
   ConfirmDialogComponent,
   ConfirmDialogData,
   FloatingActionButtonComponent,
-  green200,
   IconComponent,
   SearchInputComponent,
   SelectComponent,
@@ -57,6 +56,42 @@ export class AssignTerritoriesPageComponent implements OnInit {
   private readonly userState = inject(UserStateService);
   private readonly territoryBO = inject(TerritoryBO);
   private readonly dialog = inject(Dialog);
+  public readonly ALL_OPTION = ALL_OPTION;
+  public readonly sortFilterConfig = TERRITORY_SORT_FILTER_CONFIG;
+  public readonly white200 = white200;
+
+  private territories$: Observable<Territory[]> = of([]);
+
+  cities: string[] = [];
+  selectedCity = '';
+  searchTerm?: string | null;
+  searchFilters: TerritoryFilterSettings['filters'] = TERRITORY_SORT_FILTER_CONFIG.filterConfigs.initial;
+  orderBy: TerritoriesOrderBy = TerritoriesOrderBy.SAVED_INDEX;
+  filteredTerritories$: Observable<Territory[]> = of([]);
+
+  searchInputComponent = viewChild.required(SearchInputComponent);
+  isCreatingAssignment = signal(false);
+  selectedTerritoriesModel = signal(new Set<string>());
+  selectedCount = computed(() => this.selectedTerritoriesModel().size);
+
+  /**
+   * Designations created in this session: `designationId → territoryIds` assigned to it.
+   * Territories mapped here render checked-and-disabled, and tapping them re-shares the designation.
+   */
+  assignedDesignations = signal(new Map<string, Set<string>>());
+
+  /** Reverse index of {@link assignedDesignations} (`territoryId → designationId`) for per-row lookups. */
+  private readonly assignedTerritoryIndex = computed(() => {
+    const territoryIdToDesignationId = new Map<string, string>();
+
+    for (const [designationId, territoryIds] of this.assignedDesignations()) {
+      for (const territoryId of territoryIds) {
+        territoryIdToDesignationId.set(territoryId, designationId);
+      }
+    }
+
+    return territoryIdToDesignationId;
+  });
 
   /**
    * This page is only reachable for a signed-in user whose congregation reference is resolved,
@@ -69,26 +104,6 @@ export class AssignTerritoriesPageComponent implements OnInit {
     }
     return user.congregation;
   }
-
-  private territories$: Observable<Territory[]> = of([]);
-
-  public readonly ALL_OPTION = ALL_OPTION;
-  public readonly green200 = green200;
-  public readonly white200 = white200;
-
-  isCreatingAssignment = signal(false);
-  cities: string[] = [];
-  selectedCity = '';
-  searchTerm?: string | null;
-  searchFilters: TerritoryFilterSettings['filters'] = TERRITORY_SORT_FILTER_CONFIG.filterConfigs.initial;
-  orderBy: TerritoriesOrderBy = TerritoriesOrderBy.SAVED_INDEX;
-  filteredTerritories$: Observable<Territory[]> = of([]);
-  selectedTerritoriesModel = signal(new Set<string>());
-  assignedTerritories = signal(new Set<string>());
-
-  public sortFilterConfig = TERRITORY_SORT_FILTER_CONFIG;
-
-  searchInputComponent = viewChild.required(SearchInputComponent);
 
   ngOnInit(): void {
     const { id, cities } = this.currentCongregation;
@@ -103,17 +118,46 @@ export class AssignTerritoriesPageComponent implements OnInit {
   /**
    * Returns true if the territory has already been selected (checks the checkbox).
    * It checks both the currently selected list or if it was already assigned to a designation.
-   * i.e. it's in the assignedTerritories Set.
+   * i.e. it's in the assignedDesignations map.
    * @param territoryId
    */
   hasAlreadyBeenSelected(territoryId: string): boolean {
-    return this.selectedTerritoriesModel().has(territoryId) || this.assignedTerritories().has(territoryId);
+    return this.selectedTerritoriesModel().has(territoryId) || this.isTerritoryAssigned(territoryId);
+  }
+
+  /** Returns true if the territory was already assigned to a designation created in this session. */
+  isTerritoryAssigned(territoryId: string): boolean {
+    return this.assignedTerritoryIndex().has(territoryId);
+  }
+
+  /** Returns the id of the designation the territory was assigned to, if any. */
+  designationIdForTerritory(territoryId: string): string | undefined {
+    return this.assignedTerritoryIndex().get(territoryId);
+  }
+
+  /**
+   * Re-triggers the sharing mechanism for the designation a territory was assigned to.
+   * Called when the user taps an already-assigned (disabled) territory row.
+   */
+  handleAssignedTerritoryClick(territoryId: string) {
+    const designationId = this.designationIdForTerritory(territoryId);
+
+    if (designationId) {
+      this.shareDesignation(designationId);
+    }
   }
 
   handleTerritoryFormSubmit() {
-    this.assignedTerritories.update((assigned) => new Set([...this.selectedTerritoriesModel(), ...assigned]));
+    // Guards against a double submission
+    if (this.isCreatingAssignment()) {
+      return;
+    }
+
     const selectedTerritories = [...this.selectedTerritoriesModel().values()];
-    this.selectedTerritoriesModel.set(new Set());
+
+    if (!selectedTerritories.length) {
+      return;
+    }
 
     // Loading Spinner on Button
     this.isCreatingAssignment.set(true);
@@ -126,8 +170,27 @@ export class AssignTerritoriesPageComponent implements OnInit {
         }),
       )
       .subscribe((designation) => {
+        // Mark the Territories as assigned
+        this.assignedDesignations.update((designations) =>
+          new Map(designations).set(designation.id, new Set(selectedTerritories)),
+        );
+
+        this.removeTerritoriesFromSelection(selectedTerritories);
+
         this.shareDesignation(designation.id);
       });
+  }
+
+  private removeTerritoriesFromSelection(territoryIds: string[]) {
+    this.selectedTerritoriesModel.update((selected) => {
+      const next = new Set(selected);
+
+      for (const territoryId of territoryIds) {
+        next.delete(territoryId);
+      }
+
+      return next;
+    });
   }
 
   /**
@@ -198,7 +261,8 @@ export class AssignTerritoriesPageComponent implements OnInit {
       } else {
         next.delete(territoryId);
       }
-      return next;    });
+      return next;
+    });
   }
 
   shareDesignation(designationId: string) {

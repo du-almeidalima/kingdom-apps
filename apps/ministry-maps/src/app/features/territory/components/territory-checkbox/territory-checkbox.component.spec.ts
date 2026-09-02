@@ -140,6 +140,42 @@ describe('TerritoryCheckboxComponent', () => {
     });
   });
 
+  describe('assigned (disabled) card click', () => {
+    it('emits assignedClick when a disabled card is clicked', () => {
+      render();
+      const emitter = jest.fn();
+      component.assignedClick.subscribe(emitter);
+      component.setDisabledState(true);
+      fixture.detectChanges();
+
+      ngMocks.click(ngMocks.find(fixture, 'label.territory-checkbox'));
+
+      expect(emitter).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not emit assignedClick when the card is enabled', () => {
+      render();
+      const emitter = jest.fn();
+      component.assignedClick.subscribe(emitter);
+
+      ngMocks.click(ngMocks.find(fixture, 'label.territory-checkbox'));
+
+      expect(emitter).not.toHaveBeenCalled();
+    });
+
+    it('does not emit assignedClick when an inner action button is clicked', () => {
+      const withLink = render({ mapsLink: 'https://maps.app.goo.gl/xyz' });
+      const emitter = jest.fn();
+      component.assignedClick.subscribe(emitter);
+      component.setDisabledState(true);
+      fixture.detectChanges();
+
+      ngMocks.click(ngMocks.find(withLink, 'button'));
+
+      expect(emitter).not.toHaveBeenCalled();
+    });
+  });
+
   describe('action buttons', () => {
     it('opens Google Maps for a territory with a maps link', () => {
       const withLink = render({ mapsLink: 'https://maps.app.goo.gl/xyz' });

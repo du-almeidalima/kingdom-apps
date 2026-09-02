@@ -122,7 +122,7 @@ Suggested spec files are proposals — keep one feature area per file and mirror
 | UC-ASSIGN-09 | Checkbox toggles submit disabled                 | Admin             | P0  | ✅ `territories-assign.spec.ts` | `territories-assign.spec.ts` | `AssignTerritoriesPage` | —                                           | testid                                  |
 | UC-ASSIGN-10 | Declining moved-confirm unticks                  | Admin             | P1  | ✅ `territories-assign.spec.ts` | `territories-assign.spec.ts` | `ConfirmDialog`         | unresolved-MOVED territory                  | testid                                  |
 | UC-ASSIGN-11 | Selections persist across city switches          | Admin             | P0  | ✅ `territories-assign.spec.ts` | `territories-assign.spec.ts` | `AssignTerritoriesPage` | —                                           | —                                       |
-| UC-ASSIGN-12 | No selected-count UI ⚠                           | Admin             | P2  | ✅ `territories-assign.spec.ts` | `territories-assign.spec.ts` | `AssignTerritoriesPage` | —                                           | ⚠                                       |
+| UC-ASSIGN-12 | FAB badge selected count                         | Admin             | P0  | ✅ `territories-assign.spec.ts` | `territories-assign.spec.ts` | `AssignTerritoriesPage` | —                                           | —                                       |
 | UC-ASSIGN-13 | `expiresAt` = now + N days (raw ms)              | Admin             | P0  | ✅ `territories-assign.spec.ts` | `territories-assign.spec.ts` | `AssignTerritoriesPage` | —                                           | time tolerance                          |
 | UC-ASSIGN-14 | Missing settings → env default (45d)             | Admin (2nd cong.) | P2  | ✅ `territories-assign.spec.ts` | `territories-assign.spec.ts` | `AssignTerritoriesPage` | settings-less congregation (raw write)      | HX-3                                    |
 | UC-ASSIGN-15 | Submit creates designation (top-level fields)    | Admin             | P0  | ✅ `territories-assign.spec.ts` | `territories-assign.spec.ts` | `AssignTerritoriesPage` | —                                           | whatsapp-popup capture                  |
@@ -131,10 +131,12 @@ Suggested spec files are proposals — keep one feature area per file and mirror
 | UC-ASSIGN-18 | `in`-query batching (35 territories)             | Admin             | P2  | ✅ `territories-assign.spec.ts` | `territories-assign.spec.ts` | `AssignTerritoriesPage` | 35 territories                              | slow; ⚠ (comment only)                  |
 | UC-ASSIGN-19 | Share link = `location.origin` + whatsapp ⚠      | Admin             | P0  | ✅ `territories-assign.spec.ts` | `territories-assign.spec.ts` | `AssignTerritoriesPage` | —                                           | popup technique, ⚠                      |
 | UC-ASSIGN-20 | No clipboard affordance ⚠                        | Admin             | P2  | ✅ `territories-assign.spec.ts` | `territories-assign.spec.ts` | `AssignTerritoriesPage` | —                                           | ⚠                                       |
-| UC-ASSIGN-21 | Failed creation → optimistic marking, no error ⚠ | Admin             | P1  | —                               | blocked                      | —                       | —                                           | HX-4, ⚠                                 |
+| UC-ASSIGN-21 | Failed creation keeps ticks (no marking); silent error ⚠ | Admin     | P1  | —                              | unit-only (`assign-territories-page.component.spec.ts`) | —                       | —                                           | HX-4 (e2e), ⚠                          |
 | UC-ASSIGN-22 | Role matrix + APP_ADMIN bypass                   | Multi-role        | P0  | ✅ `territories-assign.spec.ts` | `territories-assign.spec.ts` | `AssignTerritoriesPage` | elder/organizer/super./app-admin identities | HX-1                                    |
 | UC-ASSIGN-23 | Publisher → `/welcome`                           | Publisher         | P0  | ✅ `auth.spec.ts` (matrix leg)  | `territories-assign.spec.ts` | —                       | —                                           | (dup. of UC-AUTH-12 leg — own one copy) |
 | UC-ASSIGN-24 | Anonymous → `/login`                             | Anonymous         | P0  | ✅ `auth.spec.ts` (matrix leg)  | `territories-assign.spec.ts` | —                       | —                                           | (dup. of UC-AUTH-11 leg — own one copy) |
+| UC-ASSIGN-25 | Re-send share on assigned-territory tap          | Admin             | P0  | ✅ `territories-assign.spec.ts` | `territories-assign.spec.ts` | `AssignTerritoriesPage` | —                                           | whatsapp-popup capture                  |
+| UC-ASSIGN-26 | Assigned-row buttons intact; dimmed icon (dark)  | Admin             | P1  | ✅ `territories-assign.spec.ts` | `territories-assign.spec.ts` | `AssignTerritoriesPage` | —                                           | window.open recorder                     |
 
 ## UC-STAT — territories statistics → [`features/territories-statistics.md`](./features/territories-statistics.md)
 
@@ -319,7 +321,7 @@ The planning prerequisites are retained here for traceability. HX-1, HX-2, HX-3,
 
 - **Decision (WP-34):** **deliberately deferred**. No production-side test hook or emulator fault shim is added during the final sweep.
 - **What:** a supported way to make a specific Firestore call fail from a test (emulator rules toggle, network interception of the Firestore channel, or a dedicated app-side test hook).
-- **Remains blocked:** UC-ASSIGN-21 and UC-AUTH-21. UC-CFG-08's happy path is covered; its partial-failure window remains a documented risk and unit/integration-test candidate.
+- **Remains blocked:** UC-ASSIGN-21 (e2e only — its rollback semantics are pinned by unit tests since 2026-09) and UC-AUTH-21. UC-CFG-08's happy path is covered; its partial-failure window remains a documented risk and unit/integration-test candidate.
 
 ### HX-5 — Browser-interaction helpers (not fixture extensions, but shared spec utilities)
 
@@ -336,7 +338,7 @@ The planning prerequisites are retained here for traceability. HX-1, HX-2, HX-3,
 | UC-AUTH   | 23      | 12     | 8      | 3      | 14 ✅      | 8 ✋, 1 HX-4                |
 | UC-NAV    | 14      | 8      | 4      | 2      | 14 ✅      | —                           |
 | UC-TERR   | 37      | 8      | 21     | 8      | 37 ✅      | —                           |
-| UC-ASSIGN | 24      | 12     | 7      | 5      | 23 ✅      | 1 HX-4                      |
+| UC-ASSIGN | 26      | 14     | 8      | 4      | 25 ✅      | 1 HX-4 (unit-pinned)        |
 | UC-STAT   | 19      | 5      | 10     | 4      | 19 ✅      | —                           |
 | UC-WORK   | 24      | 8      | 13     | 3      | 24 ✅      | —                           |
 | UC-USERS  | 23      | 15     | 5      | 3      | 22 ✅      | 1 unit-only                 |
@@ -345,9 +347,9 @@ The planning prerequisites are retained here for traceability. HX-1, HX-2, HX-3,
 | UC-TTL    | 2       | 1      | 1      | 0      | 2 ✅       | —                           |
 | UC-RULES  | 12      | 12     | 0      | 0      | 12 ✅      | —                           |
 | Journeys  | 9       | 4      | 5      | 0      | 9 ✅       | —                           |
-| **Total** | **205** | **89** | **86** | **30** | **194 ✅** | **11**                      |
+| **Total** | **212** | **96** | **87** | **29** | **201 ✅** | **11**                      |
 
-Coverage arithmetic: 190 of 201 UC rows plus all 9 journeys are covered. The 11 exceptions are exactly the eight manual OAuth-popup rows, `UC-AUTH-21` and `UC-ASSIGN-21` (HX-4 deferred), and `UC-USERS-12` (unit-only). `UC-PROF-07` is an explicitly accepted `test.fixme` and remains covered; redirect duplicates are owned once by the matrices in `auth.spec.ts`.
+Coverage arithmetic: 192 of 203 UC rows plus all 9 journeys are covered. The 11 exceptions are exactly the eight manual OAuth-popup rows, `UC-AUTH-21` and `UC-ASSIGN-21` (HX-4 deferred; the assign rollback semantics are unit-pinned since 2026-09), and `UC-USERS-12` (unit-only). `UC-PROF-07` is an explicitly accepted `test.fixme` and remains covered; redirect duplicates are owned once by the matrices in `auth.spec.ts`.
 
 ## Sources
 

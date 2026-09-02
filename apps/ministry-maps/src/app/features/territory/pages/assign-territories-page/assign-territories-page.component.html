@@ -27,8 +27,9 @@
           [territory]="territory"
           [name]="territory.id"
           [ngModel]="hasAlreadyBeenSelected(territory.id)"
-          [disabled]="assignedTerritories().has(territory.id)"
+          [disabled]="isTerritoryAssigned(territory.id)"
           (ngModelChange)="handleTerritoryCheck($event, territory)"
+          (assignedClick)="handleAssignedTerritoryClick(territory.id)"
         >
         </kingdom-apps-territory-checkbox>
       }
@@ -37,7 +38,8 @@
 
   <button
     lib-floating-action-button
-    [disabled]="selectedTerritoriesModel().size === 0"
+    [badge]="selectedCount()"
+    [disabled]="selectedCount() === 0 || isCreatingAssignment()"
     [loading]="isCreatingAssignment()"
     type="submit"
     form="territory-form"

@@ -11,6 +11,9 @@ import { SpinnerComponent } from '../spinner/spinner.component';
     @if (!loading()) {
       <ng-content />
     }
+    @if ((badge() ?? 0) > 0) {
+      <span class="floating-action-btn__badge" data-testid="fab-badge">{{ badge() }}</span>
+    }
   `,
   imports: [SpinnerComponent],
 })
@@ -23,6 +26,9 @@ export class FloatingActionButtonComponent implements OnInit {
   backgroundColor = input<string | undefined>(undefined);
 
   loading = input(false);
+
+  /** Numeric chip rendered on the button's top-right corner; hidden while not a positive number. */
+  badge = input<number>();
 
   ngOnInit() {
     this.renderer.addClass(this.elRef.nativeElement, `floating-action-btn`);

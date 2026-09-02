@@ -20,7 +20,14 @@
 
   &--disabled {
     background-color: var(--kui-color-control-disabled, #{variables.$light-grey-100});
-    cursor: initial;
+    // Assigned rows stay clickable: tapping them re-sends the designation share link.
+    cursor: pointer;
+
+    // Dim the icon to the disabled tone (noticeable in dark mode, where the full-contrast
+    // icon used to make assigned rows hard to tell apart from selectable ones).
+    .territory-checkbox__icon {
+      color: var(--kui-color-text-disabled, #{variables.$grey-300});
+    }
   }
 
   &--selected {

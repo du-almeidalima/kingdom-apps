@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, forwardRef, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, forwardRef, computed, inject, input, output, signal } from '@angular/core';
 import { Territory } from '../../../../../models/territory';
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
 import openGoogleMapsHandler from '../../../../shared/utils/open-google-maps';
@@ -25,13 +25,16 @@ import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
   ],
   template: `
     <label
+      role="presentation"
       class="territory-checkbox"
       data-testid="assign-territory-checkbox"
       [for]="territory().id"
+      [title]="disabled() ? assignedTitle : null"
       [ngClass]="{
         'territory-checkbox--disabled': disabled(),
         'territory-checkbox--selected': !disabled() && value(),
       }"
+      (click)="handleCardClick($event)"
     >
       <div class="territory-checkbox__control-container">
         <input
@@ -40,7 +43,6 @@ import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
           [id]="territory().id"
           [checked]="value()"
           [ngModel]="value()"
-          [disabled]="disabled()"
           hidden
           (ngModelChange)="setValue($event)"
         />
@@ -147,10 +149,15 @@ export class TerritoryCheckboxComponent implements ControlValueAccessor {
 
   protected readonly iconColor = 'currentColor';
   protected readonly VisitOutcomeEnum = VisitOutcomeEnum;
+  /** Tooltip hinting that tapping an already-assigned (disabled) row re-sends the designation. */
+  protected readonly assignedTitle = 'Enviar designação novamente';
 
   buttonIconColor = 'var(--kui-color-action-primary)';
 
   territory = input.required<Territory>();
+
+  /** Emitted when the disabled (already assigned) card itself is tapped, excluding its action buttons. */
+  assignedClick = output();
 
   hasRecentRevisit = computed(() => TerritoryAlertsBO.hasRecentRevisit(this.territory()));
   hasRecentlyMoved = computed(() => TerritoryAlertsBO.hasRecentlyMoved(this.territory()));
@@ -208,6 +215,25 @@ export class TerritoryCheckboxComponent implements ControlValueAccessor {
 
     this.onChange(value);
     this.onTouched();
+  }
+
+  /**
+   * Tapping a disabled (already assigned) card re-triggers the designation share (handled by the
+   * parent page). Clicks on the inner action buttons keep their own behavior and are ignored here.
+   */
+  handleCardClick(event: MouseEvent) {
+    if (!this.disabled()) {
+      return;
+    }
+
+    // Suppress the native label→checkbox activation
+    event.preventDefault();
+
+    if ((event.target as HTMLElement).closest('button')) {
+      return;
+    }
+
+    this.assignedClick.emit();
   }
 
   // Maybe the handleOpenMaps and handleOpenHistory should not be part of this component

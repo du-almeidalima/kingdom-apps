@@ -2,7 +2,7 @@ import { expect, test } from '../fixtures';
 import { AssignTerritoriesPage } from '../page-objects/assign-territories.page';
 import { SortFilterDialogPage } from '../page-objects/sort-filter-dialog.page';
 import { ConfirmDialogPage } from '../page-objects/confirm-dialog.page';
-import { captureWhatsAppPopup } from '../utils/whatsapp-link.util';
+import { captureWhatsAppPopup, recordedOpenUrls, recordWindowOpen } from '../utils/whatsapp-link.util';
 import * as firebaseAdmin from 'firebase-admin';
 import { RoleEnum } from '../../src/models/enums/role';
 import { VisitOutcomeEnum } from '../../src/models/enums/visit-outcome';
@@ -328,31 +328,36 @@ test.describe('Assign territories — listing & selection (WP-18)', () => {
 
 // ─── WP-19: assign creation & share ───────────────────────────────────────────
 
-// Known UX gap: UC-ASSIGN-12 locks the absence of selected-count feedback.
 test.describe('Assign territories — creation & share (WP-19)', () => {
   test.use({ role: 'admin' });
 
-  test('UC-ASSIGN-12 — there is no selected-count UI anywhere on this screen (⚠ gap)', async ({
+  // UC-ASSIGN-12 previously locked the absence of a selected-count UI; the FAB
+  // badge (fab-badge testid) now provides it.
+  test('UC-ASSIGN-12 — FAB badge counts the selected territories across city switches', async ({
     authenticatedPage,
     db,
   }) => {
     const assignPage = new AssignTerritoriesPage(authenticatedPage);
     await assignPage.goto();
 
-    // Tick 2 territories across 2 different cities.
+    // No badge while nothing is selected — the FAB carries no digit.
+    await expect(assignPage.selectedCount).toHaveCount(0);
+
+    // Tick 2 territories across 2 different cities (UC-ASSIGN-11's cross-city accumulation).
     await assignPage.check('Rua das Acácias, 45 - Pinheiros');
+    await expect(assignPage.selectedCount).toHaveText('1');
     await assignPage.selectCity('Osasco');
     await assignPage.check('Av. dos Autonomistas, 1200 - Centro');
+    await expect(assignPage.selectedCount).toHaveText('2');
 
-    // Only the FAB's binary enabled state signals selection.
-    await expect(assignPage.fab).toBeEnabled();
-    // No element exposes a running total — the FAB carries no digit and there is
-    // no "selecionados" copy anywhere on the page.
-    await expect(assignPage.fab).not.toContainText(/\d/);
-    await expect(authenticatedPage.getByText(/selecionado/i)).toHaveCount(0);
+    // Submitting resets the count (badge hidden, FAB disabled again).
+    const { sharedUrl } = await captureWhatsAppPopup(authenticatedPage, () => assignPage.fab.click());
+    expect(sharedUrl).toContain('/work/');
+    await expect(assignPage.selectedCount).toHaveCount(0);
+    await expect(assignPage.fab).toBeDisabled();
 
-    // No designation written (this test does not submit).
-    expect(await db.getCollectionDocs(db.collections.designations)).toHaveLength(1);
+    // One new designation holding both territories.
+    expect(await db.getCollectionDocs(db.collections.designations)).toHaveLength(2);
   });
 
   test('UC-ASSIGN-13 — `expiresAt` is createdAt plus 7 days, in raw milliseconds', async ({
@@ -499,7 +504,8 @@ test.describe('Assign territories — creation & share (WP-19)', () => {
     const cap1 = await captureWhatsAppPopup(authenticatedPage, () => assignPage.fab.click());
     const d1 = designationIdFromShareUrl(cap1.sharedUrl);
 
-    // Reload resets the assigned Sets → every checkbox becomes tickable again.
+    // Reload resets the session state (selectedTerritoriesModel +
+    // assignedDesignations) → every checkbox becomes tickable again.
     await authenticatedPage.reload();
     await assignPage.goto();
     await assignPage.check('Rua das Acácias, 45 - Pinheiros');
@@ -607,6 +613,84 @@ test.describe('Assign territories — creation & share (WP-19)', () => {
     );
     expect(clipboard).toBe('');
     expect(sharedUrl).toContain('/work/');
+  });
+
+  test('UC-ASSIGN-25 — tapping an assigned territory re-triggers the share for its designation', async ({
+    authenticatedPage,
+    db,
+  }) => {
+    const assignPage = new AssignTerritoriesPage(authenticatedPage);
+    await assignPage.goto();
+
+    // Create designation D1 with two territories.
+    await assignPage.check('Rua das Acácias, 45 - Pinheiros');
+    await assignPage.check('Rua Harmonia, 300 - Vila Madalena');
+    const cap1 = await captureWhatsAppPopup(authenticatedPage, () => assignPage.fab.click());
+    const d1 = designationIdFromShareUrl(cap1.sharedUrl);
+
+    // Both submitted rows render checked-and-disabled, with the re-send hint.
+    const assignedRow = assignPage.checkboxByAddress('Rua das Acácias, 45 - Pinheiros');
+    await expect(assignedRow).toHaveClass(/territory-checkbox--disabled/);
+    await expect(assignedRow).toHaveAttribute('title', 'Enviar designação novamente');
+    await expect.poll(() => assignPage.isChecked('Rua das Acácias, 45 - Pinheiros')).toBe(true);
+    await expect(assignPage.checkboxByAddress('Rua Harmonia, 300 - Vila Madalena')).toHaveClass(
+      /territory-checkbox--disabled/,
+    );
+
+    // Tapping the assigned row re-shares the SAME designation — no new doc.
+    const cap2 = await captureWhatsAppPopup(authenticatedPage, () => assignedRow.click());
+    expect(cap2.whatsappUrl).toContain('whatsapp://send?text=');
+    expect(cap2.sharedUrl.endsWith(`/work/${d1}`)).toBe(true);
+    expect(await db.getCollectionDocs(db.collections.designations)).toHaveLength(2);
+
+    // The row stays checked-and-disabled after re-sharing.
+    await expect(assignedRow).toHaveClass(/territory-checkbox--disabled/);
+    await expect.poll(() => assignPage.isChecked('Rua das Acácias, 45 - Pinheiros')).toBe(true);
+  });
+
+  test('UC-ASSIGN-26 — Maps/History buttons on an assigned row keep their behavior; assigned icon is dimmed', async ({
+    authenticatedPage,
+    db,
+  }) => {
+    const assignPage = new AssignTerritoriesPage(authenticatedPage);
+    await assignPage.goto();
+
+    // Assign one territory (seeded territories all carry a mapsLink + visit history).
+    await assignPage.check('Rua das Acácias, 45 - Pinheiros');
+    await captureWhatsAppPopup(authenticatedPage, () => assignPage.fab.click());
+
+    const assignedRow = assignPage.checkboxByAddress('Rua das Acácias, 45 - Pinheiros');
+    await expect(assignedRow).toHaveClass(/territory-checkbox--disabled/);
+
+    // Reset the recorder so only the button clicks below are captured.
+    await recordWindowOpen(authenticatedPage);
+
+    // Maps button: still opens Google Maps, never a WhatsApp share.
+    await assignedRow.locator('button').first().click();
+    const afterMaps = await recordedOpenUrls(authenticatedPage);
+    expect(afterMaps.some((url) => url.includes('maps.google.com'))).toBe(true);
+    expect(afterMaps.some((url) => url.startsWith('whatsapp://'))).toBe(false);
+
+    // History button: still opens the visit history dialog, never a WhatsApp share.
+    await assignedRow.locator('button').nth(1).click();
+    await expect(authenticatedPage.getByTestId('history-dialog')).toBeVisible();
+    const afterHistory = await recordedOpenUrls(authenticatedPage);
+    expect(afterHistory.some((url) => url.startsWith('whatsapp://'))).toBe(false);
+
+    // Dark mode: the assigned icon uses the disabled tone while selectable rows keep full contrast.
+    await authenticatedPage.emulateMedia({ colorScheme: 'dark' });
+    await expect(authenticatedPage.locator('html')).toHaveAttribute('data-resolved-theme', 'dark');
+    const assignedIconColor = await assignedRow
+      .locator('.territory-checkbox__icon')
+      .evaluate((el) => getComputedStyle(el).color);
+    expect(assignedIconColor).toBe('rgba(255, 255, 255, 0.38)');
+    const selectableRow = assignPage.checkboxByAddress('Rua Harmonia, 300 - Vila Madalena');
+    const selectableIconColor = await selectableRow
+      .locator('.territory-checkbox__icon')
+      .evaluate((el) => getComputedStyle(el).color);
+    expect(selectableIconColor).toBe('rgba(255, 255, 255, 0.87)');
+
+    expect(await db.getCollectionDocs(db.collections.designations)).toHaveLength(2);
   });
 
   test('UC-ASSIGN-22 — authorised roles reach /territories/assign; APP_ADMIN bypasses the role list', async ({
