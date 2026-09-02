@@ -43,7 +43,7 @@ Evidence labels:
 | ☐    |     9 | `⚠ E2E` + `✋ Manual` | Gap #25 · `UC-AUTH-17`                                         | **Invitation `congregation` changes shape during consumption.** Adopt one canonical schema (preferably `DocumentReference`), avoid full-document shape drift, and plan migration compatibility.                  |
 | ☐    |     9 | `⚠ E2E`               | Gap #32 · `UC-CFG-10`, `J-05`                                  | **Deleting a city leaves territories with an invisible stale city.** Block deletion, migrate affected territories, or require an explicit replacement city.                                                      |
 | ☐    |     9 | `⚠ E2E` + `⏸ HX-4`    | Gap #34 · `UC-CFG-08`                                          | **City rename persistence is non-atomic.** Make congregation and territory updates atomic where practical, or add reconciliation; fault-test every partial-failure boundary.                                     |
-| ☐    |     9 | `⚠ E2E`               | Gap #41 · `UC-AUTH-22`                                         | **Forced auth-state loss leaves the browser on `/home`.** Clear state and complete navigation to `/login`; verify protected content cannot remain visible.                                                       |
+| ☑    |     9 | `⚠ E2E`               | Gap #41 · `UC-AUTH-22`                                         | **Forced auth-state loss leaves the browser on `/home`.** Clear state and complete navigation to `/login`; verify protected content cannot remain visible. **Fixed 2026-09** (e2e `UC-AUTH-22` now verifies the redirect to `/login` and the `Login` screen rendering).            |
 
 ## High-priority follow-ups — score 7–8
 
