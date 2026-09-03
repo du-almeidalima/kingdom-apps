@@ -7,25 +7,26 @@ Everything an E2E author needs to build **realistic seeds** and write **backend 
 
 ## 1. Firestore collections
 
-| Collection                 | Doc id                                    | Written by                               | Notes                                              |
-| -------------------------- | ----------------------------------------- | ---------------------------------------- | -------------------------------------------------- |
-| `congregations`            | free-form (seed uses `seed-congregation`) | Configuration screen (`cities` only)     | Holds `cities[]` + `settings`.                     |
-| `users`                    | **=== Firebase Auth `uid`**               | sign-in (auto-create), Users screen      | `congregation` is a `DocumentReference`.           |
-| `territories`              | auto-id (`doc(collection)`)               | Territories screen, Work page write-back | Parent doc carries `recentHistory` + `lastVisit`.  |
-| `territories/{id}/history` | visit id (client-generated)               | Work page (complete/edit/undo visit)     | **Full** visit log, one doc per visit.             |
-| `designations`             | auto-id                                   | Assign page                              | Embeds a **snapshot** of the assigned territories. |
-| `invitation_links`         | auto-id                                   | Users screen (invite dialog)             | ⚠ note the **underscore** in the collection name.  |
+| Collection                 | Doc id                                    | Written by                                          | Notes                                                                                |
+| -------------------------- | ----------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `congregations`            | free-form (seed uses `seed-congregation`) | Configuration screen (`cities` only)                | Holds `cities[]` + `settings`.                                                       |
+| `users`                    | **=== Firebase Auth `uid`**               | sign-in (auto-create), Users screen                 | `congregation` is a `DocumentReference`.                                             |
+| `territories`              | auto-id (`doc(collection)`)               | Territories screen, Work page write-back            | Parent doc carries `recentHistory` + `lastVisit`.                                    |
+| `territories/{id}/history` | visit id (client-generated)               | Work page (complete/edit/undo visit)                | **Full** visit log, one doc per visit.                                               |
+| `designations`             | auto-id                                   | Assign page                                         | Embeds a **snapshot** of the assigned territories.                                   |
+| `designations_header`      | auto-id                                   | Assign page (lazy, on first designation of a cycle) | One `IN_PROGRESS` doc per congregation; closed by the Stop button or the daily cron. |
+| `invitation_links`         | auto-id                                   | Users screen (invite dialog)                        | ⚠ note the **underscore** in the collection name.                                    |
 
-The E2E layer re-declares the first five in `e2e/seed/collections.ts`
-(`db.collections.congregations | users | territories | designations`, `db.historySubcollection === 'history'`).
-`invitation_links` is **not** in `Collections` yet → harness extension (see `../test-catalog.md`).
+The E2E layer re-declares these in `e2e/seed/collections.ts`
+(`db.collections.congregations | users | territories | designations | designations_header`, `db.historySubcollection === 'history'`).
 
 ```
 congregations/{congregationId}
 users/{uid}                      → congregation: DocumentReference<congregations/{id}>
 territories/{territoryId}        → congregationId: string (plain id, NOT a ref)
 territories/{territoryId}/history/{visitId}
-designations/{designationId}     → congregationId: string, territories: DesignationTerritory[]
+designations/{designationId}     → congregationId: string, territories: DesignationTerritory[], designationHeaderId?: string
+designations_header/{headerId}   → congregationId: string (plain id, NOT a ref), status: 'IN_PROGRESS' | 'DONE'
 invitation_links/{linkId}        → congregation: DocumentReference on create, embedded object after update (§2.6)
 ```
 
@@ -75,15 +76,16 @@ type DesignationTerritory = Omit<Territory, 'recentHistory'> & { status: Designa
 type DesignationSettings = Partial<Pick<CongregationSettings, 'shouldDesignationBlockAfterExpired'>>;
 ```
 
-| Field            | Type                     | Required | Meaning / test relevance                                           |
-| ---------------- | ------------------------ | -------- | ------------------------------------------------------------------ |
-| `id`             | `string`                 | ✔        | The `:id` in `/work/:id`. Anyone holding it can open the page.     |
-| `congregationId` | `string`                 | ✔        | Plain id.                                                          |
-| `territories`    | `DesignationTerritory[]` | ✔        | **Embedded snapshot** (§4.2), each with its own `status`.          |
-| `createdAt`      | `Date` → `Timestamp`     | ✔        |                                                                    |
-| `createdBy`      | `string`                 | ✔        | Creator's user id / uid.                                           |
-| `expiresAt`      | `Date` → `Timestamp`     | ✔        | Derived on creation from `designationAccessExpiryDays`.            |
-| `settings`       | `DesignationSettings?`   | ✖        | Snapshot of `shouldDesignationBlockAfterExpired` at creation time. |
+| Field                 | Type                     | Required | Meaning / test relevance                                                                                                                    |
+| --------------------- | ------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                  | `string`                 | ✔        | The `:id` in `/work/:id`. Anyone holding it can open the page.                                                                              |
+| `congregationId`      | `string`                 | ✔        | Plain id.                                                                                                                                   |
+| `territories`         | `DesignationTerritory[]` | ✔        | **Embedded snapshot** (§4.2), each with its own `status`.                                                                                   |
+| `createdAt`           | `Date` → `Timestamp`     | ✔        |                                                                                                                                             |
+| `createdBy`           | `string`                 | ✔        | Creator's user id / uid.                                                                                                                    |
+| `expiresAt`           | `Date` → `Timestamp`     | ✔        | Derived on creation from `designationAccessExpiryDays`.                                                                                     |
+| `settings`            | `DesignationSettings?`   | ✖        | Snapshot of `shouldDesignationBlockAfterExpired` at creation time.                                                                          |
+| `designationHeaderId` | `string?`                | ✖        | Id of the `designations_header` cycle this designation belongs to (§2.7). Optional: legacy docs predate headers; **all new writes set it**. |
 
 ### 2.4 `User` — `src/models/user.ts`
 
@@ -132,6 +134,28 @@ Reading a user resolves the reference. If the congregation document is missing, 
 > no longer has any callers — `InviteBO.consumeInviteLink` was removed). Reads only access
 > `congregation.id`, which works for both shapes. When seeding invites raw, always write
 > `congregation` as a `DocumentReference` (the creation-time shape).
+
+### 2.7 `DesignationsHeader` — `src/models/designations-header.ts`
+
+Groups the designations created in one working cycle on the Assign page, so an in-progress cycle can be
+resumed after navigation/reload (see `../features/territories-assign.md` UC-ASSIGN-27..31).
+
+| Field            | Type                           | Required | Meaning / test relevance                                                                                                                   |
+| ---------------- | ------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`             | `string`                       | ✔        | Also stored **inside** the document (auto-id on create).                                                                                   |
+| `congregationId` | `string`                       | ✔        | Plain id (matches `designations`/`territories` linking style — NOT a reference). Scope: one open header per congregation.                  |
+| `status`         | `DesignationsHeaderStatusEnum` | ✔        | `'IN_PROGRESS'` \| `'DONE'` (string values, like `DesignationStatusEnum`).                                                                 |
+| `createdAt`      | `Date` → `Timestamp`           | ✔        | Set on lazy creation (first designation while none is in progress). The resume query orders by it **desc**.                                |
+| `createdBy`      | `string`                       | ✔        | User id of whoever initiated the cycle's first designation.                                                                                |
+| `closedAt`       | `Date?` → `Timestamp?`         | ✖        | Set when `status` flips to `DONE`.                                                                                                         |
+| `closedBy`       | `'USER' \| 'CRON'?`            | ✖        | Provenance of the close: manual Stop button vs the daily 12:00 `America/Sao_Paulo` scheduled function.                                     |
+| `expireAt`       | `Date?` → `Timestamp?`         | ✖        | Firestore TTL — stamped `now + 180d` on create (same retention as `designations`; TTL `fieldOverrides` entry in `firestore.indexes.json`). |
+
+Designations link back via `Designation.designationHeaderId` (§2.3); the header holds **no** designation id
+array (unbounded arrays are avoided). The resume query
+(`congregationId == X && status == 'IN_PROGRESS' orderBy createdAt desc limit 1`) needs the composite index
+declared in `firestore.indexes.json`; `where('designationHeaderId','==',H)` and `where('status','==','IN_PROGRESS')`
+are covered by automatic single-field indexes.
 
 ---
 
@@ -255,15 +279,15 @@ The alert badges (bible student / recently moved / unresolved "not answered") ar
 
 ### 4.6 Realtime vs one-shot reads
 
-| Read                                                      | API              | UI updates without reload?                                                              |
-| --------------------------------------------------------- | ---------------- | --------------------------------------------------------------------------------------- |
-| Territories list (`getAllByCongregation`)                 | `collectionData$`| **Yes** — live listener.                                                                |
-| Territories by city (`getAllByCongregationAndCities`)     | `collectionData$`| **Yes**.                                                                                |
-| Users list (`getAllByCongregation`)                       | `collectionData$`| **Yes**.                                                                                |
-| Designation (`getById`)                                   | `docData$`       | **Yes**.                                                                                |
-| Congregation (`getById`)                                  | `docData$`       | **Yes**.                                                                                |
-| Territory by id, `getAllInIds`, visit history, statistics | `getDocs`        | **No** — snapshot at call time.                                                         |
-| `UserStateService` (signal-backed)                       | in-memory        | Only when explicitly `setUser(...)`; a congregation edit made elsewhere needs a reload. |
+| Read                                                      | API               | UI updates without reload?                                                              |
+| --------------------------------------------------------- | ----------------- | --------------------------------------------------------------------------------------- |
+| Territories list (`getAllByCongregation`)                 | `collectionData$` | **Yes** — live listener.                                                                |
+| Territories by city (`getAllByCongregationAndCities`)     | `collectionData$` | **Yes**.                                                                                |
+| Users list (`getAllByCongregation`)                       | `collectionData$` | **Yes**.                                                                                |
+| Designation (`getById`)                                   | `docData$`        | **Yes**.                                                                                |
+| Congregation (`getById`)                                  | `docData$`        | **Yes**.                                                                                |
+| Territory by id, `getAllInIds`, visit history, statistics | `getDocs`         | **No** — snapshot at call time.                                                         |
+| `UserStateService` (signal-backed)                        | in-memory         | Only when explicitly `setUser(...)`; a congregation edit made elsewhere needs a reload. |
 
 So: a background Admin-SDK write is expected to appear on `/territories` **without** a reload, but the statistics page and the profile/configuration user state require a navigation or reload.
 
@@ -284,6 +308,14 @@ Consequences:
   `designation.congregationId`), seeded docs are stamped by the seeder, and legacy production docs are stamped once by the `backfill:history-stamps` script.
 - Visits older than **1 year** are not returned → dynamic period tiles and the `Mudaram` count only see the last year of data (the previous behaviour only saw `recentHistory`, so this is strictly broader).
 - A congregation with zero territories returns `of([])` immediately (empty-snapshot guard, gap #42).
+
+### 4.9 Designations header lifecycle
+
+- A header is created **lazily**: only by the first designation created while no `IN_PROGRESS` header exists for the congregation (any assigner of the congregation resumes the same header — the scope is per congregation, not per user).
+- Every designation write after that reuses the in-memory header id (no extra read; a known, accepted ceiling is documented in the backlog plan: a header closed by the cron while the page stayed open still receives one more designation stamp).
+- The header flips to `DONE` exactly once — either manually (`closedBy: 'USER'`, Stop button, available to anyone who can open the Assign page) or by the daily scheduled function (`closedBy: 'CRON'`, 12:00 `America/Sao_Paulo`, which closes **every** `IN_PROGRESS` header regardless of age).
+- Stopping closes the header only; the designations and their territories are kept untouched.
+- Security: `designations_header` is **not** in the public rules — the authenticated catch-all in `firestore.rules` is its only granter (unlike `designations`, which is public for the anonymous `/work/:id` links).
 
 ---
 
@@ -327,6 +359,7 @@ Every seeded user gets an Auth emulator account with `DEFAULT_PASSWORD = 'test-p
 | `buildVisitHistory`         | `SPOKE`, `isRevisit false`, `isResolved true`, `name 'Maria'`, dates start at `2024-01-15T10:00Z` and decrease by one day per default build                                                                             |
 | `buildDesignation`          | `createdAt 2024-02-01`, `expiresAt 2024-02-08` (**past** — override for active designations), one embedded territory, `settings.shouldDesignationBlockAfterExpired: true`                                               |
 | `buildDesignationTerritory` | `Av. Paulista, 1000 - Bela Vista`, `note: ''`, `icon MAN`, `status PENDING`, **no `history`**                                                                                                                           |
+| `buildDesignationsHeader`   | `status IN_PROGRESS`, `createdAt 2026-09-01T12:00Z`, `congregationId: ''` (**always override**) — no `closedAt`/`closedBy` unless you pass them with a `DONE` status                                                    |
 
 The seeder derives the parent territory's `lastVisit` (newest history date, else `null`) and
 `recentHistory` (newest 5, **descending**) from `history`. Note the ordering difference versus the app's
@@ -336,11 +369,12 @@ The seeder derives the parent territory's `lastVisit` (newest history date, else
 
 ## Sources
 
-- `apps/ministry-maps/src/models/territory.ts`, `designation.ts`, `territory-visit-history.ts`, `user.ts`,
-  `congregation.ts`, `invitation-link.ts`, `enums/{role,visit-outcome,designation-status}.ts`
+- `apps/ministry-maps/src/models/territory.ts`, `designation.ts`, `designations-header.ts`, `territory-visit-history.ts`, `user.ts`,
+  `congregation.ts`, `invitation-link.ts`, `enums/{role,visit-outcome,designation-status,designations-header-status,designations-header-closed-by}.ts`
 - `apps/ministry-maps/src/app/repositories/firebase/firebase-territory-datasource.service.ts`
 - `apps/ministry-maps/src/app/repositories/firebase/firebase-user-datasource.service.ts`
 - `apps/ministry-maps/src/app/repositories/firebase/firebase-designation-datasource.service.ts`
+- `apps/ministry-maps/src/app/repositories/firebase/firebase-designations-header-datasource.service.ts`
 - `apps/ministry-maps/src/app/repositories/firebase/firebase-invitation-link-datasource.service.ts`
 - `apps/ministry-maps/src/app/repositories/firebase/firebase-congregation-datasource.service.ts`
 - `apps/ministry-maps/src/app/state/user.state.service.ts`

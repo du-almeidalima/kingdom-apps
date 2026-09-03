@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, viewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize, Observable, of, shareReplay } from 'rxjs';
 
 import {
@@ -10,6 +11,7 @@ import {
   SelectComponent,
   SortFilterComponent,
   SortFilterValue,
+  ToasterService,
   white200,
 } from '@kingdom-apps/common-ui';
 
@@ -23,7 +25,6 @@ import { isMobileDevice } from '../../../../shared/utils/user-agent';
 import { TerritoryAlertsBO } from '../../bo/territory-alerts/territory-alerts.bo';
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 import { Dialog } from '@angular/cdk/dialog';
-import { TerritoryBO } from '../../bo/territory/territory.bo';
 import {
   ALL_OPTION,
   territoriesFilterPipe,
@@ -34,6 +35,8 @@ import { createSendWhatsAppLink } from '../../../../shared/utils/share-utils';
 import { FormsModule } from '@angular/forms';
 import { TerritoryCheckboxComponent } from '../../components/territory-checkbox/territory-checkbox.component';
 import { AsyncPipe } from '@angular/common';
+import { AssignTerritoriesStateService } from '../../state/assign-territories.state.service';
+import { DesignationsHeaderBO } from '../../bo/designations-header/designations-header.bo';
 
 @Component({
   selector: 'kingdom-apps-assign-territories-page',
@@ -54,8 +57,14 @@ import { AsyncPipe } from '@angular/common';
 export class AssignTerritoriesPageComponent implements OnInit {
   private readonly territoryRepository = inject(TerritoryRepository);
   private readonly userState = inject(UserStateService);
-  private readonly territoryBO = inject(TerritoryBO);
   private readonly dialog = inject(Dialog);
+  private readonly toaster = inject(ToasterService);
+  private readonly designationsHeaderBO = inject(DesignationsHeaderBO);
+  private readonly destroyRef = inject(DestroyRef);
+
+  /** Navigation-surviving session + cart state. */
+  public readonly state = inject(AssignTerritoriesStateService);
+
   public readonly ALL_OPTION = ALL_OPTION;
   public readonly sortFilterConfig = TERRITORY_SORT_FILTER_CONFIG;
   public readonly white200 = white200;
@@ -70,28 +79,6 @@ export class AssignTerritoriesPageComponent implements OnInit {
   filteredTerritories$: Observable<Territory[]> = of([]);
 
   searchInputComponent = viewChild.required(SearchInputComponent);
-  isCreatingAssignment = signal(false);
-  selectedTerritoriesModel = signal(new Set<string>());
-  selectedCount = computed(() => this.selectedTerritoriesModel().size);
-
-  /**
-   * Designations created in this session: `designationId → territoryIds` assigned to it.
-   * Territories mapped here render checked-and-disabled, and tapping them re-shares the designation.
-   */
-  assignedDesignations = signal(new Map<string, Set<string>>());
-
-  /** Reverse index of {@link assignedDesignations} (`territoryId → designationId`) for per-row lookups. */
-  private readonly assignedTerritoryIndex = computed(() => {
-    const territoryIdToDesignationId = new Map<string, string>();
-
-    for (const [designationId, territoryIds] of this.assignedDesignations()) {
-      for (const territoryId of territoryIds) {
-        territoryIdToDesignationId.set(territoryId, designationId);
-      }
-    }
-
-    return territoryIdToDesignationId;
-  });
 
   /**
    * This page is only reachable for a signed-in user whose congregation reference is resolved,
@@ -113,6 +100,20 @@ export class AssignTerritoriesPageComponent implements OnInit {
     this.cities = cities;
 
     this.fetchTerritories(id, firstCity);
+
+    this.state.isLoadingSession.set(true);
+    this.designationsHeaderBO
+      .getActiveSessionStream(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ header, designations }) => {
+          this.state.setSession(header, designations);
+          this.state.isLoadingSession.set(false);
+        },
+        error: () => {
+          this.state.isLoadingSession.set(false);
+        },
+      });
   }
 
   /**
@@ -122,17 +123,17 @@ export class AssignTerritoriesPageComponent implements OnInit {
    * @param territoryId
    */
   hasAlreadyBeenSelected(territoryId: string): boolean {
-    return this.selectedTerritoriesModel().has(territoryId) || this.isTerritoryAssigned(territoryId);
+    return this.state.selectedTerritoryIds().has(territoryId) || this.isTerritoryAssigned(territoryId);
   }
 
   /** Returns true if the territory was already assigned to a designation created in this session. */
   isTerritoryAssigned(territoryId: string): boolean {
-    return this.assignedTerritoryIndex().has(territoryId);
+    return this.state.assignedTerritoryIndex().has(territoryId);
   }
 
   /** Returns the id of the designation the territory was assigned to, if any. */
   designationIdForTerritory(territoryId: string): string | undefined {
-    return this.assignedTerritoryIndex().get(territoryId);
+    return this.state.assignedTerritoryIndex().get(territoryId);
   }
 
   /**
@@ -149,47 +150,45 @@ export class AssignTerritoriesPageComponent implements OnInit {
 
   handleTerritoryFormSubmit() {
     // Guards against a double submission
-    if (this.isCreatingAssignment()) {
+    if (this.state.isCreatingAssignment() || !this.state.selectedCount()) {
       return;
     }
 
-    const selectedTerritories = [...this.selectedTerritoriesModel().values()];
+    const territoryIds = Array.from(this.state.selectedTerritoryIds());
+    this.state.isCreatingAssignment.set(true);
 
-    if (!selectedTerritories.length) {
-      return;
-    }
-
-    // Loading Spinner on Button
-    this.isCreatingAssignment.set(true);
-
-    this.territoryBO
-      .createDesignationForTerritories(selectedTerritories)
-      .pipe(
-        finalize(() => {
-          this.isCreatingAssignment.set(false);
-        }),
-      )
-      .subscribe((designation) => {
-        // Mark the Territories as assigned
-        this.assignedDesignations.update((designations) =>
-          new Map(designations).set(designation.id, new Set(selectedTerritories)),
-        );
-
-        this.removeTerritoriesFromSelection(selectedTerritories);
-
+    this.designationsHeaderBO
+      .createDesignation(territoryIds, this.state.header())
+      .pipe(finalize(() => this.state.isCreatingAssignment.set(false)))
+      .subscribe(({ designation, header }) => {
+        this.state.setHeader(header);
+        this.state.addAssignedDesignation(designation.id, territoryIds);
         this.shareDesignation(designation.id);
       });
   }
 
-  private removeTerritoriesFromSelection(territoryIds: string[]) {
-    this.selectedTerritoriesModel.update((selected) => {
-      const next = new Set(selected);
-
-      for (const territoryId of territoryIds) {
-        next.delete(territoryId);
+  /** Opens the Stop confirmation dialog and, on confirmation, closes the active session. */
+  handleStopClick() {
+    this.openConfirmStopDialog().subscribe((confirmed) => {
+      if (!confirmed) {
+        return;
       }
 
-      return next;
+      const header = this.state.header();
+      if (!header) {
+        return;
+      }
+
+      this.state.isStoppingSession.set(true);
+      this.designationsHeaderBO
+        .closeHeader(header.id)
+        .pipe(finalize(() => this.state.isStoppingSession.set(false)))
+        .subscribe({
+          next: () => {
+            this.state.clearSession();
+            this.toaster.success('Designações em andamento encerradas com sucesso.');
+          },
+        });
     });
   }
 
@@ -242,27 +241,15 @@ export class AssignTerritoriesPageComponent implements OnInit {
     // Adding the value here regardless of the alert because we need to tell Angular that something has changed
     // In order for the TerritoryCheckBox component to render correctly
     // Otherwise, even by not adding this, the TerritoryCheckBox would display as selected
-    this.setTerritorySelection(territoryId, value);
+    this.state.setTerritorySelection(territoryId, value);
 
     if (value && importantAlert) {
       this.openConfirmAssignmentDialog(importantAlert).subscribe((result) => {
         if (!result) {
-          this.setTerritorySelection(territoryId, false);
+          this.state.setTerritorySelection(territoryId, false);
         }
       });
     }
-  }
-
-  private setTerritorySelection(territoryId: string, selected: boolean) {
-    this.selectedTerritoriesModel.update((selectedIds) => {
-      const next = new Set(selectedIds);
-      if (selected) {
-        next.add(territoryId);
-      } else {
-        next.delete(territoryId);
-      }
-      return next;
-    });
   }
 
   shareDesignation(designationId: string) {
@@ -290,6 +277,15 @@ export class AssignTerritoriesPageComponent implements OnInit {
 
     return this.dialog.open<ConfirmDialogComponent, ConfirmDialogData>(ConfirmDialogComponent, {
       data: { title, bodyText },
+    }).closed;
+  }
+
+  private openConfirmStopDialog() {
+    return this.dialog.open<ConfirmDialogComponent, ConfirmDialogData>(ConfirmDialogComponent, {
+      data: {
+        title: 'Encerrar designações?',
+        bodyText: 'Os territórios já designados serão mantidos. Novas designações iniciarão um novo ciclo.',
+      },
     }).closed;
   }
 }

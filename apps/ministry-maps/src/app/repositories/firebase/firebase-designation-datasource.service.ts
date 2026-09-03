@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { collection, CollectionReference, doc, setDoc, Timestamp } from 'firebase/firestore';
+import { collection, CollectionReference, doc, query, setDoc, Timestamp, where } from 'firebase/firestore';
 import type { DocumentReference } from 'firebase/firestore';
 import { from, map, Observable, switchMap, take, defer } from 'rxjs';
 
@@ -8,7 +8,7 @@ import { FirebaseDesignationModel } from '../../../models/firebase/firebase-desi
 import { firebaseEntityConverterFactory } from '../../shared/utils/firebase-entity-converter';
 import { DesignationRepository } from '../designation.repository';
 import { FirebaseDatasource } from './firebase-datasource';
-import { docData$ } from './firebase-rxjs-interop';
+import { collectionData$, docData$ } from './firebase-rxjs-interop';
 import { FIRESTORE } from './firebase-providers';
 
 const convertHistoryDateFirebaseTimestampToDate = (data: FirebaseDesignationModel): Designation => {
@@ -82,5 +82,11 @@ export class FirebaseDesignationDatasourceService implements DesignationReposito
 
     // defer: lazy, so concat/forkJoin/retry can re-subscribe the write.
     return defer(() => from(setDoc(designationDocReference, designationTerritory)));
+  }
+
+  getStreamByHeaderId(headerId: string): Observable<Designation[]> {
+    const q = query(this.designationCollection, where('designationHeaderId', '==', headerId));
+
+    return collectionData$<Designation>(q);
   }
 }

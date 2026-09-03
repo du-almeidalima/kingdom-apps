@@ -11,7 +11,9 @@ Angular PWA ──imports──> common-ui
      ├──> Firebase Auth
      ├──> Cloud Firestore
      ├──> Remote Config
-     └──> callable Functions ──> Firebase Admin SDK
+     └──> Functions ──> Firebase Admin SDK
+           ├── callable (deleteUser, provisionUserFromInvite)
+           └── scheduled (closeDesignationsHeaders, daily 12:00 America/Sao_Paulo)
 ```
 
 There is no custom API server. The browser uses Firebase directly; privileged operations belong in
@@ -43,13 +45,13 @@ lockfile.
 
 ## Firebase boundary
 
-| Service            | Usage                                                                                           |
-| ------------------ | ----------------------------------------------------------------------------------------------- |
-| Auth               | Google and Microsoft OAuth; emulator custom-token sign-in is exposed only in local development. |
-| Cloud Firestore    | Primary application data, accessed through AngularFire repositories.                            |
-| Cloud Functions v2 | The `deleteUser` callable performs privileged Firebase Auth deletion.                           |
-| Remote Config      | Runtime configuration; no local emulator is wired in `app.config.ts`.                           |
-| Hosting            | `prod` targets `du-ministry-maps`; `beta` targets `du-ministry-maps-beta`.                      |
+| Service            | Usage                                                                                                                                                                                                                                                                                                |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Auth               | Google and Microsoft OAuth; emulator custom-token sign-in is exposed only in local development.                                                                                                                                                                                                      |
+| Cloud Firestore    | Primary application data, accessed through repositories. `logs` and `designations` are TTL-deleted (~6 months); `designations_header` follows the same policy and holds the resumable assignment cycles.                                                                                             |
+| Cloud Functions v2 | The `deleteUser` callable performs privileged Firebase Auth deletion; the `provisionUserFromInvite` callable provisions users from invites; the `closeDesignationsHeaders` scheduled function (v2 `onSchedule`) closes every `IN_PROGRESS` `designations_header` daily at 12:00 `America/Sao_Paulo`. |
+| Remote Config      | Runtime configuration; no local emulator is wired in `app.config.ts`.                                                                                                                                                                                                                                |
+| Hosting            | `prod` targets `du-ministry-maps`; `beta` targets `du-ministry-maps-beta`.                                                                                                                                                                                                                           |
 
 The application models six roles: `APP_ADMIN`, `ADMIN`, `ELDER`, `ORGANIZER`, `SUPERINTENDENT`, and
 `PUBLISHER`. Route guards and `libAuthorize` control client navigation and visibility; they are not a
@@ -65,6 +67,12 @@ The authoritative collection shapes and invariants are documented in
   read dynamically from the deployed browser environment.
 - Local development connects Auth (`9099`), Firestore (`8080`), and Functions (`5001`) to emulators.
   The Emulator UI runs on `4000`.
+- **Triggering scheduled functions locally:** v2 `onSchedule` functions are HTTP-invoked in production
+  (Cloud Scheduler → authenticated HTTP POST), and the Functions emulator mirrors that: the scheduled
+  function is served at the trigger-key route `POST http://127.0.0.1:5001/<project>/<region>/<name>-0`.
+  Note the plain function name 404s and the Pub/Sub emulator does **not** help: on firebase-tools 14.x a
+  v2 scheduled function registers the topic `firebase-schedule-<name>` on the Pub/Sub emulator, but its
+  trigger signature is `http`, so topic publishes are acked without executing (verified on 14.27.0).
 - `apps/ministry-maps/.env.development` contains local defaults. CI supplies deployment values through
   GitHub secrets and variables.
 - Emulator seed data lives in `tools/executors/firebase-emulator/seed`.

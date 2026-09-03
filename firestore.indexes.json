@@ -33,6 +33,25 @@
         }
       ],
       "density": "SPARSE_ALL"
+    },
+    {
+      "collectionGroup": "designations_header",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "congregationId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ],
+      "density": "SPARSE_ALL"
     }
   ],
   "fieldOverrides": [
@@ -44,6 +63,12 @@
     },
     {
       "collectionGroup": "designations",
+      "fieldPath": "expireAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "designations_header",
       "fieldPath": "expireAt",
       "ttl": true,
       "indexes": []

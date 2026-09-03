@@ -15,4 +15,8 @@ export class DesignationRepositoryMock implements DesignationRepository {
   update(_designationTerritory: Designation): Observable<void> {
     return EMPTY;
   }
+
+  getStreamByHeaderId(_headerId: string): Observable<Designation[]> {
+    return EMPTY;
+  }
 }

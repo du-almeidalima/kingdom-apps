@@ -83,6 +83,9 @@ service cloud.firestore {
 
     // Catch-all for every other collection. `logs` and `users` are excluded so the dedicated
     // rules above stay their only granters (rules union grants, they never subtract).
+    // `designations_header` (resumable-assignment cycle headers) is internal congregational
+    // data and is intentionally NOT granted publicly like `designations` is — the catch-all
+    // below is its only granter: authenticated read/write.
     match /{collectionId}/{document=**} {
       allow read, write: if request.auth != null && collectionId != 'logs' && collectionId != 'users';
     }

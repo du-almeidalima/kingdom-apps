@@ -12,6 +12,7 @@
  * - `FirebaseTerritoryDatasourceService.COLLECTION_NAME` → 'territories'
  * - `FirebaseTerritoryDatasourceService['historySubCollectionName']` → 'history'
  * - `FirebaseDesignationDatasourceService['collectionName']` → 'designations'
+ * - `FirebaseDesignationsHeaderDatasourceService.COLLECTION_NAME` → 'designations_header' (exact, singular "header")
  * - `FirebaseInvitationLinkDataSourceService.COLLECTION_NAME` → 'invitation_links' (mind the underscore)
  */
 export const Collections = {
@@ -19,6 +20,7 @@ export const Collections = {
   users: 'users',
   territories: 'territories',
   designations: 'designations',
+  designations_header: 'designations_header',
   invitation_links: 'invitation_links',
   logs: 'logs',
 } as const;

@@ -1,7 +1,9 @@
 import { CongregationRepository } from './congregation.repository';
 import { DesignationRepository } from './designation.repository';
+import { DesignationsHeaderRepository } from './designations-header.repository';
 import { FirebaseCongregationDatasourceService } from './firebase/firebase-congregation-datasource.service';
 import { FirebaseDesignationDatasourceService } from './firebase/firebase-designation-datasource.service';
+import { FirebaseDesignationsHeaderDatasourceService } from './firebase/firebase-designations-header-datasource.service';
 import { FirebaseTerritoryDatasourceService } from './firebase/firebase-territory-datasource.service';
 import { FirebaseUserDatasourceService } from './firebase/firebase-user-datasource.service';
 import { TerritoryRepository } from './territories.repository';
@@ -27,6 +29,10 @@ export const REPOSITORIES_PROVIDERS = [
   {
     provide: DesignationRepository,
     useClass: FirebaseDesignationDatasourceService,
+  },
+  {
+    provide: DesignationsHeaderRepository,
+    useClass: FirebaseDesignationsHeaderDatasourceService,
   },
   {
     provide: InvitationLinkRepository,

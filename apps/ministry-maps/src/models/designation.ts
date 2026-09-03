@@ -14,6 +14,8 @@ export type Designation = {
   territories: DesignationTerritory[];
   createdAt: Date;
   createdBy: string;
+  /** Optional link to the `designations_header` cycle this designation belongs to (pre-existing docs lack it). */
+  designationHeaderId?: string;
   /** Business expiry: when the designation stops being workable (drives the disabled state). */
   expiresAt: Date;
   /** Firestore TTL deletion date (`expireAt` field policy). Deleted automatically ~6 months after creation. */

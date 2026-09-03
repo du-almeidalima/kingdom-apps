@@ -151,7 +151,7 @@ undefined)` takes the `getAllByCongregationAndCities(id, [undefined])` branch (b
 - **Expected UI:** the submit FAB renders a numeric badge (`data-testid="fab-badge"`, provided by `FloatingActionButtonComponent`'s `badge` input) bound to `selectedCount = computed(() => selectedTerritoriesModel.size)`: **hidden while `0`**, reads `1` after step 2, `2` after step 3 (cross-city accumulation per UC-ASSIGN-11 is now visible), and hidden again after submit removes the submitted ids from the selection
 - **Expected persistence:** after step 4, one new designation holds both territories (UC-ASSIGN-15/16); `db.getCollectionDocs(db.collections.designations)` grows by exactly 1
 - **Edge cases:** the badge renders exactly when the FAB is enabled (`size > 0` is also the FAB's `[disabled]` condition), so the two can never disagree; it is a common-ui affordance carrying no pt-BR copy of its own; a failed submission keeps the badge (and ticks) since the selection is only cleared on success (UC-ASSIGN-21)
-- **Priority:** P0 · **Gaps:** none — this entry previously locked the *absence* of a selected-count UI (⚠ suspected gap); the FAB badge resolved it
+- **Priority:** P0 · **Gaps:** none — this entry previously locked the _absence_ of a selected-count UI (⚠ suspected gap); the FAB badge resolved it
 
 ### Expiry derivation
 
@@ -218,7 +218,7 @@ undefined)` takes the `getAllByCongregationAndCities(id, [undefined])` branch (b
 - **Route:** `/territories/assign`
 - **Preconditions (seed):** default baseline
 - **Steps:** 1. tick `Rua das Acácias, 45 - Pinheiros` (`seed-territory-1`) and `Rua Harmonia, 300 - Vila Madalena` (`seed-territory-3`) → 2. submit, capture id `D1` from the share link → 3. reload `/territories/assign`, tick `Rua das Acácias, 45 - Pinheiros` and `Av. dos Autonomistas, 1200 - Centro` (`seed-territory-2`) → 4. submit, capture id `D2`
-- **Expected UI:** each submission independently opens its own share link/dialog; nothing on screen indicates `seed-territory-1` is already "in flight" on another designation (the row does become checked-and-disabled after the first submit — tapping it re-sends that designation, UC-ASSIGN-25 — but there is no cross-designation overview). Note the session mechanics that make step 3 possible: after step 2's submit succeeds, `assignedDesignations` (a `Map<designationId, Set<territoryId>>` populated **only in the success `subscribe`** of `handleTerritoryFormSubmit`) holds the submitted ids under `D1` and their checkboxes render checked-and-**disabled** — but both the map and `selectedTerritoriesModel` are component state, so the full reload in step 3 re-creates the component with an **empty** map and selection and every checkbox becomes tickable again (the state is only ever preserved across _city switches_ and submissions, never across reloads — see UC-ASSIGN-21 for the failure case that now also leaves the selection untouched)
+- **Expected UI:** each submission independently opens its own share link/dialog; nothing on screen indicates `seed-territory-1` is already "in flight" on another designation (the row does become checked-and-disabled after the first submit — tapping it re-sends that designation, UC-ASSIGN-25 — but there is no cross-designation overview). Note the session mechanics that make step 3 possible: after step 2's submit succeeds, `assignedDesignations` (a `Map<designationId, Set<territoryId>>` in `AssignTerritoriesStateService`, populated **only on submit success**) holds the submitted ids under `D1` and their checkboxes render checked-and-**disabled** — and the reload in step 3 **resumes the cycle from the persisted `designations_header`** (UC-ASSIGN-27): both designations point at the same header, so the hydrated map re-marks `seed-territory-1` and `seed-territory-3` as assigned while `seed-territory-2` remains tickable
 - **Expected persistence:** `db.getDoc(db.collections.designations, D1).territories` contains `seed-territory-1` and `seed-territory-3`, both `status: 'PENDING'`; `db.getDoc(db.collections.designations, D2).territories` contains `seed-territory-1` and `seed-territory-2`, both `status: 'PENDING'` — the two docs are entirely independent rows; `db.getCollectionDocs(db.collections.designations)` has grown by 2 (from the 1 baseline doc to 3)
 - **Edge cases:** mutating `D1.territories[0].status` to `'DONE'` (simulating a completed visit on `/work/:id`) must **not** change `D2.territories[0].status`, since each is an independently-written snapshot, not a shared reference
 - **Priority:** P0 · **Gaps:** none
@@ -277,7 +277,7 @@ undefined)` takes the `getAllByCongregationAndCities(id, [undefined])` branch (b
 - **Steps:** 1. tick `Rua das Acácias, 45 - Pinheiros` and `Rua Harmonia, 300 - Vila Madalena` → 2. submit, capture designation id `D1` from the share link (UC-ASSIGN-19) → 3. tap the now checked-and-disabled row for `Rua das Acácias, 45 - Pinheiros`
 - **Expected UI:** after step 2 the submitted rows render checked-and-disabled with `title="Enviar designação novamente"` and `cursor: pointer`. Tapping such a row emits `TerritoryCheckboxComponent.assignedClick` (a touch-first affordance — the click handler deliberately has no keyboard activation, since this screen is primarily used on mobile devices), which the page resolves through the `assignedDesignations` map (`designationId → territoryIds`) to call `shareDesignation(D1)` again — producing the same `whatsapp://send?text={location.origin}/work/D1` link and delivery path (desktop `window.open` / mobile `location.href`) as the original submission. The row stays checked-and-disabled afterwards
 - **Expected persistence:** none — re-sharing never writes; `db.getCollectionDocs(db.collections.designations)` is unchanged and `D1` is untouched
-- **Edge cases:** the tap does **not** open the assignment-confirmation dialog (`findImportantAlert`) — that flow belongs to *ticking* an enabled checkbox (UC-ASSIGN-07/08); clicks that originate inside the row's action buttons never re-share (UC-ASSIGN-26); the state is session-only, so after a reload no row is assigned (UC-ASSIGN-17). This map (`designationId → territoryIds`) is the groundwork for the planned "show designations already done" view
+- **Edge cases:** the tap does **not** open the assignment-confirmation dialog (`findImportantAlert`) — that flow belongs to _ticking_ an enabled checkbox (UC-ASSIGN-07/08); clicks that originate inside the row's action buttons never re-share (UC-ASSIGN-26); the state is session-only, so after a reload no row is assigned (UC-ASSIGN-17). This map (`designationId → territoryIds`) is the groundwork for the planned "show designations already done" view
 - **Priority:** P0 · **Gaps:** none
 
 #### UC-ASSIGN-26 — Assigned-row affordances: Maps/History buttons keep their behavior; assigned icon is dimmed
@@ -301,6 +301,113 @@ undefined)` takes the `getAllByCongregationAndCities(id, [undefined])` branch (b
 - **Expected persistence:** `db.getCollectionDocs(db.collections.designations)` is unchanged (no new doc) — matching the DOM, which no longer claims anything is assigned
 - **Edge cases:** this entry used to document the ⚠ defect "optimistic 'already assigned' marking survives a failed, silently-swallowed creation error" — the designation-map refactor resolved the marking (a failed create can no longer render rows checked-and-disabled), and the unit suite pins the rollback semantics (`assign-territories-page.component.spec.ts`); what **remains** is the silent failure (no error toast/dialog anywhere on this screen)
 - **Priority:** P1 · **Gaps:** `⚠ residual gap` (silent failure surface); automating the e2e failure trigger still needs a harness hook (HX-4)
+
+### Resumable sessions (`designations_header`)
+
+Session/cart state lives in `AssignTerritoriesStateService` (`providedIn: 'root'`): the active
+`designations_header` cycle (streamed in real time from Firestore on page open, updated on submit) and the
+unsubmitted selection cart (in-memory, survives route navigation but not a reload — the reload instead
+re-streams from the persisted header). Real-time collaboration: multiple assigners working concurrently
+receive live updates as designations are created or closed. The page shows a resume banner while a session
+is active, with a Stop button that closes the header manually; the daily cron (`closeDesignationsHeaders`, 12:00
+`America/Sao_Paulo`) closes every `IN_PROGRESS` header regardless of age. Model details in
+[`../domain/data-model.md §2.7 / §4.9`](../domain/data-model.md).
+
+Banner copy (pt-BR, verbatim; `data-testid="assign-resume-banner"`):
+`Designações em andamento — {N} território(s) já designado(s). Continue de onde parou.` with singular
+`1 território já designado` vs plural `N territórios já designados`, and the Stop button
+(`data-testid="assign-stop-button"`) labelled `Encerrar designações`.
+
+#### UC-ASSIGN-27 — Resume after reload/navigation
+
+- **Actor:** Admin
+- **Route:** `/territories/assign`
+- **Preconditions (seed):** default baseline + an `IN_PROGRESS` `designations_header` for
+  `seed-congregation` (`buildDesignationsHeader({ congregationId: seed.ids.congregation })`) + designations
+  carrying `designationHeaderId` pointing at it, embedding seeded territories
+- **Steps:** 1. sign in as admin → 2. open `/territories/assign`
+- **Expected UI:** the resume banner renders with the assigned-territory count (`N territórios já
+designados`); the previously assigned territories render checked-and-disabled, and tapping one re-shares
+  that designation's WhatsApp link (same path as UC-ASSIGN-25, resolved through the hydrated
+  `assignedDesignations` map)
+- **Expected persistence:** no writes — resume is read-only (streamed live from Firestore); `designations_header` still `IN_PROGRESS`
+- **Edge cases:** with no `IN_PROGRESS` header the banner is absent and every checkbox is tickable; the
+  live stream detaches on navigation away (`takeUntilDestroyed`) to avoid background reads
+- **Priority:** P0 · **Gaps:** none
+
+#### UC-ASSIGN-28 — Multi-submission cycle attaches to the same header
+
+- **Actor:** Admin
+- **Route:** `/territories/assign`
+- **Preconditions (seed):** default baseline, no open header
+- **Steps:** 1. tick a territory → 2. submit (captures `D1`) → 3. tick another territory → 4. submit (captures `D2`)
+- **Expected UI:** each submission opens its own share link; the banner appears after the first submit and
+  its count grows with each submission
+- **Expected persistence:** exactly **one** `designations_header` doc exists, `IN_PROGRESS`, `createdBy ===
+seed.ids.adminUser`; both `D1.designationHeaderId` and `D2.designationHeaderId` equal that header id — no
+  redundant headers are created
+- **Edge cases:** the header is created lazily by the **first** designation of a cycle; subsequent
+  submissions reuse the in-memory header (no extra read). Known accepted ceiling (plan §4.2): if the cron
+  closes the header while the page stays open, the next submission still stamps the closed header's id
+- **Priority:** P0 · **Gaps:** none
+
+#### UC-ASSIGN-29 — Manual Stop closes the header
+
+- **Actor:** Admin
+- **Route:** `/territories/assign`
+- **Preconditions (seed):** an active session (as UC-ASSIGN-27, or after a submission per UC-ASSIGN-28)
+- **Steps:** 1. click `Encerrar designações` (`assign-stop-button`) → 2. confirm in the dialog
+  (`Confirmar`) → 3. tick a territory → 4. submit
+- **Expected UI:** the Stop button opens a `ConfirmDialogComponent` titled `Encerrar designações?` with body
+  `Os territórios já designados serão mantidos. Novas designações iniciarão um novo ciclo.`; on
+  confirmation the header closes, the banner and Stop button disappear, all rows become tickable again
+  (post-stop UI matches post-reload UI), and a success toast reads `Designações em andamento encerradas com
+sucesso.`; the step-4 submission opens a **fresh** header (banner reappears with count 1)
+- **Expected persistence:** the old header doc reads `status: 'DONE'`, `closedBy: 'USER'`, `closedAt ≈ now`;
+  a **new** `IN_PROGRESS` header doc exists after step 4 and the new designation points at it
+- **Edge cases:** cancelling the dialog (`Cancelar`) leaves the session untouched; Stop is available to
+  anyone who can open the page (no extra role gating) and is a no-op when no session is active
+- **Priority:** P0 · **Gaps:** none
+
+#### UC-ASSIGN-30 — Selection cart survives navigation, prunes foreign assignments
+
+- **Actor:** Admin
+- **Route:** `/territories/assign`
+- **Preconditions (seed):** default baseline + an `IN_PROGRESS` header for `seed-congregation` whose
+  designations (seeded directly, simulating another assigner) embed `seed-territory-1`
+- **Steps:** 1. sign in as admin, tick `seed-territory-1` and `seed-territory-3` **before** opening
+  `/territories/assign` is impossible — instead: 1. open `/territories/assign` (empty cart, no open header
+  in this variant) and tick both → 2. navigate away and back (or another user assigns `seed-territory-1`
+  into a new header, then this user reloads) → 3. reopen `/territories/assign`
+- **Expected UI:** the cart is in-memory per navigation-surviving state service, so route navigation keeps
+  the ticks; on `loadSession` any cart territory that is now assigned inside the active header is pruned
+  (guards double-selection when another user assigned it meanwhile) — `seed-territory-1`'s row renders
+  checked-and-disabled, `seed-territory-3` stays ticked in the cart
+- **Expected persistence:** no writes by the pruning itself; submitting afterwards creates a designation
+  containing only the still-unassigned cart territories
+- **Edge cases:** the cart never survives a **reload** (only the header does); the pruning only runs when a
+  session loads
+- **Priority:** P1 · **Gaps:** none
+
+#### UC-ASSIGN-31 (optional) — Cron close via the Functions emulator
+
+- **Actor:** System (scheduled function)
+- **Route:** N/A
+- **Preconditions (seed):** one or more `IN_PROGRESS` headers across congregations; Functions + Firestore
+  emulators running
+- **Steps:** 1. `POST http://127.0.0.1:5001/du-ministry-maps/us-central1/closeDesignationsHeaders-0` with
+  an empty JSON body (the Functions emulator's trigger-key route for the scheduled function — note the
+  `-0` suffix; the plain function name 404s)
+- **Expected UI:** N/A (background function)
+- **Expected persistence:** **every** `IN_PROGRESS` header flips to `status: 'DONE'`, `closedBy: 'CRON'`,
+  `closedAt` set, regardless of age; already-`DONE` headers are untouched. A page that was already open
+  keeps its banner until the next `loadSession` (documented read-budget ceiling). Idempotent:
+  re-invoking finds nothing to close
+- **Edge cases:** do **not** use the Pub/Sub emulator route for this: on firebase-tools 14.x the topic
+  `firebase-schedule-closeDesignationsHeaders` is registered, but v2 scheduled triggers have signature
+  `http`, so topic publishes are acked without executing (verified against 14.27.0 — see
+  [`../../../ARCHITECTURE.md`](../../../ARCHITECTURE.md))
+- **Priority:** P2 · **Gaps:** optional; verified manually 2026-09-03, no automated spec yet
 
 ### Access control
 
@@ -344,7 +451,7 @@ undefined)` takes the `getAllByCongregationAndCities(id, [undefined])` branch (b
 
 ## Testability gaps (summary)
 
-- **`data-testid` coverage is partial.** The screen carries the `assign-*` testids (heading, city select, territory list, checkbox rows) plus the FAB badge's `fab-badge` (from `FloatingActionButtonComponent`); the search input and the sort/filter dialog toggles still have none and rely on rendered pt-BR text / inner-element selectors.
+- **`data-testid` coverage is partial.** The screen carries the `assign-*` testids (heading, city select, territory list, checkbox rows, resume banner `assign-resume-banner`, stop button `assign-stop-button`) plus the FAB badge's `fab-badge` (from `FloatingActionButtonComponent`); the search input and the sort/filter dialog toggles still have none and rely on rendered pt-BR text / inner-element selectors.
 - ~~**No selected-count UI** (UC-ASSIGN-12)~~ — **resolved**: the FAB's `fab-badge` renders `selectedTerritoriesModel.size` (hidden at `0`).
 - **No success or error toast** anywhere in the create-and-share flow (UC-ASSIGN-15, UC-ASSIGN-21) — success is only inferable from the share-link popup/navigation, and failure is invisible to the user entirely.
 - **No clipboard/copy affordance** exists (UC-ASSIGN-20) — only a WhatsApp deep link (`whatsapp://send?text=`).
@@ -361,6 +468,8 @@ undefined)` takes the `getAllByCongregationAndCities(id, [undefined])` branch (b
 - `apps/ministry-maps/src/app/features/territory/pages/assign-territories-page/assign-territories-page.component.html`
 - `apps/ministry-maps/src/app/features/territory/components/territory-checkbox/territory-checkbox.component.ts`
 - `apps/ministry-maps/src/app/features/territory/bo/territory/territory.bo.ts`
+- `apps/ministry-maps/src/app/features/territory/bo/designations-header/designations-header.bo.ts`
+- `apps/ministry-maps/src/app/features/territory/state/assign-territories.state.service.ts`
 - `libs/common-ui/src/lib/components/floating-action-btn/floating-action-button.component.ts` (FAB badge)
 - `apps/ministry-maps/src/app/features/territory/bo/territory-alerts/territory-alerts.bo.ts`
 - `apps/ministry-maps/src/app/features/territory/territory-routes.module.ts`
