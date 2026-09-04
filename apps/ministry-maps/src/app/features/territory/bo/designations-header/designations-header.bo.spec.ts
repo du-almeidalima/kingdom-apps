@@ -243,20 +243,17 @@ describe('DesignationsHeaderBO', () => {
       });
     });
 
-    it('swallows repository errors and logs them', async () => {
+    it('logs repository errors and rethrows them for callers', async () => {
       territoryRepository.getAllInIds.mockReturnValue(throwError(() => new Error('Firestore unavailable')));
 
-      let completed = false;
-      const emitted: unknown[] = [];
+      let errorCaught: Error | null = null;
       bo.createDesignation(['T1'], activeHeader).subscribe({
-        next: (value) => emitted.push(value),
-        complete: () => (completed = true),
+        next: () => fail('Should not emit next'),
+        error: (err) => (errorCaught = err),
       });
 
-      expect(emitted).toEqual([]);
-      expect(completed).toBe(true);
+      expect(errorCaught).toEqual(expect.objectContaining({ message: 'Firestore unavailable' }));
       expect(designationRepository.add).not.toHaveBeenCalled();
-      expect(designationsHeaderRepository.add).not.toHaveBeenCalled();
       expect(loggerService.error).toHaveBeenCalledWith(expect.objectContaining({ message: 'Firestore unavailable' }));
     });
   });

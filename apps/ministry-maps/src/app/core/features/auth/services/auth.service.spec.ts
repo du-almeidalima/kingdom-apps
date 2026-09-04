@@ -14,6 +14,8 @@ import { RoleEnum } from '../../../../../models/enums/role';
 import { AuthUserStateService } from '@kingdom-apps/common-ui';
 import { Router } from '@angular/router';
 import { FirebaseUserDatasourceService } from '../../../../repositories/firebase/firebase-user-datasource.service';
+import { AssignTerritoriesStateService } from '../../../../features/territory/state/assign-territories.state.service';
+import { AuthRoutesEnum } from '../models/enums/auth-routes';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -26,6 +28,7 @@ describe('AuthService', () => {
         MockProvider(AuthRepository, {
           signInWithProvider: jest.fn().mockReturnValue(of(ADMIN_USER_MOCK)),
           authStateChanged: jest.fn().mockReturnValue(of(true)),
+          logOut: jest.fn(),
         }),
         MockProvider(AuthUserStateService, {
           setUser: jest.fn(),
@@ -35,6 +38,9 @@ describe('AuthService', () => {
         }),
         MockProvider(FirebaseUserDatasourceService, {
           getById: jest.fn().mockReturnValue(of(ADMIN_USER_MOCK)),
+        }),
+        MockProvider(AssignTerritoriesStateService, {
+          reset: jest.fn(),
         }),
         MockProvider(Router, {
           navigate: jest.fn(),
@@ -63,6 +69,60 @@ describe('AuthService', () => {
       });
 
       done();
+    });
+  });
+
+  describe('logOut', () => {
+    it('should reset assign territories state and call repository logOut', () => {
+      const assignTerritoriesState = ngMocks.get(AssignTerritoriesStateService);
+      const authRepository = ngMocks.get(AuthRepository);
+
+      service.logOut();
+
+      expect(assignTerritoriesState.reset).toHaveBeenCalledTimes(1);
+      expect(authRepository.logOut).toHaveBeenCalledTimes(1);
+    });
+
+    it('should reset assign territories state, clear user and navigate on authStateChanged(false)', () => {
+      const userStateService = ngMocks.get(UserStateService);
+
+      // Simulate an active logged-in user
+      userStateService.setUser(ADMIN_USER_MOCK);
+
+      // Re-initialize service with authStateChanged emitting false
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          UserStateService,
+          MockProvider(AuthRepository, {
+            authStateChanged: jest.fn().mockReturnValue(of(false)),
+          }),
+          MockProvider(AuthUserStateService, {
+            setUser: jest.fn(),
+          }),
+          MockProvider(FirebaseAuthDatasourceService, {}),
+          MockProvider(FirebaseUserDatasourceService, {}),
+          MockProvider(AssignTerritoriesStateService, {
+            reset: jest.fn(),
+          }),
+          MockProvider(Router, {
+            navigate: jest.fn(),
+          }),
+        ],
+      });
+
+      const resetUserState = TestBed.inject(UserStateService);
+      resetUserState.setUser(ADMIN_USER_MOCK);
+      const resetAssignState = ngMocks.get(AssignTerritoriesStateService);
+      const resetAuthUserState = ngMocks.get(AuthUserStateService);
+      const resetRouter = ngMocks.get(Router);
+
+      TestBed.inject(AuthService);
+
+      expect(resetUserState.currentUser).toBeNull();
+      expect(resetAuthUserState.setUser).toHaveBeenCalledWith(null);
+      expect(resetAssignState.reset).toHaveBeenCalledTimes(1);
+      expect(resetRouter.navigate).toHaveBeenCalledWith([AuthRoutesEnum.LOGIN]);
     });
   });
 });

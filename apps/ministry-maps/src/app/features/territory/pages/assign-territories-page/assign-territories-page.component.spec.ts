@@ -1,6 +1,6 @@
 import { AssignTerritoriesPageComponent } from './assign-territories-page.component';
 import { MockBuilder, MockInstance, MockRender, ngMocks } from 'ng-mocks';
-import { EMPTY, Subject, of } from 'rxjs';
+import { EMPTY, Subject, of, throwError } from 'rxjs';
 import { Dialog } from '@angular/cdk/dialog';
 import { ConfirmDialogComponent, ToasterService } from '@kingdom-apps/common-ui';
 
@@ -184,6 +184,18 @@ describe('AssignTerritoriesPageComponent', () => {
     expect(openSpy).not.toHaveBeenCalled();
   });
 
+  it('toasts an error message when designation creation fails', () => {
+    const { component } = render();
+    component.handleTerritoryCheck(true, mockTerritory1);
+
+    getBO().createDesignation.mockReturnValue(throwError(() => new Error('Creation failed')));
+    component.handleTerritoryFormSubmit();
+
+    expect(component.state.isCreatingAssignment()).toBe(false);
+    expect(getToaster().error).toHaveBeenCalledWith('Não foi possível criar a designação. Tente novamente.');
+    expect(openSpy).not.toHaveBeenCalled();
+  });
+
   it('blocks a double submission while the designation creation is in flight', () => {
     const { component } = render();
     component.handleTerritoryCheck(true, mockTerritory1);
@@ -281,6 +293,23 @@ describe('AssignTerritoriesPageComponent', () => {
 
       expect(getBO().closeHeader).not.toHaveBeenCalled();
       expect(component.state.hasActiveSession()).toBe(true);
+      expect(getToaster().success).not.toHaveBeenCalled();
+    });
+
+    it('toasts an error message when closing the session fails', () => {
+      MockInstance(Dialog, (instance) => {
+        (instance as jest.Mocked<Dialog>).open.mockReturnValue({ closed: of(true) } as never);
+      });
+
+      const { component, fixture } = renderWithActiveSession();
+      getBO().closeHeader.mockReturnValue(throwError(() => new Error('Close failed')));
+
+      component.handleStopClick();
+      fixture.detectChanges();
+
+      expect(getBO().closeHeader).toHaveBeenCalledWith(header.id);
+      expect(component.state.isStoppingSession()).toBe(false);
+      expect(getToaster().error).toHaveBeenCalledWith('Não foi possível encerrar as designações. Tente novamente.');
       expect(getToaster().success).not.toHaveBeenCalled();
     });
   });

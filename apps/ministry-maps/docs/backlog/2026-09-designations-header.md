@@ -277,7 +277,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 import logger from 'firebase-functions/logger';
 import { db } from '../config/firebase';
 
-export const closeDesignationsHeaders = onSchedule({ schedule: '0 12 * * *', timeZone: 'America/Sao_Paulo' }, async () => {
+export const closeDesignationsHeaders = onSchedule({ schedule: '0 0 * * *', timeZone: 'America/Sao_Paulo' }, async () => {
   logger.info('Starting daily scheduled closing of open designations headers.');
 
   const openSnapshot = await db.collection('designations_header').where('status', '==', 'IN_PROGRESS').get();
@@ -310,7 +310,7 @@ export const closeDesignationsHeaders = onSchedule({ schedule: '0 12 * * *', tim
 });
 ```
 
-- v2 `onSchedule` unix-cron `'0 12 * * *'` + `timeZone: 'America/Sao_Paulo'` (12:00 Brasília time).
+- v2 `onSchedule` unix-cron `'0 0 * * *'` + `timeZone: 'America/Sao_Paulo'` (00:00 midnight Brasília time).
 - Idempotent by construction: consecutive executions find no `IN_PROGRESS` docs.
 - Add Admin model `functions/ministry-maps/src/models/designations-header.ts`.
 

@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { catchError, EMPTY, forkJoin, map, Observable, of, switchMap, tap } from 'rxjs';
+import { catchError, EMPTY, forkJoin, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
 
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { DesignationRepository } from '../../../../repositories/designation.repository';
@@ -59,7 +59,7 @@ export class DesignationsHeaderBO {
       }),
       catchError((err) => {
         this.loggerService.error(err);
-        return EMPTY;
+        return throwError(() => err);
       }),
       tap(({ designation, header }) => {
         this.loggerService.info(
@@ -117,6 +117,17 @@ export class DesignationsHeaderBO {
       );
   }
 
+  private createHeader(congregationId: string, createdBy: string): Observable<DesignationsHeader> {
+    const newHeader: Omit<DesignationsHeader, 'id'> = {
+      congregationId,
+      status: DesignationsHeaderStatusEnum.IN_PROGRESS,
+      createdAt: new Date(),
+      createdBy,
+    };
+
+    return this.designationsHeaderRepository.add(newHeader);
+  }
+
   private buildDesignationTerritories(territories: Territory[]): DesignationTerritory[] {
     return territories.map((t) => {
       delete t['recentHistory'];
@@ -157,17 +168,6 @@ export class DesignationsHeaderBO {
         'shouldDesignationBlockAfterExpired',
       ),
     };
-  }
-
-  private createHeader(congregationId: string, createdBy: string): Observable<DesignationsHeader> {
-    const newHeader: Omit<DesignationsHeader, 'id'> = {
-      congregationId,
-      status: DesignationsHeaderStatusEnum.IN_PROGRESS,
-      createdAt: new Date(),
-      createdBy,
-    };
-
-    return this.designationsHeaderRepository.add(newHeader);
   }
 
   /**

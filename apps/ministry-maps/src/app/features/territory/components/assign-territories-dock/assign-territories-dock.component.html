@@ -1,17 +1,24 @@
 <div class="assign-dock" data-testid="assign-dock">
   <div class="assign-dock__container">
-    <div class="assign-dock__info">
-      <div
-        class="assign-dock__badge"
-        [class.assign-dock__badge--active]="selectedCount() > 0"
-        data-testid="assign-dock-selected-badge"
-      >
-        {{ selectedCount() }}
-      </div>
-      <div class="assign-dock__labels">
+    <!-- Header: Cart selection (left) and Session status (right) -->
+    <div class="assign-dock__header">
+      <div class="assign-dock__cart">
+        <div
+          class="assign-dock__badge"
+          [class.assign-dock__badge--active]="selectedCount() > 0"
+          data-testid="assign-dock-selected-badge"
+        >
+          {{ selectedCount() }}
+        </div>
         <span class="assign-dock__selected-text" data-testid="assign-dock-selected-text">
           {{ selectedCount() <= 1 ? 'Selecionado' : 'Selecionados' }}
         </span>
+      </div>
+
+      <div
+        class="assign-dock__session"
+        [class.assign-dock__session--active]="hasActiveSession()"
+      >
         <span class="assign-dock__assigned-text" data-testid="assign-dock-assigned-text">
           @if (hasActiveSession()) {
             {{ assignedCount() === 1 ? '1 já designado' : assignedCount() + ' já designados' }}
@@ -22,6 +29,7 @@
       </div>
     </div>
 
+    <!-- Tier 2: Action Buttons Row -->
     <div class="assign-dock__actions">
       <button
         type="button"
@@ -32,7 +40,7 @@
         (click)="stopClick.emit()"
       >
         @if (isStoppingSession()) {
-          <lib-spinner color="currentColor" width="1.6rem" height="1.6rem" />
+          <lib-spinner color="currentColor" width="1.4rem" height="1.4rem" />
         } @else {
           <lib-icon class="assign-dock__btn-icon" icon="media-control-50" />
         }
@@ -40,8 +48,7 @@
       </button>
 
       <button
-        type="submit"
-        form="territory-form"
+        type="button"
         class="assign-dock__submit-btn"
         data-testid="assign-dock-submit-button"
         title="Enviar Designação"
@@ -50,7 +57,7 @@
         (click)="submitClick.emit()"
       >
         @if (isCreatingAssignment()) {
-          <lib-spinner color="currentColor" width="1.6rem" height="1.6rem" />
+          <lib-spinner color="currentColor" width="1.4rem" height="1.4rem" />
         } @else {
           <span>Enviar</span>
           <lib-icon class="assign-dock__btn-icon" icon="paper-plane-2" />

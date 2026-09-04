@@ -156,10 +156,15 @@ export class AssignTerritoriesPageComponent implements OnInit {
     this.designationsHeaderBO
       .createDesignation(territoryIds, this.state.header())
       .pipe(finalize(() => this.state.isCreatingAssignment.set(false)))
-      .subscribe(({ designation, header }) => {
-        this.state.setHeader(header);
-        this.state.addAssignedDesignation(designation.id, territoryIds);
-        this.shareDesignation(designation.id);
+      .subscribe({
+        next: ({ designation, header }) => {
+          this.state.setHeader(header);
+          this.state.addAssignedDesignation(designation.id, territoryIds);
+          this.shareDesignation(designation.id);
+        },
+        error: () => {
+          this.toaster.error('Não foi possível criar a designação. Tente novamente.');
+        },
       });
   }
 
@@ -183,6 +188,9 @@ export class AssignTerritoriesPageComponent implements OnInit {
           next: () => {
             this.state.clearSession();
             this.toaster.success('Designações em andamento encerradas com sucesso.');
+          },
+          error: () => {
+            this.toaster.error('Não foi possível encerrar as designações. Tente novamente.');
           },
         });
     });

@@ -81,13 +81,24 @@ service cloud.firestore {
         ) || callerRoleIn(['APP_ADMIN']);
     }
 
-    // Catch-all for every other collection. `logs` and `users` are excluded so the dedicated
-    // rules above stay their only granters (rules union grants, they never subtract).
     // `designations_header` (resumable-assignment cycle headers) is internal congregational
-    // data and is intentionally NOT granted publicly like `designations` is — the catch-all
-    // below is its only granter: authenticated read/write.
+    // data: authenticated users belonging to the same congregation (or APP_ADMIN) can read/write.
+    match /designations_header/{headerId} {
+      allow read: if request.auth != null
+        && (callerRoleIn(['APP_ADMIN']) || isCallerInCongregation(resource.data.congregationId));
+      allow create: if request.auth != null
+        && (callerRoleIn(['APP_ADMIN']) || isCallerInCongregation(request.resource.data.congregationId));
+      allow update, delete: if request.auth != null
+        && (callerRoleIn(['APP_ADMIN']) || isCallerInCongregation(resource.data.congregationId));
+    }
+
+    // Catch-all for every other collection. `logs`, `users`, and `designations_header` are excluded
+    // so the dedicated rules above stay their only granters (rules union grants, they never subtract).
     match /{collectionId}/{document=**} {
-      allow read, write: if request.auth != null && collectionId != 'logs' && collectionId != 'users';
+      allow read, write: if request.auth != null
+        && collectionId != 'logs'
+        && collectionId != 'users'
+        && collectionId != 'designations_header';
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -115,6 +126,13 @@ service cloud.firestore {
     function sameCongregationAsCaller(data) {
       return request.auth != null
         && data.congregation == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.congregation;
+    }
+
+    /** True when the caller belongs to the given congregationId string. */
+    function isCallerInCongregation(congregationId) {
+      return request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.congregation
+          == /databases/$(database)/documents/congregations/$(congregationId);
     }
 
     /** True when `field` is unchanged by the pending update (update rules only). */

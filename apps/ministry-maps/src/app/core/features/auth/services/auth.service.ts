@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 import { AuthUserStateService } from '@kingdom-apps/common-ui';
 import { AuthRoutesEnum } from '../models/enums/auth-routes';
 import { FirebaseUserDatasourceService } from '../../../../repositories/firebase/firebase-user-datasource.service';
+import { AssignTerritoriesStateService } from '../../../../features/territory/state/assign-territories.state.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -20,6 +21,7 @@ export class AuthService {
   private readonly authUserState = inject(AuthUserStateService);
   private readonly firebaseAuthDatasourceService = inject(FirebaseAuthDatasourceService);
   private readonly userRepository = inject(FirebaseUserDatasourceService);
+  private readonly assignTerritoriesState = inject(AssignTerritoriesStateService);
   private readonly router = inject(Router);
 
   readonly isAuthenticating = signal(false);
@@ -33,6 +35,7 @@ export class AuthService {
       if (userState.isLoggedIn && !authStateChange) {
         this.userState.setUser(null);
         this.authUserState.setUser(null);
+        this.assignTerritoriesState.reset();
         // TODO: Maybe it would a nice UX to have a intermediate screen telling them that we're logging them out
         this.router.navigate([AuthRoutesEnum.LOGIN]);
       }
@@ -67,6 +70,7 @@ export class AuthService {
   }
 
   logOut() {
+    this.assignTerritoriesState.reset();
     this.authRepository.logOut();
   }
 

@@ -313,9 +313,9 @@ Consequences:
 
 - A header is created **lazily**: only by the first designation created while no `IN_PROGRESS` header exists for the congregation (any assigner of the congregation resumes the same header — the scope is per congregation, not per user).
 - Every designation write after that reuses the in-memory header id (no extra read; a known, accepted ceiling is documented in the backlog plan: a header closed by the cron while the page stayed open still receives one more designation stamp).
-- The header flips to `DONE` exactly once — either manually (`closedBy: 'USER'`, Stop button, available to anyone who can open the Assign page) or by the daily scheduled function (`closedBy: 'CRON'`, 12:00 `America/Sao_Paulo`, which closes **every** `IN_PROGRESS` header regardless of age).
+- The header flips to `DONE` exactly once — either manually (`closedBy: 'USER'`, Stop button, available to anyone who can open the Assign page) or by the daily scheduled function (`closedBy: 'CRON'`, 00:00 midnight `America/Sao_Paulo`, which closes **every** `IN_PROGRESS` header regardless of age).
 - Stopping closes the header only; the designations and their territories are kept untouched.
-- Security: `designations_header` is **not** in the public rules — the authenticated catch-all in `firestore.rules` is its only granter (unlike `designations`, which is public for the anonymous `/work/:id` links).
+- Security: `designations_header` is **not** in the public rules — a dedicated rule in `firestore.rules` restricts read/write to authenticated users belonging to the same congregation (or `APP_ADMIN`).
 
 ---
 

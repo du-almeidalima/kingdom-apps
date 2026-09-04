@@ -5,7 +5,7 @@ import { db } from '../config/firebase';
 import type { DesignationsHeaderDoc } from '../models/designations-header';
 
 export const closeDesignationsHeaders = onSchedule(
-  { schedule: '0 12 * * *', timeZone: 'America/Sao_Paulo' },
+  { schedule: '0 0 * * *', timeZone: 'America/Sao_Paulo' },
   async () => {
     logger.info('Starting daily scheduled closing of open designations headers.');
 
