@@ -5,14 +5,11 @@ import { finalize, Observable, of, shareReplay } from 'rxjs';
 import {
   ConfirmDialogComponent,
   ConfirmDialogData,
-  FloatingActionButtonComponent,
-  IconComponent,
   SearchInputComponent,
   SelectComponent,
   SortFilterComponent,
   SortFilterValue,
   ToasterService,
-  white200,
 } from '@kingdom-apps/common-ui';
 
 import { Territory } from '../../../../../models/territory';
@@ -37,6 +34,7 @@ import { TerritoryCheckboxComponent } from '../../components/territory-checkbox/
 import { AsyncPipe } from '@angular/common';
 import { AssignTerritoriesStateService } from '../../state/assign-territories.state.service';
 import { DesignationsHeaderBO } from '../../bo/designations-header/designations-header.bo';
+import { AssignTerritoriesDockComponent } from '../../components/assign-territories-dock/assign-territories-dock.component';
 
 @Component({
   selector: 'kingdom-apps-assign-territories-page',
@@ -49,8 +47,7 @@ import { DesignationsHeaderBO } from '../../bo/designations-header/designations-
     SearchInputComponent,
     TerritoryCheckboxComponent,
     AsyncPipe,
-    FloatingActionButtonComponent,
-    IconComponent,
+    AssignTerritoriesDockComponent,
     SortFilterComponent,
   ],
 })
@@ -67,7 +64,6 @@ export class AssignTerritoriesPageComponent implements OnInit {
 
   public readonly ALL_OPTION = ALL_OPTION;
   public readonly sortFilterConfig = TERRITORY_SORT_FILTER_CONFIG;
-  public readonly white200 = white200;
 
   private territories$: Observable<Territory[]> = of([]);
 
@@ -283,8 +279,10 @@ export class AssignTerritoriesPageComponent implements OnInit {
   private openConfirmStopDialog() {
     return this.dialog.open<ConfirmDialogComponent, ConfirmDialogData>(ConfirmDialogComponent, {
       data: {
-        title: 'Encerrar designações?',
-        bodyText: 'Os territórios já designados serão mantidos. Novas designações iniciarão um novo ciclo.',
+        title: 'Encerrar Designações?',
+        bodyText:
+          '<p>Os territórios já designados continuarão salvos com seus respectivos publicadores.</p>' +
+          '<p class="mt-4 t-caption"><strong>Nota:</strong> As sessões de designação são encerradas automaticamente todos os dias à meia-noite.</p>',
       },
     }).closed;
   }

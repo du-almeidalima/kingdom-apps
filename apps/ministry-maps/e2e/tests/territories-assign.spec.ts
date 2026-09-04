@@ -2,10 +2,13 @@ import { expect, test } from '../fixtures';
 import { AssignTerritoriesPage } from '../page-objects/assign-territories.page';
 import { SortFilterDialogPage } from '../page-objects/sort-filter-dialog.page';
 import { ConfirmDialogPage } from '../page-objects/confirm-dialog.page';
+import { ToastPage } from '../page-objects/toast.page';
 import { captureWhatsAppPopup, recordedOpenUrls, recordWindowOpen } from '../utils/whatsapp-link.util';
 import * as firebaseAdmin from 'firebase-admin';
 import { RoleEnum } from '../../src/models/enums/role';
 import { VisitOutcomeEnum } from '../../src/models/enums/visit-outcome';
+import { DesignationsHeaderStatusEnum } from '../../src/models/enums/designations-header-status';
+import { DesignationsHeaderClosedByEnum } from '../../src/models/enums/designations-header-closed-by';
 import { expectData } from '../utils/firestore-assert.util';
 
 /** Extract the designation id from a `/work/{id}` share URL. */
@@ -333,15 +336,15 @@ test.describe('Assign territories — creation & share (WP-19)', () => {
 
   // UC-ASSIGN-12 previously locked the absence of a selected-count UI; the FAB
   // badge (fab-badge testid) now provides it.
-  test('UC-ASSIGN-12 — FAB badge counts the selected territories across city switches', async ({
+  test('UC-ASSIGN-12 — Dock counter counts the selected territories across city switches', async ({
     authenticatedPage,
     db,
   }) => {
     const assignPage = new AssignTerritoriesPage(authenticatedPage);
     await assignPage.goto();
 
-    // No badge while nothing is selected — the FAB carries no digit.
-    await expect(assignPage.selectedCount).toHaveCount(0);
+    // Dock badge starts at 0 while nothing is selected.
+    await expect(assignPage.selectedCount).toHaveText('0');
 
     // Tick 2 territories across 2 different cities (UC-ASSIGN-11's cross-city accumulation).
     await assignPage.check('Rua das Acácias, 45 - Pinheiros');
@@ -350,10 +353,10 @@ test.describe('Assign territories — creation & share (WP-19)', () => {
     await assignPage.check('Av. dos Autonomistas, 1200 - Centro');
     await expect(assignPage.selectedCount).toHaveText('2');
 
-    // Submitting resets the count (badge hidden, FAB disabled again).
+    // Submitting resets the count (badge resets to 0, submit button disabled again).
     const { sharedUrl } = await captureWhatsAppPopup(authenticatedPage, () => assignPage.fab.click());
     expect(sharedUrl).toContain('/work/');
-    await expect(assignPage.selectedCount).toHaveCount(0);
+    await expect(assignPage.selectedCount).toHaveText('0');
     await expect(assignPage.fab).toBeDisabled();
 
     // One new designation holding both territories.
@@ -704,5 +707,262 @@ test.describe('Assign territories — creation & share (WP-19)', () => {
       await assignPage.goto();
       await expect(assignPage.heading).toHaveText('Designar Território');
     }
+  });
+
+  test('UC-ASSIGN-27 — Resume after reload/navigation: active session hydrated in dock, stop button enabled, tapping assigned row re-shares link', async ({
+    authenticatedPage,
+    seed,
+    db,
+  }) => {
+    // Preconditions: an IN_PROGRESS designations_header for seed-congregation + 1 designation with designationHeaderId
+    const header = seed.factories.buildDesignationsHeader({
+      congregationId: seed.ids.congregation,
+      status: DesignationsHeaderStatusEnum.IN_PROGRESS,
+      createdBy: seed.ids.adminUser,
+    });
+    const designation = seed.factories.buildDesignation({
+      congregationId: seed.ids.congregation,
+      designationHeaderId: header.id,
+      territories: [
+        seed.factories.buildDesignationTerritory({
+          id: 'seed-territory-1',
+          address: 'Rua das Acácias, 45 - Pinheiros',
+          city: 'São Paulo',
+        }),
+      ],
+    });
+    await seed.write({
+      designationsHeaders: [header],
+      designations: [designation],
+    });
+
+    const assignPage = new AssignTerritoriesPage(authenticatedPage);
+    await assignPage.goto();
+
+    // Dock reflects the active session with 1 territory assigned.
+    await expect(assignPage.dock).toBeVisible();
+    await expect(assignPage.assignedCount).toHaveText('1 já designado');
+    await expect(assignPage.stopButton).toBeEnabled();
+
+    // Already-assigned territory is rendered checked-and-disabled.
+    const assignedRow = assignPage.checkboxByAddress('Rua das Acácias, 45 - Pinheiros');
+    await expect(assignedRow).toHaveClass(/territory-checkbox--disabled/);
+    await expect.poll(() => assignPage.isChecked('Rua das Acácias, 45 - Pinheiros')).toBe(true);
+
+    // Tapping that already-assigned territory re-shares its WhatsApp link.
+    const { sharedUrl } = await captureWhatsAppPopup(authenticatedPage, () =>
+      assignPage.check('Rua das Acácias, 45 - Pinheiros'),
+    );
+    expect(sharedUrl).toContain(`/work/${designation.id}`);
+
+    // Survives full page reload.
+    await authenticatedPage.reload();
+    await assignPage.heading.waitFor();
+    await expect(assignPage.assignedCount).toHaveText('1 já designado');
+    await expect(assignPage.stopButton).toBeEnabled();
+    await expect(assignedRow).toHaveClass(/territory-checkbox--disabled/);
+
+    // Persistence: read-only, header remains IN_PROGRESS.
+    const storedHeader = await db.getDoc(db.collections.designations_header, header.id);
+    expect(storedHeader?.['status']).toBe(DesignationsHeaderStatusEnum.IN_PROGRESS);
+  });
+
+  test('UC-ASSIGN-28 — Multi-submission cycle attaches multiple designations to the same header', async ({
+    authenticatedPage,
+    db,
+    seed,
+  }) => {
+    const assignPage = new AssignTerritoriesPage(authenticatedPage);
+    await assignPage.goto();
+
+    // Initial state: no active session.
+    await expect(assignPage.assignedCount).toHaveText('Nenhuma designação em andamento');
+    await expect(assignPage.stopButton).toBeDisabled();
+    await expect(assignPage.selectedCount).toHaveText('0');
+    await expect(assignPage.selectedText).toHaveText('Selecionado');
+
+    // First submission: Rua das Acácias, 45 - Pinheiros.
+    await assignPage.check('Rua das Acácias, 45 - Pinheiros');
+    await expect(assignPage.selectedCount).toHaveText('1');
+    await expect(assignPage.selectedText).toHaveText('Selecionado');
+    const { sharedUrl: share1 } = await captureWhatsAppPopup(authenticatedPage, () => assignPage.submitButton.click());
+    const d1Id = designationIdFromShareUrl(share1);
+
+    // Dock updates: 1 assigned, stop enabled, cart cleared.
+    await expect(assignPage.assignedCount).toHaveText('1 já designado');
+    await expect(assignPage.stopButton).toBeEnabled();
+    await expect(assignPage.selectedCount).toHaveText('0');
+
+    // Second submission: Rua Harmonia, 300 - Vila Madalena.
+    await assignPage.check('Rua Harmonia, 300 - Vila Madalena');
+    await expect(assignPage.selectedCount).toHaveText('1');
+    const { sharedUrl: share2 } = await captureWhatsAppPopup(authenticatedPage, () => assignPage.submitButton.click());
+    const d2Id = designationIdFromShareUrl(share2);
+
+    // Dock updates: 2 assigned, stop remains enabled.
+    await expect(assignPage.assignedCount).toHaveText('2 já designados');
+    await expect(assignPage.stopButton).toBeEnabled();
+
+    // Persistence: exactly ONE designations_header created, IN_PROGRESS, createdBy admin.
+    const allHeaders = await db.getCollectionDocs(db.collections.designations_header);
+    expect(allHeaders).toHaveLength(1);
+    const activeHeader = allHeaders[0];
+    expect(activeHeader['status']).toBe(DesignationsHeaderStatusEnum.IN_PROGRESS);
+    expect(activeHeader['congregationId']).toBe(seed.ids.congregation);
+    expect(activeHeader['createdBy']).toBe(seed.ids.adminUser);
+
+    // Both designations point to the same header.
+    const storedD1 = await db.getDoc(db.collections.designations, d1Id);
+    const storedD2 = await db.getDoc(db.collections.designations, d2Id);
+    expect(storedD1?.['designationHeaderId']).toBe(activeHeader['id']);
+    expect(storedD2?.['designationHeaderId']).toBe(activeHeader['id']);
+  });
+
+  test('UC-ASSIGN-29 — Manual Stop closes the header and allows starting a new session', async ({
+    authenticatedPage,
+    db,
+  }) => {
+    const assignPage = new AssignTerritoriesPage(authenticatedPage);
+    await assignPage.goto();
+
+    // Create an active session by submitting Rua das Acácias.
+    await assignPage.check('Rua das Acácias, 45 - Pinheiros');
+    await captureWhatsAppPopup(authenticatedPage, () => assignPage.submitButton.click());
+    await expect(assignPage.assignedCount).toHaveText('1 já designado');
+    await expect(assignPage.stopButton).toBeEnabled();
+
+    const headersBeforeStop = await db.getCollectionDocs(db.collections.designations_header);
+    expect(headersBeforeStop).toHaveLength(1);
+    const headerId1 = headersBeforeStop[0]['id'];
+
+    // 1. Click Stop -> Confirmation dialog opens with verbatim copy and HTML midnight note.
+    await assignPage.stopButton.click();
+    const confirmDialog = new ConfirmDialogPage(authenticatedPage);
+    await expect(confirmDialog.dialog).toBeVisible();
+    await expect(confirmDialog.title).toHaveText(/Encerrar [Dd]esignações\?/);
+    await expect(
+      authenticatedPage.getByText('Os territórios já designados continuarão salvos com seus respectivos publicadores.'),
+    ).toBeVisible();
+    await expect(
+      authenticatedPage.getByText(
+        'As sessões de designação são encerradas automaticamente todos os dias à meia-noite.',
+      ),
+    ).toBeVisible();
+
+    // 2. Cancel -> Dialog closes, session remains active.
+    await confirmDialog.cancel();
+    await expect(confirmDialog.dialog).toBeHidden();
+    await expect(assignPage.stopButton).toBeEnabled();
+    await expect(assignPage.assignedCount).toHaveText('1 já designado');
+
+    // 3. Confirm -> Header closed, dock resets to empty state, toast displayed.
+    await assignPage.stopButton.click();
+    await expect(confirmDialog.dialog).toBeVisible();
+    await confirmDialog.confirm();
+
+    const toast = new ToastPage(authenticatedPage);
+    await toast.expectText('Designações em andamento encerradas com sucesso.');
+
+    await expect(assignPage.stopButton).toBeDisabled();
+    await expect(assignPage.assignedCount).toHaveText('Nenhuma designação em andamento');
+
+    // Previously assigned territory row is tickable again.
+    const row = assignPage.checkboxByAddress('Rua das Acácias, 45 - Pinheiros');
+    await expect(row).not.toHaveClass(/territory-checkbox--disabled/);
+
+    // Persistence: the old header is now DONE, closedBy USER, closedAt set.
+    const closedHeader = await db.getDoc(db.collections.designations_header, headerId1);
+    expect(closedHeader?.['status']).toBe(DesignationsHeaderStatusEnum.DONE);
+    expect(closedHeader?.['closedBy']).toBe(DesignationsHeaderClosedByEnum.USER);
+    expect(closedHeader?.['closedAt']).toBeDefined();
+
+    // 4. Starting a new assignment creates a fresh header.
+    await assignPage.check('Rua Harmonia, 300 - Vila Madalena');
+    const { sharedUrl: share2 } = await captureWhatsAppPopup(authenticatedPage, () => assignPage.submitButton.click());
+    const d2Id = designationIdFromShareUrl(share2);
+
+    await expect(assignPage.assignedCount).toHaveText('1 já designado');
+    const allHeaders = await db.getCollectionDocs(db.collections.designations_header);
+    expect(allHeaders).toHaveLength(2);
+
+    const activeHeaders = allHeaders.filter((h) => h['status'] === DesignationsHeaderStatusEnum.IN_PROGRESS);
+    expect(activeHeaders).toHaveLength(1);
+    const newHeaderId = activeHeaders[0]['id'];
+    expect(newHeaderId).not.toBe(headerId1);
+
+    const storedD2 = await db.getDoc(db.collections.designations, d2Id);
+    expect(storedD2?.['designationHeaderId']).toBe(newHeaderId);
+  });
+
+  test('UC-ASSIGN-30 — Selection cart survives navigation and prunes territories assigned concurrently', async ({
+    authenticatedPage,
+    seed,
+    db,
+  }) => {
+    const assignPage = new AssignTerritoriesPage(authenticatedPage);
+    await assignPage.goto();
+
+    // Select 2 territories into cart (São Paulo has Rua das Acácias and Rua Harmonia).
+    await assignPage.check('Rua das Acácias, 45 - Pinheiros');
+    await assignPage.check('Rua Harmonia, 300 - Vila Madalena');
+    await expect(assignPage.selectedCount).toHaveText('2');
+    await expect(assignPage.selectedText).toHaveText('Selecionados');
+
+    // Navigate away client-side to /profile.
+    await authenticatedPage.locator('#profile-link').click();
+    await expect(authenticatedPage).toHaveURL(/\/profile/);
+
+    // Concurrently, another user assigns Rua das Acácias into an active header.
+    const foreignHeader = seed.factories.buildDesignationsHeader({
+      congregationId: seed.ids.congregation,
+      status: DesignationsHeaderStatusEnum.IN_PROGRESS,
+      createdBy: 'another-admin',
+    });
+    const foreignDesignation = seed.factories.buildDesignation({
+      congregationId: seed.ids.congregation,
+      designationHeaderId: foreignHeader.id,
+      territories: [
+        seed.factories.buildDesignationTerritory({
+          id: 'seed-territory-1',
+          address: 'Rua das Acácias, 45 - Pinheiros',
+          city: 'São Paulo',
+        }),
+      ],
+    });
+    await seed.write({
+      designationsHeaders: [foreignHeader],
+      designations: [foreignDesignation],
+    });
+
+    // Navigate back to /territories/assign via browser back (client-side popstate).
+    await authenticatedPage.goBack();
+    await assignPage.heading.waitFor();
+
+    // Active session is loaded: dock shows 1 already assigned territory.
+    await expect(assignPage.assignedCount).toHaveText('1 já designado');
+
+    // Rua das Acácias was pruned from cart and rendered disabled (already assigned).
+    const prunedRow = assignPage.checkboxByAddress('Rua das Acácias, 45 - Pinheiros');
+    await expect(prunedRow).toHaveClass(/territory-checkbox--disabled/);
+
+    // Rua Harmonia remains selected in cart.
+    await expect.poll(() => assignPage.isChecked('Rua Harmonia, 300 - Vila Madalena')).toBe(true);
+    await expect(assignPage.selectedCount).toHaveText('1');
+    await expect(assignPage.selectedText).toHaveText('Selecionado');
+    await expect(assignPage.submitButton).toBeEnabled();
+
+    // Submitting creates a designation containing ONLY the remaining cart territory.
+    const { sharedUrl } = await captureWhatsAppPopup(authenticatedPage, () => assignPage.submitButton.click());
+    const newDesigId = designationIdFromShareUrl(sharedUrl);
+
+    const storedDesig = await db.getDoc(db.collections.designations, newDesigId);
+    expect(storedDesig?.['designationHeaderId']).toBe(foreignHeader.id);
+    const territoriesInDesig = storedDesig?.['territories'] as Array<Record<string, unknown>>;
+    expect(territoriesInDesig).toHaveLength(1);
+    expect(territoriesInDesig[0]['id']).toBe('seed-territory-3');
+
+    // Dock counter badge resets to 0 and assigned count is now 2.
+    await expect(assignPage.selectedCount).toHaveText('0');
+    await expect(assignPage.assignedCount).toHaveText('2 já designados');
   });
 });

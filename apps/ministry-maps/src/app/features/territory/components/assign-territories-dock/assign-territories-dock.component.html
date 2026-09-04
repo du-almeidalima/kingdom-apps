@@ -1,0 +1,61 @@
+<div class="assign-dock" data-testid="assign-dock">
+  <div class="assign-dock__container">
+    <div class="assign-dock__info">
+      <div
+        class="assign-dock__badge"
+        [class.assign-dock__badge--active]="selectedCount() > 0"
+        data-testid="assign-dock-selected-badge"
+      >
+        {{ selectedCount() }}
+      </div>
+      <div class="assign-dock__labels">
+        <span class="assign-dock__selected-text" data-testid="assign-dock-selected-text">
+          {{ selectedCount() <= 1 ? 'Selecionado' : 'Selecionados' }}
+        </span>
+        <span class="assign-dock__assigned-text" data-testid="assign-dock-assigned-text">
+          @if (hasActiveSession()) {
+            {{ assignedCount() === 1 ? '1 já designado' : assignedCount() + ' já designados' }}
+          } @else {
+            Nenhuma designação em andamento
+          }
+        </span>
+      </div>
+    </div>
+
+    <div class="assign-dock__actions">
+      <button
+        type="button"
+        class="assign-dock__stop-btn"
+        data-testid="assign-dock-stop-button"
+        [disabled]="!hasActiveSession() || isStoppingSession()"
+        aria-label="Encerrar Designações"
+        (click)="stopClick.emit()"
+      >
+        @if (isStoppingSession()) {
+          <lib-spinner color="currentColor" width="1.6rem" height="1.6rem" />
+        } @else {
+          <lib-icon class="assign-dock__btn-icon" icon="media-control-50" />
+        }
+        <span>Encerrar</span>
+      </button>
+
+      <button
+        type="submit"
+        form="territory-form"
+        class="assign-dock__submit-btn"
+        data-testid="assign-dock-submit-button"
+        title="Enviar Designação"
+        [disabled]="selectedCount() === 0 || isCreatingAssignment()"
+        aria-label="Enviar designação"
+        (click)="submitClick.emit()"
+      >
+        @if (isCreatingAssignment()) {
+          <lib-spinner color="currentColor" width="1.6rem" height="1.6rem" />
+        } @else {
+          <span>Enviar</span>
+          <lib-icon class="assign-dock__btn-icon" icon="paper-plane-2" />
+        }
+      </button>
+    </div>
+  </div>
+</div>

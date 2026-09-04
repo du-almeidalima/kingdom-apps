@@ -19,29 +19,6 @@
     <lib-sort-filter [config]="sortFilterConfig" (changed)="handleSortFilterChange($event)" />
   </div>
 
-  <!-- Resume banner -->
-  @if (state.hasActiveSession()) {
-    <div class="resume-banner flex items-center justify-between p-4 rounded-lg mb-6" data-testid="assign-resume-banner">
-      <span class="resume-banner__text text-sm font-medium">
-        Designações em andamento —
-        {{
-          state.assignedTerritoryCount() === 1
-            ? '1 território já designado'
-            : state.assignedTerritoryCount() + ' territórios já designados'
-        }}. Continue de onde parou.
-      </span>
-      <button
-        type="button"
-        class="resume-banner__stop text-sm font-semibold"
-        data-testid="assign-stop-button"
-        [disabled]="state.isStoppingSession()"
-        (click)="handleStopClick()"
-      >
-        Encerrar designações
-      </button>
-    </div>
-  }
-
   <!-- Territories -->
   <form id="territory-form" (submit)="handleTerritoryFormSubmit()">
     <div class="flex flex-col gap-5 mt-8 pb-56" data-testid="assign-territory-list">
@@ -59,15 +36,13 @@
     </div>
   </form>
 
-  <button
-    lib-floating-action-button
-    [badge]="state.selectedCount()"
-    [disabled]="state.selectedCount() === 0 || state.isCreatingAssignment()"
-    [loading]="state.isCreatingAssignment()"
-    type="submit"
-    form="territory-form"
-    title="Enviar Designação"
-  >
-    <lib-icon icon="paper-plane-2"></lib-icon>
-  </button>
+  <kingdom-apps-assign-territories-dock
+    [selectedCount]="state.selectedCount()"
+    [assignedCount]="state.assignedTerritoryCount()"
+    [hasActiveSession]="state.hasActiveSession()"
+    [isCreatingAssignment]="state.isCreatingAssignment()"
+    [isStoppingSession]="state.isStoppingSession()"
+    (submitClick)="handleTerritoryFormSubmit()"
+    (stopClick)="handleStopClick()"
+  />
 </div>

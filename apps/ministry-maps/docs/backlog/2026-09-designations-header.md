@@ -237,31 +237,31 @@ The component becomes a thin delegate:
 - `ngOnInit` invokes `state.loadSession(currentCongregation.id)` alongside the existing city/territory init.
 
 Template additions (`assign-territories-page.component.html`):
-Placed between the search/filter row and the territory form:
+Replaces the floating action button and top resume banner with a unified bottom dock:
 
-1. **Resume Banner** (rendered when `state.hasActiveSession()`):
-   - Copy with proper pt-BR singular/plural handling:
-     ```html
-     @if (state.hasActiveSession()) {
-     <div class="flex items-center justify-between p-4 bg-primary-50 rounded-lg border border-primary-200 mb-6" data-testid="assign-resume-banner">
-       <span class="text-sm font-medium text-primary-900"> Designações em andamento — {{ state.assignedTerritoryCount() === 1 ? '1 território já designado' : state.assignedTerritoryCount() + ' territórios já designados' }}. Continue de onde parou. </span>
-       <button type="button" class="text-sm font-semibold text-primary-700 hover:text-primary-800 disabled:opacity-50" data-testid="assign-stop-button" [disabled]="state.isStoppingSession()" (click)="handleStopClick()">Encerrar designações</button>
-     </div>
-     }
-     ```
+1. **Assign Territories Dock (`AssignTerritoriesDockComponent`, `data-testid="assign-dock"`)**:
+   - Fixed at bottom center, elevated surface with theme-aware tokens.
+   - Selected count badge (`data-testid="assign-dock-selected-badge"`): circular counter with active green highlight when >0.
+   - Selected label (`data-testid="assign-dock-selected-text"`): `Selecionado` (when count <= 1, including 0) vs `Selecionados` (when count > 1), avoiding number repetition alongside the circular badge.
+   - Assigned session label (`data-testid="assign-dock-assigned-text"`): `{N} já designado(s)` when `hasActiveSession()`, `Nenhuma designação em andamento` otherwise.
+   - Stop button (`data-testid="assign-dock-stop-button"`): `Encerrar`, stop square icon (`media-control-50`). Disabled when `!hasActiveSession() || isStoppingSession()`.
+   - Submit button (`data-testid="assign-dock-submit-button"`): `Enviar`, paper-plane icon (`paper-plane-2`). Disabled when `selectedCount() === 0 || isCreatingAssignment()`.
+
 2. **Stop Flow & Confirmation Dialog**:
    - `handleStopClick()` opens `ConfirmDialogComponent`:
      - `title`: `Encerrar designações?`
-     - `bodyText`: `Os territórios já designados serão mantidos. Novas designações iniciarão um novo ciclo.`
-   - On confirmation, calls `state.stopSession()`.
+     - `bodyText`: `<p>Os territórios já designados continuarão salvos com seus respectivos publicadores.</p><p class="mt-4 t-caption"><strong>Nota:</strong> As sessões de designação são encerradas automaticamente todos os dias à meia-noite.</p>`
+   - On confirmation, calls `designationsHeaderBO.closeHeader(headerId)`.
    - On success: `toaster.success('Designações em andamento encerradas com sucesso.')`.
 
-### 4.5 Existing tests to touch
+### 4.5 Tests
 
-- `assign-territories-page.component.spec.ts` — mock `AssignTerritoriesStateService`; test resume hydration, submit delegation, Stop confirmation dialog and toaster invocation.
+- `assign-territories-dock.component.spec.ts` — isolated unit tests verifying all badge and button states (disabled, active, loading spinners, outputs).
+- `assign-territories-page.component.spec.ts` — test dock binding, stream hydration, submit delegation, Stop confirmation dialog and toaster invocation.
+- `territories-assign.spec.ts` — Playwright E2E tests covering UC-ASSIGN-12 (dock badge counter), UC-ASSIGN-27 (session resume & re-share), UC-ASSIGN-28 (multi-submission cycle with single header), UC-ASSIGN-29 (manual Stop flow, dialog confirmation & new cycle), and UC-ASSIGN-30 (cart navigation survival and concurrent assignment pruning).
 - `territory.bo.spec.ts` — drop moved `createDesignationForTerritories` tests into `designations-header.bo.spec.ts`.
-- New `designations-header.bo.spec.ts` — test `createDesignation` (both header-creation and header-reuse cases), `closeHeader`, and `getActiveSessionStream`.
-- New `assign-territories.state.service.spec.ts` — zoneless tests verifying cart accumulation, pruning of newly assigned territories on load, and session stop lifecycle.
+- `designations-header.bo.spec.ts` — test `createDesignation` (both header-creation and header-reuse cases), `closeHeader`, and `getActiveSessionStream`.
+- `assign-territories.state.service.spec.ts` — zoneless tests verifying cart accumulation, pruning of newly assigned territories on load, and session stop lifecycle.
 
 ---
 

@@ -2,11 +2,12 @@ import { AssignTerritoriesPageComponent } from './assign-territories-page.compon
 import { MockBuilder, MockInstance, MockRender, ngMocks } from 'ng-mocks';
 import { EMPTY, Subject, of } from 'rxjs';
 import { Dialog } from '@angular/cdk/dialog';
-import { ConfirmDialogComponent, FloatingActionButtonComponent, ToasterService } from '@kingdom-apps/common-ui';
+import { ConfirmDialogComponent, ToasterService } from '@kingdom-apps/common-ui';
 
 import { TerritoryAlertsBO } from '../../bo/territory-alerts/territory-alerts.bo';
 import { DesignationsHeaderBO } from '../../bo/designations-header/designations-header.bo';
 import { AssignTerritoriesStateService } from '../../state/assign-territories.state.service';
+import { AssignTerritoriesDockComponent } from '../../components/assign-territories-dock/assign-territories-dock.component';
 import { Designation } from '../../../../../models/designation';
 import { DesignationsHeader } from '../../../../../models/designations-header';
 import {
@@ -52,7 +53,7 @@ describe('AssignTerritoriesPageComponent', () => {
         .provide(MOCK_REPOSITORIES_PROVIDERS)
         // Real state service (its own spec covers it).
         .provide(AssignTerritoriesStateService)
-        .keep(FloatingActionButtonComponent)
+        .keep(AssignTerritoriesDockComponent)
     );
   });
 
@@ -98,21 +99,25 @@ describe('AssignTerritoriesPageComponent', () => {
     expect(getBO().getActiveSessionStream).toHaveBeenCalledWith(congregationMock.id);
   });
 
-  it('renders the selected count on the FAB badge', () => {
+  it('renders the selected count in the dock', () => {
     const { fixture, component } = render();
 
     expect(component.state.selectedCount()).toBe(0);
-    expect(ngMocks.findAll(fixture, '[data-testid="fab-badge"]')).toHaveLength(0);
+    expect(ngMocks.find(fixture, '[data-testid="assign-dock-selected-badge"]').nativeElement.textContent.trim()).toBe(
+      '0',
+    );
 
     component.handleTerritoryCheck(true, mockTerritory1);
     fixture.detectChanges();
 
     expect(component.state.selectedCount()).toBe(1);
-    expect(ngMocks.formatText(ngMocks.find(fixture, '[data-testid="fab-badge"]'))).toContain('1');
+    expect(ngMocks.find(fixture, '[data-testid="assign-dock-selected-badge"]').nativeElement.textContent.trim()).toBe(
+      '1',
+    );
   });
 
-  describe('resume banner', () => {
-    it('hydrates the session and renders the banner with the stop button', () => {
+  describe('session dock state', () => {
+    it('hydrates the session and reflects it in the dock with stop button enabled', () => {
       resumeWith([designationInSession('D1', [mockTerritory1.id])]);
 
       const { fixture, component } = render();
@@ -121,10 +126,12 @@ describe('AssignTerritoriesPageComponent', () => {
       expect(component.isTerritoryAssigned(mockTerritory1.id)).toBe(true);
       expect(component.designationIdForTerritory(mockTerritory1.id)).toBe('D1');
 
-      const banner = ngMocks.find(fixture, '[data-testid="assign-resume-banner"]');
-      expect(ngMocks.formatText(banner)).toContain('Designações em andamento');
-      expect(ngMocks.formatText(banner)).toContain('1 território já designado');
-      expect(ngMocks.find(fixture, '[data-testid="assign-stop-button"]')).toBeTruthy();
+      const dock = ngMocks.find(fixture, '[data-testid="assign-dock"]');
+      expect(dock).toBeTruthy();
+      expect(ngMocks.formatText(ngMocks.find(fixture, '[data-testid="assign-dock-assigned-text"]'))).toContain(
+        '1 já designado',
+      );
+      expect(ngMocks.find(fixture, '[data-testid="assign-dock-stop-button"]').nativeElement.disabled).toBe(false);
     });
 
     it('renders the plural copy when more than one territory is assigned', () => {
@@ -132,15 +139,18 @@ describe('AssignTerritoriesPageComponent', () => {
 
       const { fixture } = render();
 
-      expect(ngMocks.formatText(ngMocks.find(fixture, '[data-testid="assign-resume-banner"]'))).toContain(
-        '2 territórios já designados',
+      expect(ngMocks.formatText(ngMocks.find(fixture, '[data-testid="assign-dock-assigned-text"]'))).toContain(
+        '2 já designados',
       );
     });
 
-    it('renders no banner when there is no active session', () => {
+    it('disables the stop button when there is no active session', () => {
       const { fixture } = render();
 
-      expect(ngMocks.findAll(fixture, '[data-testid="assign-resume-banner"]')).toHaveLength(0);
+      expect(ngMocks.find(fixture, '[data-testid="assign-dock-stop-button"]').nativeElement.disabled).toBe(true);
+      expect(ngMocks.formatText(ngMocks.find(fixture, '[data-testid="assign-dock-assigned-text"]'))).toBe(
+        'Nenhuma designação em andamento',
+      );
     });
   });
 
@@ -232,8 +242,10 @@ describe('AssignTerritoriesPageComponent', () => {
 
       expect(getDialog().open).toHaveBeenCalledWith(ConfirmDialogComponent, {
         data: {
-          title: 'Encerrar designações?',
-          bodyText: 'Os territórios já designados serão mantidos. Novas designações iniciarão um novo ciclo.',
+          title: 'Encerrar Designações?',
+          bodyText:
+            '<p>Os territórios já designados continuarão salvos com seus respectivos publicadores.</p>' +
+            '<p class="mt-4 t-caption"><strong>Nota:</strong> As sessões de designação são encerradas automaticamente todos os dias à meia-noite.</p>',
         },
       });
     });
@@ -251,7 +263,10 @@ describe('AssignTerritoriesPageComponent', () => {
       expect(getBO().closeHeader).toHaveBeenCalledWith(header.id);
       expect(component.state.hasActiveSession()).toBe(false);
       expect(component.state.assignedTerritoryCount()).toBe(0);
-      expect(ngMocks.findAll(fixture, '[data-testid="assign-resume-banner"]')).toHaveLength(0);
+      expect(ngMocks.find(fixture, '[data-testid="assign-dock-stop-button"]').nativeElement.disabled).toBe(true);
+      expect(ngMocks.formatText(ngMocks.find(fixture, '[data-testid="assign-dock-assigned-text"]'))).toBe(
+        'Nenhuma designação em andamento',
+      );
       expect(getToaster().success).toHaveBeenCalledWith('Designações em andamento encerradas com sucesso.');
     });
 

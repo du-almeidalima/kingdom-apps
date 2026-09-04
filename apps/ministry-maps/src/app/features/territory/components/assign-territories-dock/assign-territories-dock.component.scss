@@ -1,0 +1,221 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+@use 'libs/common-ui/src/lib/styles/abstract/breakpoints' as bp;
+
+:host {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 50;
+  display: block;
+}
+
+.assign-dock {
+  width: 100%;
+  border-top: 1px solid var(--kui-color-border, #{variables.$grey-100});
+  background-color: var(--kui-color-surface-elevated, var(--kui-color-surface, #ffffff));
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+
+  &__container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.6rem;
+    max-width: 52rem;
+    margin: 0 auto;
+    padding: 2rem 2.4rem calc(2rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  &__info {
+    display: flex;
+    align-items: center;
+    gap: 1.4rem;
+    min-width: 0;
+  }
+
+  &__badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 4.6rem;
+    height: 4.6rem;
+    border-radius: 50%;
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1;
+    background-color: var(--kui-color-surface-muted, #{variables.$light-grey-100});
+    color: var(--kui-color-text-muted, #{variables.$text-medium});
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
+
+    &--active {
+      background-color: var(--kui-color-action-primary, #{variables.$primary-green});
+      color: var(--kui-color-on-action-primary, #{variables.$white-100});
+    }
+  }
+
+  &__labels {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 0.3rem;
+  }
+
+  &__selected-text {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--kui-color-text, #{variables.$text});
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__assigned-text {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--kui-color-text-muted, #{variables.$text-medium});
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  &__stop-btn,
+  &__submit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    min-height: 4.6rem;
+    border-radius: 2px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      opacity 150ms ease,
+      filter 150ms ease;
+
+    &:focus {
+      outline: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--kui-color-focus, #07ab3b);
+      outline-offset: 2px;
+    }
+  }
+
+  &__stop-btn {
+    padding: 0 2rem;
+    border: 1px solid var(--kui-color-border-strong, #{variables.$grey-400});
+    background-color: var(--kui-color-surface-elevated, var(--kui-color-surface, #ffffff));
+    color: var(--kui-color-text, #{variables.$text});
+
+    &:hover:not(:disabled) {
+      background-color: var(--kui-color-surface-hover, #{variables.$white-300});
+      border-color: var(--kui-color-text, #{variables.$text});
+    }
+
+    &:active:not(:disabled) {
+      background-color: var(--kui-color-surface-muted, #{variables.$white-300});
+    }
+
+    &:disabled {
+      border-color: var(--kui-color-border, #{variables.$grey-100});
+      background-color: transparent;
+      color: var(--kui-color-text-disabled, #{variables.$text-low});
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+  }
+
+  &__submit-btn {
+    padding: 0 2.2rem;
+    border: 1px solid transparent;
+    background-color: var(--kui-color-action-primary, #{variables.$primary-green});
+    color: var(--kui-color-on-action-primary, #{variables.$white-100});
+
+    &:hover:not(:disabled) {
+      filter: brightness(110%);
+    }
+
+    &:active:not(:disabled) {
+      filter: brightness(95%);
+    }
+
+    &:disabled {
+      background-color: var(--kui-color-control-disabled, #{variables.$light-grey-100});
+      color: var(--kui-color-text-disabled, #{variables.$text-low});
+      cursor: not-allowed;
+      filter: none;
+    }
+  }
+
+  &__btn-icon {
+    width: 1.6rem;
+    height: 1.6rem;
+    display: inline-block;
+  }
+
+  @include bp.mobile-only {
+    &__container {
+      padding: 1.6rem 1.6rem calc(1.6rem + env(safe-area-inset-bottom, 0px));
+      gap: 1rem;
+    }
+
+    &__info {
+      gap: 1rem;
+    }
+
+    &__badge {
+      width: 4.2rem;
+      height: 4.2rem;
+      font-size: 1.6rem;
+    }
+
+    &__selected-text {
+      font-size: 1.5rem;
+    }
+
+    &__assigned-text {
+      font-size: 1.2rem;
+    }
+
+    &__actions {
+      gap: 0.8rem;
+    }
+
+    &__stop-btn,
+    &__submit-btn {
+      min-height: 4.2rem;
+      font-size: 1.4rem;
+      gap: 0.6rem;
+    }
+
+    &__stop-btn {
+      padding: 0 1.6rem;
+    }
+
+    &__submit-btn {
+      padding: 0 1.8rem;
+    }
+
+    &__btn-icon {
+      width: 1.4rem;
+      height: 1.4rem;
+    }
+  }
+}

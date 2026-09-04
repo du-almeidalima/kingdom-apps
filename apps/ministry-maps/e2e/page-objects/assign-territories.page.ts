@@ -18,8 +18,14 @@ export class AssignTerritoriesPage {
   readonly cityFilter: Locator;
   readonly list: Locator;
   readonly checkboxes: Locator;
+  readonly dock: Locator;
+  readonly submitButton: Locator;
+  /** Alias for submitButton to maintain backwards compatibility with existing specs. */
   readonly fab: Locator;
+  readonly stopButton: Locator;
   readonly selectedCount: Locator;
+  readonly selectedText: Locator;
+  readonly assignedCount: Locator;
   readonly searchInput: Locator;
 
   constructor(private readonly page: Page) {
@@ -27,11 +33,13 @@ export class AssignTerritoriesPage {
     this.cityFilter = page.getByTestId('assign-city-filter');
     this.list = page.getByTestId('assign-territory-list');
     this.checkboxes = page.getByTestId('assign-territory-checkbox');
-    // Exact match: assigned rows carry `title="Enviar designação novamente"`,
-    // which would otherwise substring-match this title (getByTitle is
-    // case-insensitive by default) and break strict-mode locators.
-    this.fab = page.getByTitle('Enviar Designação', { exact: true });
-    this.selectedCount = this.fab.getByTestId('fab-badge');
+    this.dock = page.getByTestId('assign-dock');
+    this.submitButton = page.getByTitle('Enviar Designação', { exact: true });
+    this.fab = this.submitButton;
+    this.stopButton = page.getByTestId('assign-dock-stop-button');
+    this.selectedCount = page.getByTestId('assign-dock-selected-badge');
+    this.selectedText = page.getByTestId('assign-dock-selected-text');
+    this.assignedCount = page.getByTestId('assign-dock-assigned-text');
     this.searchInput = page.locator('lib-search-input input');
   }
 
