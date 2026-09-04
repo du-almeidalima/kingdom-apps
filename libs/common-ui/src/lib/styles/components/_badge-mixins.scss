@@ -1,0 +1,56 @@
+@use '../abstract/variables';
+
+// Primitive badge variables - compact, standardized design tokens
+$badge-height: 2.0rem;
+$badge-height-sm: 1.6rem;
+$badge-height-lg: 2.6rem;
+$badge-padding-x: 0.8rem;
+$badge-padding-x-sm: 0.5rem;
+$badge-padding-x-lg: 1.0rem;
+$badge-font-size: 1.2rem;
+$badge-font-size-sm: 1.0rem;
+$badge-font-size-lg: 1.3rem;
+$badge-border-radius: 9999px;
+
+// Base structural mixin
+@mixin badge-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  box-sizing: border-box;
+  border-radius: $badge-border-radius;
+  font-weight: 600;
+  line-height: 1;
+  border: 1px solid transparent;
+  user-select: none;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease;
+}
+
+// Sizing mixin
+@mixin badge-size($height: $badge-height, $padding-x: $badge-padding-x, $font-size: $badge-font-size) {
+  height: $height;
+  min-height: $height;
+  padding: 0 $padding-x;
+  font-size: $font-size;
+}
+
+// Circular/square badge mixin (e.g. counters or avatars)
+@mixin badge-circle($size: 2.4rem) {
+  width: $size;
+  height: $size;
+  min-height: $size;
+  padding: 0;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+// Full standard badge mixin
+@mixin badge {
+  @include badge-base;
+  @include badge-size;
+}

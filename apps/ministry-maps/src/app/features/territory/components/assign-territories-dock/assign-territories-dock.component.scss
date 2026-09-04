@@ -1,4 +1,5 @@
 @use 'libs/common-ui/src/lib/styles/abstract/variables';
+@use 'libs/common-ui/src/lib/styles/components/badge-mixins' as badge;
 
 :host {
   position: fixed;
@@ -41,20 +42,16 @@
     flex-shrink: 0;
   }
 
+  &__badge,
+  &__session--active {
+    @include badge.badge;
+  }
+
   &__badge {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    width: 2.4rem;
-    height: 2.4rem;
-    border-radius: 50%;
-    font-size: 1.2rem;
+    @include badge.badge-circle;
     font-weight: 700;
-    line-height: 1;
     background-color: var(--kui-color-surface-muted, #{variables.$light-grey-100});
     color: var(--kui-color-text-muted, #{variables.$text-medium});
-    transition: background-color 150ms ease, color 150ms ease;
 
     &--active {
       background-color: var(--kui-color-action-primary, #{variables.$primary-green});
@@ -77,14 +74,8 @@
     text-align: right;
 
     &--active {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 2.0rem;
-      padding: 0 0.8rem;
-      border-radius: 9999px;
       background-color: rgba(7, 171, 59, 0.08);
-      border: 1px solid rgba(7, 171, 59, 0.16);
+      border-color: rgba(7, 171, 59, 0.16);
     }
   }
 

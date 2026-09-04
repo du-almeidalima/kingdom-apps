@@ -100,7 +100,8 @@
 
   &__visit-container {
     display: flex;
-    align-items: baseline;
+    align-items: center;
+    flex-wrap: wrap;
     gap: 0.75rem;
   }
 
