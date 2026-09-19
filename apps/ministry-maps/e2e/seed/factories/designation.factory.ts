@@ -15,6 +15,7 @@ export function buildDesignationTerritory(over: Partial<DesignationTerritory> = 
     congregationId: '',
     icon: TerritoryIcon.MAN,
     status: DesignationStatusEnum.PENDING,
+    history: [],
     ...over,
   };
 }

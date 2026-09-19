@@ -20,10 +20,11 @@ const convertHistoryDateFirebaseTimestampToDate = (data: FirebaseDesignationMode
     territories: data.territories.map((t) => ({
       ...t,
       lastVisit: t.lastVisit && t.lastVisit.toDate(),
-      history: t.history.map((h) => ({
-        ...h,
-        date: h.date.toDate(),
-      })),
+      history:
+        t.history?.map((h) => ({
+          ...h,
+          date: h.date.toDate(),
+        })) ?? [],
     })),
   };
 };
