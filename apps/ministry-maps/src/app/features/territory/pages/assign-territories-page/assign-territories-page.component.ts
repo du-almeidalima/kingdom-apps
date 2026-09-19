@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { finalize, Observable, of, shareReplay } from 'rxjs';
+import { finalize, Observable, of, shareReplay, take, tap } from 'rxjs';
 
 import {
   ConfirmDialogComponent,
@@ -35,6 +35,12 @@ import { AsyncPipe } from '@angular/common';
 import { AssignTerritoriesStateService } from '../../state/assign-territories.state.service';
 import { DesignationsHeaderBO } from '../../bo/designations-header/designations-header.bo';
 import { AssignTerritoriesDockComponent } from '../../components/assign-territories-dock/assign-territories-dock.component';
+import { TeamDistributionService, DistributionPlan, CarPlan } from '../../services/team-distribution.service';
+import { suggestCapacity, selectionStatus } from '../../services/capacity';
+import { formGroups, describeGroups, groupMakeup } from '../../services/pairing';
+
+/** Fallback average leg (km) used for the capacity suggestion before a route is computed. */
+const DEFAULT_AVG_LEG_KM = 2;
 
 @Component({
   selector: 'kingdom-apps-assign-territories-page',
@@ -58,6 +64,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
   private readonly toaster = inject(ToasterService);
   private readonly designationsHeaderBO = inject(DesignationsHeaderBO);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly distribution = inject(TeamDistributionService);
 
   /** Navigation-surviving session + cart state. */
   public readonly state = inject(AssignTerritoriesStateService);
@@ -75,6 +82,63 @@ export class AssignTerritoriesPageComponent implements OnInit {
   filteredTerritories$: Observable<Territory[]> = of([]);
 
   searchInputComponent = viewChild.required(SearchInputComponent);
+
+  // Route optimization + team distribution state
+  /** Accumulates every loaded territory so the optimizer can resolve any selected id synchronously. */
+  private readonly territoryById = new Map<string, Territory>();
+  /** Average minutes spent per visit. */
+  private readonly visitMin = 10;
+
+  /** Crew composition entered in the team panel. */
+  public readonly team = signal({ men: 0, women: 0, cars: 0, durationMin: 120, economize: true });
+  /** Per-car distribution after "Otimizar e distribuir". */
+  public readonly plan = signal<DistributionPlan | null>(null);
+  /** Index of the car whose "Compartilhar" request is in flight, if any. */
+  public readonly isSharingCar = signal<number | null>(null);
+
+  public readonly CAR_COLORS = ['#45c06c', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6', '#ec4899', '#84cc16'];
+  public readonly describeGroups = describeGroups;
+  public readonly groupMakeup = groupMakeup;
+
+  /** Work-group composition + capacity suggestion, derived from the crew, plan and current selection. */
+  public readonly crew = computed(() => {
+    const team = this.team();
+    const groups = formGroups(team.men, team.women);
+    const numGroups = groups.groups.length;
+    // Capacity scales with the number of work groups (pairs + trios), not raw headcount.
+    const suggestion = suggestCapacity({
+      pairs: Math.max(1, numGroups),
+      durationMin: team.durationMin,
+      avgLegKm: this.plan()?.avgLegKm ?? DEFAULT_AVG_LEG_KM,
+      visitMin: this.visitMin,
+    });
+
+    return {
+      groups,
+      numGroups,
+      groupText: describeGroups(groups),
+      groupUnplaced: groups.unplacedMen + groups.unplacedWomen,
+      suggestion,
+      selectionState: selectionStatus(this.state.selectedCount(), suggestion.suggestedTotal),
+    };
+  });
+
+  /** Global route order (all cars flattened) + per-territory position/car maps, derived from the plan. */
+  private readonly flatRoute = computed(() => {
+    const order: string[] = [];
+    const orderIndexById = new Map<string, number>(); // territory id -> 1-based global route position
+    const carIndexById = new Map<string, number>(); // territory id -> 0-based car
+
+    this.plan()?.cars.forEach((car) => {
+      car.territories.forEach((t) => {
+        order.push(t.id);
+        orderIndexById.set(t.id, order.length);
+        carIndexById.set(t.id, car.carIndex);
+      });
+    });
+
+    return { order, orderIndexById, carIndexById };
+  });
 
   /**
    * This page is only reachable for a signed-in user whose congregation reference is resolved,
@@ -150,7 +214,15 @@ export class AssignTerritoriesPageComponent implements OnInit {
       return;
     }
 
-    const territoryIds = Array.from(this.state.selectedTerritoryIds());
+    // Use the optimized route order when it covers exactly the current selection; otherwise selection order.
+    const selectionIds = Array.from(this.state.selectedTerritoryIds());
+    const optimizedOrder = this.flatRoute().order;
+    const territoryIds =
+      optimizedOrder.length === selectionIds.length && selectionIds.every((id) => optimizedOrder.includes(id))
+        ? optimizedOrder
+        : selectionIds;
+
+    this.plan.set(null);
     this.state.isCreatingAssignment.set(true);
 
     this.designationsHeaderBO
@@ -247,6 +319,9 @@ export class AssignTerritoriesPageComponent implements OnInit {
     // Otherwise, even by not adding this, the TerritoryCheckBox would display as selected
     this.state.setTerritorySelection(territoryId, value);
 
+    // Any selection change invalidates a previously computed distribution.
+    this.plan.set(null);
+
     if (value && importantAlert) {
       this.openConfirmAssignmentDialog(importantAlert).subscribe((result) => {
         if (!result) {
@@ -254,6 +329,134 @@ export class AssignTerritoriesPageComponent implements OnInit {
         }
       });
     }
+  }
+
+  /** Crew number inputs (Homens / Mulheres / Carros / Duração). */
+  onTeamNumberChange(field: 'men' | 'women' | 'cars' | 'durationMin', value: number) {
+    this.team.update((team) => ({ ...team, [field]: value }));
+  }
+
+  /** Re-runs the distribution when the economize toggle flips (if a plan is showing). */
+  onEconomizeChange(economize: boolean) {
+    this.team.update((team) => ({ ...team, economize }));
+    if (this.plan()) {
+      this.handleDistribute();
+    }
+  }
+
+  /**
+   * Forms work groups (pairs/trios) from the crew, optimizes the selected territories,
+   * and distributes them into per-car clusters. Runs synchronously from loaded territories.
+   */
+  handleDistribute() {
+    const ids = Array.from(this.state.selectedTerritoryIds());
+    if (ids.length < 2 || this.crew().numGroups < 1) {
+      return; // need at least 2 territories and a crew that forms at least one pair/trio
+    }
+
+    const selected = ids.map((id) => this.territoryById.get(id)).filter((t): t is Territory => !!t);
+
+    this.plan.set(
+      this.distribution.distribute(selected, {
+        men: this.team().men,
+        women: this.team().women,
+        cars: this.team().cars,
+        visitMin: this.visitMin,
+        durationMin: this.team().durationMin,
+        economize: this.team().economize,
+      }),
+    );
+  }
+
+  /**
+   * One-click distribution: auto-select the most-overdue territories (ordered by last
+   * visit) up to the suggested count for the current team, then optimize + distribute.
+   * Pool is the loaded territories for the active city (or all cities when "Todas").
+   */
+  handleAutoDistribute() {
+    const target = this.crew().suggestion.suggestedTotal;
+    if (target < 2) {
+      return;
+    }
+
+    // Pool = the territories currently VISIBLE (same city + filters the user sees), so the
+    // auto-selection matches what gets badged and never picks filtered-out ones (e.g. bible students).
+    this.filteredTerritories$.pipe(take(1)).subscribe((list) => {
+      const assigned = this.state.assignedTerritoryIndex();
+      const stalest = [...list]
+        .filter((t) => !assigned.has(t.id))
+        .sort((a, b) => (a.lastVisit?.getTime() ?? 0) - (b.lastVisit?.getTime() ?? 0)); // stalest first
+
+      // Pass 1: distribute the default-estimate count to learn the real average leg.
+      this.state.replaceSelection(stalest.slice(0, target).map((t) => t.id));
+      this.handleDistribute();
+
+      // Pass 2: the suggestion just refined using the real travel - if fewer territories
+      // actually fit the time budget, trim to that and redistribute so pairs stay in budget.
+      const refined = this.crew().suggestion.suggestedTotal;
+      if (refined >= 2 && refined < target) {
+        this.state.replaceSelection(stalest.slice(0, refined).map((t) => t.id));
+        this.handleDistribute();
+      }
+    });
+  }
+
+  /** Trims the current selection to the suggested total, keeping the stalest (most overdue). */
+  trimToSuggested() {
+    const target = this.crew().suggestion.suggestedTotal;
+    if (!target || this.state.selectedCount() <= target) {
+      return;
+    }
+
+    const kept = Array.from(this.state.selectedTerritoryIds())
+      .map((id) => this.territoryById.get(id))
+      .filter((t): t is Territory => !!t)
+      .sort((a, b) => (a.lastVisit?.getTime() ?? 0) - (b.lastVisit?.getTime() ?? 0)) // stalest first
+      .slice(0, target);
+
+    this.state.replaceSelection(kept.map((t) => t.id));
+    this.plan.set(null);
+  }
+
+  /** Whether every territory of this car was already assigned to a designation. */
+  carShared(car: CarPlan): boolean {
+    const assigned = this.state.assignedTerritoryIndex();
+    return car.territories.length > 0 && car.territories.every((t) => assigned.has(t.id));
+  }
+
+  /** Creates a designation for one car's cluster (in route order) and shares it via WhatsApp. */
+  shareForCar(car: CarPlan) {
+    this.isSharingCar.set(car.carIndex);
+    const ids = car.territories.map((t) => t.id);
+
+    this.designationsHeaderBO
+      .createDesignation(ids, this.state.header())
+      .pipe(finalize(() => this.isSharingCar.set(null)))
+      .subscribe({
+        next: ({ designation, header }) => {
+          this.state.setHeader(header);
+          this.state.addAssignedDesignation(designation.id, ids);
+          this.shareDesignation(designation.id);
+        },
+        error: () => {
+          this.toaster.error('Não foi possível criar a designação. Tente novamente.');
+        },
+      });
+  }
+
+  /** 1-based position of a territory id in the optimized route, or null if not distributed yet. */
+  orderIndexOf(id: string): number | null {
+    return this.flatRoute().orderIndexById.get(id) ?? null;
+  }
+
+  /** Color of a territory's assigned car, or null when not distributed. */
+  carColorOf(id: string): string | null {
+    const carIndex = this.flatRoute().carIndexById.get(id);
+    return carIndex === undefined ? null : this.carColor(carIndex);
+  }
+
+  carColor(carIndex: number): string {
+    return this.CAR_COLORS[carIndex % this.CAR_COLORS.length];
   }
 
   shareDesignation(designationId: string) {
@@ -268,10 +471,17 @@ export class AssignTerritoriesPageComponent implements OnInit {
 
   private fetchTerritories(congregationId: string, city: string) {
     // This is the object that will be iterated, since we can't iterate through formGroup.controls...
-    this.territories$ =
+    const source$ =
       city === ALL_OPTION
-        ? this.territoryRepository.getAllByCongregation(congregationId).pipe(shareReplay(1))
-        : this.territoryRepository.getAllByCongregationAndCities(congregationId, [city]).pipe(shareReplay(1));
+        ? this.territoryRepository.getAllByCongregation(congregationId)
+        : this.territoryRepository.getAllByCongregationAndCities(congregationId, [city]);
+
+    // Accumulate every loaded territory so the optimizer can resolve any selected
+    // id synchronously (selections can span cities; you can only select what you've loaded).
+    this.territories$ = source$.pipe(
+      tap((list) => list.forEach((t) => this.territoryById.set(t.id, t))),
+      shareReplay(1),
+    );
 
     this.filterTerritories();
   }

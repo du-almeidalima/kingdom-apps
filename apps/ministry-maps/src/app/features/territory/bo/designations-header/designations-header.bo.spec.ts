@@ -172,6 +172,20 @@ describe('DesignationsHeaderBO', () => {
         expect(territoryRepository.getAllInIds).toHaveBeenCalledWith(['T1', 'T2', 'T3']);
       });
 
+      it('restores the caller order when the repository returns the territories shuffled', async () => {
+        const shuffled = [
+          territoryMockBuilder({ id: 'T3' }),
+          territoryMockBuilder({ id: 'T1' }),
+          territoryMockBuilder({ id: 'T2' }),
+        ];
+        territoryRepository.getAllInIds.mockReturnValue(of(shuffled));
+
+        await lastValueFrom(bo.createDesignation(['T1', 'T2', 'T3'], activeHeader));
+
+        const persisted = designationRepository.add.mock.calls[0][0];
+        expect(persisted.territories.map((t) => t.id)).toEqual(['T1', 'T2', 'T3']);
+      });
+
       it('splits ids into batches of 10 for more than 10 ids and flattens the results in order', async () => {
         const ids = Array.from({ length: 11 }, (_, i) => `T${i + 1}`);
         const fetched: Territory[] = ids.map((id) => territoryMockBuilder({ id }));

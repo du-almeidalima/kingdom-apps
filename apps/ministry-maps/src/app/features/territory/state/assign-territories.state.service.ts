@@ -71,6 +71,11 @@ export class AssignTerritoriesStateService {
     });
   }
 
+  /** Replaces the whole unsubmitted selection in one go (auto-distribute / trim flows). */
+  replaceSelection(territoryIds: string[]): void {
+    this.selectedTerritoryIds.set(new Set(territoryIds));
+  }
+
   /** Clears the active session (header and assigned designations), leaving the selection cart untouched. */
   clearSession(): void {
     this.header.set(null);

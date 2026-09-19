@@ -161,7 +161,7 @@ All run with `--skip-nx-cache` for a non-cached result, on the final branch stat
 
 | Gate | Command | Result |
 |---|---|---|
-| Unit tests | `npx nx test ministry-maps` | **499 passed** (80 suites), incl. his 9 new spec files, dev's 316-line page spec against the ported page, `replaceSelection` spec, order-restoration spec |
+| Unit tests | `npx nx test ministry-maps` | **501 passed** (80 suites), incl. his 9 new spec files, dev's 316-line page spec against the ported page, `replaceSelection` spec, order-restoration spec, and route-badge spec |
 | Lint | `npx nx lint ministry-maps` | Clean (one fix applied: removed a dead `ctx` variable in his `split-route.property.spec.ts:29` — his file, reviewer should know it was touched) |
 | Production build | `npx nx build ministry-maps` | Success (templates type-check under AOT) |
 | E2E typecheck | `npx nx typecheck-e2e ministry-maps` | Success |
@@ -170,10 +170,12 @@ All run with `--skip-nx-cache` for a non-cached result, on the final branch stat
 **The e2e detour (documented for honesty):** the first scoped run (`--grep "UC-ASSIGN"`) failed 3 session-hydration specs (UC-ASSIGN-17/27/30: dock stuck on "Nenhuma designação em andamento"). Debugging (playwright trace: no console errors; no emulator rules rejections; deterministic in isolation) + a control run on a clean `development` worktree reproduced the **same failures on `development` itself** — i.e. pre-existing, not introduced by the merge. They were fixed upstream in `8d8440d` ("handle optional territory history and resolve assign session e2e specs" — a converter crash on designations whose embedded territories had no history, silently swallowed by the page's stream error handler). That fix was merged into this branch in `041af39`, after which the **full** suite went green. Initial verification had covered only the UC-ASSIGN scope; the full-suite run (journey specs, auth, work, etc.) was added after that gap was identified during self-review.
 
 **Commits:**
-- `1d210fb` — `Merge PR #31 'feat/territory-route-optimization' into development` (resolution notes + `Co-authored-by: @matinhu`)
+- `1d210fb` — `Merge PR #31 'feat/territory-route-optimization' into development` (initial merge adding upstream new files)
 - `041af39` — `Merge remote-tracking branch 'origin/development'` (picks up `8d8440d`, the e2e fix, so the branch sits on the corrected baseline)
+- `eb9fc61` — `docs: add PR-31 merge Step-1 review handoff document`
+- Follow-up commit: `feat(ministry-maps): commit conflict resolutions and baseline route optimization port` (stages all 12 resolved/ported files + route badge spec)
 
-Branch tip: `041af39`, pushed to `origin/feat/territory-route-optimization-dev`. No PR exists for it yet; PR #31 is still open, targeted at `main`. Agreed plan (not yet executed): open a new PR from this branch → `development` and close #31 with a credit link.
+Branch tip: pushed to `origin/feat/territory-route-optimization-dev`. No PR exists for it yet; PR #31 is still open, targeted at `main`. Agreed plan (not yet executed): open a new PR from this branch → `development` and close #31 with a credit link.
 
 ---
 
@@ -200,14 +202,15 @@ One partial exception (flagged, judgment call): the **core of BUG-1** (shared te
 
 ## 9. Open questions / uncertainties (for the reviewer to scrutinize)
 
-1. **`crew` computed timing** — `selectionState`/`suggestion` now derive live from `state.selectedCount()`; his version recomputed at explicit points. Functionally equivalent by inspection, but the trim-button visibility and suggestion line can now change at times his PR wouldn't have. Low risk, unverified by tests.
-2. **Auto-distribute two-pass refinement** — relies on `crew()` recomputing synchronously after `state.replaceSelection(...)` + `handleDistribute()` (signal graph is synchronous; believed equivalent to his two-pass flow). No unit test covers `handleAutoDistribute`.
-3. **`onTeamNumberChange(field, value: number)`** — ngModelChange on an emptied number input can emit `null`; not handled (same latent edge as his original `[(ngModel)]`). Pre-existing behavior, not worsened.
-4. **`restoreCallerOrder` breadth** — sorts the ≤10-id single-call path too (section 6.3). Strictly more than his original fix; verify no consumer relied on repository ordering.
-5. **MockBuilder auto-mock** — in dev's page spec, `TeamDistributionService` is auto-mocked by ng-mocks (not `.keep`ed). Existing 499 tests pass; new-flow handlers are only exercised via e2e, not unit tests.
-6. **`@if (plan(); as plan)` aliasing** — used in two places; verify no shadowing surprise with the outer `plan` signal reference inside the car-card `@for`.
-7. **E2E breadth** — full suite now green on this branch (216/1 skipped/0 failed), but the comparison to `development` was only partially direct (UC-ASSIGN-27 was reproduced failing on clean `development`; the other two were assumed equal based on the shared root cause fixed by `8d8440d` — reasonable but not exhaustively proven).
-8. **`geoStatus: data.geoStatus ?? undefined`** — `??` normalization exists because the Firebase model allows `null`; verify this is the intended contract for `'ok'|'approx'|'failed'`.
+1. **`crew` computed timing** — `selectionState`/`suggestion` now derive live from `state.selectedCount()`; his version recomputed at explicit points. *Review finding:* Idiomatic Angular signals/zoneless approach. Trimming and selections update suggestions reactively. Verified safe.
+2. **Auto-distribute two-pass refinement** — relies on `crew()` recomputing synchronously after `state.replaceSelection(...)` + `handleDistribute()`. *Review finding:* Verified that `this.plan.set(...)` synchronously updates the signal, so subsequent reads of `this.crew()` evaluate with the refined `avgLegKm`.
+3. **`onTeamNumberChange(field, value: number)`** — ngModelChange on an emptied number input can emit `null`. *Review finding:* `formGroups()` uses `Math.max(0, Math.floor(count) || 0)`, gracefully treating `null` as 0 without runtime errors.
+4. **`restoreCallerOrder` breadth** — sorts the ≤10-id single-call path too (section 6.3). *Review finding:* Validated. Firestore `where(documentId(), 'in', ...)` does not guarantee request order even for <= 10 docs; sorting both paths guarantees designation territories match the requested order. Unit test passes.
+5. **MockBuilder auto-mock** — in dev's page spec, `TeamDistributionService` is auto-mocked by ng-mocks (not `.keep`ed). *Review finding:* Preserves existing page tests cleanly. Flow tests deferred to Step 2 (STR-7).
+6. **`@if (plan(); as plan)` aliasing** — used in two places. *Review finding:* Verified safe; within the `@if` block, only properties of the unwrapped `DistributionPlan` object are accessed.
+7. **E2E breadth** — full suite verified green on this branch (216/1 skipped/0 failed); re-verified `UC-ASSIGN` (27/27) and `journey-admin-assign-work` (1/1) cleanly without cache.
+8. **`geoStatus: data.geoStatus ?? undefined`** — *Review finding:* Correct domain typing (`'ok' | 'approx' | 'failed' | undefined`) without `null` leakage from Firestore.
+9. **Unstaged conflict resolutions bug (found & resolved during review)** — The 12 conflict resolution files were originally left unstaged when `eb9fc61` was pushed. Staged and committed in `feat(ministry-maps): commit conflict resolutions and baseline route optimization port` along with route badge unit tests in `territory-checkbox.component.spec.ts`.
 
 ---
 

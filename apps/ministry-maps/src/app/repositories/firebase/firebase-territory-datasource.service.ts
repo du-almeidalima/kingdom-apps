@@ -5,6 +5,7 @@ import {
   deleteDoc,
   doc,
   documentId,
+  GeoPoint,
   getDoc,
   getDocs,
   limit,
@@ -36,6 +37,9 @@ export const convertTerritoryFirebaseTimestampsToDate = (data: FirebaseTerritory
   return {
     ...data,
     lastVisit: data.lastVisit?.toDate(),
+    geo: data.geo ? { lat: data.geo.latitude, lng: data.geo.longitude } : undefined,
+    geoStatus: data.geoStatus ?? undefined,
+    geocodedAt: data.geocodedAt ? data.geocodedAt.toDate() : undefined,
     recentHistory: data.recentHistory?.map((h) => ({
       ...h,
       date: h?.date?.toDate(),
@@ -179,10 +183,12 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
     };
 
     const newTerritoryDocRef = doc(this.territoriesCollection);
+    const territoryToPersist = { ...territoryWithoutHistory, id: newTerritoryDocRef.id };
+    this.convertTerritoryGeoFieldsToFirestore(territoryToPersist);
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     // Creating a reference to the new document, so we can get the id
-    const newTerritory$ = from(setDoc(newTerritoryDocRef, { ...territoryWithoutHistory, id: newTerritoryDocRef.id }));
+    const newTerritory$ = from(setDoc(newTerritoryDocRef, territoryToPersist));
 
     return newTerritory$.pipe(
       switchMap(() =>
@@ -205,6 +211,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
     const territoryCopy = structuredClone(territoryWithoutHistory);
     // FIXME: I don't know why the converter is not getting this on the 'toFirestore'
     removeUndefined(territoryCopy);
+    this.convertTerritoryGeoFieldsToFirestore(territoryCopy);
 
     // defer: lazy, so concat/forkJoin/retry can re-subscribe the write.
     return defer(() => from(updateDoc(territoryDocRef, territoryCopy)));
@@ -222,6 +229,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
         // FIXME: I don't know why the converter is not getting this on the 'toFirestore'
         const territoryCopy = structuredClone(territory);
         removeUndefined(territoryCopy);
+        this.convertTerritoryGeoFieldsToFirestore(territoryCopy);
 
         return transaction.update(territoryDocRef, territoryCopy);
       });
@@ -309,6 +317,22 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
     );
 
     return forkJoin([deleteRecentHistory$, deleteHistory$]).pipe(map((_) => undefined));
+  }
+
+  /**
+   * Converts the domain geo/date fields to their Firestore representations (GeoPoint/Timestamp) in-place
+   * before persisting, mirroring how the Date `lastVisit` field is stored.
+   */
+  private convertTerritoryGeoFieldsToFirestore(payload: {
+    geo?: { lat: number; lng: number } | GeoPoint;
+    geocodedAt?: Date | Timestamp;
+  }): void {
+    if (payload.geo && !(payload.geo instanceof GeoPoint)) {
+      payload.geo = new GeoPoint(payload.geo.lat, payload.geo.lng);
+    }
+    if (payload.geocodedAt instanceof Date) {
+      payload.geocodedAt = Timestamp.fromDate(payload.geocodedAt);
+    }
   }
 
   /** Gets the {@link CollectionReference} of the Territory History sub-collection */

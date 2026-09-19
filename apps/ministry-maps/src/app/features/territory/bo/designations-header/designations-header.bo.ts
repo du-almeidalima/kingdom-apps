@@ -177,8 +177,15 @@ export class DesignationsHeaderBO {
   private batchGetTerritoriesInIds(territoriesIds: string[]): Observable<Territory[]> {
     const BATCH_SIZE = 10;
 
+    // The batched Firestore "IN" fetch does not preserve request order; re-sort the
+    // fetched territories to match the caller's id order (i.e. the optimized route).
+    const restoreCallerOrder = (territories: Territory[]) => {
+      const orderIndex = new Map(territoriesIds.map((id, i) => [id, i]));
+      return [...territories].sort((a, b) => (orderIndex.get(a.id) ?? 0) - (orderIndex.get(b.id) ?? 0));
+    };
+
     if (territoriesIds.length <= BATCH_SIZE) {
-      return this.territoryRepository.getAllInIds(territoriesIds);
+      return this.territoryRepository.getAllInIds(territoriesIds).pipe(map(restoreCallerOrder));
     }
 
     // Sending batches of BATCH_SIZE territories and joining the response
@@ -192,6 +199,8 @@ export class DesignationsHeaderBO {
       getTerritoriesIn$.push(this.territoryRepository.getAllInIds(batchIds));
     }
 
-    return forkJoin(getTerritoriesIn$).pipe(map((territoriesBatches) => territoriesBatches.flat()));
+    return forkJoin(getTerritoriesIn$).pipe(
+      map((territoriesBatches) => restoreCallerOrder(territoriesBatches.flat())),
+    );
   }
 }

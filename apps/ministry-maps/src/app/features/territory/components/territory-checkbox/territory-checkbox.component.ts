@@ -60,7 +60,12 @@ import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
             />
             <!-- Address and Note -->
             <div class="flex flex-col gap-1">
-              <h3 class="territory-checkbox__title">{{ territory().address }}</h3>
+              <h3 class="territory-checkbox__title">
+                @if (orderIndex() !== null) {
+                  <span class="territory-checkbox__route-badge" [style.background-color]="badgeColor() || null">{{ orderIndex() }}</span>
+                }
+                {{ territory().address }}
+              </h3>
               <span class="territory-checkbox__subtitle">{{ territory().note }}</span>
             </div>
           </div>
@@ -170,6 +175,12 @@ export class TerritoryCheckboxComponent implements ControlValueAccessor {
   // Control Value Accessor
   disabled = signal(false);
   value = signal(false);
+
+  /** Optional 1-based position in an optimized route; renders a numbered badge when set. */
+  orderIndex = input<number | null>(null);
+
+  /** Optional color for the numbered badge (the assigned pair's color). */
+  badgeColor = input<string | null>(null);
 
   statusClass = computed(() => {
     const prefix = 'territory-checkbox__indicator--';

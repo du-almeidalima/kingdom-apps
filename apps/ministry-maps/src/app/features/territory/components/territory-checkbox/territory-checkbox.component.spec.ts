@@ -81,6 +81,26 @@ describe('TerritoryCheckboxComponent', () => {
     });
   });
 
+  describe('route badge', () => {
+    it('renders the route badge with orderIndex and badgeColor when orderIndex is provided', () => {
+      const fix = MockRender(TerritoryCheckboxComponent, {
+        territory: territoryMockBuilder({}),
+        orderIndex: 3,
+        badgeColor: '#45c06c',
+      });
+
+      const badge = ngMocks.find(fix, '.territory-checkbox__route-badge');
+      expect(ngMocks.formatText(badge)).toBe('3');
+      expect(badge.nativeElement.style.backgroundColor).toBe('rgb(69, 192, 108)');
+    });
+
+    it('does not render the route badge when orderIndex is null', () => {
+      const fix = render();
+
+      expect(ngMocks.findAll(fix, '.territory-checkbox__route-badge')).toHaveLength(0);
+    });
+  });
+
   describe('ControlValueAccessor contract', () => {
     it('writeValue selects the checkbox and updates the indicator', () => {
       render();

@@ -45,6 +45,14 @@ describe('AssignTerritoriesStateService', () => {
       expect(service.selectedTerritoryIds()).toEqual(new Set(['T2']));
       expect(service.assignedTerritoryCount()).toBe(1);
     });
+
+    it('replaces the whole selection via replaceSelection', () => {
+      service.setTerritorySelection('T1', true);
+      service.replaceSelection(['T2', 'T3']);
+
+      expect(service.selectedTerritoryIds()).toEqual(new Set(['T2', 'T3']));
+      expect(service.selectedCount()).toBe(2);
+    });
   });
 
   describe('setSession', () => {
