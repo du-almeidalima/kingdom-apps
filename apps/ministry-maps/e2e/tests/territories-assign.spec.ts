@@ -507,10 +507,13 @@ test.describe('Assign territories — creation & share (WP-19)', () => {
     const cap1 = await captureWhatsAppPopup(authenticatedPage, () => assignPage.fab.click());
     const d1 = designationIdFromShareUrl(cap1.sharedUrl);
 
-    // Reload resets the session state (selectedTerritoriesModel +
-    // assignedDesignations) → every checkbox becomes tickable again.
-    await authenticatedPage.reload();
-    await assignPage.goto();
+    // Stopping the active session closes the header so previously assigned territories become tickable in a new cycle.
+    await assignPage.stopButton.click();
+    const confirmDialog = new ConfirmDialogPage(authenticatedPage);
+    await expect(confirmDialog.dialog).toBeVisible();
+    await confirmDialog.confirm();
+    await expect(assignPage.assignedCount).toHaveText('Nenhuma designação em andamento');
+
     await assignPage.check('Rua das Acácias, 45 - Pinheiros');
     await assignPage.selectCity('Osasco');
     await assignPage.check('Av. dos Autonomistas, 1200 - Centro');
