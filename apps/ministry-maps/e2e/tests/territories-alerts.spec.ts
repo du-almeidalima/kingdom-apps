@@ -60,7 +60,7 @@ test.describe('Territories page — alerts (WP-16)', () => {
     expect(rh.some((h) => h['visitOutcome'] === VisitOutcomeEnum.MOVED && h['isResolved'] === false)).toBe(true);
   });
 
-  test('UC-TERR-25 — "Não quer visitas" badge (24-month window)', async ({ authenticatedPage, seed, db }) => {
+  test('UC-TERR-25 — "Não quer visitas" badge', async ({ authenticatedPage, seed, db }) => {
     const tenMonthsAgo = new Date();
     tenMonthsAgo.setMonth(tenMonthsAgo.getMonth() - 10);
     const stopVisit = seed.factories.buildTerritory({

@@ -243,7 +243,7 @@ test.describe('Assign territories — listing & selection (WP-18)', () => {
     await expect(confirm.title).toHaveText('Não visitar');
     await expect(
       authenticatedPage.getByText(
-        'Esse morador pediu para não ser visitado por uma Testemunha de Jeová recentemente dentro dos últimos dois anos.',
+        'Esse morador pediu para não ser visitado por uma Testemunha de Jeová.',
       ),
     ).toBeVisible();
     await expect(authenticatedPage.getByText('Você deseja designar esse território mesmo assim?')).toBeVisible();
