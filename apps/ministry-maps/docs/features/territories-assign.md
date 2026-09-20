@@ -364,7 +364,7 @@ seed.ids.adminUser`; both `D1.designationHeaderId` and `D2.designationHeaderId` 
 - **Steps:** 1. click `Encerrar` (`assign-dock-stop-button`) → 2. confirm in the dialog
   (`Confirmar`) → 3. tick a territory → 4. submit
 - **Expected UI:** the Stop button opens a `ConfirmDialogComponent` titled `Encerrar designações?` with body
-  HTML informing that already assigned territories stay saved with their publishers (`<p>Os territórios já designados continuarão salvos com seus respectivos publicadores.</p>`) and a caption note noting automatic closure at midnight (`<p class="mt-4 t-caption"><strong>Nota:</strong> As sessões de designação são encerradas automaticamente todos os dias à meia-noite.</p>`); on
+  HTML informing that already assigned territories stay available for publishers to work (`<p>Isso encerra a sessão atual de designação. Os territórios já designados continuam disponíveis para os publicadores trabalharem normalmente.</p>`) and a caption note noting automatic closure at midnight (`<p class="mt-4 t-caption"><strong>Nota:</strong> As sessões de designação são encerradas automaticamente todos os dias à meia-noite.</p>`); on
   confirmation the header closes, the Stop button becomes disabled, the dock displays `Nenhuma designação em andamento`,
   all rows become tickable again (post-stop UI matches post-reload UI), and a success toast reads
   `Designações em andamento encerradas com sucesso.`; the step-4 submission opens a **fresh** header (dock assigned text reflects count 1)

@@ -844,7 +844,9 @@ test.describe('Assign territories — creation & share (WP-19)', () => {
     await expect(confirmDialog.dialog).toBeVisible();
     await expect(confirmDialog.title).toHaveText(/Encerrar [Dd]esignações\?/);
     await expect(
-      authenticatedPage.getByText('Os territórios já designados continuarão salvos com seus respectivos publicadores.'),
+      authenticatedPage.getByText(
+        'Isso encerra a sessão atual de designação. Os territórios já designados continuam disponíveis para os publicadores trabalharem normalmente.',
+      ),
     ).toBeVisible();
     await expect(
       authenticatedPage.getByText(

@@ -250,7 +250,7 @@ Replaces the floating action button and top resume banner with a unified bottom 
 2. **Stop Flow & Confirmation Dialog**:
    - `handleStopClick()` opens `ConfirmDialogComponent`:
      - `title`: `Encerrar designações?`
-     - `bodyText`: `<p>Os territórios já designados continuarão salvos com seus respectivos publicadores.</p><p class="mt-4 t-caption"><strong>Nota:</strong> As sessões de designação são encerradas automaticamente todos os dias à meia-noite.</p>`
+     - `bodyText`: `<p>Isso encerra a sessão atual de designação. Os territórios já designados continuam disponíveis para os publicadores trabalharem normalmente.</p><p class="mt-4 t-caption"><strong>Nota:</strong> As sessões de designação são encerradas automaticamente todos os dias à meia-noite.</p>`
    - On confirmation, calls `designationsHeaderBO.closeHeader(headerId)`.
    - On success: `toaster.success('Designações em andamento encerradas com sucesso.')`.
 

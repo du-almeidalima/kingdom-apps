@@ -289,7 +289,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
       data: {
         title: 'Encerrar Designações?',
         bodyText:
-          '<p>Os territórios já designados continuarão salvos com seus respectivos publicadores.</p>' +
+          '<p>Isso encerra a sessão atual de designação. Os territórios já designados continuam disponíveis para os publicadores trabalharem normalmente.</p>' +
           '<p class="mt-4 t-caption"><strong>Nota:</strong> As sessões de designação são encerradas automaticamente todos os dias à meia-noite.</p>',
       },
     }).closed;
