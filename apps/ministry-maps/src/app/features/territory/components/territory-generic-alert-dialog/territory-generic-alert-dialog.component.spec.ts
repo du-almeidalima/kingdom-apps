@@ -2,7 +2,6 @@ import { TerritoryGenericAlertDialogComponent } from './territory-generic-alert-
 import { MockBuilder, MockRender, ngMocks } from 'ng-mocks';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { EMPTY, of, take, timer } from 'rxjs';
-import { fakeAsync, tick } from '@angular/core/testing';
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 
 describe('TerritoryGenericAlertDialogComponent', () => {
@@ -31,35 +30,41 @@ describe('TerritoryGenericAlertDialogComponent', () => {
     expect(fixture.point.componentInstance).toBeTruthy();
   });
 
-  it('should handle isSubmitting state correctly during async operation', fakeAsync(() => {
+  it('should handle isSubmitting state correctly during async operation', async () => {
     const requestTimeMs = 500;
     // An Observable that completes after 500 milliseconds
     const markAsResolvedCallbackMock = jest.fn().mockReturnValue(timer(0, requestTimeMs).pipe(take(1)));
 
-    const fixture = MockRender(
-      TerritoryGenericAlertDialogComponent,
-      {},
-      {
-        providers: [
-          {
-            provide: DIALOG_DATA,
-            useValue: {
-              history: [],
-              markAsResolvedCallback: markAsResolvedCallbackMock,
+    jest.useFakeTimers();
+    try {
+      const fixture = MockRender(
+        TerritoryGenericAlertDialogComponent,
+        {},
+        {
+          providers: [
+            {
+              provide: DIALOG_DATA,
+              useValue: {
+                history: [],
+                markAsResolvedCallback: markAsResolvedCallbackMock,
+              },
             },
-          },
-        ],
-      },
-    );
+          ],
+        },
+      );
 
-    const component = fixture.point.componentInstance;
+      const component = fixture.point.componentInstance;
 
-    component.handleResolveAlert();
-    expect(component.isSubmitting).toBeTruthy();
+      component.handleResolveAlert();
+      expect(component.isSubmitting()).toBeTruthy();
 
-    tick(requestTimeMs);
-    expect(component.isSubmitting).toBeFalsy();
-  }));
+      jest.advanceTimersByTime(requestTimeMs);
+      await Promise.resolve();
+      expect(component.isSubmitting()).toBeFalsy();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 
   it('should call markAsResolvedCallback with history data', () => {
     const mockHistory = [

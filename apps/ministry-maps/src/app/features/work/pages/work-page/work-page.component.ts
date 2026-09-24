@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { catchError, concat, debounceTime, Observable, of, retry, Subscription, tap } from 'rxjs';
 
@@ -15,6 +15,7 @@ import { DesignationNotFoundComponent } from '../../components/designation-not-f
   selector: 'kingdom-apps-work-page',
   templateUrl: './work-page.component.html',
   styleUrls: ['./work-page.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [WorkBO],
   imports: [NoteComponent, WorkItemComponent, DesignationNotFoundComponent],
 })
@@ -25,16 +26,16 @@ export class WorkPageComponent implements OnInit, OnDestroy {
   private readonly workBO = inject(WorkBO);
 
   private designationTerritorySubscription: Subscription | undefined;
-  isLoading = false;
-  isNotFound = false;
-  designation: Designation | undefined;
-  territories: Designation['territories'] = [];
-  doneTerritories: Designation['territories'] = [];
-  isDisabled = false;
-  isBlocked = false;
+  isLoading = signal(false);
+  isNotFound = signal(false);
+  designation = signal<Designation | undefined>(undefined);
+  territories = signal<Designation['territories']>([]);
+  doneTerritories = signal<Designation['territories']>([]);
+  isDisabled = signal(false);
+  isBlocked = signal(false);
 
   ngOnInit(): void {
-    this.isLoading = true;
+    this.isLoading.set(true);
     const designationId = this.route.snapshot.paramMap.get('id') ?? '';
 
     this.designationTerritorySubscription = this.designationRepository
@@ -42,28 +43,32 @@ export class WorkPageComponent implements OnInit, OnDestroy {
       .pipe(
         debounceTime(100),
         tap(() => {
-          this.isLoading = false;
+          this.isLoading.set(false);
         }),
       )
       .subscribe((designation) => {
         // Designations deleted by the Firestore TTL policy (or otherwise missing) resolve to undefined.
-        this.isNotFound = !designation;
+        this.isNotFound.set(!designation);
 
         if (designation?.territories) {
-          this.isDisabled = this.shouldDisableDesignation(designation);
-          this.isBlocked = this.isDisabled && !!designation.settings?.shouldDesignationBlockAfterExpired;
+          this.isDisabled.set(this.shouldDisableDesignation(designation));
+          this.isBlocked.set(this.isDisabled() && !!designation.settings?.shouldDesignationBlockAfterExpired);
 
-          this.designation = designation;
-          this.territories = [];
-          this.doneTerritories = [];
+          this.designation.set(designation);
+
+          const territories: Designation['territories'] = [];
+          const doneTerritories: Designation['territories'] = [];
 
           designation.territories.forEach((t) => {
             if (t.status === DesignationStatusEnum.PENDING) {
-              this.territories.push(t);
+              territories.push(t);
             } else {
-              this.doneTerritories.push(t);
+              doneTerritories.push(t);
             }
           });
+
+          this.territories.set(territories);
+          this.doneTerritories.set(doneTerritories);
         }
       });
   }
@@ -75,10 +80,10 @@ export class WorkPageComponent implements OnInit, OnDestroy {
   }
 
   handleTerritoryUpdated(designationTerritory: DesignationTerritory) {
-    if (!this.designation) {
+    const designation = this.designation();
+    if (!designation) {
       return;
     }
-    const designation = this.designation;
     const updatedDesignation = this.workBO.updateDesignationTerritoryObject(designation, designationTerritory);
     const designationTerritoryUpdate$ = this.designationRepository.update(updatedDesignation);
 
@@ -117,7 +122,7 @@ export class WorkPageComponent implements OnInit, OnDestroy {
         // TODO: Add a success message here
         console.log(
           'Successfully saved visit for designation: ' +
-            this.designation?.id +
+            this.designation()?.id +
             ' and territory: ' +
             designationTerritory.id +
             '',
@@ -130,12 +135,14 @@ export class WorkPageComponent implements OnInit, OnDestroy {
       throw new Error('Can only revert last visit for a designation that is done');
     }
 
-    if (!this.designation) {
+    const designation = this.designation();
+
+    if (!designation) {
       throw new Error('Can only revert last visit for a designation that is not undefined');
     }
 
     this.workBO
-      .undoLastVisitChanges(this.designation, designationTerritory)
+      .undoLastVisitChanges(designation, designationTerritory)
       .pipe(
         catchError((err) => {
           // TODO: Create a component to display errors
@@ -148,7 +155,7 @@ export class WorkPageComponent implements OnInit, OnDestroy {
         // TODO: Add a success message here
         console.log(
           'Successfully reverted last visit for designation: ' +
-            this.designation?.id +
+            this.designation()?.id +
             ' and territory: ' +
             designationTerritory.id +
             '',

@@ -4,7 +4,6 @@ import { SectionComponent } from '../../../shared/components/section/section.com
 import { UserStateService } from '../../../state/user.state.service';
 import { SelectComponent } from '@kingdom-apps/common-ui';
 import { FormsModule } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { CongregationRepository } from '../../../repositories/congregation.repository';
 import { Congregation } from '../../../../models/congregation';
 import { ProfileBO } from '../bo/profile.bo';
@@ -40,7 +39,7 @@ export class ChangeCongregationComponent implements OnInit {
   profileBo = inject(ProfileBO);
 
   isLoading = signal(false);
-  user = toSignal(this.userState.$user);
+  user = this.userState.user;
   congregations = signal<Pick<Congregation, 'name' | 'id'>[]>([
     {
       name: this.user()?.congregation?.name ?? '',

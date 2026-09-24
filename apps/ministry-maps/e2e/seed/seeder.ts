@@ -21,7 +21,14 @@ import { InvitationLinkSeed, SeedDefinition, SeedResult, UserSeed } from './type
  * - `Date` values are persisted by the Admin SDK as Firestore `Timestamp`s.
  */
 export async function seed(def: SeedDefinition): Promise<SeedResult> {
-  const { congregations = [], users = [], territories = [], designations = [], invitationLinks = [] } = def;
+  const {
+    congregations = [],
+    users = [],
+    territories = [],
+    designations = [],
+    designationsHeaders = [],
+    invitationLinks = [],
+  } = def;
 
   const batch = firestore.batch();
 
@@ -57,6 +64,10 @@ export async function seed(def: SeedDefinition): Promise<SeedResult> {
     batch.set(firestore.collection(Collections.designations).doc(designation.id), designation);
   }
 
+  for (const designationsHeader of designationsHeaders) {
+    batch.set(firestore.collection(Collections.designations_header).doc(designationsHeader.id), designationsHeader);
+  }
+
   for (const invitationLink of invitationLinks) {
     batch.set(
       firestore.collection(Collections.invitation_links).doc(invitationLink.id),
@@ -72,6 +83,7 @@ export async function seed(def: SeedDefinition): Promise<SeedResult> {
     userIds: users.map((u) => u.id),
     territoryIds: territories.map((t) => t.id),
     designationIds: designations.map((d) => d.id),
+    designationsHeaderIds: designationsHeaders.map((h) => h.id),
     invitationLinkIds: invitationLinks.map((i) => i.id),
   };
 }

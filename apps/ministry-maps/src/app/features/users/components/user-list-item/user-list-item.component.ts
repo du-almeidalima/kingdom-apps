@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, EventEmitter, input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
 import { AuthorizeDirective, IconButtonComponent, IconComponent, red300 } from '@kingdom-apps/common-ui';
@@ -75,9 +75,7 @@ export class UserListItemComponent {
   initials = computed(() => getUserInitials(this.user().name));
   role = computed(() => getTranslatedRole(this.user()?.role ?? RoleEnum.PUBLISHER));
 
-  @Output()
-  edit = new EventEmitter<User>();
+  edit = output<User>();
 
-  @Output()
-  remove = new EventEmitter<string>();
+  remove = output<string>();
 }

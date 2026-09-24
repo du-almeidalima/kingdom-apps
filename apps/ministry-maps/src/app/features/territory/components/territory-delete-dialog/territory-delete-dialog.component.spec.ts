@@ -1,11 +1,13 @@
 import { TerritoryDeleteDialogComponent } from './territory-delete-dialog.component';
 import { MockBuilder, MockRender, ngMocks } from 'ng-mocks';
 import { DialogRef } from '@angular/cdk/dialog';
-import { TerritoryModule } from '../../territory.module';
+import { TerritoryAlertsBO } from '../../bo/territory-alerts/territory-alerts.bo';
+import { TerritoryBO } from '../../bo/territory/territory.bo';
+import { TerritoryStatisticsBO } from '../../bo/territory-statistics/territory-statistics.bo';
 
 describe('TerritoryDeleteDialogComponent', () => {
   beforeEach(() =>
-    MockBuilder(TerritoryDeleteDialogComponent, [TerritoryModule]).provide({
+    MockBuilder(TerritoryDeleteDialogComponent, [TerritoryAlertsBO, TerritoryBO, TerritoryStatisticsBO]).provide({
       provide: DialogRef,
       useValue: { close: jest.fn() },
     }),

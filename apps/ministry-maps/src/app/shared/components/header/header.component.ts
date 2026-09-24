@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { HeaderComponent as LibHeaderComponent, IconButtonComponent, IconComponent } from '@kingdom-apps/common-ui';
 import { FeatureRoutesEnum } from '../../../app-routes';
 import { UserStateService } from '../../../state/user.state.service';
@@ -7,6 +7,7 @@ import { RouterLink } from '@angular/router';
 @Component({
   selector: 'kingdom-apps-header',
   styleUrls: ['./header.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <lib-header
       [backgroundColorVar]="headerBackgroundColor"

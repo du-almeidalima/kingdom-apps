@@ -12,7 +12,8 @@ description: Create or modify Angular components — selectors, templates, signa
 ## Non-negotiables
 
 - **Standalone** — Angular 21 default; omit `standalone: true`, never add NgModules (legacy routing NgModules under home/territory/users/work are migration debt).
-- **OnPush** — `changeDetection: ChangeDetectionStrategy.OnPush` is required on new components (~72% of existing ones have it).
+- **OnPush** — `changeDetection: ChangeDetectionStrategy.OnPush` is required on new components (all existing components now have it).
+- **Zoneless** — the app runs without Zone.js. Never add `zone.js`, `provideZoneChangeDetection`, or `NgZone`. State mutated in async callbacks (subscribe/finalize/timeout) **must** be a signal — plain-field writes there never render.
 - **Selectors** — app components: `kingdom-apps-*` (e.g. `kingdom-apps-territories-page`); common-ui: `lib-*` elements or attribute selectors (`button[lib-button]`). The `prefix: app` in project.json is dead config — ignore it.
 - **`inject()`** for new DI. Constructor DI survives in ~41 older files — don't copy it.
 - **`data-testid`** on interactive/dynamic elements — unit specs query `By.css('[data-testid=…]')`, Playwright page objects use `page.getByTestId(...)`.
@@ -48,7 +49,7 @@ saved = output<Item>();
 
 items = signal<Item[]>([]);
 filtered = computed(() => this.items().filter((i) => i.active));
-user = toSignal(this.userState.$user); // bridge Observable state into the template
+user = this.userState.user; // readonly signal straight from the state service
 ```
 
 - **Split:** signals in components/pages; RxJS Observables in services/BOs/repositories (see `.agents/rules/angular-services.md`).

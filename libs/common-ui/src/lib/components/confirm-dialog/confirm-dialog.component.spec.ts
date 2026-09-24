@@ -25,7 +25,7 @@ describe('ConfirmDialogComponent', () => {
   it('should display title', () => {
     MockRender(ConfirmDialogComponent);
     const dialogComponent = ngMocks.find(DialogComponent);
-    expect(dialogComponent.componentInstance.title).toEqual(TEST_DATA.title);
+    expect(dialogComponent.componentInstance.title()).toEqual(TEST_DATA.title);
   });
 
   it('should display body text', () => {

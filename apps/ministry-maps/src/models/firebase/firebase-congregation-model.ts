@@ -4,7 +4,7 @@ import {
   QueryDocumentSnapshot,
   SnapshotOptions,
   WithFieldValue,
-} from '@angular/fire/firestore';
+} from 'firebase/firestore';
 
 import { Congregation } from '../congregation';
 

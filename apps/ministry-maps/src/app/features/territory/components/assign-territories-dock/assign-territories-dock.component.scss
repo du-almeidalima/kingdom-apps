@@ -1,0 +1,173 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+@use 'libs/common-ui/src/lib/styles/components/badge-mixins' as badge;
+
+:host {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 50;
+  display: block;
+}
+
+.assign-dock {
+  width: 100%;
+  border-top: 1px solid var(--kui-color-border, #{variables.$grey-100});
+  background-color: var(--kui-color-surface-elevated, var(--kui-color-surface, #ffffff));
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.06);
+
+  &__container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 52rem;
+    margin: 0 auto;
+    padding: 0.8rem 1.6rem calc(0.8rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  // Header: Cart selection (left) and session status (right)
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    min-width: 0;
+  }
+
+  &__cart {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-shrink: 0;
+  }
+
+  &__badge,
+  &__session--active {
+    @include badge.badge;
+  }
+
+  &__badge {
+    @include badge.badge-circle;
+    font-weight: 700;
+    background-color: var(--kui-color-surface-muted, #{variables.$light-grey-100});
+    color: var(--kui-color-text-muted, #{variables.$text-medium});
+
+    &--active {
+      background-color: var(--kui-color-action-primary, #{variables.$primary-green});
+      color: var(--kui-color-on-action-primary, #{variables.$white-100});
+    }
+  }
+
+  &__selected-text {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--kui-color-text, #{variables.$text});
+    white-space: nowrap;
+  }
+
+  &__session {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 0;
+    text-align: right;
+
+    &--active {
+      background-color: rgba(7, 171, 59, 0.08);
+      border-color: rgba(7, 171, 59, 0.16);
+    }
+  }
+
+  &__assigned-text {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--kui-color-text-muted, #{variables.$text-medium});
+    line-height: 1.2;
+
+    .assign-dock__session--active & {
+      color: var(--kui-color-action-primary, #{variables.$primary-green});
+      font-weight: 600;
+      white-space: nowrap;
+    }
+  }
+
+  // Action buttons: compact height, shared sizing, padding, and layout
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    width: 100%;
+  }
+
+  &__stop-btn,
+  &__submit-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    min-height: 3.8rem;
+    padding: 0 1.2rem;
+    border-radius: 2px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 150ms ease;
+
+    &:focus {
+      outline: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--kui-color-focus, #07ab3b);
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+
+  &__stop-btn {
+    border: 1px solid var(--kui-color-border-strong, #{variables.$grey-400});
+    background-color: var(--kui-color-surface-elevated, var(--kui-color-surface, #ffffff));
+    color: var(--kui-color-text, #{variables.$text});
+
+    &:hover:not(:disabled) {
+      background-color: var(--kui-color-surface-hover, #{variables.$white-300});
+      border-color: var(--kui-color-text, #{variables.$text});
+    }
+
+    &:disabled {
+      border-color: var(--kui-color-border, #{variables.$grey-100});
+      background-color: transparent;
+      color: var(--kui-color-text-disabled, #{variables.$text-low});
+      opacity: 0.45;
+    }
+  }
+
+  &__submit-btn {
+    border: 1px solid transparent;
+    background-color: var(--kui-color-action-primary, #{variables.$primary-green});
+    color: var(--kui-color-on-action-primary, #{variables.$white-100});
+
+    &:hover:not(:disabled) {
+      filter: brightness(110%);
+    }
+
+    &:disabled {
+      background-color: var(--kui-color-control-disabled, #{variables.$light-grey-100});
+      color: var(--kui-color-text-disabled, #{variables.$text-low});
+      filter: none;
+    }
+  }
+
+  &__btn-icon {
+    width: 1.4rem;
+    height: 1.4rem;
+    display: inline-block;
+  }
+}

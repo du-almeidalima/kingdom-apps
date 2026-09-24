@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FeatureRoutesEnum } from '../../../../app-routes';
-import { TerritoryRoutesEnum } from '../../../territory/territory-routes.module';
+import { TerritoryRoutesEnum } from '../../../territory/models/enums/territory-routes';
 import { UserStateService } from '../../../../state/user.state.service';
-import { UsersRoutesEnum } from '../../../users/users-routes.module';
+import { UsersRoutesEnum } from '../../../users/models/enums/users-routes';
 import { RouterLink } from '@angular/router';
 import { CardBodyComponent, CardComponent, CardHeaderComponent } from '@kingdom-apps/common-ui';
 

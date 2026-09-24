@@ -1,0 +1,71 @@
+@use '../abstract/variables';
+@use './badge-mixins' as bm;
+
+@forward './badge-mixins';
+
+// Global primitive badge class and modifiers
+.badge {
+  @include bm.badge;
+
+  // Sizes
+  &--sm {
+    @include bm.badge-size(bm.$badge-height-sm, bm.$badge-padding-x-sm, bm.$badge-font-size-sm);
+  }
+
+  &--md {
+    @include bm.badge-size(bm.$badge-height, bm.$badge-padding-x, bm.$badge-font-size);
+  }
+
+  &--lg {
+    @include bm.badge-size(bm.$badge-height-lg, bm.$badge-padding-x-lg, bm.$badge-font-size-lg);
+  }
+
+  &--circle,
+  &--round {
+    @include bm.badge-circle;
+
+    &.badge--sm {
+      @include bm.badge-circle(bm.$badge-height-sm);
+    }
+
+    &.badge--lg {
+      @include bm.badge-circle(bm.$badge-height-lg);
+    }
+  }
+
+  // Semantic color variants
+  &--primary {
+    background-color: var(--kui-color-action-primary, #{variables.$primary-green});
+    color: var(--kui-color-on-action-primary, #{variables.$white-100});
+  }
+
+  &--muted,
+  &--neutral {
+    background-color: var(--kui-color-surface-muted, #{variables.$light-grey-100});
+    color: var(--kui-color-text-muted, #{variables.$text-medium});
+  }
+
+  &--success {
+    background-color: var(--kui-color-success-surface, #dcfce7);
+    color: var(--kui-color-on-success, #14532d);
+    border-color: var(--kui-color-success-border, #15803d);
+  }
+
+  &--info {
+    background-color: var(--kui-color-info-surface, #dbeafe);
+    color: var(--kui-color-on-info, #1e3a8a);
+    border-color: var(--kui-color-info-border, #1d4ed8);
+  }
+
+  &--warning {
+    background-color: var(--kui-color-warning-surface, #fef3c7);
+    color: var(--kui-color-on-warning, #78350f);
+    border-color: var(--kui-color-warning-border, #b45309);
+  }
+
+  &--danger {
+    background-color: var(--kui-color-danger-surface, #fee3e3);
+    color: var(--kui-color-on-danger, #7f1f1f);
+    border-color: var(--kui-color-danger-border, #b91d1d);
+  }
+}

@@ -20,7 +20,7 @@ description: Builds, budgets, the CI pipeline, and Firebase deployment.
 
 ## Deploying
 
-- Hosting: `npx nx deploy ministry-maps` (@angular/fire:deploy). Channels `prod` and `beta`, both serving `dist/apps/ministry-maps` — SPA rewrite, immutable 1y cache for hashed js/css, no-cache for `ngsw-worker.js`/`ngsw.json`.
+- Hosting: `npx nx deploy ministry-maps` (`nx:run-commands` → `firebase deploy --only hosting:prod` via firebase-tools; depends on the `build` target). Channels `prod` and `beta`, both serving `dist/apps/ministry-maps` — SPA rewrite, immutable 1y cache for hashed js/css, no-cache for `ngsw-worker.js`/`ngsw.json`.
 - Functions: `npm --prefix functions/ministry-maps run deploy`. Order: **functions first, then Firestore rules**.
 - Normal flow is hands-off: merges to `main` deploy via CI.
 

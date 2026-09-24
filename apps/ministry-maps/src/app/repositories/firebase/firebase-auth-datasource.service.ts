@@ -1,18 +1,13 @@
 import { inject, Injectable } from '@angular/core';
-import {
-  Auth,
-  authState,
-  GoogleAuthProvider,
-  OAuthProvider,
-  signInWithPopup,
-  signOut,
-  UserCredential,
-} from '@angular/fire/auth';
+import { GoogleAuthProvider, OAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import type { UserCredential } from 'firebase/auth';
 import { from, map, Observable, of, switchMap, take } from 'rxjs';
 
 import { AuthErrorEnum, AuthRepository, CreateUserConfig } from '../auth.repository';
 import { User } from '../../../models/user';
 import { FirebaseUserDatasourceService } from './firebase-user-datasource.service';
+import { authState$ } from './firebase-rxjs-interop';
+import { FIREBASE_AUTH } from './firebase-providers';
 
 export enum FIREBASE_PROVIDERS {
   GOOGLE = 'GOOGLE',
@@ -21,12 +16,12 @@ export enum FIREBASE_PROVIDERS {
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseAuthDatasourceService implements AuthRepository {
-  private readonly auth = inject(Auth);
+  private readonly auth = inject(FIREBASE_AUTH);
   private readonly userRepository = inject(FirebaseUserDatasourceService);
 
   /** Triggered by FireBase during Log-In and Log-Out events*/
   authStateChanged(): Observable<boolean> {
-    return authState(this.auth).pipe(map((firebaseUser) => !!firebaseUser));
+    return authState$(this.auth).pipe(map((firebaseUser) => !!firebaseUser));
   }
 
   signInWithProvider(
@@ -58,7 +53,7 @@ export class FirebaseAuthDatasourceService implements AuthRepository {
    * Specific for initializing a User from Firebase Authentication.
    */
   getUserFromAuthentication() {
-    return authState(this.auth).pipe(
+    return authState$(this.auth).pipe(
       take(1),
       switchMap((providerUser) => {
         if (providerUser) {

@@ -274,8 +274,8 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 
 Alert conditions are computed in `TerritoryAlertsBO` purely from the parent doc's `recentHistory` array
 (never the full `history` subcollection). There is **no** badge or alert tied to the `NOT_ANSWERED` (`1`)
-outcome — only bible-student, `MOVED` (unresolved), `ASKED_TO_NOT_VISIT_AGAIN` (unresolved, within 24
-months) and `isRevisit` drive a badge.
+outcome — only bible-student, `MOVED` (unresolved), `ASKED_TO_NOT_VISIT_AGAIN` (unresolved), and
+`isRevisit` drive a badge.
 
 #### UC-TERR-23 — "Estudante" badge for bible-study territories
 
@@ -298,15 +298,15 @@ months) and `isRevisit` drive a badge.
 - **Edge cases:** setting `isResolved: true` on that same entry removes the badge without any other change
 - **Priority:** P1 · **Gaps:** none
 
-#### UC-TERR-25 — "Não quer visitas" badge, 24-month window
+#### UC-TERR-25 — "Não quer visitas" badge
 
 - **Actor:** Admin
 - **Route:** `/territories`
-- **Preconditions (seed):** 1 territory with `note` set and `recentHistory` containing `{ visitOutcome: 3, isResolved: false, date: <10 months ago> }`
+- **Preconditions (seed):** 1 territory with `note` set and `recentHistory` containing an unresolved `ASKED_TO_NOT_VISIT_AGAIN` (`3`) entry
 - **Steps:** 1. open `/territories`
 - **Expected UI:** badge text `Não quer visitas`, `title="Essa pessoa disse que não quer ser visitada por uma Testemunha de Jeová"`
 - **Expected persistence:** `db.getDoc(...).recentHistory` entry has `visitOutcome === 3`
-- **Edge cases:** `differenceInMonths(history.date, now) < 24` — a matching entry from 25 months ago no longer shows the badge even if unresolved
+- **Edge cases:** the alert remains active until manually resolved (`isResolved: true`) — there is no automatic expiration window
 - **Priority:** P1 · **Gaps:** none
 
 #### UC-TERR-26 — "Revisita" badge for any `isRevisit` entry
@@ -385,7 +385,7 @@ months) and `isRevisit` drive a badge.
 
 - **Actor:** Admin
 - **Route:** `/territories`
-- **Preconditions (seed):** 1 territory, non-empty `note`, `recentHistory` with one unresolved `ASKED_TO_NOT_VISIT_AGAIN` (`3`) entry dated within 24 months
+- **Preconditions (seed):** 1 territory, non-empty `note`, `recentHistory` with one unresolved `ASKED_TO_NOT_VISIT_AGAIN` (`3`) entry
 - **Steps:** 1. menu → `Não Visitar` → 2. dialog title `Parar de Visitar`, message `Um ou mais publicadores marcaram que esse território pediu para não ser visitado: ` → 3. `Remover Marcação`
 - **Expected UI:** `Não quer visitas` badge and `Não Visitar` menu item disappear
 - **Expected persistence:** the matching entry's `isResolved` becomes `true` in both `recentHistory` and the `history/{visitId}` subcollection doc

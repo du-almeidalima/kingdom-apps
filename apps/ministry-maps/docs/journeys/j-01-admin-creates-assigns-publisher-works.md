@@ -50,9 +50,11 @@ entry `status === 'PENDING'`, every entry **has** a `history` key and **lacks** 
 
 ### Leg 3 — Admin builds designation D2 with a deliberate overlap
 
-7. `page.reload()` on `/territories/assign` (the full reload resets the component's
-   `selectedTerritoriesModel`/`assignedTerritories` Sets — see UC-ASSIGN-17 — making the just-assigned
-   territories tickable again).
+7. `page.reload()` on `/territories/assign` (the full reload resets the component's session state —
+   `selectedTerritoriesModel` plus the `assignedDesignations` map (`designationId → territoryIds`) —
+   see UC-ASSIGN-17 — making the just-assigned territories tickable again; without the reload they
+   render checked-and-disabled and tapping one would re-send that designation's share link,
+   UC-ASSIGN-25).
 8. City `São Paulo`: tick `Rua das Acácias, 45 - Pinheiros` (**again — the overlap**) and
    `Rua Harmonia, 300 - Vila Madalena` (`seed-territory-3`). Submit as in step 6; capture `D2`.
 

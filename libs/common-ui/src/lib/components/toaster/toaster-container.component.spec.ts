@@ -182,8 +182,8 @@ describe('ToasterContainerComponent', () => {
 
       const iconElement = ngMocks.find(IconComponent);
       expect(iconElement).toBeTruthy();
-      expect(iconElement.componentInstance.icon).toBe('check-mark-circle-lined');
-      expect(iconElement.componentInstance.fillColor).toBe('currentColor');
+      expect(iconElement.componentInstance.icon()).toBe('check-mark-circle-lined');
+      expect(iconElement.componentInstance.fillColor()).toBe('currentColor');
     });
 
     it('should not render icon when not provided', () => {

@@ -1,11 +1,11 @@
 <main class="container">
-  @if (isLoading) {
+  @if (isLoading()) {
     <span data-testid="work-loading">Loading...</span>
-  } @else if (isNotFound) {
+  } @else if (isNotFound()) {
     <kingdom-apps-designation-not-found data-testid="work-designation-not-found" />
-  } @else if (designation) {
+  } @else if (designation(); as designation) {
     <div>
-      @if (isDisabled) {
+      @if (isDisabled()) {
         <lib-note
           type="info"
           message="Essa designação está desabilitada. Por favor peça ao seu SG uma designação nova."
@@ -15,16 +15,16 @@
       }
 
       <!-- IN PROGRESS TERRITORIES -->
-      @if (territories.length > 0) {
+      @if (territories().length > 0) {
         <h2 class="t-headline4 my-5">Territórios</h2>
         <!-- TODO: Check if this is updating properly -->
-        @for (territory of territories; track territory.id + territory.status) {
+        @for (territory of territories(); track territory.id + territory.status) {
           <kingdom-apps-work-item
             class="mt-5"
             data-testid="work-pending-list"
             [territory]="territory"
-            [disabled]="isDisabled"
-            [blocked]="isBlocked"
+            [disabled]="isDisabled()"
+            [blocked]="isBlocked()"
             (territoryUpdated)="handleTerritoryUpdated($event)"
           />
         }
@@ -34,18 +34,18 @@
       }
 
       <!-- DONE TERRITORIES -->
-      @if (doneTerritories.length > 0) {
+      @if (doneTerritories().length > 0) {
         <h2 class="t-headline4 my-5">Concluídos</h2>
 
-        @for (territory of doneTerritories; track territory.id + territory.status) {
+        @for (territory of doneTerritories(); track territory.id + territory.status) {
           <!-- TODO: Check if this is updating properly -->
           <kingdom-apps-work-item
             class="mt-5"
             data-testid="work-completed-list"
             [territory]="territory"
             [done]="true"
-            [disabled]="isDisabled"
-            [blocked]="isBlocked"
+            [disabled]="isDisabled()"
+            [blocked]="isBlocked()"
             (territoryUpdated)="handleTerritoryUpdated($event)"
             (lastVisitReverted)="handleLastVisitReverted($event)"
           />

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { NgStyle } from '@angular/common';
 
 @Component({
@@ -6,13 +6,12 @@ import { NgStyle } from '@angular/common';
   styleUrls: ['./card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="card" [ngStyle]="customStyle">
+    <div class="card" [ngStyle]="customStyle()">
       <ng-content></ng-content>
     </div>
   `,
   imports: [NgStyle],
 })
 export class CardComponent {
-  @Input()
-  customStyle?: Record<string, string | number> | null;
+  customStyle = input<Record<string, string | number> | null | undefined>(undefined);
 }

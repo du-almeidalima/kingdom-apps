@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, input, output } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { FIREBASE_PROVIDERS } from '../../../../repositories/firebase/firebase-auth-datasource.service';
 import { SpinnerComponent } from '@kingdom-apps/common-ui';
@@ -16,8 +16,8 @@ import { SpinnerComponent } from '@kingdom-apps/common-ui';
         class="provider-login-button"
         type="button"
         [style.--btn-size]="btnSize + 'px'"
-        [disabled]="loading"
-        (click)="providerClick.emit(provider)"
+        [disabled]="loading()"
+        (click)="providerClick.emit(provider())"
       >
         <!-- Button Content -->
         <img
@@ -29,7 +29,7 @@ import { SpinnerComponent } from '@kingdom-apps/common-ui';
           [alt]="imgAltText"
         />
         <span class="provider-login-button__text t-body2">Entrar com uma conta do {{ imgAltText }}</span>
-        @if (loading) {
+        @if (loading()) {
           <lib-spinner class="provider-login-button__spinner" height="2.5rem" width="2.5rem" />
         }
       </button>
@@ -41,17 +41,14 @@ export class ProviderLoginButtonComponent implements OnInit {
   imgAltText!: string;
   btnSize = 25;
 
-  @Input()
-  loading = false;
+  loading = input(false);
 
-  @Input({ required: true })
-  provider: FIREBASE_PROVIDERS = FIREBASE_PROVIDERS.GOOGLE;
+  provider = input.required<FIREBASE_PROVIDERS>();
 
-  @Output()
-  providerClick = new EventEmitter<FIREBASE_PROVIDERS>();
+  providerClick = output<FIREBASE_PROVIDERS>();
 
   ngOnInit(): void {
-    switch (this.provider) {
+    switch (this.provider()) {
       case FIREBASE_PROVIDERS.GOOGLE:
         this.imgUrl =
           'https://lh3.googleusercontent.com/COxitqgJr1sJnIDe8-jiKhxDx1FrYbtRHKJ9z_hELisAlapwE9LUPh6fcXIfb5vwpbMl4xl9H9TRFPc5NOO8Sb3VSgIBrfRYvW6cUA';

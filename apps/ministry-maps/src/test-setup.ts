@@ -1,7 +1,7 @@
-import { setupZoneTestEnv } from 'jest-preset-angular/setup-env/zone';
+import { setupZonelessTestEnv } from 'jest-preset-angular/setup-env/zoneless';
 import './test/setup-test-mocks';
 
-setupZoneTestEnv({
+setupZonelessTestEnv({
   errorOnUnknownElements: true,
   errorOnUnknownProperties: true,
 });

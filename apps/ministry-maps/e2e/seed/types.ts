@@ -1,5 +1,6 @@
 import { Congregation } from '../../src/models/congregation';
 import { Designation } from '../../src/models/designation';
+import { DesignationsHeader } from '../../src/models/designations-header';
 import { RoleEnum } from '../../src/models/enums/role';
 import { InvitationLink } from '../../src/models/invitation-link';
 import { Territory } from '../../src/models/territory';
@@ -50,6 +51,9 @@ export interface TerritorySeed extends Omit<Territory, 'recentHistory' | 'lastVi
 /** A designation document. Mirrors the real {@link Designation} model 1:1. */
 export type DesignationSeed = Designation;
 
+/** A designations_header document. Mirrors the real {@link DesignationsHeader} model 1:1. */
+export type DesignationsHeaderSeed = DesignationsHeader;
+
 /**
  * An invitation-link document in the app's creation-time shape
  * (`docs/domain/data-model.md` §2.6). Typed against the real
@@ -68,6 +72,7 @@ export interface SeedDefinition {
   users?: UserSeed[];
   territories?: TerritorySeed[];
   designations?: DesignationSeed[];
+  designationsHeaders?: DesignationsHeaderSeed[];
   invitationLinks?: InvitationLinkSeed[];
 }
 
@@ -77,5 +82,6 @@ export interface SeedResult {
   userIds: string[];
   territoryIds: string[];
   designationIds: string[];
+  designationsHeaderIds: string[];
   invitationLinkIds: string[];
 }

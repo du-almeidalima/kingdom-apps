@@ -5,6 +5,7 @@ Repository-wide instructions for coding agents. [`README.md`](./README.md) has s
 ## Core Rules
 
 - **Standalone Angular only:** no NgModules in new code. Existing feature-routing NgModules are migration debt, not examples to copy.
+- **Zoneless + signals:** no Zone.js anywhere (no `zone.js` polyfill, `provideZoneChangeDetection`, or `NgZone`). Every component is OnPush; use signal inputs/outputs/queries and `host` objects. State mutated in async callbacks (subscribe/finalize) must be a signal or it won't render. Unit tests run zoneless (`setupZonelessTestEnv`) — `fakeAsync`/`tick` don't work; use jest fake timers.
 - **Prefer `inject()`** for new dependency injection. Legacy constructor DI exists in older files — don't copy it, don't mass-migrate it.
 - **npm + Node 22:** use `npm`/`npx` (e.g. `npx nx … ministry-maps`); never introduce another package manager. Java 21 is required for the Firebase emulators.
 - **Lean dependencies:** keep third-party packages minimal. Before adding one, check whether `common-ui` already provides the component or the shared styles cover it; otherwise build it yourself (standalone + Tailwind/SCSS + design tokens). Adopt a library only when its logic is complex enough that maintaining it in-house would cost more than the dependency's weight.
@@ -44,7 +45,7 @@ Repository-wide instructions for coding agents. [`README.md`](./README.md) has s
 Rules live in `.agents/rules/`. oh-my-pi and Antigravity load them natively, scoped by the frontmatter `globs`; other harnesses should read the rules relevant to the files being changed:
 
 | Context                                | Rules                                                                 |
-| -------------------------------------- | --------------------------------------------------------------------- |
+|----------------------------------------|-----------------------------------------------------------------------|
 | Components, services, state            | `.agents/rules/angular-components.md`, `angular-services.md`          |
 | Styling, theming, tokens               | `.agents/rules/styling.md`                                            |
 | Unit tests (ng-mocks + Jest)           | `.agents/rules/unit-testing.md`                                       |
@@ -63,7 +64,7 @@ For Ministry Maps behavior or data changes, also read the relevant material unde
 Use Nx through `npx`. Run the focused target first, then every relevant downstream target required by the change.
 
 | Change                    | Minimum relevant checks                                                                                                                                                               |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `apps/ministry-maps`      | `npx nx test ministry-maps`, `npx nx lint ministry-maps`, `npx nx build ministry-maps`                                                                                                |
 | `libs/common-ui`          | `npx nx test common-ui`, `npx nx lint common-ui`                                                                                                                                      |
 | E2E                       | `npx nx typecheck-e2e ministry-maps`, then the relevant `npx nx e2e ministry-maps` scope                                                                                              |
@@ -75,7 +76,7 @@ Add or update tests for behavior changes. Do not weaken, skip, or delete a faili
 ## Gotchas
 
 - `functions/ministry-maps` is **not an Nx project**: separate manifest and lockfile, driven by `npm --prefix functions/ministry-maps run <script>`.
-- `NX_*` values are injected at build time (webpack DefinePlugin) from `apps/ministry-maps/.env.development`/`.env.production` — not read dynamically in the browser.
+- `NX_*` values are injected at build time (esbuild `define` via `apps/ministry-maps/tools/esbuild/define-env.plugin.js`) from `apps/ministry-maps/.env.development`/`.env.production` — not read dynamically in the browser.
 - Root flat ESLint config covers the Angular workspace; Functions has its own `functions/ministry-maps/eslint.config.mjs`.
 - `npm start` imports the emulator seed on start and exports it back on graceful exit; snapshot manually with `npx firebase emulators:export tools/executors/firebase-emulator/seed --force`.
 - Deploy order when both change: functions first, then Firestore rules. Hosting deploys happen in CI on merge to `main`.
@@ -86,21 +87,10 @@ Add or update tests for behavior changes. Do not weaken, skip, or delete a faili
 
 ## CodeGraph
 
-Use CodeGraph before generic text search or opening several files when locating or understanding code:
+In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the repo root), reach for it BEFORE grep/find or reading files when you need to understand or locate code:
 
-1. Run `codegraph status` at the repository root. Do not infer readiness from `.codegraph/`; the directory can exist before an index does.
-2. If the index is usable, prefer the `codegraph_explore` MCP tool when available. Otherwise run
-   `codegraph explore "<symbol names or question>"` from the shell.
-3. If the index is stale, run `codegraph sync` and check its status again. If CodeGraph is unavailable or cannot provide the needed result, fall back to the normal repository search tools.
+- **MCP tool** (when available): `codegraph_explore` answers most code questions in one call — the relevant symbols' verbatim source plus the call paths between them, including dynamic-dispatch hops grep can't follow. Name a file or symbol in the query to read its current line-numbered source. If it's listed but deferred, load it by name via tool search.
+- **Shell** (always works): `codegraph explore "<symbol names or question>"` prints the same output.
 
-Name concrete symbols or files in queries when possible. The index is machine-local and intentionally ignored by Git; never commit its database, daemon files, sockets, or logs.
-
-For an explicit environment-setup task, the portable one-time setup is:
-
-```bash
-npm install --global @colbymchenry/codegraph
-codegraph init
-codegraph status
-```
-
+If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is the user's decision.
 <!-- CODEGRAPH_END -->

@@ -15,7 +15,7 @@ This document describes the behavioural use cases for the `/territories/assign` 
 - **Route:** `/territories/assign`
 - **Preconditions (seed):** default baseline (`seed-territory-1`/`-3` São Paulo `positionIndex 0`/`2`, `seed-territory-2` Osasco)
 - **Steps:** 1. sign in as admin → 2. open `/territories/assign`
-- **Expected UI:** heading `Designar Território` (singular, verbatim as written); a native `<select name="Cidade">` (no visible `<label>`, `lib-select` is a bare attribute directive) pre-selected to the congregation's first city, `São Paulo`; a `kingdom-apps-territory-checkbox` row per territory of that city, ordered by `positionIndex` ascending (`Rua das Acácias...` index 0 above `Rua Harmonia...` index 2); the floating submit button (`title="Enviar Designação"`) renders with a paper-plane icon and is `disabled` because `selectedTerritoriesModel.size === 0`
+- **Expected UI:** heading `Designar Território` (singular, verbatim as written); a native `<select name="Cidade">` (no visible `<label>`, `lib-select` is a bare attribute directive) pre-selected to the congregation's first city, `São Paulo`; a `kingdom-apps-territory-checkbox` row per territory of that city, ordered by `positionIndex` ascending (`Rua das Acácias...` index 0 above `Rua Harmonia...` index 2); the bottom dock (`kingdom-apps-assign-territories-dock`, `data-testid="assign-dock"`) renders with a counter badge reading `0`, and its submit button (`title="Enviar Designação"`, `data-testid="assign-dock-submit-button"`) renders with a paper-plane icon and is `disabled` because `selectedTerritoriesModel.size === 0`
 - **Expected persistence:** `db.getDoc(db.collections.territories,'seed-territory-1').positionIndex === 0`; `db.getDoc(db.collections.territories,'seed-territory-3').positionIndex === 2`; no `designations` doc created (`db.getCollectionDocs(db.collections.designations)` still has only `seed-designation`)
 - **Edge cases:** this screen reuses `territoriesFilterPipe`/`TERRITORY_SORT_FILTER_CONFIG` verbatim from `/territories` (same sort options `Ordem de Cadastro`/`Última Visita`, same toggles); see [`territories-management.md`](./territories-management.md) for the pipe's exact rules, not repeated here
 - **Priority:** P0 · **Gaps:** no `data-testid` anywhere on this screen (none of the app's 4 testids apply here); rows must be located by their rendered address text
@@ -100,11 +100,11 @@ undefined)` takes the `getAllByCongregationAndCities(id, [undefined])` branch (b
 
 - **Actor:** Admin
 - **Route:** `/territories/assign`
-- **Preconditions (seed):** 1 territory with `recentHistory: [{ visitOutcome: 3, isResolved: false, date: <10 months ago> }]` (unresolved `ASKED_TO_NOT_VISIT_AGAIN`, within the 24-month window)
+- **Preconditions (seed):** 1 territory with `recentHistory: [{ visitOutcome: 3, isResolved: false, date: <10 months ago> }]` (unresolved `ASKED_TO_NOT_VISIT_AGAIN`)
 - **Steps:** 1. open `/territories/assign`, select its city → 2. tick that territory's checkbox
-- **Expected UI:** `ConfirmDialogComponent` titled `Não visitar`, body `Esse morador pediu para não ser visitado por uma Testemunha de Jeová recentemente dentro dos últimos dois anos.` then `Você deseja designar esse território mesmo assim?`
+- **Expected UI:** `ConfirmDialogComponent` titled `Não visitar`, body `Esse morador pediu para não ser visitado por uma Testemunha de Jeová.` then `Você deseja designar esse território mesmo assim?`
 - **Expected persistence:** `db.getDoc(...).recentHistory` entry has `visitOutcome === 3`, `isResolved: false`
-- **Edge cases:** `TerritoryAlertsBO.findImportantAlert` checks `MOVED` before `ASKED_TO_NOT_VISIT_AGAIN` — a territory with both unresolved entries only ever shows the `Se Mudou` dialog; also note the 24-month window uses `differenceInMonths(history.date, now) < 24`, exactly like the `/territories` badge (see [`territories-management.md#UC-TERR-25`](./territories-management.md)), so a 25-month-old entry raises **no** dialog and the territory selects silently
+- **Edge cases:** `TerritoryAlertsBO.findImportantAlert` checks `MOVED` before `ASKED_TO_NOT_VISIT_AGAIN` — a territory with both unresolved entries only ever shows the `Se Mudou` dialog; like the `/territories` badge (see [`territories-management.md#UC-TERR-25`](./territories-management.md)), the alert remains active until resolved (no automatic expiration window)
 - **Priority:** P1 · **Gaps:** no `data-testid` on the confirm dialog
 
 ### Selecting and deselecting territories
@@ -139,19 +139,19 @@ undefined)` takes the `getAllByCongregationAndCities(id, [undefined])` branch (b
 - **Steps:** 1. select city `São Paulo`, tick `Rua das Acácias, 45 - Pinheiros` → 2. switch city to `Osasco`, tick `Av. dos Autonomistas, 1200 - Centro` → 3. switch back to `São Paulo`
 - **Expected UI:** after step 3, `Rua das Acácias, 45 - Pinheiros` renders **still ticked** (`hasAlreadyBeenSelected` checks `selectedTerritoriesModel`, which was never cleared by `handleSelectedCityChange`); the submit FAB stays enabled throughout since the Set always has at least one entry
 - **Expected persistence:** N/A until submit; if submitted at this point, both territory ids end up in a single designation's `territories[]` (see UC-ASSIGN-16) even though they were never simultaneously visible on screen
-- **Edge cases:** this is a deliberate cross-city accumulation feature, not a bug — the FAB and its disabled state are the **only** feedback a user gets that something remains selected while viewing an unrelated city (see UC-ASSIGN-12 for the missing count indicator)
-- **Priority:** P0 · **Gaps:** no `data-testid` to directly query "currently selected count"; a test must tick, navigate city away and back, and assert the checkbox's checked state via its `input[type=checkbox]:checked` state
+- **Edge cases:** this is a deliberate cross-city accumulation feature, not a bug — the dock counter badge (UC-ASSIGN-12) keeps showing the accumulated count while the user is viewing an unrelated city, and the submit button stays enabled throughout since the Set always has at least one entry
+- **Priority:** P0 · **Gaps:** none
 
-#### UC-ASSIGN-12 — ⚠ suspected gap: there is no selected-count UI anywhere on this screen
+#### UC-ASSIGN-12 — Dock counter counts the selected territories across city switches
 
 - **Actor:** Admin
 - **Route:** `/territories/assign`
 - **Preconditions (seed):** default baseline
-- **Steps:** 1. tick 2 territories across 2 different cities (per UC-ASSIGN-11) → 2. inspect the page for any running total
-- **Expected UI:** neither the heading, the city select, the FAB, nor any badge shows a number of selected territories — the component (`AssignTerritoriesPageComponent`) never renders `selectedTerritoriesModel.size` anywhere in the template; the **only** observable signal is the FAB's binary enabled/disabled state (`size === 0` vs `> 0`), which cannot distinguish 1 selection from 50
-- **Expected persistence:** N/A (UI-only observation)
-- **Edge cases:** a test cannot assert "2 selected" from the DOM at all — it must instead assert the eventual `designations/{id}.territories` array length after submission (see UC-ASSIGN-16) as an indirect proxy
-- **Priority:** P2 · **Gaps:** no selected-count affordance exists to test; if added later, this entry's "Expected UI" must be rewritten
+- **Steps:** 1. open `/territories/assign` → 2. tick `Rua das Acácias, 45 - Pinheiros` → 3. switch city to `Osasco` and tick `Av. dos Autonomistas, 1200 - Centro` → 4. submit
+- **Expected UI:** the dock renders a circular counter badge (`data-testid="assign-dock-selected-badge"`) and label (`data-testid="assign-dock-selected-text"`) bound to `selectedCount = state.selectedCount()`: reads `0` (`0 selecionado`) initially, `1` (`1 selecionado`) after step 2, `2` (`2 selecionados`) after step 3 (cross-city accumulation per UC-ASSIGN-11 is visible), and resets to `0` after submit removes the submitted ids from the selection; the submit button is enabled whenever count > 0
+- **Expected persistence:** after step 4, one new designation holds both territories (UC-ASSIGN-15/16); `db.getCollectionDocs(db.collections.designations)` grows by exactly 1
+- **Edge cases:** the badge highlights green when `count > 0` and dims when `0`; it is an app dock affordance carrying pt-BR copy (`0` and `1 selecionado` vs `N selecionados`); a failed submission keeps the count (and ticks) since the selection is only cleared on success (UC-ASSIGN-21)
+- **Priority:** P0 · **Gaps:** none
 
 ### Expiry derivation
 
@@ -188,7 +188,7 @@ undefined)` takes the `getAllByCongregationAndCities(id, [undefined])` branch (b
 - **Route:** `/territories/assign`
 - **Preconditions (seed):** default baseline, city `São Paulo`
 - **Steps:** 1. tick `Rua das Acácias, 45 - Pinheiros` and `Rua Harmonia, 300 - Vila Madalena` → 2. submit
-- **Expected UI:** the FAB shows its loading spinner (`[loading]='isCreatingAssignment'`) for the duration of the write, then a new browser window/navigation opens for the WhatsApp share link (see UC-ASSIGN-19) — there is **no success toast** anywhere in this flow (contrast with `/territories`' CSV export, see [`territories-management.md#UC-TERR-34`](./territories-management.md))
+- **Expected UI:** the FAB shows its loading spinner (`[loading]='isCreatingAssignment'`) and is `disabled` for the duration of the write (a re-entrancy guard in `handleTerritoryFormSubmit` plus the disabled binding prevent a double-click from creating duplicate designations), then a new browser window/navigation opens for the WhatsApp share link (see UC-ASSIGN-19) — there is **no success toast** anywhere in this flow (contrast with `/territories`' CSV export, see [`territories-management.md#UC-TERR-34`](./territories-management.md))
 - **Expected persistence:** a new `designations/{id}` doc exists with `congregationId === seed.ids.congregation`, `createdBy === seed.ids.adminUser`, `createdAt` ≈ submit time, `expiresAt` per UC-ASSIGN-13, and `settings.shouldDesignationBlockAfterExpired === true` (copied from `congregation.settings.shouldDesignationBlockAfterExpired` at creation time, per the default baseline) — assert via `db.queryWhere(db.collections.designations, 'congregationId', '==', seed.ids.congregation)` filtered to the new id (not `seed-designation`)
 - **Edge cases:** the doc's own `id` field is also written **inside** the document body (`setDoc(newDesignationDocRef, { ...designation, id: newDesignationDocRef.id })`), mirroring the territory/user write pattern documented in [`data-model.md`](../domain/data-model.md)
 - **Priority:** P0 · **Gaps:** none
@@ -217,8 +217,8 @@ undefined)` takes the `getAllByCongregationAndCities(id, [undefined])` branch (b
 - **Actor:** Admin
 - **Route:** `/territories/assign`
 - **Preconditions (seed):** default baseline
-- **Steps:** 1. tick `Rua das Acácias, 45 - Pinheiros` (`seed-territory-1`) and `Rua Harmonia, 300 - Vila Madalena` (`seed-territory-3`) → 2. submit, capture id `D1` from the share link → 3. reload `/territories/assign`, tick `Rua das Acácias, 45 - Pinheiros` and `Av. dos Autonomistas, 1200 - Centro` (`seed-territory-2`) → 4. submit, capture id `D2`
-- **Expected UI:** each submission independently opens its own share link/dialog; nothing on screen indicates `seed-territory-1` is already "in flight" on another designation. Note the session mechanics that make step 3 possible: after step 2's submit, `assignedTerritories` (a plain component field) holds the submitted ids and their checkboxes render checked-and-**disabled** — but both Sets are component state, so the full reload in step 3 re-creates the component with **empty** Sets and every checkbox becomes tickable again (the Sets are only ever preserved across _city switches_ and submissions, never across reloads — see UC-ASSIGN-20 for the more severe optimistic-marking case that survives within one session)
+- **Steps:** 1. tick `Rua das Acácias, 45 - Pinheiros` (`seed-territory-1`) and `Rua Harmonia, 300 - Vila Madalena` (`seed-territory-3`) → 2. submit, capture id `D1` from the share link → 3. click `Encerrar` (Stop button) and confirm in dialog to close the active session → 4. tick `Rua das Acácias, 45 - Pinheiros` and `Av. dos Autonomistas, 1200 - Centro` (`seed-territory-2`) → 5. submit, capture id `D2`
+- **Expected UI:** each submission independently opens its own share link/dialog; nothing on screen indicates `seed-territory-1` is already "in flight" on another designation once the previous cycle is closed. Note the session mechanics: after step 2's submit succeeds, `assignedDesignations` in `AssignTerritoriesStateService` holds the submitted ids under `D1` and their checkboxes render checked-and-**disabled** within that active cycle (UC-ASSIGN-27). Stopping the session in step 3 (UC-ASSIGN-29) closes the header cycle (`status: 'DONE'`), clearing active assigned state so `seed-territory-1` becomes tickable again in the new cycle for D2
 - **Expected persistence:** `db.getDoc(db.collections.designations, D1).territories` contains `seed-territory-1` and `seed-territory-3`, both `status: 'PENDING'`; `db.getDoc(db.collections.designations, D2).territories` contains `seed-territory-1` and `seed-territory-2`, both `status: 'PENDING'` — the two docs are entirely independent rows; `db.getCollectionDocs(db.collections.designations)` has grown by 2 (from the 1 baseline doc to 3)
 - **Edge cases:** mutating `D1.territories[0].status` to `'DONE'` (simulating a completed visit on `/work/:id`) must **not** change `D2.territories[0].status`, since each is an independently-written snapshot, not a shared reference
 - **Priority:** P0 · **Gaps:** none
@@ -269,19 +269,150 @@ undefined)` takes the `getAllByCongregationAndCities(id, [undefined])` branch (b
 'clipboard-write'])` step added before reading `navigator.clipboard.readText()`
 - **Priority:** P2 · **Gaps:** documents the current absence; no automatable clipboard flow exists today
 
-#### UC-ASSIGN-21 — ⚠ suspected defect: on a failed creation, ticked territories are optimistically marked "already assigned" with no rollback and no error shown
+#### UC-ASSIGN-25 — Tapping an already-assigned territory re-triggers the share for its designation
 
 - **Actor:** Admin
 - **Route:** `/territories/assign`
-- **Preconditions (seed):** default baseline, plus a way to force `TerritoryBO.createDesignationForTerritories` to error (e.g. temporarily revoke Firestore write access for `designations` in the emulator's rules, or seed a scenario where `userState.currentUser` briefly lacks a `congregation` — whichever is feasible from the harness; if neither is automatable today, keep this as a documented risk rather than an automated spec)
+- **Preconditions (seed):** default baseline
+- **Steps:** 1. tick `Rua das Acácias, 45 - Pinheiros` and `Rua Harmonia, 300 - Vila Madalena` → 2. submit, capture designation id `D1` from the share link (UC-ASSIGN-19) → 3. tap the now checked-and-disabled row for `Rua das Acácias, 45 - Pinheiros`
+- **Expected UI:** after step 2 the submitted rows render checked-and-disabled with `title="Enviar designação novamente"` and `cursor: pointer`. Tapping such a row emits `TerritoryCheckboxComponent.assignedClick` (a touch-first affordance — the click handler deliberately has no keyboard activation, since this screen is primarily used on mobile devices), which the page resolves through the `assignedDesignations` map (`designationId → territoryIds`) to call `shareDesignation(D1)` again — producing the same `whatsapp://send?text={location.origin}/work/D1` link and delivery path (desktop `window.open` / mobile `location.href`) as the original submission. The row stays checked-and-disabled afterwards
+- **Expected persistence:** none — re-sharing never writes; `db.getCollectionDocs(db.collections.designations)` is unchanged and `D1` is untouched
+- **Edge cases:** the tap does **not** open the assignment-confirmation dialog (`findImportantAlert`) — that flow belongs to _ticking_ an enabled checkbox (UC-ASSIGN-07/08); clicks that originate inside the row's action buttons never re-share (UC-ASSIGN-26); the state is session-only, so after a reload no row is assigned (UC-ASSIGN-17). This map (`designationId → territoryIds`) is the groundwork for the planned "show designations already done" view
+- **Priority:** P0 · **Gaps:** none
+
+#### UC-ASSIGN-26 — Assigned-row affordances: Maps/History buttons keep their behavior; assigned icon is dimmed
+
+- **Actor:** Admin
+- **Route:** `/territories/assign`
+- **Preconditions (seed):** default baseline (every seeded territory carries a `mapsLink` and visit history)
+- **Steps:** 1. tick `Rua das Acácias, 45 - Pinheiros` → 2. submit → 3. click the assigned row's Maps button → 4. click the assigned row's History button → 5. switch to dark mode (`emulateMedia({ colorScheme: 'dark' })` under the `system` preference)
+- **Expected UI:** the action buttons inside an assigned row are unaffected by the disabled state — Maps still opens the Google Maps link (a `window.open` to the maps URL on Chromium), History still opens the `Histórico de Visitas` dialog (`history-dialog` testid) — and **neither triggers a WhatsApp share** (`handleCardClick` ignores clicks whose target is inside a `button`). In dark mode the assigned row's territory icon renders at the disabled tone (`--kui-color-text-disabled`, computed `rgba(255, 255, 255, 0.38)`) while selectable rows keep full contrast (`--kui-color-text`, `rgba(255, 255, 255, 0.87)`); the same semantic token dims it proportionally in light mode (`rgba(0, 0, 0, 0.38)`), matching the row's already-dim description text — previously the icon stayed at full contrast, making assigned rows hard to tell apart in dark mode
+- **Expected persistence:** N/A (no writes in this flow); `designations` unchanged beyond the one created in step 2
+- **Edge cases:** the tone is applied via `.territory-checkbox--disabled .territory-checkbox__icon` in `territory-checkbox.component.scss`, not a dark-mode-only override — both themes consume the semantic token
+- **Priority:** P1 · **Gaps:** none
+
+#### UC-ASSIGN-21 — ⚠ residual gap: on a failed creation the ticks remain selectable (no optimistic marking), but no error is shown
+
+- **Actor:** Admin (harness extension needed — see below)
+- **Route:** `/territories/assign`
+- **Preconditions (seed):** default baseline, plus a way to force `TerritoryBO.createDesignationForTerritories` to error (e.g. temporarily revoke Firestore write access for `designations` in the emulator's rules; if not automatable today the behaviour is pinned by unit tests — see below)
 - **Steps:** 1. tick `Rua das Acácias, 45 - Pinheiros` → 2. submit while the write is forced to fail
-- **Expected UI:** `handleTerritoryFormSubmit` immediately does
-  `this.assignedTerritories = new Set([...this.selectedTerritoriesModel, ...this.assignedTerritories])` and clears `selectedTerritoriesModel` **before** the network call resolves. If the call then errors,
-  `TerritoryBO`'s `catchError` swallows it and returns `EMPTY`, so `.subscribe((designation) => ...)` never fires and `shareDesignation` is never called — but the checkbox for `Rua das Acácias, 45 - Pinheiros`
-  remains rendered as checked-and-disabled (`[disabled]='assignedTerritories.has(territory.id)'`) forever (until a full reload), even though **no designation was created** and **no error message appears anywhere** (the only trace is a `loggerService.error` call, which is not user-visible)
-- **Expected persistence:** `db.getCollectionDocs(db.collections.designations)` is unchanged (no new doc), while the DOM falsely implies the territory is now designated
-- **Edge cases:** the `finalize(() => this.isCreatingAssignment = false)` still runs, so the FAB's spinner stops and the FAB returns to `disabled` (since `selectedTerritoriesModel` was already cleared) — giving no visual indication that anything went wrong
-- **Priority:** P1 · **Gaps:** `⚠ suspected defect`; automating the failure trigger itself may need a harness extension (a way to simulate a Firestore write failure) — flag as blocked until such a hook exists
+- **Expected UI:** `handleTerritoryFormSubmit` leaves `selectedTerritoriesModel` untouched until the creation resolves and populates `assignedDesignations` only inside the success `subscribe` (the designation id — the map's key — only exists after the write). On failure the checkbox therefore **stays ticked and selectable**, the FAB stays enabled with its badge still reading `1`, and `shareDesignation` is never called (`TerritoryBO`'s `catchError` swallows the error and returns `EMPTY`, so nothing user-visible happens — the only trace is a `loggerService.error` call); the `finalize` still stops the FAB spinner. The admin can simply resubmit once the cause is fixed
+- **Expected persistence:** `db.getCollectionDocs(db.collections.designations)` is unchanged (no new doc) — matching the DOM, which no longer claims anything is assigned
+- **Edge cases:** this entry used to document the ⚠ defect "optimistic 'already assigned' marking survives a failed, silently-swallowed creation error" — the designation-map refactor resolved the marking (a failed create can no longer render rows checked-and-disabled), and the unit suite pins the rollback semantics (`assign-territories-page.component.spec.ts`); what **remains** is the silent failure (no error toast/dialog anywhere on this screen)
+- **Priority:** P1 · **Gaps:** `⚠ residual gap` (silent failure surface); automating the e2e failure trigger still needs a harness hook (HX-4)
+
+### Resumable sessions (`designations_header`)
+
+Session/cart state lives in `AssignTerritoriesStateService` (`providedIn: 'root'`): the active
+`designations_header` cycle (streamed in real time from Firestore on page open, updated on submit) and the
+unsubmitted selection cart (in-memory, survives route navigation but not a reload — the reload instead
+re-streams from the persisted header). Real-time collaboration: multiple assigners working concurrently
+receive live updates as designations are created or closed. The page features a unified bottom dock
+(`kingdom-apps-assign-territories-dock`, `data-testid="assign-dock"`) showing the selected cart count, the
+assigned-territory count for the active session, a Stop button (`Encerrar`, `data-testid="assign-dock-stop-button"`)
+that closes the header manually, and a Submit button (`Enviar`, `data-testid="assign-dock-submit-button"`). The
+daily cron (`closeDesignationsHeaders`, 12:00 `America/Sao_Paulo`) closes every `IN_PROGRESS` header regardless of
+age. Model details in [`../domain/data-model.md §2.7 / §4.9`](../domain/data-model.md).
+
+Dock state copy (pt-BR, verbatim):
+
+- Selected badge (`data-testid="assign-dock-selected-badge"`): circular counter with active green highlight when >0.
+- Selected label (`data-testid="assign-dock-selected-text"`): `Selecionado` (when count <= 1, including 0) vs `Selecionados` (when count > 1), avoiding number repetition alongside the circular badge.
+- Assigned label (`data-testid="assign-dock-assigned-text"`): when active session, `{N} já designado(s)` with singular `1 já designado` vs plural `N já designados`; when no active session, `Nenhuma designação em andamento`.
+- Stop button (`data-testid="assign-dock-stop-button"`): labelled `Encerrar`, media stop square icon (`media-control-50`); enabled when `hasActiveSession()` is true, disabled when false or when stopping.
+- Submit button (`data-testid="assign-dock-submit-button"`): labelled `Enviar`, paper-plane icon (`paper-plane-2`); enabled when `selectedCount() > 0`, disabled when 0 or when creating.
+
+#### UC-ASSIGN-27 — Resume after reload/navigation
+
+- **Actor:** Admin
+- **Route:** `/territories/assign`
+- **Preconditions (seed):** default baseline + an `IN_PROGRESS` `designations_header` for
+  `seed-congregation` (`buildDesignationsHeader({ congregationId: seed.ids.congregation })`) + designations
+  carrying `designationHeaderId` pointing at it, embedding seeded territories
+- **Steps:** 1. sign in as admin → 2. open `/territories/assign`
+- **Expected UI:** the bottom dock reflects the active session with the assigned-territory count
+  (`data-testid="assign-dock-assigned-text"`: `N já designados`) and enables the Stop button (`Encerrar`);
+  the previously assigned territories render checked-and-disabled, and tapping one re-shares that
+  designation's WhatsApp link (same path as UC-ASSIGN-25, resolved through the hydrated `assignedDesignations` map)
+- **Expected persistence:** no writes — resume is read-only (streamed live from Firestore); `designations_header` still `IN_PROGRESS`
+- **Edge cases:** with no `IN_PROGRESS` header the dock displays `Nenhuma designação em andamento`, the Stop button is disabled,
+  and every checkbox is tickable; the live stream detaches on navigation away (`takeUntilDestroyed`) to avoid background reads
+- **Priority:** P0 · **Gaps:** none
+
+#### UC-ASSIGN-28 — Multi-submission cycle attaches to the same header
+
+- **Actor:** Admin
+- **Route:** `/territories/assign`
+- **Preconditions (seed):** default baseline, no open header
+- **Steps:** 1. tick a territory → 2. submit via dock `Enviar` (captures `D1`) → 3. tick another territory → 4. submit via dock `Enviar` (captures `D2`)
+- **Expected UI:** each submission opens its own share link; the dock reflects the growing assigned count
+  after each submission (`1 já designado`, then `2 já designados`) and the Stop button becomes enabled
+- **Expected persistence:** exactly **one** `designations_header` doc exists, `IN_PROGRESS`, `createdBy ===
+seed.ids.adminUser`; both `D1.designationHeaderId` and `D2.designationHeaderId` equal that header id — no
+  redundant headers are created
+- **Edge cases:** the header is created lazily by the **first** designation of a cycle; subsequent
+  submissions reuse the in-memory header (no extra read). Known accepted ceiling (plan §4.2): if the cron
+  closes the header while the page stays open, the next submission still stamps the closed header's id
+- **Priority:** P0 · **Gaps:** none
+
+#### UC-ASSIGN-29 — Manual Stop closes the header
+
+- **Actor:** Admin
+- **Route:** `/territories/assign`
+- **Preconditions (seed):** an active session (as UC-ASSIGN-27, or after a submission per UC-ASSIGN-28)
+- **Steps:** 1. click `Encerrar` (`assign-dock-stop-button`) → 2. confirm in the dialog
+  (`Confirmar`) → 3. tick a territory → 4. submit
+- **Expected UI:** the Stop button opens a `ConfirmDialogComponent` titled `Encerrar designações?` with body
+  HTML informing that already assigned territories stay available for publishers to work (`<p>Isso encerra a sessão atual de designação. Os territórios já designados continuam disponíveis para os publicadores trabalharem normalmente.</p>`) and a caption note noting automatic closure at midnight (`<p class="mt-4 t-caption"><strong>Nota:</strong> As sessões de designação são encerradas automaticamente todos os dias à meia-noite.</p>`); on
+  confirmation the header closes, the Stop button becomes disabled, the dock displays `Nenhuma designação em andamento`,
+  all rows become tickable again (post-stop UI matches post-reload UI), and a success toast reads
+  `Designações em andamento encerradas com sucesso.`; the step-4 submission opens a **fresh** header (dock assigned text reflects count 1)
+- **Expected persistence:** the old header doc reads `status: 'DONE'`, `closedBy: 'USER'`, `closedAt ≈ now`;
+  a **new** `IN_PROGRESS` header doc exists after step 4 and the new designation points at it
+- **Edge cases:** cancelling the dialog (`Cancelar`) leaves the session untouched; Stop is available to
+  anyone who can open the page (no extra role gating) and is disabled when no session is active
+- **Priority:** P0 · **Gaps:** none
+
+#### UC-ASSIGN-30 — Selection cart survives navigation, prunes foreign assignments
+
+- **Actor:** Admin
+- **Route:** `/territories/assign`
+- **Preconditions (seed):** default baseline + an `IN_PROGRESS` header for `seed-congregation` whose
+  designations (seeded directly, simulating another assigner) embed `seed-territory-1`
+- **Steps:** 1. sign in as admin, tick `seed-territory-1` and `seed-territory-3` **before** opening
+  `/territories/assign` is impossible — instead: 1. open `/territories/assign` (empty cart, no open header
+  in this variant) and tick both → 2. navigate away and back (or another user assigns `seed-territory-1`
+  into a new header, then this user reloads) → 3. reopen `/territories/assign`
+- **Expected UI:** the cart is in-memory per navigation-surviving state service, so route navigation keeps
+  the ticks; on `loadSession` any cart territory that is now assigned inside the active header is pruned
+  (guards double-selection when another user assigned it meanwhile) — `seed-territory-1`'s row renders
+  checked-and-disabled, `seed-territory-3` stays ticked in the cart
+- **Expected persistence:** no writes by the pruning itself; submitting afterwards creates a designation
+  containing only the still-unassigned cart territories
+- **Edge cases:** the cart never survives a **reload** (only the header does); the pruning only runs when a
+  session loads
+- **Priority:** P1 · **Gaps:** none
+
+#### UC-ASSIGN-31 (optional) — Cron close via the Functions emulator
+
+- **Actor:** System (scheduled function)
+- **Route:** N/A
+- **Preconditions (seed):** one or more `IN_PROGRESS` headers across congregations; Functions + Firestore
+  emulators running
+- **Steps:** 1. `POST http://127.0.0.1:5001/du-ministry-maps/us-central1/closeDesignationsHeaders-0` with
+  an empty JSON body (the Functions emulator's trigger-key route for the scheduled function — note the
+  `-0` suffix; the plain function name 404s)
+- **Expected UI:** N/A (background function)
+- **Expected persistence:** **every** `IN_PROGRESS` header flips to `status: 'DONE'`, `closedBy: 'CRON'`,
+  `closedAt` set, regardless of age; already-`DONE` headers are untouched. A page that was already open
+  keeps its banner until the next `loadSession` (documented read-budget ceiling). Idempotent:
+  re-invoking finds nothing to close
+- **Edge cases:** do **not** use the Pub/Sub emulator route for this: on firebase-tools 14.x the topic
+  `firebase-schedule-closeDesignationsHeaders` is registered, but v2 scheduled triggers have signature
+  `http`, so topic publishes are acked without executing (verified against 14.27.0 — see
+  [`../../../ARCHITECTURE.md`](../../../ARCHITECTURE.md))
+- **Priority:** P2 · **Gaps:** optional; verified manually 2026-09-03, no automated spec yet
 
 ### Access control
 
@@ -325,17 +456,16 @@ undefined)` takes the `getAllByCongregationAndCities(id, [undefined])` branch (b
 
 ## Testability gaps (summary)
 
-- **Zero `data-testid`s on this screen.** All four app-wide testids belong to `/territories`, not
-  `/territories/assign` — every selector here relies on rendered pt-BR text, native form attributes (`name`, `title`), or component tag names (`kingdom-apps-territory-checkbox`).
-- **No selected-count UI** (UC-ASSIGN-12): the only feedback that something is selected is the submit button's binary enabled/disabled state; a test cannot assert "N selected" from the DOM.
+- **`data-testid` coverage is partial.** The screen carries the `assign-*` testids (heading, city select, territory list, checkbox rows, resume banner `assign-resume-banner`, stop button `assign-stop-button`) plus the FAB badge's `fab-badge` (from `FloatingActionButtonComponent`); the search input and the sort/filter dialog toggles still have none and rely on rendered pt-BR text / inner-element selectors.
+- ~~**No selected-count UI** (UC-ASSIGN-12)~~ — **resolved**: the FAB's `fab-badge` renders `selectedTerritoriesModel.size` (hidden at `0`).
 - **No success or error toast** anywhere in the create-and-share flow (UC-ASSIGN-15, UC-ASSIGN-21) — success is only inferable from the share-link popup/navigation, and failure is invisible to the user entirely.
 - **No clipboard/copy affordance** exists (UC-ASSIGN-20) — only a WhatsApp deep link (`whatsapp://send?text=`).
 - **Harness extensions needed:** a second congregation + non-default admin identity for the zero-territory and zero-cities edge cases (UC-ASSIGN-03, UC-ASSIGN-04, UC-ASSIGN-14); `signInAs` support for `ELDER`,
-  `ORGANIZER`, `SUPERINTENDENT`, `APP_ADMIN` (UC-ASSIGN-22); a way to force a Firestore write failure to automate UC-ASSIGN-21.
+  `ORGANIZER`, `SUPERINTENDENT`, `APP_ADMIN` (UC-ASSIGN-22); a way to force a Firestore write failure to automate UC-ASSIGN-21 in e2e (its rollback semantics are unit-tested meanwhile).
 - **Untested boundary:** congregations with more than 30 cities would make `getAllByCongregationAndCities`'s
   `where('city','in',cities)` exceed Firestore's real cap (UC-ASSIGN-18) — not reproduced by any seed today.
 - **Documented current-behaviour-vs-defect items** (see the corresponding entry for the assertion to make today): UC-ASSIGN-04 (empty-`cities` ternary bug, shared with `UC-TERR-04`), UC-ASSIGN-16 (embedded
-  `history` sliced from an unordered read, not the true 5 most recent), UC-ASSIGN-18 (batching comment cites the wrong Firestore limit), UC-ASSIGN-19 (share link uses `location.origin`, not `environment.baseUrl`), UC-ASSIGN-21 (optimistic "already assigned" marking survives a failed, silently-swallowed creation error).
+  `history` sliced from an unordered read, not the true 5 most recent), UC-ASSIGN-18 (batching comment cites the wrong Firestore limit), UC-ASSIGN-19 (share link uses `location.origin`, not `environment.baseUrl`). ~~UC-ASSIGN-21 (optimistic "already assigned" marking survives a failed, silently-swallowed creation error)~~ — **resolved**: assignment is marked only on successful creation; the silent-failure surface remains documented above.
 
 ## Sources
 
@@ -343,6 +473,9 @@ undefined)` takes the `getAllByCongregationAndCities(id, [undefined])` branch (b
 - `apps/ministry-maps/src/app/features/territory/pages/assign-territories-page/assign-territories-page.component.html`
 - `apps/ministry-maps/src/app/features/territory/components/territory-checkbox/territory-checkbox.component.ts`
 - `apps/ministry-maps/src/app/features/territory/bo/territory/territory.bo.ts`
+- `apps/ministry-maps/src/app/features/territory/bo/designations-header/designations-header.bo.ts`
+- `apps/ministry-maps/src/app/features/territory/state/assign-territories.state.service.ts`
+- `libs/common-ui/src/lib/components/floating-action-btn/floating-action-button.component.ts` (FAB badge)
 - `apps/ministry-maps/src/app/features/territory/bo/territory-alerts/territory-alerts.bo.ts`
 - `apps/ministry-maps/src/app/features/territory/territory-routes.module.ts`
 - `apps/ministry-maps/src/app/repositories/firebase/firebase-designation-datasource.service.ts`

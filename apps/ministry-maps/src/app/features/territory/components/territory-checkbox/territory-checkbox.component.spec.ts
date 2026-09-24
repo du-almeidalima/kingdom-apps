@@ -85,13 +85,13 @@ describe('TerritoryCheckboxComponent', () => {
     it('writeValue selects the checkbox and updates the indicator', () => {
       render();
 
-      expect(component.statusClass).toContain('default');
+      expect(component.statusClass()).toContain('default');
 
       component.writeValue(true);
       fixture.detectChanges();
 
-      expect(component.value).toBe(true);
-      expect(component.statusClass).toContain('selected');
+      expect(component.value()).toBe(true);
+      expect(component.statusClass()).toContain('selected');
     });
 
     it('setDisabledState disables the control and switches the indicator', () => {
@@ -100,7 +100,7 @@ describe('TerritoryCheckboxComponent', () => {
       component.setDisabledState(true);
       fixture.detectChanges();
 
-      expect(component.statusClass).toContain('disabled');
+      expect(component.statusClass()).toContain('disabled');
     });
 
     it('setValue propagates the value through onChange and onTouched', () => {
@@ -112,7 +112,7 @@ describe('TerritoryCheckboxComponent', () => {
 
       component.setValue(true);
 
-      expect(component.value).toBe(true);
+      expect(component.value()).toBe(true);
       expect(onChange).toHaveBeenCalledWith(true);
       expect(onTouched).toHaveBeenCalled();
     });
@@ -125,7 +125,7 @@ describe('TerritoryCheckboxComponent', () => {
 
       component.setValue(true);
 
-      expect(component.value).toBe(false);
+      expect(component.value()).toBe(false);
       expect(onChange).not.toHaveBeenCalled();
     });
 
@@ -140,13 +140,49 @@ describe('TerritoryCheckboxComponent', () => {
     });
   });
 
+  describe('assigned (disabled) card click', () => {
+    it('emits assignedClick when a disabled card is clicked', () => {
+      render();
+      const emitter = jest.fn();
+      component.assignedClick.subscribe(emitter);
+      component.setDisabledState(true);
+      fixture.detectChanges();
+
+      ngMocks.click(ngMocks.find(fixture, 'label.territory-checkbox'));
+
+      expect(emitter).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not emit assignedClick when the card is enabled', () => {
+      render();
+      const emitter = jest.fn();
+      component.assignedClick.subscribe(emitter);
+
+      ngMocks.click(ngMocks.find(fixture, 'label.territory-checkbox'));
+
+      expect(emitter).not.toHaveBeenCalled();
+    });
+
+    it('does not emit assignedClick when an inner action button is clicked', () => {
+      const withLink = render({ mapsLink: 'https://maps.app.goo.gl/xyz' });
+      const emitter = jest.fn();
+      component.assignedClick.subscribe(emitter);
+      component.setDisabledState(true);
+      fixture.detectChanges();
+
+      ngMocks.click(ngMocks.find(withLink, 'button'));
+
+      expect(emitter).not.toHaveBeenCalled();
+    });
+  });
+
   describe('action buttons', () => {
     it('opens Google Maps for a territory with a maps link', () => {
       const withLink = render({ mapsLink: 'https://maps.app.goo.gl/xyz' });
 
       ngMocks.click(ngMocks.find(withLink, 'button'));
 
-      expect(openGoogleMapsHandler).toHaveBeenCalledWith('https://maps.app.goo.gl/xyz', component.territory);
+      expect(openGoogleMapsHandler).toHaveBeenCalledWith('https://maps.app.goo.gl/xyz', component.territory());
     });
 
     it('hides the maps button when there is no maps link', () => {

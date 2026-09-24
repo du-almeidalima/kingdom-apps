@@ -1,4 +1,4 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 
 import { Territory } from '../../../../../models/territory';
 import { TerritoryStatisticsBO } from '../../bo/territory-statistics/territory-statistics.bo';
@@ -7,6 +7,7 @@ import { TerritoryStatisticsBO } from '../../bo/territory-statistics/territory-s
   selector: 'kingdom-apps-territory-statistics-static-section',
   standalone: true,
   imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: [
     './territory-statistics-static-section.component.scss',
     '../../pages/statistics-territories-page/statistics-territories-page.component.scss',

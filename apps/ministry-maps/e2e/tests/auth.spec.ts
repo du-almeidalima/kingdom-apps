@@ -121,7 +121,7 @@ test.describe('Auth', () => {
     expect(await db.getCollectionDocs(db.collections.users)).toHaveLength(8);
   });
 
-  test('UC-AUTH-22 — Admin signout clears state but retains /home (⚠ defect)', async ({ page, signInAs, db }) => {
+  test('UC-AUTH-22 — Admin signout clears state and navigates to /login', async ({ page, signInAs, db }) => {
     await signInAs('admin');
     await page.goto('/home');
 
@@ -131,8 +131,8 @@ test.describe('Auth', () => {
       await api.auth.signOut();
     });
 
-    await expect(page).toHaveURL(/.*\/home/);
-    await expect(page.getByRole('heading', { name: 'Login' })).toHaveCount(0);
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.getByRole('heading', { name: 'Login' })).toBeVisible();
     await expect(page.locator('#profile-link')).toHaveCount(0);
     await expect
       .poll(() =>

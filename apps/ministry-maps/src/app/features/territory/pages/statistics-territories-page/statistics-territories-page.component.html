@@ -3,7 +3,7 @@
 
   <select
     lib-select
-    [disabled]="isLoading"
+    [disabled]="isLoading()"
     class="w-full"
     name="Cidade"
     data-testid="statistics-city-filter"
@@ -17,7 +17,7 @@
   </select>
 
   @let territories = (filteredTerritories$ | async) || [];
-  @if (isLoading) {
+  @if (isLoading()) {
     <div class="flex items-center justify-center mt-52 py-6" data-testid="statistics-loading">
       <lib-spinner [height]="'5rem'" [width]="'5rem'" class="mx-auto" />
     </div>

@@ -1,17 +1,15 @@
-import { Component, OnInit, ViewChild, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, viewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize, Observable, of, shareReplay } from 'rxjs';
 
 import {
   ConfirmDialogComponent,
   ConfirmDialogData,
-  FloatingActionButtonComponent,
-  green200,
-  IconComponent,
   SearchInputComponent,
   SelectComponent,
   SortFilterComponent,
   SortFilterValue,
-  white200,
+  ToasterService,
 } from '@kingdom-apps/common-ui';
 
 import { Territory } from '../../../../../models/territory';
@@ -24,7 +22,6 @@ import { isMobileDevice } from '../../../../shared/utils/user-agent';
 import { TerritoryAlertsBO } from '../../bo/territory-alerts/territory-alerts.bo';
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 import { Dialog } from '@angular/cdk/dialog';
-import { TerritoryBO } from '../../bo/territory/territory.bo';
 import {
   ALL_OPTION,
   territoriesFilterPipe,
@@ -35,27 +32,49 @@ import { createSendWhatsAppLink } from '../../../../shared/utils/share-utils';
 import { FormsModule } from '@angular/forms';
 import { TerritoryCheckboxComponent } from '../../components/territory-checkbox/territory-checkbox.component';
 import { AsyncPipe } from '@angular/common';
+import { AssignTerritoriesStateService } from '../../state/assign-territories.state.service';
+import { DesignationsHeaderBO } from '../../bo/designations-header/designations-header.bo';
+import { AssignTerritoriesDockComponent } from '../../components/assign-territories-dock/assign-territories-dock.component';
 
 @Component({
   selector: 'kingdom-apps-assign-territories-page',
   templateUrl: './assign-territories-page.component.html',
   styleUrls: ['./assign-territories-page.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     SelectComponent,
     FormsModule,
     SearchInputComponent,
     TerritoryCheckboxComponent,
     AsyncPipe,
-    FloatingActionButtonComponent,
-    IconComponent,
+    AssignTerritoriesDockComponent,
     SortFilterComponent,
   ],
 })
 export class AssignTerritoriesPageComponent implements OnInit {
   private readonly territoryRepository = inject(TerritoryRepository);
   private readonly userState = inject(UserStateService);
-  private readonly territoryBO = inject(TerritoryBO);
   private readonly dialog = inject(Dialog);
+  private readonly toaster = inject(ToasterService);
+  private readonly designationsHeaderBO = inject(DesignationsHeaderBO);
+  private readonly destroyRef = inject(DestroyRef);
+
+  /** Navigation-surviving session + cart state. */
+  public readonly state = inject(AssignTerritoriesStateService);
+
+  public readonly ALL_OPTION = ALL_OPTION;
+  public readonly sortFilterConfig = TERRITORY_SORT_FILTER_CONFIG;
+
+  private territories$: Observable<Territory[]> = of([]);
+
+  cities: string[] = [];
+  selectedCity = '';
+  searchTerm?: string | null;
+  searchFilters: TerritoryFilterSettings['filters'] = TERRITORY_SORT_FILTER_CONFIG.filterConfigs.initial;
+  orderBy: TerritoriesOrderBy = TerritoriesOrderBy.SAVED_INDEX;
+  filteredTerritories$: Observable<Territory[]> = of([]);
+
+  searchInputComponent = viewChild.required(SearchInputComponent);
 
   /**
    * This page is only reachable for a signed-in user whose congregation reference is resolved,
@@ -69,65 +88,112 @@ export class AssignTerritoriesPageComponent implements OnInit {
     return user.congregation;
   }
 
-  private territories$: Observable<Territory[]> = of([]);
-
-  public readonly ALL_OPTION = ALL_OPTION;
-  public readonly green200 = green200;
-  public readonly white200 = white200;
-
-  isCreatingAssignment = false;
-  cities: string[] = [];
-  selectedCity = '';
-  searchTerm?: string | null;
-  searchFilters: TerritoryFilterSettings['filters'] = TERRITORY_SORT_FILTER_CONFIG.filterConfigs.initial;
-  orderBy: TerritoriesOrderBy = TerritoriesOrderBy.SAVED_INDEX;
-  filteredTerritories$: Observable<Territory[]> = of([]);
-  selectedTerritoriesModel = new Set<string>();
-  assignedTerritories = new Set<string>();
-
-  public sortFilterConfig = TERRITORY_SORT_FILTER_CONFIG;
-
-  @ViewChild(SearchInputComponent)
-  searchInputComponent!: SearchInputComponent;
-
   ngOnInit(): void {
     const { id, cities } = this.currentCongregation;
-    const firstCity = cities.length >= 0 ? cities[0] : ALL_OPTION;
+    const firstCity = cities.length > 0 ? cities[0] : ALL_OPTION;
 
     this.selectedCity = firstCity;
     this.cities = cities;
 
     this.fetchTerritories(id, firstCity);
+
+    this.state.isLoadingSession.set(true);
+    this.designationsHeaderBO
+      .getActiveSessionStream(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ header, designations }) => {
+          this.state.setSession(header, designations);
+          this.state.isLoadingSession.set(false);
+        },
+        error: () => {
+          this.state.isLoadingSession.set(false);
+        },
+      });
   }
 
   /**
    * Returns true if the territory has already been selected (checks the checkbox).
    * It checks both the currently selected list or if it was already assigned to a designation.
-   * i.e. it's in the assignedTerritories Set.
+   * i.e. it's in the assignedDesignations map.
    * @param territoryId
    */
   hasAlreadyBeenSelected(territoryId: string): boolean {
-    return this.selectedTerritoriesModel.has(territoryId) || this.assignedTerritories.has(territoryId);
+    return this.state.selectedTerritoryIds().has(territoryId) || this.isTerritoryAssigned(territoryId);
+  }
+
+  /** Returns true if the territory was already assigned to a designation created in this session. */
+  isTerritoryAssigned(territoryId: string): boolean {
+    return this.state.assignedTerritoryIndex().has(territoryId);
+  }
+
+  /** Returns the id of the designation the territory was assigned to, if any. */
+  designationIdForTerritory(territoryId: string): string | undefined {
+    return this.state.assignedTerritoryIndex().get(territoryId);
+  }
+
+  /**
+   * Re-triggers the sharing mechanism for the designation a territory was assigned to.
+   * Called when the user taps an already-assigned (disabled) territory row.
+   */
+  handleAssignedTerritoryClick(territoryId: string) {
+    const designationId = this.designationIdForTerritory(territoryId);
+
+    if (designationId) {
+      this.shareDesignation(designationId);
+    }
   }
 
   handleTerritoryFormSubmit() {
-    this.assignedTerritories = new Set([...this.selectedTerritoriesModel, ...this.assignedTerritories]);
-    const selectedTerritories = [...this.selectedTerritoriesModel.values()];
-    this.selectedTerritoriesModel.clear();
+    // Guards against a double submission
+    if (this.state.isCreatingAssignment() || !this.state.selectedCount()) {
+      return;
+    }
 
-    // Loading Spinner on Button
-    this.isCreatingAssignment = true;
+    const territoryIds = Array.from(this.state.selectedTerritoryIds());
+    this.state.isCreatingAssignment.set(true);
 
-    this.territoryBO
-      .createDesignationForTerritories(selectedTerritories)
-      .pipe(
-        finalize(() => {
-          this.isCreatingAssignment = false;
-        }),
-      )
-      .subscribe((designation) => {
-        this.shareDesignation(designation.id);
+    this.designationsHeaderBO
+      .createDesignation(territoryIds, this.state.header())
+      .pipe(finalize(() => this.state.isCreatingAssignment.set(false)))
+      .subscribe({
+        next: ({ designation, header }) => {
+          this.state.setHeader(header);
+          this.state.addAssignedDesignation(designation.id, territoryIds);
+          this.shareDesignation(designation.id);
+        },
+        error: () => {
+          this.toaster.error('Não foi possível criar a designação. Tente novamente.');
+        },
       });
+  }
+
+  /** Opens the Stop confirmation dialog and, on confirmation, closes the active session. */
+  handleStopClick() {
+    this.openConfirmStopDialog().subscribe((confirmed) => {
+      if (!confirmed) {
+        return;
+      }
+
+      const header = this.state.header();
+      if (!header) {
+        return;
+      }
+
+      this.state.isStoppingSession.set(true);
+      this.designationsHeaderBO
+        .closeHeader(header.id)
+        .pipe(finalize(() => this.state.isStoppingSession.set(false)))
+        .subscribe({
+          next: () => {
+            this.state.clearSession();
+            this.toaster.success('Designações em andamento encerradas com sucesso.');
+          },
+          error: () => {
+            this.toaster.error('Não foi possível encerrar as designações. Tente novamente.');
+          },
+        });
+    });
   }
 
   /**
@@ -167,7 +233,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
   handleSelectedCityChange(city: string) {
     this.selectedCity = city;
     this.searchTerm = '';
-    this.searchInputComponent.resetSearch();
+    this.searchInputComponent().resetSearch();
     this.fetchTerritories(this.currentCongregation.id, city);
   }
 
@@ -179,16 +245,12 @@ export class AssignTerritoriesPageComponent implements OnInit {
     // Adding the value here regardless of the alert because we need to tell Angular that something has changed
     // In order for the TerritoryCheckBox component to render correctly
     // Otherwise, even by not adding this, the TerritoryCheckBox would display as selected
-    if (value) {
-      this.selectedTerritoriesModel.add(territoryId);
-    } else {
-      this.selectedTerritoriesModel.delete(territoryId);
-    }
+    this.state.setTerritorySelection(territoryId, value);
 
     if (value && importantAlert) {
       this.openConfirmAssignmentDialog(importantAlert).subscribe((result) => {
         if (!result) {
-          this.selectedTerritoriesModel.delete(territoryId);
+          this.state.setTerritorySelection(territoryId, false);
         }
       });
     }
@@ -219,6 +281,17 @@ export class AssignTerritoriesPageComponent implements OnInit {
 
     return this.dialog.open<ConfirmDialogComponent, ConfirmDialogData>(ConfirmDialogComponent, {
       data: { title, bodyText },
+    }).closed;
+  }
+
+  private openConfirmStopDialog() {
+    return this.dialog.open<ConfirmDialogComponent, ConfirmDialogData>(ConfirmDialogComponent, {
+      data: {
+        title: 'Encerrar Designações?',
+        bodyText:
+          '<p>Isso encerra a sessão atual de designação. Os territórios já designados continuam disponíveis para os publicadores trabalharem normalmente.</p>' +
+          '<p class="mt-4 t-caption"><strong>Nota:</strong> As sessões de designação são encerradas automaticamente todos os dias à meia-noite.</p>',
+      },
     }).closed;
   }
 }

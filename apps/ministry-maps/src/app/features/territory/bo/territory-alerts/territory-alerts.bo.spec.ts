@@ -52,56 +52,35 @@ describe('TerritoryAlertsBO (static helpers)', () => {
   });
 
   describe('hasRecentlyAskedToStopVisiting', () => {
-    beforeEach(() => {
-      jest.useFakeTimers();
-      jest.setSystemTime(new Date(2024, 5, 15));
-    });
-
-    afterEach(() => {
-      jest.useRealTimers();
-    });
-
-    const monthsAgo = (months: number) => new Date(2024, 5 - months, 15);
-
     it.each([
       [
-        'asked 3 months ago (unresolved)',
-        historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: monthsAgo(3) }),
+        'an unresolved ASKED_TO_NOT_VISIT_AGAIN entry',
+        [historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN })],
         true,
       ],
       [
-        'asked 23 months ago (unresolved)',
-        historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: monthsAgo(23) }),
+        'an unresolved entry from more than 24 months ago',
+        [historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: new Date(2020, 0, 1) })],
         true,
       ],
       [
-        'asked exactly 24 months ago (window boundary)',
-        historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: monthsAgo(24) }),
-        false,
-      ],
-      [
-        'asked more than 24 months ago',
-        historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: monthsAgo(30) }),
-        false,
-      ],
-      [
-        'asked but already resolved',
-        historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, isResolved: true, date: monthsAgo(3) }),
-        false,
-      ],
-      // differenceInMonths clamps future dates to 0, so future-dated reports stay flagged.
-      [
-        'asked with a future date',
-        historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: new Date(2025, 5, 15) }),
+        'an unresolved entry without a date',
+        [historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: undefined as unknown as Date })],
         true,
       ],
       [
-        'entry without a date',
-        historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, date: undefined as unknown as Date }),
+        'a resolved ASKED_TO_NOT_VISIT_AGAIN entry',
+        [historyEntry({ visitOutcome: VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN, isResolved: true })],
         false,
       ],
-    ])('is %p for %s', (_desc, entry, expected) => {
-      expect(TerritoryAlertsBO.hasRecentlyAskedToStopVisiting(territory({ recentHistory: [entry] }))).toBe(expected);
+      [
+        'only non-stop-visiting entries',
+        [historyEntry({ visitOutcome: VisitOutcomeEnum.SPOKE })],
+        false,
+      ],
+      ['no recent history', undefined, false],
+    ])('is %p when the territory has %s', (_desc, recentHistory, expected) => {
+      expect(TerritoryAlertsBO.hasRecentlyAskedToStopVisiting(territory({ recentHistory }))).toBe(expected);
     });
   });
 
@@ -147,7 +126,10 @@ describe('TerritoryAlertsBO (static helpers)', () => {
 
   describe('alertMessaging', () => {
     it('maps ASKED_TO_NOT_VISIT_AGAIN to its pt-BR messaging', () => {
-      expect(TerritoryAlertsBO.alertMessaging(VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN).title).toBe('Não visitar');
+      const messaging = TerritoryAlertsBO.alertMessaging(VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN);
+      expect(messaging.title).toBe('Não visitar');
+      expect(messaging.bodyText).toContain('Esse morador pediu para não ser visitado por uma Testemunha de Jeová.');
+      expect(messaging.bodyText).not.toContain('dois anos');
     });
 
     it('maps MOVED to its pt-BR messaging', () => {

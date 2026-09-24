@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { DialogRef } from '@angular/cdk/dialog';
 import { IconComponent } from '../icon/icon.component';
 
@@ -9,7 +9,7 @@ import { IconComponent } from '../icon/icon.component';
   template: `
     <dialog class="dialog" open>
       <header class="dialog__header">
-        <h2 class="dialog__header-title">{{ title }}</h2>
+        <h2 class="dialog__header-title">{{ title() }}</h2>
         <button class="dialog__header-close-btn" (click)="handleCloseDialog()" [tabIndex]="-1">
           <lib-icon icon="x-mark-lined"></lib-icon>
         </button>
@@ -25,8 +25,7 @@ import { IconComponent } from '../icon/icon.component';
 export class DialogComponent {
   private dialogRef = inject(DialogRef);
 
-  @Input()
-  title = '';
+  title = input('');
 
   handleCloseDialog() {
     this.dialogRef.close();

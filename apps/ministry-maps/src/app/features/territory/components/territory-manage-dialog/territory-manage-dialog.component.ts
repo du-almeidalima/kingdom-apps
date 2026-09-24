@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { finalize, Observable, retry, switchMap } from 'rxjs';
@@ -166,9 +166,9 @@ type TerritoryForm = {
             type="submit"
             form="territory-form"
             data-testid="territory-submit"
-            [disabled]="!this.form.valid || isSubmitting"
+            [disabled]="!this.form.valid || isSubmitting()"
           >
-            @if (isSubmitting) {
+            @if (isSubmitting()) {
               <lib-spinner height="1.75rem" width="1.75rem" [color]="white" />
             } @else {
               <ng-container>{{ isEdit ? 'Salvar' : 'Adicionar' }}</ng-container>
@@ -188,7 +188,7 @@ export class TerritoryManageDialogComponent implements OnInit {
 
   public readonly territoryIcons: TerritoryIcon[] = Object.values(TerritoryIcon);
   public readonly white = white100;
-  public isSubmitting = false;
+  public isSubmitting = signal(false);
 
   isEdit: boolean;
   form!: FormGroup<TerritoryForm>;
@@ -238,7 +238,7 @@ export class TerritoryManageDialogComponent implements OnInit {
       };
     }
 
-    this.isSubmitting = true;
+    this.isSubmitting.set(true);
 
     let territoryRequest$: Observable<unknown>;
 
@@ -260,7 +260,7 @@ export class TerritoryManageDialogComponent implements OnInit {
       .pipe(
         retry(3),
         finalize(() => {
-          this.isSubmitting = false;
+          this.isSubmitting.set(false);
         }),
       )
       .subscribe(() => {

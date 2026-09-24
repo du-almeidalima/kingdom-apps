@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, forwardRef, Input, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, forwardRef, computed, inject, input, output, signal } from '@angular/core';
 import { Territory } from '../../../../../models/territory';
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
 import openGoogleMapsHandler from '../../../../shared/utils/open-google-maps';
@@ -25,66 +25,68 @@ import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
   ],
   template: `
     <label
+      role="presentation"
       class="territory-checkbox"
       data-testid="assign-territory-checkbox"
-      [for]="territory.id"
+      [for]="territory().id"
+      [title]="disabled() ? assignedTitle : null"
       [ngClass]="{
-        'territory-checkbox--disabled': disabled,
-        'territory-checkbox--selected': !disabled && value,
+        'territory-checkbox--disabled': disabled(),
+        'territory-checkbox--selected': !disabled() && value(),
       }"
+      (click)="handleCardClick($event)"
     >
       <div class="territory-checkbox__control-container">
         <input
           type="checkbox"
-          [name]="territory.id"
-          [id]="territory.id"
-          [checked]="value"
-          [ngModel]="value"
-          [disabled]="disabled"
+          [name]="territory().id"
+          [id]="territory().id"
+          [checked]="value()"
+          [ngModel]="value()"
           hidden
           (ngModelChange)="setValue($event)"
         />
         <div
           class="territory-checkbox__description"
-          [ngClass]="{ 'territory-checkbox__description--disabled': disabled }"
+          [ngClass]="{ 'territory-checkbox__description--disabled': disabled() }"
         >
           <!-- Title and Subtitle -->
           <div class="territory-checkbox__title-subtitle-container">
             <lib-icon
               class="territory-checkbox__icon"
-              [ngClass]="{ 'territory-checkbox__icon--large': isIconLarge }"
+              [ngClass]="{ 'territory-checkbox__icon--large': isIconLarge() }"
               [fillColor]="iconColor"
-              [icon]="icon"
+              [icon]="icon()"
             />
             <!-- Address and Note -->
             <div class="flex flex-col gap-1">
-              <h3 class="territory-checkbox__title">{{ territory.address }}</h3>
-              <span class="territory-checkbox__subtitle">{{ territory.note }}</span>
+              <h3 class="territory-checkbox__title">{{ territory().address }}</h3>
+              <span class="territory-checkbox__subtitle">{{ territory().note }}</span>
             </div>
           </div>
           <!-- VISIT CONTAINER -->
           <div class="territory-checkbox__visit-container">
-            @if (territory.lastVisit) {
+            @if (territory().lastVisit) {
               <div class="territory-checkbox__last-visit-container">
                 <span class="territory-checkbox__last-visit-label">
-                  Última visita: {{ territory.lastVisit | date: 'dd/MM/yyyy' }}
+                  Última visita: {{ territory().lastVisit | date: 'dd/MM/yyyy' }}
                 </span>
                 @if (
-                  territory.recentHistory?.length &&
-                  territory.recentHistory![territory.recentHistory!.length - 1].visitOutcome !== undefined
+                  territory().recentHistory?.length &&
+                  territory().recentHistory![territory().recentHistory!.length - 1].visitOutcome !== undefined
                 ) {
                   <lib-icon
                     [ngClass]="{
                       '-mt-0.5':
-                        territory.recentHistory![territory.recentHistory!.length - 1].visitOutcome ===
+                        territory().recentHistory![territory().recentHistory!.length - 1].visitOutcome ===
                         VisitOutcomeEnum.NOT_ANSWERED,
                       '-mt-1.5':
-                        territory.recentHistory![territory.recentHistory!.length - 1].visitOutcome !==
+                        territory().recentHistory![territory().recentHistory!.length - 1].visitOutcome !==
                         VisitOutcomeEnum.NOT_ANSWERED,
                     }"
                     class="territory-checkbox__last-visit-icon"
                     [icon]="
-                      territory.recentHistory![territory.recentHistory!.length - 1].visitOutcome | visitOutcomeToIcon
+                      territory().recentHistory![territory().recentHistory!.length - 1].visitOutcome | visitOutcomeToIcon
                     "
                     [fillColor]="iconColor"
                   />
@@ -92,7 +94,7 @@ import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
               </div>
             }
             <!-- VISIT STATUS BADGE -->
-            @if (hasRecentRevisit) {
+            @if (hasRecentRevisit()) {
               <span
                 class="territory-alert-badge territory-alert-badge--revisit"
                 title="Essa pessoa foi marcada como revisita recentemente"
@@ -100,12 +102,12 @@ import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
                 Revisita
               </span>
             }
-            @if (hasRecentlyMoved) {
+            @if (hasRecentlyMoved()) {
               <span class="territory-alert-badge territory-alert-badge--moved" title="Essa pessoa se mudou">
                 Mudou
               </span>
             }
-            @if (hasRecentlyAskedToStopVisiting) {
+            @if (hasRecentlyAskedToStopVisiting()) {
               <span
                 class="territory-alert-badge territory-alert-badge--stop-visiting"
                 title="Essa pessoa disse que não quer ser visitada por uma Testemunha de Jeová"
@@ -113,7 +115,7 @@ import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
                 Não quer visitas
               </span>
             }
-            @if (isBibleStudent) {
+            @if (isBibleStudent()) {
               <span
                 class="territory-alert-badge territory-alert-badge--bible-student"
                 title="Essa pessoa é um estudante da Bíblia"
@@ -125,63 +127,59 @@ import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
         </div>
         <!-- BUTTONS CONTAINER -->
         <div class="territory-checkbox__buttons-container">
-          @if (territory.mapsLink) {
-            <button lib-icon-button type="button" (click)="handleOpenMaps(territory.mapsLink)">
+          @if (territory().mapsLink; as mapsLink) {
+            <button lib-icon-button type="button" (click)="handleOpenMaps(mapsLink)">
               <lib-icon [fillColor]="buttonIconColor" icon="map-5"></lib-icon>
             </button>
           }
-          @if (territory.recentHistory) {
+          @if (territory().recentHistory) {
             <button lib-icon-button type="button" (click)="handleOpenHistory()">
               <lib-icon [fillColor]="buttonIconColor" icon="time-17"></lib-icon>
             </button>
           }
         </div>
       </div>
-      <span class="territory-checkbox__indicator" [ngClass]="statusClass"></span>
+      <span class="territory-checkbox__indicator" [ngClass]="statusClass()"></span>
     </label>
   `,
   imports: [FormsModule, NgClass, IconComponent, DatePipe, IconButtonComponent, VisitOutcomeToIconPipe],
 })
-export class TerritoryCheckboxComponent implements ControlValueAccessor, OnInit {
+export class TerritoryCheckboxComponent implements ControlValueAccessor {
   private readonly dialog = inject(Dialog);
 
   protected readonly iconColor = 'currentColor';
   protected readonly VisitOutcomeEnum = VisitOutcomeEnum;
+  /** Tooltip hinting that tapping an already-assigned (disabled) row re-sends the designation. */
+  protected readonly assignedTitle = 'Enviar designação novamente';
 
   buttonIconColor = 'var(--kui-color-action-primary)';
-  hasRecentRevisit = false;
-  hasRecentlyMoved = false;
-  hasRecentlyAskedToStopVisiting = false;
-  isBibleStudent = false;
-  icon: Icons = 'generation-3';
-  isIconLarge = false;
+
+  territory = input.required<Territory>();
+
+  /** Emitted when the disabled (already assigned) card itself is tapped, excluding its action buttons. */
+  assignedClick = output();
+
+  hasRecentRevisit = computed(() => TerritoryAlertsBO.hasRecentRevisit(this.territory()));
+  hasRecentlyMoved = computed(() => TerritoryAlertsBO.hasRecentlyMoved(this.territory()));
+  hasRecentlyAskedToStopVisiting = computed(() => TerritoryAlertsBO.hasRecentlyAskedToStopVisiting(this.territory()));
+  isBibleStudent = computed(() => TerritoryAlertsBO.isBibleStudent(this.territory()));
+
+  icon = computed<Icons>(() => mapTerritoryIcon(this.territory().icon));
+  isIconLarge = computed(() => isIconLarge(this.icon()));
 
   // Control Value Accessor
-  disabled = false;
-  value = false;
+  disabled = signal(false);
+  value = signal(false);
 
-  @Input()
-  territory!: Territory;
-
-  get statusClass() {
+  statusClass = computed(() => {
     const prefix = 'territory-checkbox__indicator--';
 
-    if (this.disabled) {
+    if (this.disabled()) {
       return prefix + 'disabled';
     }
 
-    return prefix + (this.value ? 'selected' : 'default');
-  }
-
-  ngOnInit(): void {
-    this.hasRecentRevisit = TerritoryAlertsBO.hasRecentRevisit(this.territory);
-    this.hasRecentlyMoved = TerritoryAlertsBO.hasRecentlyMoved(this.territory);
-    this.hasRecentlyAskedToStopVisiting = TerritoryAlertsBO.hasRecentlyAskedToStopVisiting(this.territory);
-    this.isBibleStudent = TerritoryAlertsBO.isBibleStudent(this.territory);
-
-    this.icon = mapTerritoryIcon(this.territory.icon);
-    this.isIconLarge = isIconLarge(this.icon);
-  }
+    return prefix + (this.value() ? 'selected' : 'default');
+  });
 
   // Resolve style indicator
   onTouched: () => void = () => {
@@ -201,32 +199,51 @@ export class TerritoryCheckboxComponent implements ControlValueAccessor, OnInit 
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
+    this.disabled.set(isDisabled);
   }
 
   writeValue(value: boolean): void {
-    this.value = value;
+    this.value.set(value);
   }
 
   setValue(value: boolean) {
-    if (this.disabled) {
+    if (this.disabled()) {
       return;
     }
 
-    this.value = value;
+    this.value.set(value);
 
     this.onChange(value);
     this.onTouched();
   }
 
+  /**
+   * Tapping a disabled (already assigned) card re-triggers the designation share (handled by the
+   * parent page). Clicks on the inner action buttons keep their own behavior and are ignored here.
+   */
+  handleCardClick(event: MouseEvent) {
+    if (!this.disabled()) {
+      return;
+    }
+
+    // Suppress the native label→checkbox activation
+    event.preventDefault();
+
+    if ((event.target as HTMLElement).closest('button')) {
+      return;
+    }
+
+    this.assignedClick.emit();
+  }
+
   // Maybe the handleOpenMaps and handleOpenHistory should not be part of this component
   handleOpenMaps(mapsLink: string) {
-    openGoogleMapsHandler(mapsLink, this.territory);
+    openGoogleMapsHandler(mapsLink, this.territory());
   }
 
   handleOpenHistory() {
     this.dialog.open<HistoryDialogComponent, TerritoryVisitHistory[]>(HistoryDialogComponent, {
-      data: this.territory.recentHistory?.slice().reverse(),
+      data: this.territory().recentHistory?.slice().reverse(),
     });
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { TERRITORY_SORT_FILTER_CONFIG } from '../../config/territory-filter.config';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { UserStateService } from '../../../../state/user.state.service';
@@ -53,6 +53,7 @@ import { TerritoryCsvExporterBO } from '../../bo/territory-csv-exporter/territor
   selector: 'kingdom-apps-territories-page',
   templateUrl: './territories-page.component.html',
   styleUrls: ['./territories-page.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     SelectComponent,
     FormsModule,
@@ -91,13 +92,10 @@ export class TerritoriesPageComponent implements OnInit {
   public searchTerm?: string | null;
   public searchFilters: TerritoryFilterSettings['filters'] = TERRITORY_SORT_FILTER_CONFIG.filterConfigs.initial;
   public sortBy = TerritoriesOrderBy.SAVED_INDEX;
-  public isLoading = false;
+  public isLoading = signal(false);
   public filteredTerritories$: Observable<Territory[]> = of([]);
 
   public sortFilterConfig = TERRITORY_SORT_FILTER_CONFIG;
-
-  @ViewChild(SearchInputComponent)
-  searchInputComponent?: SearchInputComponent;
 
   ngOnInit(): void {
     this.cities = this.userState.currentUser?.congregation?.cities ?? [];
@@ -315,11 +313,11 @@ export class TerritoriesPageComponent implements OnInit {
   /** Get territories from the repository and create the filtered observable array */
   private getTerritories() {
     const userCongregationId = this.userState.currentUser?.congregation?.id;
-    this.isLoading = true;
+    this.isLoading.set(true);
 
     this.territories$ = this.territoryRepository.getAllByCongregation(userCongregationId ?? '').pipe(
       finalize(() => {
-        this.isLoading = false;
+        this.isLoading.set(false);
       }),
       shareReplay(1),
     );

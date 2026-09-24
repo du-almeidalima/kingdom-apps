@@ -14,7 +14,7 @@ There is **no HTTP/REST layer** — all I/O is Firebase (Firestore, Auth, callab
 
 ```
 pages/components → BOs (domain use cases) → abstract repositories ← Firebase datasources
-                        ↘ state services (UserStateService)           ↘ httpsCallableData (Functions)
+                        ↘ state services (UserStateService)           ↘ httpsCallableData$ (Functions)
 ```
 
 ## Repositories — abstract class + provider binding
@@ -42,21 +42,25 @@ Reference implementation: `repositories/firebase/firebase-user-datasource.servic
 - Return **Observables only** — wrap promises with `from()`: `from(getDocFromServer(ref))`.
 - `static readonly COLLECTION_NAME`; typed `CollectionReference<Model, FirebaseModel>` built in the constructor.
 - Cache-first reads where sensible: `getDocFromCache` → fall back to server.
-- Callables: `httpsCallableData(functions, 'deleteUser')` — **the export name in `functions/src/index.ts` is the callable name**; renaming breaks callers.
+- Callables: `httpsCallableData$(functions, 'deleteUser')` (from `firebase-rxjs-interop.ts`) — **the export name in `functions/src/index.ts` is the callable name**; renaming breaks callers.
 - `implements <Entity>Repository, FirebaseDatasource<T>` (`createDocumentRef`) — used to resolve cross-collection `DocumentReference`s (user → congregation).
 - Strip `undefined` before writes with `removeUndefined`; convert via `firebaseEntityConverterFactory` (the timestamp factory is `@deprecated`).
 
 ## State services
 
+Signal-backed — no `BehaviorSubject`:
+
 ```typescript
 // state/user.state.service.ts
-private readonly userSubject = new BehaviorSubject<User | null>(null);
-public $user = this.userSubject.asObservable();   // $-prefix (not user$ suffix)
-public get currentUser() { return this.userSubject.getValue(); }
-public get isLoggedIn() { return !!this.userSubject.getValue(); }
+private readonly userSignal = signal<User | null>(null);
+public readonly user = this.userSignal.asReadonly(); // read-only signal for templates
+public get currentUser() { return this.userSignal(); }
+public get isLoggedIn() { return !!this.userSignal(); }
+public setUser(user: User | null) { this.userSignal.set(user); }
 ```
 
-- Components bridge to signals: `user = toSignal(this.userState.$user)`.
+- Components read the signal directly: `user = this.userState.user` (getters reading the signal stay template-reactive; no `toSignal` bridge needed).
+- Need it as an Observable? `toObservable(this.userState.user)` in a field initializer (injection context).
 - Twins kept in sync by `AuthService`: `UserStateService` (app — full domain `User`) and `AuthUserStateService` (common-ui — `{roles, name}`).
 - Cross-feature state → `app/state/`; UI-only, domain-free state → `lib/state/` in common-ui.
 

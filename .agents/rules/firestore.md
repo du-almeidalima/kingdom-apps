@@ -10,7 +10,7 @@ description: Firestore — the datasource-only access rule, dual models, convert
 
 ## Only datasources touch Firestore
 
-No component, page, or BO calls `collection()`/`collectionData()` directly. All reads/writes go through Firebase datasource services implementing abstract repositories (`.agents/rules/angular-services.md`, `.agents/rules/repositories.md`). Ids come from converters (`snapshot.id`) — `{ idField: 'id' }` is not used.
+No component, page, or BO calls `collection()`/`collectionData$()` directly. All reads/writes go through Firebase datasource services implementing abstract repositories (`.agents/rules/angular-services.md`, `.agents/rules/repositories.md`). Ids come from converters (`snapshot.id`) — `{ idField: 'id' }` is not used. The vanilla SDK is driven through the DI tokens and RxJS interop helpers in `repositories/firebase/firebase-providers.ts` / `firebase-rxjs-interop.ts`.
 
 ## Dual models
 

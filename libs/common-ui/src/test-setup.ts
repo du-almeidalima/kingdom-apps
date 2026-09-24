@@ -1,4 +1,4 @@
-import { setupZoneTestEnv } from 'jest-preset-angular/setup-env/zone';
+import { setupZonelessTestEnv } from 'jest-preset-angular/setup-env/zoneless';
 import { ngMocks } from 'ng-mocks';
 
 // auto spy
@@ -9,7 +9,7 @@ import { MockService } from 'ng-mocks';
 
 ngMocks.defaultMock(TitleStrategy, () => MockService(DefaultTitleStrategy));
 
-setupZoneTestEnv({
+setupZonelessTestEnv({
   errorOnUnknownElements: true,
   errorOnUnknownProperties: true,
 });

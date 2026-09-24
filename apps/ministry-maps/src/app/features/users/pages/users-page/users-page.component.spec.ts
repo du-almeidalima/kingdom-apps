@@ -14,7 +14,7 @@ describe('UsersPageComponent', () => {
 
   it('should render spinner when isLoading is true', () => {
     const fixture = MockRender(UsersPageComponent);
-    fixture.point.componentInstance.isLoading = true;
+    fixture.point.componentInstance.isLoading.set(true);
     fixture.detectChanges();
 
     const spinner = ngMocks.find(SpinnerComponent, null);
@@ -26,7 +26,7 @@ describe('UsersPageComponent', () => {
 
   it('should render users list when isLoading is false', () => {
     const fixture = MockRender(UsersPageComponent);
-    fixture.point.componentInstance.isLoading = false;
+    fixture.point.componentInstance.isLoading.set(false);
     fixture.detectChanges();
 
     const spinner = ngMocks.find(SpinnerComponent, null);

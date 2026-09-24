@@ -5,7 +5,7 @@ import {
   QueryDocumentSnapshot,
   SnapshotOptions,
   WithFieldValue,
-} from '@angular/fire/firestore';
+} from 'firebase/firestore';
 
 /**
  * Maps a raw Firestore document payload to its domain shape.

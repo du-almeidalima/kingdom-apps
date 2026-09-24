@@ -1,6 +1,5 @@
 import { type Territory } from '../../../../../models/territory';
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
-import { differenceInMonths } from '../../../../shared/utils/date';
 import { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
 import { Injectable, inject } from '@angular/core';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
@@ -34,7 +33,6 @@ export class TerritoryAlertsBO {
 
   /**
    * Looks into territory [recentHistory]{@link Territory.recentHistory} to find if it was asked to not visit again.
-   * It looks for unresolved entries within a 24-month window (see commit 029f5f0).
    * @return boolean if found.
    */
   static hasRecentlyAskedToStopVisiting(territory: Territory) {
@@ -43,14 +41,7 @@ export class TerritoryAlertsBO {
         return false;
       }
 
-      if (history.visitOutcome === VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN && history.date) {
-        const currentDate = new Date();
-        const difference = differenceInMonths(history.date, currentDate);
-
-        return difference < 24;
-      }
-
-      return false;
+      return history.visitOutcome === VisitOutcomeEnum.ASKED_TO_NOT_VISIT_AGAIN;
     });
   }
 
@@ -77,7 +68,7 @@ export class TerritoryAlertsBO {
         return {
           title: 'Não visitar',
           bodyText: `
-          <p>Esse morador pediu para não ser visitado por uma Testemunha de Jeová recentemente dentro dos últimos dois anos.</p>
+          <p>Esse morador pediu para não ser visitado por uma Testemunha de Jeová.</p>
           <p class='mt-5'>Você deseja designar esse território mesmo assim?</p>
         `,
         };

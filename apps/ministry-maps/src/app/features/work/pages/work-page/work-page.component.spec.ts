@@ -1,7 +1,7 @@
 import { WorkPageComponent } from './work-page.component';
 import { MockBuilder, MockInstance, MockRender, ngMocks } from 'ng-mocks';
 import { ActivatedRoute } from '@angular/router';
-import { fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { defer, of, throwError } from 'rxjs';
 import { territoryMockBuilder } from '../../../../../test/mocks/models/territory.mock';
 import { MOCK_REPOSITORIES_PROVIDERS } from '../../../../../test/mocks/providers/mock-repositories-providers';
@@ -31,7 +31,7 @@ describe('WorkPageComponent', () => {
     expect(fixture.point.componentInstance).toBeTruthy();
   });
 
-  it('should show the not found screen when the designation no longer exists (e.g. deleted by the TTL policy)', fakeAsync(() => {
+  it('should show the not found screen when the designation no longer exists (e.g. deleted by the TTL policy)', async () => {
     MockInstance(ActivatedRoute, 'snapshot', jest.fn(), 'get').mockReturnValue({
       paramMap: new Map([['id', 'deleted-designation']]),
     });
@@ -39,14 +39,21 @@ describe('WorkPageComponent', () => {
       useValue: { getById: () => of(undefined) },
     });
 
-    const fixture = MockRender(WorkPageComponent);
-    tick(200);
-    fixture.detectChanges();
+    jest.useFakeTimers();
+    try {
+      const fixture = MockRender(WorkPageComponent);
+      // Flush the component's debounceTime(100) on the designation load.
+      jest.advanceTimersByTime(200);
+      await Promise.resolve();
+      fixture.detectChanges();
 
-    const component = fixture.point.componentInstance as WorkPageComponent;
-    expect(component.isNotFound).toBe(true);
-    expect(ngMocks.find(fixture, 'kingdom-apps-designation-not-found')).toBeDefined();
-  }));
+      const component = fixture.point.componentInstance as WorkPageComponent;
+      expect(component.isNotFound()).toBe(true);
+      expect(ngMocks.find(fixture, 'kingdom-apps-designation-not-found')).toBeDefined();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 
   it('should not show the not found screen while the designation exists', () => {
     MockInstance(ActivatedRoute, 'snapshot', jest.fn(), 'get').mockReturnValue({
@@ -56,7 +63,7 @@ describe('WorkPageComponent', () => {
     const fixture = MockRender(WorkPageComponent);
 
     const component = fixture.point.componentInstance as WorkPageComponent;
-    expect(component.isNotFound).toBe(false);
+    expect(component.isNotFound()).toBe(false);
     expect(ngMocks.findAll(fixture, DesignationNotFoundComponent)).toHaveLength(0);
   });
 
@@ -117,34 +124,39 @@ describe('WorkPageComponent', () => {
 
     function renderComponent(): WorkPageComponent {
       const fixture = MockRender(WorkPageComponent);
-      tick(200);
+      // Flush the component's debounceTime(100) on the designation load.
+      jest.advanceTimersByTime(200);
       fixture.detectChanges();
 
       return fixture.point.componentInstance as WorkPageComponent;
     }
 
-    it('subscribes the sequenced write-back: designation, territory and visit history all fire', fakeAsync(() => {
+    it('subscribes the sequenced write-back: designation, territory and visit history all fire', () => {
       const spies = overrideDependencies(of(undefined));
       const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => undefined);
 
-      renderComponent().handleTerritoryUpdated(designationTerritory);
+      jest.useFakeTimers();
+      try {
+        renderComponent().handleTerritoryUpdated(designationTerritory);
 
-      expect(spies.designationUpdate).toHaveBeenCalledTimes(1);
-      expect(spies.territoryUpdate).toHaveBeenCalledTimes(1);
-      expect(spies.setVisitHistory).toHaveBeenCalledWith(
-        designationTerritory.id,
-        expect.objectContaining({
-          id: '1699999999999',
-          congregationId: designation.congregationId,
-          territoryId: designationTerritory.id,
-        }),
-      );
-      expect(alertSpy).not.toHaveBeenCalled();
+        expect(spies.designationUpdate).toHaveBeenCalledTimes(1);
+        expect(spies.territoryUpdate).toHaveBeenCalledTimes(1);
+        expect(spies.setVisitHistory).toHaveBeenCalledWith(
+          designationTerritory.id,
+          expect.objectContaining({
+            id: '1699999999999',
+            congregationId: designation.congregationId,
+            territoryId: designationTerritory.id,
+          }),
+        );
+        expect(alertSpy).not.toHaveBeenCalled();
+      } finally {
+        jest.useRealTimers();
+        alertSpy.mockRestore();
+      }
+    });
 
-      alertSpy.mockRestore();
-    }));
-
-    it('retries the write-back twice and surfaces an alert when it keeps failing', fakeAsync(() => {
+    it('retries the write-back twice and surfaces an alert when it keeps failing', () => {
       // Lazy failing write: each retry re-subscription re-executes it, like the real datasource.
       let writeAttempts = 0;
       const failing$ = defer(() => {
@@ -155,14 +167,18 @@ describe('WorkPageComponent', () => {
       const spies = overrideDependencies(failing$);
       const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => undefined);
 
-      renderComponent().handleTerritoryUpdated(designationTerritory);
+      jest.useFakeTimers();
+      try {
+        renderComponent().handleTerritoryUpdated(designationTerritory);
 
-      // Initial attempt + 2 retries of the lazy, re-subscribable write.
-      expect(spies.designationUpdate).toHaveBeenCalledTimes(1);
-      expect(writeAttempts).toBe(3);
-      expect(alertSpy).toHaveBeenCalledWith(expect.stringContaining('Um erro aconteceu ao salvar a visita'));
-
-      alertSpy.mockRestore();
-    }));
+        // Initial attempt + 2 retries of the lazy, re-subscribable write.
+        expect(spies.designationUpdate).toHaveBeenCalledTimes(1);
+        expect(writeAttempts).toBe(3);
+        expect(alertSpy).toHaveBeenCalledWith(expect.stringContaining('Um erro aconteceu ao salvar a visita'));
+      } finally {
+        jest.useRealTimers();
+        alertSpy.mockRestore();
+      }
+    });
   });
 });

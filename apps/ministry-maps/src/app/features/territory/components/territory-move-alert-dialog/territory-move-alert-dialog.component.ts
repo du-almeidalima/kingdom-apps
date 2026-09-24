@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import {
@@ -88,7 +88,7 @@ export enum MoveResolutionActionsEnum {
             form="move-alert-resolution-form"
             data-testid="alert-resolve-save"
           >
-            @if (!isSubmitting) {
+            @if (!isSubmitting()) {
               <span>Salvar</span>
             } @else {
               <lib-spinner class="login-button__spinner" height="1.75rem" width="1.75rem" [color]="white" />
@@ -117,7 +117,7 @@ export class TerritoryMoveAlertDialogComponent {
   protected readonly iconColor = 'currentColor';
   public readonly MoveResolutionActions = MoveResolutionActionsEnum;
 
-  public isSubmitting = false;
+  public isSubmitting = signal(false);
   public historyReports: TerritoryVisitHistory[] = [];
 
   public form: FormGroup<{ action: FormControl<MoveResolutionActionsEnum> }>;
@@ -143,12 +143,12 @@ export class TerritoryMoveAlertDialogComponent {
         this.dialogRef.close(this.form.value.action);
         break;
       case MoveResolutionActionsEnum.MARK_AS_RESOLVED:
-        this.isSubmitting = true;
+        this.isSubmitting.set(true);
         this.data
           .markAsResolvedCallback(this.data.history)
           .pipe(
             finalize(() => {
-              this.isSubmitting = false;
+              this.isSubmitting.set(false);
             }),
           )
           .subscribe(() => {

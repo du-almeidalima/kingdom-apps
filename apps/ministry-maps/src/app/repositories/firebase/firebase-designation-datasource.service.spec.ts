@@ -1,17 +1,22 @@
 import { TestBed } from '@angular/core/testing';
-import { collection, doc, docData, Firestore, setDoc, Timestamp } from '@angular/fire/firestore';
-import { MockProvider } from 'ng-mocks';
+import { collection, doc, setDoc, Timestamp } from 'firebase/firestore';
 import { of } from 'rxjs';
 
 import { FirebaseDesignationDatasourceService } from './firebase-designation-datasource.service';
+import { FIRESTORE } from './firebase-providers';
+import { docData$ } from './firebase-rxjs-interop';
 import { Designation } from '../../../models/designation';
 
-jest.mock('@angular/fire/firestore', () => ({
-  ...jest.requireActual('@angular/fire/firestore'),
+jest.mock('firebase/firestore', () => ({
+  ...jest.requireActual('firebase/firestore'),
   collection: jest.fn(),
   doc: jest.fn(),
-  docData: jest.fn(),
   setDoc: jest.fn(),
+}));
+
+jest.mock('./firebase-rxjs-interop', () => ({
+  ...jest.requireActual('./firebase-rxjs-interop'),
+  docData$: jest.fn(),
 }));
 
 describe('FirebaseDesignationDatasourceService', () => {
@@ -28,13 +33,13 @@ describe('FirebaseDesignationDatasourceService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [MockProvider(Firestore)],
+      providers: [{ provide: FIRESTORE, useValue: {} }],
     });
 
     (collection as jest.Mock).mockReturnValue({ withConverter: jest.fn().mockReturnThis() });
     (doc as jest.Mock).mockReturnValue({ id: 'designation-1' });
     (setDoc as jest.Mock).mockResolvedValue(undefined);
-    (docData as jest.Mock).mockReturnValue(of(designation));
+    (docData$ as jest.Mock).mockReturnValue(of(designation));
 
     service = TestBed.inject(FirebaseDesignationDatasourceService);
   });

@@ -4,7 +4,7 @@
     <!-- Google Login Button -->
     <kingdom-apps-provider-login-button
       [provider]="FIREBASE_PROVIDERS.GOOGLE"
-      [loading]="loading"
+      [loading]="loading()"
       (providerClick)="handleProviderLoginClick($event)"
     />
   </lib-card>

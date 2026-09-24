@@ -4,14 +4,15 @@
  *
  * These MUST stay in sync with the app's datasource services (the values are
  * intentionally re-declared here rather than imported, because those classes
- * are Angular `@Injectable`s that pull in `@angular/fire` and therefore cannot
- * be loaded in Playwright's Node context):
+ * are Angular `@Injectable`s that pull in the browser Firebase SDK and therefore
+ * cannot be loaded in Playwright's Node context):
  *
  * - `FirebaseCongregationDatasourceService.COLLECTION_NAME` → 'congregations'
  * - `FirebaseUserDatasourceService.COLLECTION_NAME` → 'users'
  * - `FirebaseTerritoryDatasourceService.COLLECTION_NAME` → 'territories'
  * - `FirebaseTerritoryDatasourceService['historySubCollectionName']` → 'history'
  * - `FirebaseDesignationDatasourceService['collectionName']` → 'designations'
+ * - `FirebaseDesignationsHeaderDatasourceService.COLLECTION_NAME` → 'designations_header' (exact, singular "header")
  * - `FirebaseInvitationLinkDataSourceService.COLLECTION_NAME` → 'invitation_links' (mind the underscore)
  */
 export const Collections = {
@@ -19,6 +20,7 @@ export const Collections = {
   users: 'users',
   territories: 'territories',
   designations: 'designations',
+  designations_header: 'designations_header',
   invitation_links: 'invitation_links',
   logs: 'logs',
 } as const;

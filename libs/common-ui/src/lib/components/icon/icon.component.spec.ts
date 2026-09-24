@@ -1,35 +1,26 @@
-import { ComponentFixture } from '@angular/core/testing';
 import { MockBuilder, MockRender, ngMocks } from 'ng-mocks';
 import { IconComponent } from './icon.component';
 
 describe('IconComponent', () => {
-  let component: IconComponent;
-  let fixture: ComponentFixture<IconComponent>;
-
   beforeEach(() => {
     return MockBuilder(IconComponent);
   });
 
-  beforeEach(() => {
-    fixture = MockRender(IconComponent);
-    component = fixture.componentInstance;
-  });
-
   it('should create', () => {
-    expect(component).toBeTruthy();
+    const fixture = MockRender(IconComponent);
+    expect(fixture.point.componentInstance).toBeTruthy();
   });
 
-  it('should default fillColor to currentColor on instance', () => {
-    const instance = new IconComponent();
-    expect(instance.fillColor).toBe('currentColor');
+  it('should default fillColor to currentColor', () => {
+    const fixture = MockRender(IconComponent);
+    expect(fixture.point.componentInstance.fillColor()).toBe('currentColor');
   });
 
   it('should set icon input property', () => {
     const testIcon = 'check-mark-circle-thin';
-    component.icon = testIcon;
-    fixture.detectChanges();
+    const fixture = MockRender(IconComponent, { icon: testIcon });
 
-    const iconElement = ngMocks.find('use');
+    const iconElement = ngMocks.find(fixture, 'use');
     expect(iconElement.attributes['href']).toContain(testIcon);
   });
 });

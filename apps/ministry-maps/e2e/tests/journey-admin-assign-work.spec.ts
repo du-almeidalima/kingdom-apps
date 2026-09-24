@@ -4,6 +4,7 @@ import { TerritoryManageDialogPage } from '../page-objects/territory-manage-dial
 import { AssignTerritoriesPage } from '../page-objects/assign-territories.page';
 import { WorkPage } from '../page-objects/work.page';
 import { WorkItemCompleteDialogPage } from '../page-objects/work-item-complete-dialog.page';
+import { ConfirmDialogPage } from '../page-objects/confirm-dialog.page';
 import { captureWhatsAppPopup } from '../utils/whatsapp-link.util';
 import { DesignationStatusEnum } from '../../src/models/enums/designation-status';
 import { expectData } from '../utils/firestore-assert.util';
@@ -115,9 +116,14 @@ test('J-01 — Admin creates + assigns ×2; publishers work their own independen
   // ═══════════════════════════════════════════════════════════════════════════
   // Leg 3 — Admin builds D2 with a deliberate overlap (UC-ASSIGN-17)
   // ═══════════════════════════════════════════════════════════════════════════
-  // Reload resets the component's assigned Sets → just-assigned territories are tickable again.
-  await page.reload();
-  await assignPage.goto();
+  // Stopping the active session closes the header so previously assigned territories are tickable again in a new cycle.
+  await assignPage.stopButton.click();
+  const confirmDialog = new ConfirmDialogPage(page);
+  await expect(confirmDialog.dialog).toBeVisible();
+  await confirmDialog.confirm();
+  await expect(assignPage.assignedCount).toHaveText('Nenhuma designação em andamento');
+
+  await assignPage.selectCity('São Paulo');
   await assignPage.check('Rua das Acácias, 45 - Pinheiros'); // the overlap
   await assignPage.check('Rua Harmonia, 300 - Vila Madalena');
   const cap2 = await captureWhatsAppPopup(page, () => assignPage.fab.click());

@@ -1,26 +1,22 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgStyle, NgTemplateOutlet } from '@angular/common';
 
 @Component({
   selector: 'lib-header',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
   imports: [RouterLink, NgTemplateOutlet, NgStyle],
 })
 export class HeaderComponent {
-  @Input()
-  public backgroundColorVar = 'var(--kui-color-surface-inverse, hsl(0, 0%, 50%))';
+  public backgroundColorVar = input('var(--kui-color-surface-inverse, hsl(0, 0%, 50%))');
 
-  @Input()
-  public logoBackgroundColor = 'var(--kui-color-surface-inverse, hsl(0, 0%, 50%))';
+  public logoBackgroundColor = input('var(--kui-color-surface-inverse, hsl(0, 0%, 50%))');
 
-  @Input()
-  public logoColor? = 'var(--kui-color-on-inverse, currentColor)';
+  public logoColor = input('var(--kui-color-on-inverse, currentColor)');
 
-  @Input()
-  public initials = 'TT';
+  public initials = input('TT');
 
-  @Input()
-  public headerLink?: string;
+  public headerLink = input<string | undefined>(undefined);
 }

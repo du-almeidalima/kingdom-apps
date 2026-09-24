@@ -25,6 +25,21 @@ export interface WhatsAppShareCapture {
 }
 
 /**
+ * Installs (or resets) the `window.open` recorder used by
+ * {@link captureWhatsAppPopup} and by negative share assertions (every URL
+ * passed to `window.open` lands in `window.__whatsappOpenedUrls`).
+ */
+export async function recordWindowOpen(page: Page): Promise<void> {
+  await page.addInitScript(installWhatsAppRecorder);
+  await page.evaluate(installWhatsAppRecorder);
+}
+
+/** All URLs passed to `window.open` since the recorder was last (re)installed. */
+export async function recordedOpenUrls(page: Page): Promise<string[]> {
+  return page.evaluate(() => window.__whatsappOpenedUrls ?? []);
+}
+
+/**
  * Captures a `whatsapp://send?text=…` share by recording the URL passed to
  * `window.open` (UC-ASSIGN-19; see `docs/testability-gaps.md` §2.3).
  *
@@ -42,8 +57,7 @@ export interface WhatsAppShareCapture {
  * ```
  */
 export async function captureWhatsAppPopup(page: Page, trigger: () => Promise<void>): Promise<WhatsAppShareCapture> {
-  await page.addInitScript(installWhatsAppRecorder);
-  await page.evaluate(installWhatsAppRecorder);
+  await recordWindowOpen(page);
   await trigger();
 
   await page.waitForFunction(() =>

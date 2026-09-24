@@ -2,9 +2,8 @@ import { TestBed } from '@angular/core/testing';
 
 import { FIREBASE_PROVIDERS, FirebaseAuthDatasourceService } from './firebase-auth-datasource.service';
 import { MockProvider, ngMocks } from 'ng-mocks';
-import { Auth } from '@angular/fire/auth';
+import { FIREBASE_AUTH } from './firebase-providers';
 import { FirebaseUserDatasourceService } from './firebase-user-datasource.service';
-import { Firestore } from '@angular/fire/firestore';
 import { catchError, EMPTY, finalize, of } from 'rxjs';
 import { elderUser, userMockBuilder } from '../../../test/mocks';
 import { RoleEnum } from '../../../models/enums/role';
@@ -75,26 +74,13 @@ const MOCK_USER = userMockBuilder({
 
 const mockSignInWithPopup = jest.fn().mockReturnValue(Promise.resolve(MOCK_AUTH_RES));
 
-jest.mock('@angular/fire/auth', () => {
-  const originalModule = jest.requireActual('@angular/fire/auth');
+jest.mock('firebase/auth', () => {
+  const originalModule = jest.requireActual('firebase/auth');
 
   return {
     __esModule: true,
     ...originalModule,
     signInWithPopup: () => mockSignInWithPopup(),
-  };
-});
-
-jest.mock('@angular/fire/firestore', () => {
-  const originalModule = jest.requireActual('@angular/fire/firestore');
-  return {
-    __esModule: true,
-    ...originalModule,
-    doc: jest.fn().mockImplementation((_, path) => {
-      return {
-        path,
-      };
-    }),
   };
 });
 
@@ -104,11 +90,10 @@ describe('FirebaseAuthService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        MockProvider(Auth),
+        { provide: FIREBASE_AUTH, useValue: {} },
         MockProvider(FirebaseUserDatasourceService, {
           getById: () => of(MOCK_USER),
         }),
-        MockProvider(Firestore),
       ],
     });
 

@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import {
   AuthorizeDirective,
   ButtonComponent,
@@ -7,7 +7,6 @@ import {
   ConfirmDialogData,
   IconComponent,
 } from '@kingdom-apps/common-ui';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Dialog } from '@angular/cdk/dialog';
 
 import { UserStateService } from '../../../../state/user.state.service';
@@ -24,6 +23,7 @@ import { ProfileBO } from '../../bo/profile.bo';
   templateUrl: './profile-page.component.html',
   styleUrl: './profile-page.component.scss',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ChangeCongregationComponent,
     AppearanceSettingsComponent,
@@ -42,7 +42,7 @@ export class ProfilePageComponent {
   private readonly authService = inject(AuthService);
   private readonly dialog = inject(Dialog);
 
-  user = toSignal(this.userStateService.$user);
+  user = this.userStateService.user;
   fullName = computed(() => this.user()?.name ?? 'Meu Nome');
   congregation = computed(() => this.user()?.congregation?.name ?? 'LS Congregação');
   initials = computed(() => getUserInitials(this.fullName()));

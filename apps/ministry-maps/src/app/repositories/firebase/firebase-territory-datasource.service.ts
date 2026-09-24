@@ -1,14 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import {
   collection,
-  collectionData,
   collectionGroup,
-  CollectionReference,
   deleteDoc,
   doc,
   documentId,
-  DocumentReference,
-  Firestore,
   getDoc,
   getDocs,
   limit,
@@ -19,7 +15,8 @@ import {
   Timestamp,
   updateDoc,
   where,
-} from '@angular/fire/firestore';
+} from 'firebase/firestore';
+import type { CollectionReference, DocumentReference } from 'firebase/firestore';
 import { combineLatest, defer, EMPTY, forkJoin, from, map, Observable, of, switchMap } from 'rxjs';
 
 import { firebaseEntityConverterFactory, removeUndefined } from '../../shared/utils/firebase-entity-converter';
@@ -31,6 +28,8 @@ import {
   FirebaseTerritoryVisitHistoryModel,
 } from '../../../models/firebase/firebase-territory-model';
 import { FirebaseDatasource } from './firebase-datasource';
+import { collectionData$ } from './firebase-rxjs-interop';
+import { FIRESTORE } from './firebase-providers';
 
 /** Converts the Firebase Timestamps to Date objects */
 export const convertTerritoryFirebaseTimestampsToDate = (data: FirebaseTerritoryModel): Territory => {
@@ -62,7 +61,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
   private readonly historySubCollectionName = 'history';
   private readonly territoriesCollection: CollectionReference<Territory>;
 
-  private readonly firestore = inject(Firestore);
+  private readonly firestore = inject(FIRESTORE);
 
   constructor() {
     this.territoriesCollection = collection(
@@ -78,7 +77,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
   getAllByCongregation(congregationId: string, options?: TerritoryRepositoryQueryOptions): Observable<Territory[]> {
     const q = query(this.territoriesCollection, where('congregationId', '==', congregationId));
 
-    return from(collectionData<Territory>(q)).pipe(
+    return collectionData$<Territory>(q).pipe(
       // Resolve Territory History
       switchMap((territoriesSnapshot) => {
         if (!options?.getHistory || territoriesSnapshot.length === 0) {
@@ -139,7 +138,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
       where('city', 'in', cities),
     );
 
-    return from(collectionData<Territory>(q));
+    return collectionData$<Territory>(q);
   }
 
   getAllInIds(ids: string[]) {

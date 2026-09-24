@@ -42,9 +42,7 @@ From `src/app/app-routes.ts` + `src/app/core/features/auth/auth-routes.ts` and e
 | `''`                                                             | —                               | —                                         | Redirects to `/home` (which then applies the guard).                                                                                                           |
 | unknown path                                                     | —                               | —                                         | **No wildcard route and no 404 component** → Angular logs an `Error: Cannot match any routes` and the shell renders with an empty router outlet (header only). |
 
-`data.authGuardPipe: redirectUnauthorizedToLogin` is present on several routes but is **dead
-configuration**: it belongs to `@angular/fire`'s `AuthGuard`, which is not used. Redirects come from the
-custom `authGuard` only.
+Redirects come from the custom `authGuard` only — no other guard is registered.
 
 ---
 

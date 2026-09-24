@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { AuthorizeDirective, IconButtonComponent, IconComponent, Icons, red400 } from '@kingdom-apps/common-ui';
 import { Territory } from '../../../../../models/territory';
 import mapTerritoryIcon, { isIconLarge } from '../../../../shared/utils/territory-icon-mapper';
@@ -17,28 +17,28 @@ import { NgClass } from '@angular/common';
     <div
       class="territory-list-item"
       data-testid="territory-list-item"
-      [ngClass]="{ 'territory-list-item--row-gap': !!territory.note }"
+      [ngClass]="{ 'territory-list-item--row-gap': !!territory().note }"
     >
       <lib-icon
         class="territory-list-item__icon"
-        [ngClass]="{ 'territory-list-item__icon--large': isIconLarge }"
+        [ngClass]="{ 'territory-list-item__icon--large': isIconLarge() }"
         [fillColor]="iconColor"
-        [icon]="icon"
+        [icon]="icon()"
       />
       <h3 class="territory-list-item__address">
-        <span class="t-body2">{{ territory.address }}</span>
+        <span class="t-body2">{{ territory().address }}</span>
         <span class="t-caption text-gray-600"
-          >{{ territory.city }}
-          @if (territory.peopleQuantity) {
-            , {{ territory.peopleQuantity }} pessoa(s)
+          >{{ territory().city }}
+          @if (territory().peopleQuantity) {
+            , {{ territory().peopleQuantity }} pessoa(s)
           }
         </span>
       </h3>
       <!-- BADGES -->
-      @if (territory.note) {
+      @if (territory().note) {
         <div class="territory-list-item__notes">
-          <span class="t-caption">Notas: {{ territory.note }}</span>
-          @if (hasRecentlyMoved) {
+          <span class="t-caption">Notas: {{ territory().note }}</span>
+          @if (hasRecentlyMoved()) {
             <span
               class="territory-alert-badge territory-alert-badge--moved"
               data-testid="territory-alert-badge"
@@ -47,7 +47,7 @@ import { NgClass } from '@angular/common';
               Mudou
             </span>
           }
-          @if (hasRecentlyRevisit) {
+          @if (hasRecentlyRevisit()) {
             <span
               class="territory-alert-badge territory-alert-badge--revisit"
               data-testid="territory-alert-badge"
@@ -56,7 +56,7 @@ import { NgClass } from '@angular/common';
               Revisita
             </span>
           }
-          @if (hasRecentlyAskedToStopVisiting) {
+          @if (hasRecentlyAskedToStopVisiting()) {
             <span
               class="territory-alert-badge territory-alert-badge--stop-visiting"
               data-testid="territory-alert-badge"
@@ -65,7 +65,7 @@ import { NgClass } from '@angular/common';
               Não quer visitas
             </span>
           }
-          @if (isBibleStudent) {
+          @if (isBibleStudent()) {
             <span
               class="territory-alert-badge territory-alert-badge--bible-student"
               data-testid="territory-alert-badge"
@@ -88,7 +88,7 @@ import { NgClass } from '@angular/common';
             <li
               class="menu__item"
               cdkMenuItem
-              (cdkMenuItemTriggered)="edit.emit(territory)"
+              (cdkMenuItemTriggered)="edit.emit(territory())"
               *libAuthorize="EDIT_ALLOWED"
             >
               <button lib-icon-button type="button">
@@ -96,7 +96,7 @@ import { NgClass } from '@angular/common';
               </button>
               <span>Editar</span>
             </li>
-            <li class="menu__item" cdkMenuItem (cdkMenuItemTriggered)="history.emit(territory)">
+            <li class="menu__item" cdkMenuItem (cdkMenuItemTriggered)="history.emit(territory())">
               <button lib-icon-button type="button" data-testid="territory-history-button">
                 <lib-icon [fillColor]="greyButtonColor" icon="time-17"></lib-icon>
               </button>
@@ -105,12 +105,12 @@ import { NgClass } from '@angular/common';
             <!-- ALERTS -->
             <ng-container *libAuthorize="EDIT_ALLOWED">
               <!-- SEPARATOR -->
-              @if (hasAlerts) {
+              @if (hasAlerts()) {
                 <hr class="menu__separator" />
               }
               <!-- MOVED ALERT -->
-              @if (hasRecentlyMoved) {
-                <li class="menu__item" cdkMenuItem (cdkMenuItemTriggered)="resolveMove.emit(territory)">
+              @if (hasRecentlyMoved()) {
+                <li class="menu__item" cdkMenuItem (cdkMenuItemTriggered)="resolveMove.emit(territory())">
                   <button lib-icon-button type="button">
                     <lib-icon
                       [fillColor]="greyButtonColor"
@@ -121,8 +121,8 @@ import { NgClass } from '@angular/common';
                 </li>
               }
               <!-- REVISIT ALERT -->
-              @if (hasRecentlyRevisit) {
-                <li class="menu__item" cdkMenuItem (cdkMenuItemTriggered)="resolveRevisit.emit(territory)">
+              @if (hasRecentlyRevisit()) {
+                <li class="menu__item" cdkMenuItem (cdkMenuItemTriggered)="resolveRevisit.emit(territory())">
                   <button lib-icon-button type="button">
                     <lib-icon
                       [fillColor]="greyButtonColor"
@@ -133,8 +133,8 @@ import { NgClass } from '@angular/common';
                 </li>
               }
               <!-- REVISIT ALERT -->
-              @if (hasRecentlyAskedToStopVisiting) {
-                <li class="menu__item" cdkMenuItem (cdkMenuItemTriggered)="resolveStopVisiting.emit(territory)">
+              @if (hasRecentlyAskedToStopVisiting()) {
+                <li class="menu__item" cdkMenuItem (cdkMenuItemTriggered)="resolveStopVisiting.emit(territory())">
                   <button lib-icon-button type="button">
                     <lib-icon
                       [fillColor]="greyButtonColor"
@@ -150,7 +150,7 @@ import { NgClass } from '@angular/common';
             <li
               class="menu__item"
               cdkMenuItem
-              (cdkMenuItemTriggered)="remove.emit(territory.id)"
+              (cdkMenuItemTriggered)="remove.emit(territory().id)"
               *libAuthorize="EDIT_ALLOWED"
             >
               <button lib-icon-button cdkMenuItem type="button">
@@ -176,51 +176,37 @@ import { NgClass } from '@angular/common';
     NgClass,
   ],
 })
-export class TerritoryListItemComponent implements OnInit {
+export class TerritoryListItemComponent {
   protected readonly EDIT_ALLOWED = EDIT_ALLOWED;
   protected readonly VisitOutcomeEnum = VisitOutcomeEnum;
 
   public greyButtonColor = 'currentColor';
   public deleteButtonColor = red400;
   public iconColor = 'currentColor';
-  public isIconLarge = false;
-  public icon: Icons = 'generation-3';
-  public hasRecentlyMoved = false;
-  public hasRecentlyRevisit = false;
-  public hasRecentlyAskedToStopVisiting = false;
-  public isBibleStudent = false;
-  public hasAlerts = false;
 
-  @Input()
-  territory!: Territory;
+  territory = input.required<Territory>();
 
-  @Output()
-  edit = new EventEmitter<Territory>();
+  icon = computed<Icons>(() => mapTerritoryIcon(this.territory().icon));
+  isIconLarge = computed(() => isIconLarge(this.icon()));
 
-  @Output()
-  history = new EventEmitter<Territory>();
+  hasRecentlyMoved = computed(() => TerritoryAlertsBO.hasRecentlyMoved(this.territory()));
+  hasRecentlyRevisit = computed(() => TerritoryAlertsBO.hasRecentRevisit(this.territory()));
+  hasRecentlyAskedToStopVisiting = computed(() => TerritoryAlertsBO.hasRecentlyAskedToStopVisiting(this.territory()));
+  isBibleStudent = computed(() => TerritoryAlertsBO.isBibleStudent(this.territory()));
 
-  @Output()
-  remove = new EventEmitter<string>();
+  hasAlerts = computed(
+    () => this.hasRecentlyMoved() || this.hasRecentlyRevisit() || this.hasRecentlyAskedToStopVisiting(),
+  );
 
-  @Output()
-  resolveMove = new EventEmitter<Territory>();
+  edit = output<Territory>();
 
-  @Output()
-  resolveRevisit = new EventEmitter<Territory>();
+  history = output<Territory>();
 
-  @Output()
-  resolveStopVisiting = new EventEmitter<Territory>();
+  remove = output<string>();
 
-  ngOnInit(): void {
-    this.icon = mapTerritoryIcon(this.territory.icon);
-    this.isIconLarge = isIconLarge(this.icon);
+  resolveMove = output<Territory>();
 
-    this.hasRecentlyMoved = TerritoryAlertsBO.hasRecentlyMoved(this.territory);
-    this.hasRecentlyRevisit = TerritoryAlertsBO.hasRecentRevisit(this.territory);
-    this.hasRecentlyAskedToStopVisiting = TerritoryAlertsBO.hasRecentlyAskedToStopVisiting(this.territory);
-    this.isBibleStudent = TerritoryAlertsBO.isBibleStudent(this.territory);
+  resolveRevisit = output<Territory>();
 
-    this.hasAlerts = this.hasRecentlyMoved || this.hasRecentlyRevisit || this.hasRecentlyAskedToStopVisiting;
-  }
+  resolveStopVisiting = output<Territory>();
 }

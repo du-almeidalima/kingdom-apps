@@ -59,3 +59,27 @@ $size: 6rem;
     filter: none;
   }
 }
+
+.floating-action-btn__badge {
+  // :host is position: fixed, so it already is this chip's containing block.
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 2.4rem;
+  height: 2.4rem;
+  padding: 0 0.5rem;
+  border-radius: 999rem;
+
+  background-color: var(--kui-color-surface-inverse, #{variables.$gray-200});
+  color: var(--kui-color-on-inverse, #{variables.$white-100});
+
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1;
+  pointer-events: none;
+}

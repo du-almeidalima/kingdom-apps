@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, Renderer2, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnInit, Renderer2, inject, input } from '@angular/core';
 import { SpinnerComponent } from '../spinner/spinner.component';
 
 @Component({
@@ -7,9 +7,12 @@ import { SpinnerComponent } from '../spinner/spinner.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./floating-action-button.component.scss'],
   template: `
-    <lib-spinner [color]="spinnerColor" [hide]="!loading" width="3rem" height="3rem" />
-    @if (!loading) {
+    <lib-spinner [color]="spinnerColor" [hide]="!loading()" width="3rem" height="3rem" />
+    @if (!loading()) {
       <ng-content />
+    }
+    @if ((badge() ?? 0) > 0) {
+      <span class="floating-action-btn__badge" data-testid="fab-badge">{{ badge() }}</span>
     }
   `,
   imports: [SpinnerComponent],
@@ -20,16 +23,17 @@ export class FloatingActionButtonComponent implements OnInit {
 
   spinnerColor = 'currentColor';
 
-  @Input()
-  backgroundColor?: string;
+  backgroundColor = input<string | undefined>(undefined);
 
-  @Input()
-  loading = false;
+  loading = input(false);
+
+  /** Numeric chip rendered on the button's top-right corner; hidden while not a positive number. */
+  badge = input<number>();
 
   ngOnInit() {
     this.renderer.addClass(this.elRef.nativeElement, `floating-action-btn`);
-    if (this.backgroundColor) {
-      this.renderer.setStyle(this.elRef.nativeElement, '--backgroundColor', this.backgroundColor);
+    if (this.backgroundColor()) {
+      this.renderer.setStyle(this.elRef.nativeElement, '--backgroundColor', this.backgroundColor());
     }
   }
 }

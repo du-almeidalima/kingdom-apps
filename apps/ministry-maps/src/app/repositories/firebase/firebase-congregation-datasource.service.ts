@@ -1,25 +1,14 @@
 import { inject, Injectable } from '@angular/core';
-import {
-  collection,
-  CollectionReference,
-  doc,
-  docData,
-  DocumentData,
-  DocumentReference,
-  Firestore,
-  getDoc,
-  getDocFromCache,
-  getDocs,
-  orderBy,
-  query,
-  updateDoc,
-} from '@angular/fire/firestore';
+import { collection, CollectionReference, doc, getDoc, getDocFromCache, getDocs, orderBy, query, updateDoc } from 'firebase/firestore';
+import type { DocumentData, DocumentReference } from 'firebase/firestore';
 import { from, map, Observable } from 'rxjs';
 
 import { CongregationRepository } from '../congregation.repository';
 import { Congregation } from '../../../models/congregation';
 import { congregationConverter, FirebaseCongregationModel } from '../../../models/firebase/firebase-congregation-model';
 import { FirebaseDatasource } from './firebase-datasource';
+import { docData$ } from './firebase-rxjs-interop';
+import { FIRESTORE } from './firebase-providers';
 
 @Injectable({
   providedIn: 'root',
@@ -27,7 +16,7 @@ import { FirebaseDatasource } from './firebase-datasource';
 export class FirebaseCongregationDatasourceService implements CongregationRepository, FirebaseDatasource<Congregation> {
   static readonly COLLECTION_NAME = 'congregations';
   private readonly congregationCollection: CollectionReference<Congregation>;
-  private readonly firestore = inject(Firestore);
+  private readonly firestore = inject(FIRESTORE);
 
   constructor() {
     this.congregationCollection = collection(
@@ -64,11 +53,9 @@ export class FirebaseCongregationDatasourceService implements CongregationReposi
   }
 
   getById(id: string): Observable<Congregation | undefined> {
-    const congregationReference = doc(this.firestore, `${FirebaseCongregationDatasourceService.COLLECTION_NAME}/${id}`);
+    const congregationReference = doc(this.congregationCollection, id);
 
-    return docData(congregationReference, {
-      idField: 'id',
-    }) as Observable<Congregation | undefined>;
+    return docData$<Congregation>(congregationReference);
   }
 
   getCongregations(): Observable<Pick<Congregation, 'name' | 'id'>[]> {

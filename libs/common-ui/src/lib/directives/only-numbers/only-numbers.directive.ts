@@ -1,19 +1,22 @@
-import { Directive, ElementRef, HostListener, Input, inject } from '@angular/core';
+import { Directive, ElementRef, inject, input } from '@angular/core';
 
 @Directive({
   selector: '[libOnlyNumbers]',
+  host: {
+    '(keydown)': 'onKeyPress($event)',
+    '(paste)': 'onPaste($event)',
+  },
 })
 export class OnlyNumbersDirective {
   private el = inject(ElementRef);
 
-  @Input() decimal = false;
-  @Input() negative = false;
+  decimal = input(false);
+  negative = input(false);
 
   /**
    * Handles the key press event to allow or block specific characters based on defined criteria.
    * @see https://angular.dev/api/core/HostListener#description
    */
-  @HostListener('keydown', ['$event'])
   onKeyPress(event: KeyboardEvent) {
     // Allow special keys (navigation, editing, etc.)
     const specialKeys = [
@@ -55,7 +58,7 @@ export class OnlyNumbersDirective {
     // Define the allowed characters
     let pattern: RegExp;
 
-    if (this.decimal && this.negative) {
+    if (this.decimal() && this.negative()) {
       // Allow digits, decimal point, and negative sign
       pattern = /[\d.-]/;
 
@@ -68,7 +71,7 @@ export class OnlyNumbersDirective {
       if (charStr === '-' && this.el.nativeElement.value.length > 0) {
         return false;
       }
-    } else if (this.decimal) {
+    } else if (this.decimal()) {
       // Allow digits and decimal point
       pattern = /[\d.]/;
 
@@ -76,7 +79,7 @@ export class OnlyNumbersDirective {
       if (charStr === '.' && this.el.nativeElement.value.includes('.')) {
         return false;
       }
-    } else if (this.negative) {
+    } else if (this.negative()) {
       // Allow digits and negative sign
       pattern = /[\d-]/;
 
@@ -93,7 +96,6 @@ export class OnlyNumbersDirective {
     return pattern.test(charStr);
   }
 
-  @HostListener('paste', ['$event'])
   onPaste(event: ClipboardEvent) {
     // Get the pasted text
     const pastedText = event.clipboardData?.getData('text');
@@ -101,11 +103,11 @@ export class OnlyNumbersDirective {
     if (!pastedText) return;
 
     let regExp: RegExp;
-    if (this.decimal && this.negative) {
+    if (this.decimal() && this.negative()) {
       regExp = new RegExp('^-?\\d*(\\.\\d*)?$');
-    } else if (this.decimal) {
+    } else if (this.decimal()) {
       regExp = new RegExp('^\\d*(\\.\\d*)?$');
-    } else if (this.negative) {
+    } else if (this.negative()) {
       regExp = new RegExp('^-?\\d*$');
     } else {
       regExp = new RegExp('^\\d*$');

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 
@@ -18,6 +18,7 @@ interface CityItem {
 @Component({
   selector: 'kingdom-apps-config-congregation-cities',
   imports: [FormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-4xl mx-auto p-6">
       <div class="mb-8">
@@ -33,7 +34,7 @@ interface CityItem {
           class="bg-white border border-gray-200 rounded-lg shadow-sm mb-6 overflow-hidden"
           data-testid="config-cities-list"
         >
-          @for (city of cities; track city; let i = $index) {
+          @for (city of cities(); track city; let i = $index) {
             <div
               class="px-6 py-4 border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors"
               data-testid="config-city-row"
@@ -46,7 +47,7 @@ interface CityItem {
                       class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
                       data-testid="config-edit-city"
                       (click)="editCity(city)"
-                      [disabled]="hasEditingCities"
+                      [disabled]="hasEditingCities()"
                     >
                       Edit
                     </button>
@@ -54,7 +55,7 @@ interface CityItem {
                       class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
                       data-testid="config-delete-city"
                       (click)="deleteCity(i)"
-                      [disabled]="hasEditingCities"
+                      [disabled]="hasEditingCities()"
                     >
                       Delete
                     </button>
@@ -86,7 +87,7 @@ interface CityItem {
               }
             </div>
           }
-          @if (cities.length === 0) {
+          @if (cities().length === 0) {
             <div class="px-6 py-12 text-center text-gray-500">
               <p>No cities configured yet. Add your first city below.</p>
             </div>
@@ -100,7 +101,7 @@ interface CityItem {
           class="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
           data-testid="config-add-city"
           (click)="addCity()"
-          [disabled]="hasEditingCities || isLoading"
+          [disabled]="hasEditingCities() || isLoading()"
         >
           + Add City
         </button>
@@ -109,12 +110,12 @@ interface CityItem {
           class="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
           data-testid="config-save"
           (click)="saveChanges()"
-          [disabled]="!hasChanges() || isLoading"
+          [disabled]="!hasChanges() || isLoading()"
         >
-          @if (!isLoading) {
+          @if (!isLoading()) {
             <span>Save Changes</span>
           }
-          @if (isLoading) {
+          @if (isLoading()) {
             <span>Saving...</span>
           }
         </button>
@@ -138,8 +139,8 @@ export class ConfigCongregationCitiesComponent implements OnInit {
   private toaster = inject(ToasterService);
 
   congregation: Congregation | null = null;
-  cities: CityItem[] = [];
-  isLoading = false;
+  cities = signal<CityItem[]>([]);
+  isLoading = signal(false);
 
   ngOnInit(): void {
     this.loadCongregation();
@@ -150,53 +151,60 @@ export class ConfigCongregationCitiesComponent implements OnInit {
     this.congregation = user?.congregation || null;
 
     if (this.congregation) {
-      this.cities = this.congregation.cities.map((city) => ({
-        originalName: city,
-        currentName: city,
-        isEditing: false,
-        isNew: false,
-      }));
+      this.cities.set(
+        this.congregation.cities.map((city) => ({
+          originalName: city,
+          currentName: city,
+          isEditing: false,
+          isNew: false,
+        })),
+      );
     }
   }
 
   addCity(): void {
-    this.cities.push({
-      originalName: '',
-      currentName: '',
-      isEditing: true,
-      isNew: true,
-    });
+    this.cities.update((cities) => [
+      ...cities,
+      {
+        originalName: '',
+        currentName: '',
+        isEditing: true,
+        isNew: true,
+      },
+    ]);
   }
 
   editCity(city: CityItem): void {
     city.isEditing = true;
+    this.cities.set([...this.cities()]);
   }
 
   cancelEdit(city: CityItem, index: number): void {
     if (city.isNew) {
-      this.cities.splice(index, 1);
+      this.cities.update((cities) => cities.filter((_, i) => i !== index));
     } else {
       city.currentName = city.originalName;
       city.isEditing = false;
+      this.cities.set([...this.cities()]);
     }
   }
 
   deleteCity(index: number): void {
     if (confirm('Are you sure you want to delete this city?')) {
-      this.cities.splice(index, 1);
+      this.cities.update((cities) => cities.filter((_, i) => i !== index));
     }
   }
 
   saveChanges(): void {
     // Validate that all cities have names
-    const hasEmptyCities = this.cities.some((city) => !city.currentName.trim());
+    const hasEmptyCities = this.cities().some((city) => !city.currentName.trim());
     if (hasEmptyCities) {
       this.toaster.error('All cities must have a name.');
       return;
     }
 
     // Check for duplicate city names
-    const cityNames = this.cities.map((c) => c.currentName.trim().toLowerCase());
+    const cityNames = this.cities().map((c) => c.currentName.trim().toLowerCase());
     const hasDuplicates = cityNames.some((name, index) => cityNames.indexOf(name) !== index);
     if (hasDuplicates) {
       this.toaster.error('City names must be unique.');
@@ -204,29 +212,31 @@ export class ConfigCongregationCitiesComponent implements OnInit {
     }
 
     // Build the update DTOs
-    const updates: UpdateCongregationCityDTO[] = this.cities.map((city) => ({
+    const updates: UpdateCongregationCityDTO[] = this.cities().map((city) => ({
       oldCityName: city.isNew ? undefined : city.originalName,
       newCityName: city.currentName.trim(),
     }));
 
-    this.isLoading = true;
+    this.isLoading.set(true);
 
     this.configurationBO.updateCongregationCities(updates).subscribe({
       next: () => {
         this.toaster.success('Cities updated successfully!');
-        this.isLoading = false;
+        this.isLoading.set(false);
 
         // Update the local state
-        this.cities = this.cities.map((city) => ({
-          originalName: city.currentName,
-          currentName: city.currentName,
-          isEditing: false,
-          isNew: false,
-        }));
+        this.cities.set(
+          this.cities().map((city) => ({
+            originalName: city.currentName,
+            currentName: city.currentName,
+            isEditing: false,
+            isNew: false,
+          })),
+        );
       },
       error: (error) => {
         this.toaster.error(`Error updating cities: ${error.message || 'Unknown error'}`);
-        this.isLoading = false;
+        this.isLoading.set(false);
       },
     });
   }
@@ -235,14 +245,12 @@ export class ConfigCongregationCitiesComponent implements OnInit {
     // A deletion (or a net add+delete mix) changes the city count: without this check,
     // delete-only changes would never enable the Save button.
     const originalCities = this.congregation?.cities;
-    if (originalCities && this.cities.length !== originalCities.length) {
+    if (originalCities && this.cities().length !== originalCities.length) {
       return true;
     }
 
-    return this.cities.some((city) => city.isNew || city.currentName !== city.originalName);
+    return this.cities().some((city) => city.isNew || city.currentName !== city.originalName);
   }
 
-  get hasEditingCities(): boolean {
-    return this.cities.some((city) => city.isEditing);
-  }
+  hasEditingCities = computed(() => this.cities().some((city) => city.isEditing));
 }

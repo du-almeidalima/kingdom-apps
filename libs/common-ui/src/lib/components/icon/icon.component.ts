@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, input } from '@angular/core';
 import { Icons } from './icon-type';
 
 @Component({
@@ -24,21 +24,17 @@ import { Icons } from './icon-type';
     `,
   ],
   template: `
-    <svg class="icon" [style.--fill-color]="fillColor">
-      <use [attr.href]="iconUrl"></use>
+    <svg class="icon" [style.--fill-color]="fillColor()">
+      <use [attr.href]="iconUrl()"></use>
     </svg>
   `,
 })
 export class IconComponent {
   private readonly assetsFolderPath = '/assets/common-ui/icons/sprite.svg';
 
-  iconUrl = `${this.assetsFolderPath}#iconmonstr-task-list-lined`;
+  icon = input<Icons>('task-list-lined');
 
-  @Input()
-  set icon(icon: Icons) {
-    this.iconUrl = `${this.assetsFolderPath}#iconmonstr-${icon}`;
-  }
+  fillColor = input('currentColor');
 
-  @Input()
-  fillColor = 'currentColor';
+  iconUrl = computed(() => `${this.assetsFolderPath}#iconmonstr-${this.icon()}`);
 }

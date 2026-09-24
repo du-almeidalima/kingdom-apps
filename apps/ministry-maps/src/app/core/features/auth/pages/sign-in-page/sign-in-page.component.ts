@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FIREBASE_PROVIDERS } from '../../../../../repositories/firebase/firebase-auth-datasource.service';
 import { AuthService } from '../../services/auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -17,6 +17,7 @@ import { ProviderLoginButtonComponent } from '../../components/provider-login-bu
   selector: 'kingdom-apps-sign-in-page',
   templateUrl: './sign-in-page.component.html',
   styleUrls: ['./sign-in-page.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CardComponent, NgOptimizedImage, ProviderLoginButtonComponent],
 })
 export class SignInPageComponent implements OnInit {
@@ -28,18 +29,18 @@ export class SignInPageComponent implements OnInit {
 
   inviteRepository = inject(InvitationLinkRepository);
 
-  loading = false;
-  errorCode: '' | 'INVALID_LINK' | 'INVALID_EMAIL' = '';
-  invite: InvitationLink | undefined;
+  loading = signal(false);
+  errorCode = signal<'' | 'INVALID_LINK' | 'INVALID_EMAIL'>('');
+  invite = signal<InvitationLink | undefined>(undefined);
 
   ngOnInit(): void {
-    this.loading = true;
+    this.loading.set(true);
 
     this.inviteRepository
       .getById(this.route.snapshot.params['inviteId'])
       .pipe(
         finalize(() => {
-          this.loading = false;
+          this.loading.set(false);
         }),
         catchError(() => {
           return EMPTY;
@@ -47,37 +48,37 @@ export class SignInPageComponent implements OnInit {
       )
       .subscribe((invite) => {
         if (!invite || !invite.isValid) {
-          this.errorCode = 'INVALID_LINK';
+          this.errorCode.set('INVALID_LINK');
           return;
         }
 
-        this.invite = invite;
+        this.invite.set(invite);
       });
   }
 
   handleProviderLoginClick(provider: FIREBASE_PROVIDERS) {
-    this.loading = true;
+    this.loading.set(true);
 
-    if (!this.invite) {
+    const invite = this.invite();
+    if (!invite) {
       return;
     }
-
     const userConfig: CreateUserConfig = {
-      inviteId: this.invite.id,
-      role: this.invite.role,
-      email: this.invite.email,
-      congregation: this.invite.congregation,
+      inviteId: invite.id,
+      role: invite.role,
+      email: invite.email,
+      congregation: invite.congregation,
     };
 
     this.authService
       .signInWithProvider(provider, true, userConfig)
       .pipe(
         finalize(() => {
-          this.loading = false;
+          this.loading.set(false);
         }),
         catchError((err) => {
           if (err?.message === AuthErrorEnum.INVALID_EMAIL) {
-            this.errorCode = 'INVALID_EMAIL';
+            this.errorCode.set('INVALID_EMAIL');
           }
 
           return EMPTY;
@@ -86,7 +87,7 @@ export class SignInPageComponent implements OnInit {
       .subscribe((user) => {
         // this.invite should never be null, but TypeScript seems to have trouble inferring that it is not null
         // Maybe because this method is async
-        if (!user || !this.invite) {
+        if (!user || !this.invite()) {
           return;
         }
 

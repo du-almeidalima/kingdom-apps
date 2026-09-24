@@ -1,6 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { addDoc, collection, CollectionReference, Firestore, Timestamp } from '@angular/fire/firestore';
+import { addDoc, collection, Timestamp } from 'firebase/firestore';
+import type { CollectionReference } from 'firebase/firestore';
 import { environment } from '../../../../environments/environment';
+import { FIRESTORE } from '../../../repositories/firebase/firebase-providers';
 
 export type LogEntry = {
   timestamp: Date;
@@ -21,7 +23,7 @@ export enum LogLevelEnum {
   providedIn: 'root',
 })
 export class LoggerService {
-  private firestore = inject(Firestore);
+  private firestore = inject(FIRESTORE);
 
   // TTL retention: 6 months
   private static readonly RETENTION_DAYS = 180;

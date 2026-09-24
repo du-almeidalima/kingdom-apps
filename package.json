@@ -15,21 +15,19 @@
     "@angular/common": "21.2.9",
     "@angular/compiler": "21.2.9",
     "@angular/core": "21.2.9",
-    "@angular/elements": "21.2.9",
-    "@angular/fire": "^21.0.0-rc.0-canary.f54c0fe",
     "@angular/forms": "21.2.9",
     "@angular/platform-browser": "21.2.9",
     "@angular/platform-browser-dynamic": "21.2.9",
     "@angular/router": "21.2.9",
     "@angular/service-worker": "21.2.9",
-    "firebase-functions": "^7.0.3",
-    "rxjs": "~7.8.0",
-    "zone.js": "0.16.1"
+    "firebase": "^12.18.0",
+    "rxjs": "~7.8.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "21.2.21",
     "@angular-devkit/core": "21.2.21",
     "@angular-devkit/schematics": "21.2.21",
+    "@angular/build": "21.2.21",
     "@angular/cli": "21.2.21",
     "@angular/compiler-cli": "21.2.9",
     "@angular/language-service": "21.2.9",
@@ -44,7 +42,7 @@
     "@nx/playwright": "^22.6.5",
     "@nx/web": "22.6.5",
     "@nx/workspace": "22.6.5",
-    "@playwright/test": "^1.36.0",
+    "@playwright/test": "1.62.1",
     "@schematics/angular": "21.2.21",
     "@swc-node/register": "1.11.1",
     "@swc/core": "1.15.8",
@@ -72,7 +70,6 @@
     "ts-node": "10.9.1",
     "tslib": "^2.3.0",
     "typescript": "5.9.3",
-    "typescript-eslint": "^8.33.1",
-    "whatwg-fetch": "^3.6.20"
+    "typescript-eslint": "^8.33.1"
   }
 }
