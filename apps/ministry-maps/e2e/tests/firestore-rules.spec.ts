@@ -1,5 +1,30 @@
 import { expect, test } from '../fixtures';
+import { SeedApi } from '../fixtures/database.fixture';
 import { createDocAs, deleteDocAs, mintIdToken, readDocAs, updateDocAs } from '../firebase/firestore-rules.util';
+import { Collections, DESIGNATIONS_PROGRESS_DOC_ID, DESIGNATIONS_PROGRESS_SUBCOLLECTION } from '../seed/collections';
+import { RoleEnum } from '../../src/models/enums/role';
+
+const progressPath = (headerId: string) =>
+  `${Collections.designations_header}/${headerId}/${DESIGNATIONS_PROGRESS_SUBCOLLECTION}/${DESIGNATIONS_PROGRESS_DOC_ID}`;
+
+/** Seeds a same-congregation header with one registered designation and no completed territories. */
+async function seedProgressSummary(seed: SeedApi, headerId: string) {
+  const header = seed.factories.buildDesignationsHeader({
+    id: headerId,
+    congregationId: seed.ids.congregation,
+    createdBy: seed.ids.adminUser,
+  });
+  const progress = seed.factories.buildDesignationsProgress({
+    headerId,
+    congregationId: seed.ids.congregation,
+    designations: {
+      D1: { territoriesTotal: 2, createdAt: header.createdAt, expiresAt: new Date('2026-09-08T12:00:00.000Z') },
+    },
+  });
+  await seed.write({ designationsHeaders: [header], designationsProgress: [progress] });
+}
+
+const territoryEntry = { designationId: 'D1', territoryId: 'T1', outcome: 0, completedAt: new Date() };
 
 test.describe('Firestore Security Rules', () => {
   test('UC-RULES-01 — Anonymous read access to public collections (200 allowed)', async ({ seed }) => {
@@ -289,5 +314,81 @@ test.describe('Firestore Security Rules', () => {
     // Publisher deletes anyone -> 403
     expect(await deleteDocAs(`users/${seed.ids.adminUser}`, publisherToken)).toBe(403);
     expect(await db.getDoc(db.collections.users, seed.ids.adminUser)).toBeDefined();
+  });
+
+  test('UC-RULES-13 — Anonymous progress: only a territories update is allowed (200), everything else denied (403)', async ({
+    db,
+    seed,
+  }) => {
+    await seedProgressSummary(seed, 'rules-progress-anon');
+    const path = progressPath('rules-progress-anon');
+    const readStored = async () =>
+      (
+        await db.firestore
+          .collection(db.collections.designations_header)
+          .doc('rules-progress-anon')
+          .collection(DESIGNATIONS_PROGRESS_SUBCOLLECTION)
+          .doc(DESIGNATIONS_PROGRESS_DOC_ID)
+          .get()
+      ).data();
+
+    expect(await readDocAs(path)).toBe(403);
+    expect(
+      await createDocAs(progressPath('rules-progress-anon-new'), {
+        headerId: 'rules-progress-anon-new',
+        congregationId: seed.ids.congregation,
+      }),
+    ).toBe(403);
+
+    expect(await updateDocAs(path, { territories: { D1_T1: territoryEntry } })).toBe(200);
+    expect((await readStored())?.['territories']?.['D1_T1']?.['territoryId']).toBe('T1');
+
+    expect(await updateDocAs(path, { designations: { D1: { territoriesTotal: 99 } } })).toBe(403);
+    expect((await readStored())?.['designations']?.['D1']?.['territoriesTotal']).toBe(2);
+
+    expect(await deleteDocAs(path)).toBe(403);
+    expect(await readStored()).toBeDefined();
+  });
+
+  test('UC-RULES-14 — Same-congregation admin progress: read, create and update allowed (200)', async ({ seed }) => {
+    await seedProgressSummary(seed, 'rules-progress-admin');
+    const adminToken = await mintIdToken(seed.ids.adminUser);
+    const path = progressPath('rules-progress-admin');
+
+    expect(await readDocAs(path, adminToken)).toBe(200);
+    expect(
+      await createDocAs(
+        progressPath('rules-progress-admin-new'),
+        { headerId: 'rules-progress-admin-new', congregationId: seed.ids.congregation },
+        adminToken,
+      ),
+    ).toBe(200);
+    expect(await updateDocAs(path, { designations: { D1: { territoriesTotal: 3 } } }, adminToken)).toBe(200);
+    expect(await updateDocAs(path, { territories: { D1_T1: territoryEntry } }, adminToken)).toBe(200);
+  });
+
+  test('UC-RULES-15 — Foreign-congregation admin progress: read and update denied (403)', async ({ db, seed }) => {
+    await seedProgressSummary(seed, 'rules-progress-foreign');
+    const congregation = seed.factories.buildCongregation({ id: 'rules-foreign-congregation' });
+    const foreignAdmin = seed.factories.buildUser({
+      id: 'rules-foreign-admin',
+      role: RoleEnum.ADMIN,
+      congregationId: congregation.id,
+    });
+    await seed.write({ congregations: [congregation], users: [foreignAdmin] });
+    const foreignToken = await mintIdToken(foreignAdmin.id);
+    const path = progressPath('rules-progress-foreign');
+
+    expect(await readDocAs(path, foreignToken)).toBe(403);
+    // The anonymous territories-only path must not open up to signed-in outsiders.
+    expect(await updateDocAs(path, { territories: { D1_T1: territoryEntry } }, foreignToken)).toBe(403);
+
+    const stored = await db.firestore
+      .collection(db.collections.designations_header)
+      .doc('rules-progress-foreign')
+      .collection(DESIGNATIONS_PROGRESS_SUBCOLLECTION)
+      .doc(DESIGNATIONS_PROGRESS_DOC_ID)
+      .get();
+    expect(stored.data()?.['territories']).toEqual({});
   });
 });

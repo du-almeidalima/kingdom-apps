@@ -6,6 +6,7 @@ import { DesignationsHeaderBO } from './designations-header.bo';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { DesignationRepository } from '../../../../repositories/designation.repository';
 import { DesignationsHeaderRepository } from '../../../../repositories/designations-header.repository';
+import { DesignationsProgressRepository } from '../../../../repositories/designations-progress.repository';
 import { UserStateService } from '../../../../state/user.state.service';
 import { LoggerService } from '../../../../shared/services/logger/logger.service';
 import { CongregationSettingsBO } from '../../../../core/features/congregation-settings/bo/congregation-settings.bo';
@@ -52,9 +53,10 @@ describe('DesignationsHeaderBO', () => {
           getAllInIds: jest.fn().mockReturnValue(of([])),
         }),
         MockProvider(DesignationRepository, {
-          add: jest.fn().mockReturnValue(of({ id: 'DESIGNATION-NEW' } as Designation)),
+          add: jest.fn().mockReturnValue(of({ id: 'DESIGNATION-NEW', territories: [territoryMockBuilder({ id: 'T1' })], createdAt: new Date(2026, 8, 1), expiresAt: new Date(2026, 9, 1) } as Designation)),
           getStreamByHeaderId: jest.fn().mockReturnValue(of([])),
         }),
+        MockProvider(DesignationsProgressRepository, { registerDesignation: jest.fn().mockReturnValue(of(void 0)) }),
         MockProvider(DesignationsHeaderRepository, {
           getInProgressByCongregation: jest.fn().mockReturnValue(of(undefined)),
           getInProgressStreamByCongregation: jest.fn().mockReturnValue(of(undefined)),
@@ -128,6 +130,11 @@ describe('DesignationsHeaderBO', () => {
         expect(designationsHeaderRepository.getInProgressByCongregation).not.toHaveBeenCalled();
         expect(designationsHeaderRepository.add).not.toHaveBeenCalled();
         expect(designationRepository.add.mock.calls[0][0].designationHeaderId).toBe(activeHeader.id);
+        expect(TestBed.inject(DesignationsProgressRepository).registerDesignation).toHaveBeenCalledWith(activeHeader, 'DESIGNATION-NEW', {
+          territoriesTotal: 1,
+          createdAt: expect.any(Date),
+          expiresAt: expect.any(Date),
+        });
       });
 
       it('creates a new header when none is active in memory nor in Firestore', async () => {
@@ -147,6 +154,7 @@ describe('DesignationsHeaderBO', () => {
         });
         expect(result.header).toBe(createdHeader);
         expect(designationRepository.add.mock.calls[0][0].designationHeaderId).toBe('HEADER-CREATED');
+        expect(TestBed.inject(DesignationsProgressRepository).registerDesignation).toHaveBeenCalledWith(createdHeader, 'DESIGNATION-NEW', expect.objectContaining({ territoriesTotal: 1 }));
       });
 
       it('reuses the in-progress header found in Firestore when none is in memory', async () => {
@@ -159,6 +167,19 @@ describe('DesignationsHeaderBO', () => {
         expect(designationsHeaderRepository.add).not.toHaveBeenCalled();
         expect(result.header).toBe(existingHeader);
         expect(designationRepository.add.mock.calls[0][0].designationHeaderId).toBe('HEADER-EXISTING');
+        expect(TestBed.inject(DesignationsProgressRepository).registerDesignation).toHaveBeenCalledWith(existingHeader, 'DESIGNATION-NEW', expect.objectContaining({ territoriesTotal: 1 }));
+      });
+
+      it('still emits the created designation when progress registration fails', async () => {
+        const progressRepository = TestBed.inject(DesignationsProgressRepository);
+        jest.spyOn(progressRepository, 'registerDesignation').mockReturnValue(throwError(() => new Error('progress unavailable')));
+        territoryRepository.getAllInIds.mockReturnValue(of([territoryMockBuilder({ id: 'T1' })]));
+
+        const result = await lastValueFrom(bo.createDesignation(['T1'], activeHeader));
+
+        expect(result.header).toBe(activeHeader);
+        expect(result.designation.id).toBe('DESIGNATION-NEW');
+        expect(loggerService.error).toHaveBeenCalledWith(expect.stringContaining('Failed to register Designation'));
       });
     });
 

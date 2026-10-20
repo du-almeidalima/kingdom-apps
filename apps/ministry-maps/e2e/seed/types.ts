@@ -1,6 +1,7 @@
 import { Congregation } from '../../src/models/congregation';
 import { Designation } from '../../src/models/designation';
 import { DesignationsHeader } from '../../src/models/designations-header';
+import { DesignationsProgress } from '../../src/models/designations-progress';
 import { RoleEnum } from '../../src/models/enums/role';
 import { InvitationLink } from '../../src/models/invitation-link';
 import { Territory } from '../../src/models/territory';
@@ -53,6 +54,7 @@ export type DesignationSeed = Designation;
 
 /** A designations_header document. Mirrors the real {@link DesignationsHeader} model 1:1. */
 export type DesignationsHeaderSeed = DesignationsHeader;
+export type DesignationsProgressSeed = DesignationsProgress;
 
 /**
  * An invitation-link document in the app's creation-time shape
@@ -73,6 +75,7 @@ export interface SeedDefinition {
   territories?: TerritorySeed[];
   designations?: DesignationSeed[];
   designationsHeaders?: DesignationsHeaderSeed[];
+  designationsProgress?: DesignationsProgressSeed[];
   invitationLinks?: InvitationLinkSeed[];
 }
 

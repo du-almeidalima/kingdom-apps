@@ -7,6 +7,7 @@ export class HomePage {
   readonly linkDesignarTerritorios: Locator;
   readonly linkAdministrarTerritorios: Locator;
   readonly linkEstatisticasTerritorios: Locator;
+  readonly linkHistoricoDesignacoes: Locator;
   readonly linkAdministrarPessoas: Locator;
 
   constructor(private readonly page: Page) {
@@ -16,6 +17,7 @@ export class HomePage {
     this.linkDesignarTerritorios = page.getByRole('link', { name: 'Designar Territórios' }).first();
     this.linkAdministrarTerritorios = page.getByRole('link', { name: 'Administrar Territórios' });
     this.linkEstatisticasTerritorios = page.getByRole('link', { name: 'Estatísticas Territórios' });
+    this.linkHistoricoDesignacoes = page.getByRole('link', { name: 'Histórico de Designações' });
     this.linkAdministrarPessoas = page.getByRole('link', { name: 'Administrar Pessoas' });
   }
 

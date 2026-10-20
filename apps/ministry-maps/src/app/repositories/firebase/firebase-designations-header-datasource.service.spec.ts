@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { collection, doc, getDocs, setDoc, Timestamp, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, limit, orderBy, query, setDoc, startAfter, Timestamp, updateDoc, where } from 'firebase/firestore';
 import { lastValueFrom, of } from 'rxjs';
 
 import { FirebaseDesignationsHeaderDatasourceService } from './firebase-designations-header-datasource.service';
@@ -18,6 +18,7 @@ jest.mock('firebase/firestore', () => ({
   where: jest.fn(),
   orderBy: jest.fn(),
   limit: jest.fn(),
+  startAfter: jest.fn(),
   setDoc: jest.fn(),
   updateDoc: jest.fn(),
 }));
@@ -120,5 +121,29 @@ describe('FirebaseDesignationsHeaderDatasourceService', () => {
 
       expect(result).toBe(sampleHeader);
     });
+  });
+
+  describe('getPageByCongregation', () => {
+    it('queries one congregation newest first with the requested limit', async () => {
+      (getDocs as jest.Mock).mockResolvedValue({ docs: [{ data: () => sampleHeader }] });
+      await lastValueFrom(service.getPageByCongregation('congregation-1', 21));
+      expect(where).toHaveBeenCalledWith('congregationId', '==', 'congregation-1');
+      expect(orderBy).toHaveBeenCalledWith('createdAt', 'desc');
+      expect(limit).toHaveBeenCalledWith(21);
+      expect(startAfter).not.toHaveBeenCalled();
+    });
+
+    it('uses the createdAt cursor only when provided', async () => {
+      const cursor = new Date('2026-01-02T00:00:00Z');
+      await lastValueFrom(service.getPageByCongregation('congregation-1', 21, cursor));
+      expect(startAfter).toHaveBeenCalledWith(Timestamp.fromDate(cursor));
+      expect(query).toHaveBeenCalled();
+    });
+  });
+
+  it('gets a header by id through the live doc interop', () => {
+    service.getById('header-1').subscribe();
+    expect(doc).toHaveBeenCalledWith(expect.anything(), 'header-1');
+    expect(docData$).toHaveBeenCalled();
   });
 });

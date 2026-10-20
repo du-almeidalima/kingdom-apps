@@ -1,0 +1,24 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+
+.summary-card {
+  border: 1px solid var(--kui-color-border, #{variables.$light-grey-200});
+  border-radius: 6px;
+  background: var(--kui-color-surface, #{variables.$white-100});
+  padding: 1.6rem;
+  box-shadow: none;
+}
+
+.summary__progress, .summary__outcomes { display: flex; align-items: center; gap: 0.75rem; }
+.summary__progress { justify-content: space-between; margin: 1.5rem 0 0.5rem; }
+.summary__outcomes {
+  flex-wrap: wrap;
+  margin-top: 1rem;
+
+  lib-icon {
+    width: 1.2rem;
+    height: 1.2rem;
+    display: inline-block;
+    margin-right: 0.25rem;
+    flex-shrink: 0;
+  }
+}

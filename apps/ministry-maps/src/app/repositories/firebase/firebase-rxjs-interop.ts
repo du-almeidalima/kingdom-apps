@@ -19,6 +19,7 @@ import type { DocumentReference, Query, QueryDocumentSnapshot } from 'firebase/f
 /** Live Firebase auth state: emits the current user (or `null`) on subscribe and on every change. */
 export const authState$ = (auth: Auth): Observable<User | null> =>
   new Observable<User | null>((subscriber) =>
+    // Returning onAuthStateChanged's Unsubscribe callback registers it as RxJS teardown logic.
     onAuthStateChanged(
       auth,
       (user) => subscriber.next(user),
@@ -48,6 +49,7 @@ export const docData$ = <T>(
   options?: SnapshotDataOptions,
 ): Observable<T | undefined> =>
   new Observable<T | undefined>((subscriber) =>
+    // Returning onSnapshot's Unsubscribe callback registers it as RxJS teardown logic.
     onSnapshot(
       reference,
       { includeMetadataChanges: true },
@@ -65,6 +67,7 @@ export const docData$ = <T>(
  */
 export const collectionData$ = <T>(q: Query<T>, options?: SnapshotDataOptions): Observable<T[]> =>
   new Observable<T[]>((subscriber) =>
+    // Returning onSnapshot's Unsubscribe callback registers it as RxJS teardown logic.
     onSnapshot(
       q,
       { includeMetadataChanges: true },

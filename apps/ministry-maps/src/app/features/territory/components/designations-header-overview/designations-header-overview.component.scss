@@ -1,0 +1,22 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.overview__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.overview__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--kui-color-text, #{variables.$text});
+}

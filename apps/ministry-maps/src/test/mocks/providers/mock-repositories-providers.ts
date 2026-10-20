@@ -2,9 +2,11 @@ import { UserRepositoryMock } from '../models/user.mock';
 import { CongregationRepositoryMock } from '../models/congregation.mock';
 import { DesignationRepositoryMock } from '../models/designation.mock';
 import { DesignationsHeaderRepositoryMock } from '../models/designations-header.mock';
+import { DesignationsProgressRepositoryMock } from '../models/designations-progress.mock';
 import { TerritoryRepositoryMock } from '../models/territory.mock';
 import { DesignationRepository } from '../../../app/repositories/designation.repository';
 import { DesignationsHeaderRepository } from '../../../app/repositories/designations-header.repository';
+import { DesignationsProgressRepository } from '../../../app/repositories/designations-progress.repository';
 import { TerritoryRepository } from '../../../app/repositories/territories.repository';
 import { CongregationRepository } from '../../../app/repositories/congregation.repository';
 import { UserRepository } from '../../../app/repositories/user.repository';
@@ -33,6 +35,10 @@ export const MOCK_REPOSITORIES_PROVIDERS = [
   {
     provide: DesignationsHeaderRepository,
     useClass: DesignationsHeaderRepositoryMock,
+  },
+  {
+    provide: DesignationsProgressRepository,
+    useClass: DesignationsProgressRepositoryMock,
   },
   // {
   //   provide: NoteRepository,

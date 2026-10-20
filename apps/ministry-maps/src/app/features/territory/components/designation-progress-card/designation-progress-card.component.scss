@@ -1,0 +1,97 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+
+.designation-card {
+  overflow: hidden;
+  border: 1px solid var(--kui-color-border, #{variables.$light-grey-200});
+  border-radius: 6px;
+  background: var(--kui-color-surface, #{variables.$white-100});
+
+  &__toggle { display: flex; width: 100%; align-items: center; gap: 1rem; padding: 1rem; text-align: left; color: inherit; background: transparent; border: 0; cursor: pointer; }
+  &__main { display: flex; flex: 1; flex-direction: column; gap: 0.25rem; }
+  &__title { font-size: 1.5rem; font-weight: 600; color: var(--kui-color-text, #{variables.$text}); }
+  &__bar { width: min(18rem, 25vw); }
+  &__chevron {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-top: 2px solid currentColor;
+    border-right: 2px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform 180ms ease;
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+  }
+  &__chevron--open { transform: rotate(135deg); }
+
+  &__body-wrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    visibility: hidden;
+    transition: grid-template-rows 220ms cubic-bezier(0.2, 0, 0, 1), visibility 220ms ease;
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+
+    &--open {
+      grid-template-rows: 1fr;
+      visibility: visible;
+    }
+  }
+
+  &__body-inner {
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  &__body { display: flex; flex-direction: column; align-items: flex-start; gap: 1rem; padding: 0 1rem 1rem; }
+  &__rows { width: 100%; margin: 0; padding: 0; list-style: none; }
+  &__row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.75rem 0; border-top: 1px solid var(--kui-color-border, #{variables.$light-grey-200}); }
+  &__address {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  &__status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  &__outcome {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    white-space: nowrap;
+  }
+
+  &__outcome-icon {
+    width: 1.4rem;
+    height: 1.4rem;
+    flex-shrink: 0;
+    display: inline-block;
+  }
+
+  &__share-btn {
+    align-self: flex-end;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    min-height: 3.6rem;
+    padding: 0.6rem 1.4rem;
+    font-size: 1.3rem;
+    font-weight: 500;
+  }
+
+  &__share-icon {
+    width: 1.4rem;
+    height: 1.4rem;
+    flex-shrink: 0;
+    display: inline-block;
+  }
+}

@@ -971,3 +971,39 @@ test.describe('Assign territories — creation & share (WP-19)', () => {
     await expect(assignPage.assignedCount).toHaveText('2 já designados');
   });
 });
+
+test.describe('Assign progress registration', () => {
+  test.use({ role: 'admin' });
+
+  test('UC-ASSIGN-32 — Each submission registers its designation in the shared progress document', async ({ authenticatedPage, seed, db }) => {
+    const assignPage = new AssignTerritoriesPage(authenticatedPage);
+    await assignPage.goto();
+    await assignPage.check('Rua das Acácias, 45 - Pinheiros');
+    const firstShare = await captureWhatsAppPopup(authenticatedPage, () => assignPage.fab.click());
+    const firstId = designationIdFromShareUrl(firstShare.sharedUrl);
+    const firstDesignation = await db.getDoc(db.collections.designations, firstId);
+    const headerId = firstDesignation?.['designationHeaderId'] as string;
+    const progressRef = db.firestore.collection(db.collections.designations_header).doc(headerId).collection('progress').doc('summary');
+
+    await expect.poll(async () => {
+      const snapshot = await progressRef.get();
+      const data = snapshot.data();
+      return data?.['designations']?.[firstId]?.['territoriesTotal'];
+    }).toBe(1);
+    const firstProgress = (await progressRef.get()).data();
+    expect(firstProgress?.['congregationId']).toBe(seed.ids.congregation);
+    expect(firstProgress?.['headerId']).toBe(headerId);
+    expect(firstProgress?.['expireAt']).toBeTruthy();
+
+    await assignPage.selectCity('Osasco');
+    await assignPage.check('Av. dos Autonomistas, 1200 - Centro');
+    const secondShare = await captureWhatsAppPopup(authenticatedPage, () => assignPage.fab.click());
+    const secondId = designationIdFromShareUrl(secondShare.sharedUrl);
+    await expect.poll(async () => {
+      const snapshot = await progressRef.get();
+      const data = snapshot.data();
+      return Object.keys(data?.['designations'] ?? {}).length;
+    }).toBe(2);
+    expect((await progressRef.get()).data()?.['designations']?.[secondId]?.['territoriesTotal']).toBe(1);
+  });
+});

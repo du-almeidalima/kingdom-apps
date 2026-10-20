@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { MockProvider } from 'ng-mocks';
-import { lastValueFrom, of } from 'rxjs';
+import { lastValueFrom, of, throwError } from 'rxjs';
 
 import { WorkBO } from './work.bo';
 import { TerritoryRepository } from '../../../repositories/territories.repository';
@@ -10,6 +10,8 @@ import { DesignationStatusEnum } from '../../../../models/enums/designation-stat
 import { Territory } from '../../../../models/territory';
 import { TerritoryVisitHistory } from '../../../../models/territory-visit-history';
 import { VisitOutcomeEnum } from '../../../../models/enums/visit-outcome';
+import { DesignationsProgressRepository } from '../../../repositories/designations-progress.repository';
+import { LoggerService } from '../../../shared/services/logger/logger.service';
 
 const historyEntry = (id: string, daysAgo: number): TerritoryVisitHistory => ({
   id,
@@ -32,13 +34,14 @@ const designationTerritory = (partial: Partial<DesignationTerritory> = {}): Desi
   ...partial,
 });
 
-const designation = (territories: DesignationTerritory[] = [designationTerritory()]): Designation => ({
+const designation = (territories: DesignationTerritory[] = [designationTerritory()], designationHeaderId?: string): Designation => ({
   id: 'DESIGNATION-1',
   congregationId: 'CONGREGATION-1',
   territories,
   createdAt: new Date(2024, 0, 1),
   createdBy: 'USER-1',
   expiresAt: new Date(2024, 1, 15),
+  designationHeaderId,
 });
 
 describe('WorkBO', () => {
@@ -57,12 +60,43 @@ describe('WorkBO', () => {
         MockProvider(DesignationRepository, {
           update: jest.fn().mockReturnValue(of(void 0)),
         }),
+        MockProvider(DesignationsProgressRepository, {
+          setTerritoryProgress: jest.fn().mockReturnValue(of(void 0)),
+          removeTerritoryProgress: jest.fn().mockReturnValue(of(void 0)),
+        }),
+        MockProvider(LoggerService),
       ],
     });
 
     workBO = TestBed.inject(WorkBO);
     territoryRepository = TestBed.inject(TerritoryRepository) as jest.Mocked<TerritoryRepository>;
     designationRepository = TestBed.inject(DesignationRepository) as jest.Mocked<DesignationRepository>;
+  });
+
+  describe('recordTerritoryProgress', () => {
+    it('writes the latest completed visit', async () => {
+      const item = designationTerritory();
+      await lastValueFrom(workBO.recordTerritoryProgress(designation([item], 'HEADER-1'), item));
+      expect(TestBed.inject(DesignationsProgressRepository).setTerritoryProgress).toHaveBeenCalledWith('HEADER-1', {
+        designationId: 'DESIGNATION-1', territoryId: 'TERRITORY-1', outcome: VisitOutcomeEnum.SPOKE, completedAt: item.history?.at(-1)?.date,
+      });
+    });
+
+    it.each([
+      ['legacy designation', designation([designationTerritory()])],
+      ['pending territory', designation([designationTerritory({ status: DesignationStatusEnum.PENDING })], 'HEADER-1')],
+      ['missing history', designation([designationTerritory({ history: [] })], 'HEADER-1')],
+    ])('skips the write for %s', async (_label, input) => {
+      await lastValueFrom(workBO.recordTerritoryProgress(input, input.territories[0]));
+      expect(TestBed.inject(DesignationsProgressRepository).setTerritoryProgress).not.toHaveBeenCalled();
+    });
+
+    it('swallows a failed progress write and logs a warning', async () => {
+      jest.spyOn(TestBed.inject(DesignationsProgressRepository), 'setTerritoryProgress').mockReturnValue(throwError(() => new Error('missing')));
+      const item = designationTerritory();
+      await expect(lastValueFrom(workBO.recordTerritoryProgress(designation([item], 'HEADER-1'), item))).resolves.toBeUndefined();
+      expect(TestBed.inject(LoggerService).warn).toHaveBeenCalled();
+    });
   });
 
   describe('undoLastVisitChanges', () => {
@@ -109,6 +143,21 @@ describe('WorkBO', () => {
       await lastValueFrom(workBO.undoLastVisitChanges(designation([territory]), territory));
 
       expect(territoryRepository.deleteVisitHistory).toHaveBeenCalledWith('TERRITORY-1', 'H2');
+    });
+
+    it('removes progress on undo and swallows a failed progress removal', async () => {
+      const territory = designationTerritory();
+      const input = designation([territory], 'HEADER-1');
+      await lastValueFrom(workBO.undoLastVisitChanges(input, territory));
+      expect(TestBed.inject(DesignationsProgressRepository).removeTerritoryProgress).toHaveBeenCalledWith('HEADER-1', 'DESIGNATION-1', 'TERRITORY-1');
+      jest.spyOn(TestBed.inject(DesignationsProgressRepository), 'removeTerritoryProgress').mockReturnValue(throwError(() => new Error('missing')));
+      await expect(lastValueFrom(workBO.undoLastVisitChanges(input, territory))).resolves.toBeDefined();
+    });
+
+    it('skips progress removal for legacy designations', async () => {
+      const territory = designationTerritory();
+      await lastValueFrom(workBO.undoLastVisitChanges(designation([territory]), territory));
+      expect(TestBed.inject(DesignationsProgressRepository).removeTerritoryProgress).not.toHaveBeenCalled();
     });
 
     it('saves the territory back without the designation status field', async () => {

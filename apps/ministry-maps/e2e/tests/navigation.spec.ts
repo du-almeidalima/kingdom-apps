@@ -158,4 +158,14 @@ test.describe('Navigation & Shell', () => {
     await expect(page.getByTestId('users-heading')).toBeVisible();
     expect((await db.getDoc(db.collections.users, seed.ids.adminUser))?.['role']).toBe(RoleEnum.ADMIN);
   });
+
+  test('UC-NAV-15 — Home link to /territories/designations', async ({ page, signInAs }) => {
+    await signInAs('admin');
+    const home = new HomePage(page);
+    await home.goto();
+    await expect(home.linkHistoricoDesignacoes).toBeVisible();
+    await home.linkHistoricoDesignacoes.click();
+    await expect(page).toHaveURL(/\/territories\/designations$/);
+    await expect(page.getByTestId('designations-history-heading')).toBeVisible();
+  });
 });

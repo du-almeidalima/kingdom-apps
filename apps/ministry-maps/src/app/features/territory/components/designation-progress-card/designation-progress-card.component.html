@@ -1,0 +1,108 @@
+<section class="designation-card">
+  <button
+    type="button"
+    class="designation-card__toggle"
+    data-testid="designation-progress-card-toggle"
+    [attr.aria-expanded]="expanded()"
+    [attr.aria-controls]="bodyId()"
+    (click)="cardToggle.emit(summary().designationId)"
+  >
+    <span class="designation-card__main">
+      <span class="designation-card__title">Designação {{ summary().index }}</span>
+      <span class="t-caption">
+        Criada em
+        <time [attr.datetime]="summary().createdAt.toISOString()">
+          {{ summary().createdAt | date: 'dd/MM/yyyy HH:mm' }}
+        </time>
+      </span>
+    </span>
+
+    @if (summary().isExpired) {
+      <span class="badge badge--sm badge--danger" data-testid="designation-expired-badge">Expirada</span>
+    }
+
+    <span class="t-body2" data-testid="designation-progress-count">{{ progressLabel() }}</span>
+
+    <span class="designation-card__bar">
+      <lib-progress-bar
+        [value]="summary().territoriesDone"
+        [max]="summary().territoriesTotal"
+        label="Progresso da designação"
+      />
+    </span>
+
+    <span
+      class="designation-card__chevron"
+      [class.designation-card__chevron--open]="expanded()"
+      aria-hidden="true"
+    ></span>
+  </button>
+
+  <div
+    class="designation-card__body-wrapper"
+    [class.designation-card__body-wrapper--open]="expanded()"
+    [id]="bodyId()"
+    [attr.aria-hidden]="!expanded()"
+  >
+    <div class="designation-card__body-inner">
+      @if (isBodyMounted()) {
+        <div class="designation-card__body">
+          @switch (bodyState()) {
+            @case ('loading') {
+              <lib-spinner data-testid="designation-progress-loading" />
+            }
+            @case ('ready') {
+              <ul class="designation-card__rows" data-testid="designation-territory-list">
+                @for (row of territoryRows(); track row.territoryId) {
+                  <li class="designation-card__row" data-testid="designation-territory-row">
+                    <span class="designation-card__address">
+                      <span class="t-body2">{{ row.address }}</span>
+                      <span class="t-caption">{{ row.city }}</span>
+                    </span>
+
+                    <div class="designation-card__status">
+                      <span
+                        class="badge badge--sm"
+                        [class.badge--success]="row.isDone"
+                        [class.badge--warning]="!row.isDone"
+                        data-testid="designation-territory-status"
+                      >
+                        {{ row.isDone ? 'Concluído' : 'Pendente' }}
+                      </span>
+
+                      @if (row.isDone && row.outcome !== undefined) {
+                        <span class="designation-card__outcome t-caption">
+                          <lib-icon
+                            class="designation-card__outcome-icon"
+                            [icon]="row.outcome | visitOutcomeToIcon"
+                          />
+                          <span>{{ outcomeLabels[row.outcome] }}</span>
+                        </span>
+                      }
+                    </div>
+                  </li>
+                }
+              </ul>
+
+              <button
+                type="button"
+                lib-button
+                btnType="secondary"
+                class="designation-card__share-btn"
+                data-testid="designation-share-button"
+                (click)="share.emit(summary().designationId)"
+              >
+                <lib-icon class="designation-card__share-icon" icon="paper-plane-2" />
+                <span>Reenviar</span>
+              </button>
+            }
+
+            @case ('empty') {
+              <p data-testid="designation-not-found">Designação não encontrada.</p>
+            }
+          }
+        </div>
+      }
+    </div>
+  </div>
+</section>

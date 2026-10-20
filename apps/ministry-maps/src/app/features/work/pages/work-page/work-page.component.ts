@@ -84,6 +84,9 @@ export class WorkPageComponent implements OnInit, OnDestroy {
     if (!designation) {
       return;
     }
+
+    // TODO: This process has become a bit complex and should probably be moved into a BO class, the component should
+    //  not handle so much of the logic
     const updatedDesignation = this.workBO.updateDesignationTerritoryObject(designation, designationTerritory);
     const designationTerritoryUpdate$ = this.designationRepository.update(updatedDesignation);
 
@@ -108,7 +111,9 @@ export class WorkPageComponent implements OnInit, OnDestroy {
 
     // The observables must be spread out: `concat([a$, b$])` would emit them as values and
     // never subscribe the writes.
-    concat(designationTerritoryUpdate$, territoryUpdate$, visitHistoryUpdate$)
+    const progressUpdate$ = this.workBO.recordTerritoryProgress(designation, designationTerritory);
+
+    concat(designationTerritoryUpdate$, territoryUpdate$, visitHistoryUpdate$, progressUpdate$)
       .pipe(
         retry(2),
         catchError((err) => {

@@ -86,10 +86,12 @@ test.describe('Territories page — CRUD and reorder (WP-15)', () => {
   test('UC-TERR-17 — positionIndex is allocated as max+1 per city on create', async ({ authenticatedPage, db }) => {
     const territoriesPage = new TerritoriesPage(authenticatedPage);
     await territoriesPage.goto();
+    await expect(territoriesPage.cityFilter).toContainText('São Paulo');
     // São Paulo baseline max positionIndex is 2.
     await territoriesPage.addButton.click();
     const dialog = new TerritoryManageDialogPage(authenticatedPage);
     await expect(dialog.dialog).toBeVisible();
+    await expect(dialog.citySelect).toHaveValue('São Paulo');
     await dialog.addressInput.fill('Rua Index, 300');
     await dialog.submit();
 

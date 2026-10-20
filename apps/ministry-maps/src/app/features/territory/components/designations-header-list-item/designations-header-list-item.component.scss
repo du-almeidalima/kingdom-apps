@@ -1,0 +1,27 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+
+.header-item {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1.2rem 1.4rem;
+  color: var(--kui-color-text, #{variables.$text});
+  text-decoration: none;
+  background: var(--kui-color-surface, #{variables.$white-100});
+  border: 1px solid var(--kui-color-border, #{variables.$light-grey-200});
+  border-radius: 6px;
+  box-shadow: var(--kui-shadow-surface, #{variables.$shadow-z1});
+
+  &__overview {
+    flex: 1;
+  }
+
+  &__chevron {
+    width: 0.7rem;
+    height: 0.7rem;
+    flex-shrink: 0;
+    border-top: 2px solid currentColor;
+    border-right: 2px solid currentColor;
+    transform: rotate(45deg);
+  }
+}

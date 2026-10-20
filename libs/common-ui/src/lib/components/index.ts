@@ -22,3 +22,4 @@ export * from './toaster/toaster.service';
 export * from './toaster/toaster.models';
 export * from './portal/portal-anchor.component';
 export * from './portal/portal.service';
+export * from './progress-bar/progress-bar.component';

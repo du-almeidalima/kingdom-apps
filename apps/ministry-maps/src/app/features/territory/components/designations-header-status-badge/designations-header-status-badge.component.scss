@@ -1,0 +1,13 @@
+:host {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.status-badge {
+  gap: 0.4rem;
+}
+
+.status-badge__icon {
+  width: 1.3rem;
+  height: 1.3rem;
+}

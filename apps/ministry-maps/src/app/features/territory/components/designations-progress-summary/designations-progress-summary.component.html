@@ -1,0 +1,36 @@
+<section class="summary-card" data-testid="designations-progress-summary">
+  <kingdom-apps-designations-header-overview [header]="header()" />
+
+  @if (progress(); as summary) {
+    <div class="summary__progress">
+      <p class="t-body1" data-testid="designations-progress-summary-text">
+        {{ summary.territoriesDone }} de {{ summary.territoriesTotal }} territórios concluídos
+      </p>
+      <span class="t-body1 t-medium-emphasis" data-testid="designations-progress-percent">
+        {{ summary.percent }}%
+      </span>
+    </div>
+
+    <lib-progress-bar
+      [value]="summary.territoriesDone"
+      [max]="summary.territoriesTotal"
+      [animated]="true"
+      label="Progresso dos territórios"
+    />
+
+    <ul class="summary__outcomes m-0 p-0 list-none">
+      @for (item of summary.outcomeCounts; track item.outcome) {
+        <li>
+          <span class="badge badge--sm badge--muted" data-testid="designations-outcome-count">
+            <lib-icon [icon]="item.outcome | visitOutcomeToIcon" />
+            <span>{{ outcomeLabels[item.outcome] }} {{ item.count }}</span>
+          </span>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="t-body2" data-testid="designations-progress-unavailable">
+      Progresso indisponível para esta sessão.
+    </p>
+  }
+</section>

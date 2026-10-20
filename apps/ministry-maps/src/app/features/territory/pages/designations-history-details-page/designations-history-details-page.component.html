@@ -1,0 +1,36 @@
+<div class="container">
+  <h2 class="t-headline2 mb-8" data-testid="designations-history-details-heading">Histórico de designações</h2>
+
+  @if (!designationHeaderState().loaded) {
+    <div class="flex items-center justify-center py-12" data-testid="designations-history-details-loading">
+      <lib-spinner height="4rem" width="4rem" />
+    </div>
+  } @else if (designationHeaderState().detail; as detail) {
+    <kingdom-apps-designations-progress-summary
+      [header]="detail.header"
+      [progress]="detail.progress"
+    />
+
+    @if (detail.progress; as progress) {
+      <h3 class="t-headline3 mt-8 mb-4">Designações</h3>
+      <ul class="flex flex-col gap-4 m-0 p-0 list-none">
+        @for (summary of progress.designations; track summary.designationId) {
+          <li>
+            <kingdom-apps-designation-progress-card
+              [summary]="summary"
+              [expanded]="expandedIds().has(summary.designationId)"
+              [isLoading]="loadingIds().has(summary.designationId)"
+              [rows]="rowsById().get(summary.designationId) ?? null"
+              (cardToggle)="handleToggle($event)"
+              (share)="handleShare($event)"
+            />
+          </li>
+        }
+      </ul>
+    }
+  } @else {
+    <p class="t-body2" data-testid="designations-history-details-not-found">
+      Sessão de designações não encontrada.
+    </p>
+  }
+</div>

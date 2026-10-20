@@ -17,8 +17,6 @@ import { User } from '../../../../../models/user';
 import { TERRITORY_SORT_FILTER_CONFIG } from '../../config/territory-filter.config';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { UserStateService } from '../../../../state/user.state.service';
-import { FeatureRoutesEnum } from '../../../../app-routes';
-import { isMobileDevice } from '../../../../shared/utils/user-agent';
 import { TerritoryAlertsBO } from '../../bo/territory-alerts/territory-alerts.bo';
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 import { Dialog } from '@angular/cdk/dialog';
@@ -28,7 +26,7 @@ import {
   TerritoriesOrderBy,
   TerritoryFilterSettings,
 } from '../../../../shared/utils/territories-filter-pipe';
-import { createSendWhatsAppLink } from '../../../../shared/utils/share-utils';
+import { shareDesignationLink } from '../../../../shared/utils/share-utils';
 import { FormsModule } from '@angular/forms';
 import { TerritoryCheckboxComponent } from '../../components/territory-checkbox/territory-checkbox.component';
 import { AsyncPipe } from '@angular/common';
@@ -257,13 +255,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
   }
 
   shareDesignation(designationId: string) {
-    const builtUrl = createSendWhatsAppLink(`${location.origin}/${FeatureRoutesEnum.WORK}/${designationId}`);
-
-    if (isMobileDevice()) {
-      window.location.href = builtUrl;
-    } else {
-      window.open(builtUrl);
-    }
+    shareDesignationLink(designationId);
   }
 
   private fetchTerritories(congregationId: string, city: string) {

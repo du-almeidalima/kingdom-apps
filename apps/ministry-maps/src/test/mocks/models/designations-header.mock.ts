@@ -14,6 +14,14 @@ export class DesignationsHeaderRepositoryMock implements DesignationsHeaderRepos
     return EMPTY;
   }
 
+  getPageByCongregation(_congregationId: string, _pageSize: number, _startAfterCreatedAt?: Date): Observable<DesignationsHeader[]> {
+    return EMPTY;
+  }
+
+  getById(_id: string): Observable<DesignationsHeader | undefined> {
+    return EMPTY;
+  }
+
   add(_header: Omit<DesignationsHeader, 'id'>): Observable<DesignationsHeader> {
     return EMPTY;
   }

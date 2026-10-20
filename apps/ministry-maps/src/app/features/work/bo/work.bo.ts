@@ -1,9 +1,11 @@
 import { inject, Injectable } from '@angular/core';
 import { TerritoryRepository } from '../../../repositories/territories.repository';
 import { Designation, DesignationTerritory } from '../../../../models/designation';
-import { forkJoin } from 'rxjs';
+import { catchError, defaultIfEmpty, forkJoin, Observable, of } from 'rxjs';
 import { DesignationRepository } from '../../../repositories/designation.repository';
 import { DesignationStatusEnum } from '../../../../models/enums/designation-status';
+import { DesignationsProgressRepository } from '../../../repositories/designations-progress.repository';
+import { LoggerService } from '../../../shared/services/logger/logger.service';
 
 /**
  * This class contains Business Logic use cases about the Work (Assignment) domain.
@@ -13,6 +15,28 @@ import { DesignationStatusEnum } from '../../../../models/enums/designation-stat
 export class WorkBO {
   private readonly territoryRepository = inject(TerritoryRepository);
   private readonly designationRepository = inject(DesignationRepository);
+  private readonly designationsProgressRepository = inject(DesignationsProgressRepository);
+  private readonly loggerService = inject(LoggerService);
+
+  /** Records the territory's latest visit on its header progress doc. No-op for legacy designations. Never errors. */
+  recordTerritoryProgress(designation: Designation, territory: DesignationTerritory): Observable<void> {
+    const lastVisit = territory.history?.[territory.history.length - 1];
+    if (!designation.designationHeaderId || territory.status !== DesignationStatusEnum.DONE || !lastVisit) {
+      return of(undefined);
+    }
+
+    return this.designationsProgressRepository
+      .setTerritoryProgress(designation.designationHeaderId, {
+        designationId: designation.id,
+        territoryId: territory.id,
+        outcome: lastVisit.visitOutcome,
+        completedAt: lastVisit.date,
+      })
+      .pipe(
+        defaultIfEmpty(undefined),
+        catchError((err) => this.swallowProgressError(err, designation, territory)),
+      );
+  }
 
   /**
    * This method is used to undo changes made on the last visit of a Territory, commonly used when a publisher
@@ -36,7 +60,29 @@ export class WorkBO {
     const territoryUpdate$ = this.territoryRepository.update(territory);
     const visitHistoryDelete$ = this.territoryRepository.deleteVisitHistory(territory.id, removedHistory.id);
 
-    return forkJoin([designationUpdate$, territoryUpdate$, visitHistoryDelete$]);
+    const progressRevert$ = this.revertTerritoryProgress(designation, designationTerritoryCopy);
+    return forkJoin([designationUpdate$, territoryUpdate$, visitHistoryDelete$, progressRevert$]);
+  }
+
+  private revertTerritoryProgress(designation: Designation, territory: DesignationTerritory): Observable<void> {
+    if (!designation.designationHeaderId) return of(undefined);
+    return this.designationsProgressRepository
+      .removeTerritoryProgress(designation.designationHeaderId, designation.id, territory.id)
+      .pipe(
+        defaultIfEmpty(undefined),
+        catchError((err) => this.swallowProgressError(err, designation, territory)),
+      );
+  }
+
+  private swallowProgressError(
+    err: unknown,
+    designation: Designation,
+    territory: DesignationTerritory,
+  ): Observable<void> {
+    void this.loggerService.warn(
+      `Failed to update progress for Designation [${designation.id}], Territory [${territory.id}]: ${err}`,
+    );
+    return of(undefined);
   }
 
   /**

@@ -1,9 +1,10 @@
 import { inject, Injectable } from '@angular/core';
-import { catchError, EMPTY, forkJoin, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
+import { catchError, defaultIfEmpty, EMPTY, forkJoin, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
 
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { DesignationRepository } from '../../../../repositories/designation.repository';
 import { DesignationsHeaderRepository } from '../../../../repositories/designations-header.repository';
+import { DesignationsProgressRepository } from '../../../../repositories/designations-progress.repository';
 import { Designation, DesignationSettings, DesignationTerritory } from '../../../../../models/designation';
 import { DesignationStatusEnum } from '../../../../../models/enums/designation-status';
 import { DesignationsHeader } from '../../../../../models/designations-header';
@@ -23,6 +24,7 @@ export class DesignationsHeaderBO {
   private readonly territoryRepository = inject(TerritoryRepository);
   private readonly designationRepository = inject(DesignationRepository);
   private readonly designationsHeaderRepository = inject(DesignationsHeaderRepository);
+  private readonly designationsProgressRepository = inject(DesignationsProgressRepository);
   private readonly userStateService = inject(UserStateService);
   private readonly loggerService = inject(LoggerService);
   private readonly congregationSettingsBO = inject(CongregationSettingsBO);
@@ -55,7 +57,27 @@ export class DesignationsHeaderBO {
         const designationTerritories = this.buildDesignationTerritories(territories);
         const newDesignation = this.buildNewDesignation(congregation.id, user.id, header.id, designationTerritories);
 
-        return this.designationRepository.add(newDesignation).pipe(map((designation) => ({ designation, header })));
+        return this.designationRepository.add(newDesignation).pipe(
+          switchMap((designation) =>
+            // Register this designation on the designations-header/{id}/progress subcollection
+            this.designationsProgressRepository
+              .registerDesignation(header, designation.id, {
+                territoriesTotal: designation.territories.length,
+                createdAt: designation.createdAt,
+                expiresAt: designation.expiresAt,
+              })
+              .pipe(
+                defaultIfEmpty(undefined),
+                catchError((err) => {
+                  this.loggerService.error(
+                    `Failed to register Designation [${designation.id}] progress on Header [${header.id}]: ${err}`,
+                  );
+                  return of(undefined);
+                }),
+                map(() => ({ designation, header })),
+              ),
+          ),
+        );
       }),
       catchError((err) => {
         this.loggerService.error(err);

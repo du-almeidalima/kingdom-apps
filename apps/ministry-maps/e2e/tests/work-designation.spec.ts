@@ -7,6 +7,7 @@ import { stubWindowOpen, getOpenedUrls } from '../utils/window-open-stub.util';
 import { DesignationStatusEnum } from '../../src/models/enums/designation-status';
 import { VisitOutcomeEnum } from '../../src/models/enums/visit-outcome';
 import { SeedApi } from '../fixtures/database.fixture';
+import { DesignationsHeaderStatusEnum } from '../../src/models/enums/designations-header-status';
 
 /**
  * Helper: seeds one territory + one designation embedding that territory
@@ -705,6 +706,113 @@ test.describe('Work designation — conditional affordances', () => {
     >;
     expect(storedTerritories.find((territory) => territory['id'] === t1Id)?.['mapsLink']).toBeUndefined();
     expect(storedTerritories.find((territory) => territory['id'] === t2Id)?.['mapsLink']).toBe(mapsUrl);
+  });
+});
+
+test.describe('Work designation progress tracking', () => {
+  test('UC-WORK-25 — Completing a visit writes its outcome to header progress', async ({ page, seed, db }) => {
+    const header = seed.factories.buildDesignationsHeader({ id: 'work-progress-complete', congregationId: seed.ids.congregation, createdBy: seed.ids.adminUser, status: DesignationsHeaderStatusEnum.IN_PROGRESS });
+    const { territory, designation, designationId, territoryId } = seedActiveDesignation(seed, { designation: { designationHeaderId: header.id } });
+    await seed.write({ territories: [territory], designations: [designation], designationsHeaders: [header], designationsProgress: [seed.factories.buildDesignationsProgress({
+      headerId: header.id, congregationId: seed.ids.congregation,
+      designations: { [designationId]: { territoriesTotal: 1, createdAt: designation.createdAt, expiresAt: designation.expiresAt } },
+    })] });
+    const work = new WorkPage(page);
+    const dialog = new WorkItemCompleteDialogPage(page);
+    await work.goto(designationId);
+    await work.itemByAddress(territory.address).getByTestId('work-item-checkbox').click();
+    await dialog.submit();
+    await expect.poll(async () => {
+      const snapshot = await db.firestore.collection(db.collections.designations_header).doc(header.id).collection('progress').doc('summary').get();
+      return snapshot.data()?.['territories']?.[`${designationId}_${territoryId}`]?.['outcome'];
+    }).toBe(VisitOutcomeEnum.SPOKE);
+  });
+
+  test('UC-WORK-26 — Editing a visit overwrites its progress outcome', async ({ page, seed, db }) => {
+    const header = seed.factories.buildDesignationsHeader({ id: 'work-progress-edit', congregationId: seed.ids.congregation, createdBy: seed.ids.adminUser });
+    const { territory, designationId, territoryId } = seedActiveDesignation(seed);
+    const history = seed.factories.buildVisitHistory({ visitOutcome: VisitOutcomeEnum.SPOKE });
+    const doneTerritory = seed.factories.buildDesignationTerritory({ ...territory, status: DesignationStatusEnum.DONE, history: [history] });
+    const designation = seed.factories.buildDesignation({
+      id: designationId,
+      congregationId: seed.ids.congregation,
+      designationHeaderId: header.id,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      territories: [doneTerritory],
+    });
+    await seed.write({ territories: [{ ...territory, history: [history] }], designations: [designation], designationsHeaders: [header], designationsProgress: [seed.factories.buildDesignationsProgress({
+      headerId: header.id, congregationId: seed.ids.congregation,
+      designations: { [designationId]: { territoriesTotal: 1, createdAt: designation.createdAt, expiresAt: designation.expiresAt } },
+      territories: { [`${designationId}_${territoryId}`]: { designationId, territoryId, outcome: VisitOutcomeEnum.SPOKE, completedAt: history.date } },
+    })] });
+    const work = new WorkPage(page);
+    const dialog = new WorkItemCompleteDialogPage(page);
+    await work.goto(designationId);
+    await work.completedList.getByTestId('work-item-edit').click();
+    await dialog.selectOutcome('Ninguém atendeu');
+    await dialog.submit();
+    await expect.poll(async () => {
+      const snapshot = await db.firestore.collection(db.collections.designations_header).doc(header.id).collection('progress').doc('summary').get();
+      return snapshot.data()?.['territories']?.[`${designationId}_${territoryId}`]?.['outcome'];
+    }).toBe(VisitOutcomeEnum.NOT_ANSWERED);
+  });
+
+  test('UC-WORK-27 — Undo removes the territory progress entry', async ({ page, seed, db }) => {
+    const header = seed.factories.buildDesignationsHeader({ id: 'work-progress-undo', congregationId: seed.ids.congregation, createdBy: seed.ids.adminUser });
+    const { territory, designationId, territoryId } = seedActiveDesignation(seed);
+    const history = seed.factories.buildVisitHistory({ visitOutcome: VisitOutcomeEnum.SPOKE });
+    const doneTerritory = seed.factories.buildDesignationTerritory({ ...territory, status: DesignationStatusEnum.DONE, history: [history] });
+    const designation = seed.factories.buildDesignation({
+      id: designationId,
+      congregationId: seed.ids.congregation,
+      designationHeaderId: header.id,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      territories: [doneTerritory],
+    });
+    await seed.write({ territories: [{ ...territory, history: [history] }], designations: [designation], designationsHeaders: [header], designationsProgress: [seed.factories.buildDesignationsProgress({
+      headerId: header.id, congregationId: seed.ids.congregation,
+      designations: { [designationId]: { territoriesTotal: 1, createdAt: designation.createdAt, expiresAt: designation.expiresAt } },
+      territories: { [`${designationId}_${territoryId}`]: { designationId, territoryId, outcome: VisitOutcomeEnum.SPOKE, completedAt: history.date } },
+    })] });
+    const work = new WorkPage(page);
+    const confirm = new ConfirmDialogPage(page);
+    await work.goto(designationId);
+    await work.completedList.getByTestId('work-item-undo').click();
+    await confirm.confirm();
+    await expect.poll(async () => {
+      const snapshot = await db.firestore.collection(db.collections.designations_header).doc(header.id).collection('progress').doc('summary').get();
+      return Object.hasOwn(snapshot.data()?.['territories'] ?? {}, `${designationId}_${territoryId}`);
+    }).toBe(false);
+  });
+
+  test('UC-WORK-28 — A legacy designation without a header completes without progress writes or alert', async ({ page, seed, db }) => {
+    const { territory, designation, designationId } = seedActiveDesignation(seed);
+    await seed.write({ territories: [territory], designations: [designation] });
+    const alerts: string[] = [];
+    page.on('dialog', async (dialog) => { alerts.push(dialog.message()); await dialog.dismiss(); });
+    const work = new WorkPage(page);
+    await work.goto(designationId);
+    await work.itemByAddress(territory.address).getByTestId('work-item-checkbox').click();
+    await new WorkItemCompleteDialogPage(page).submit();
+    await expect(work.completedHeading).toBeVisible();
+    expect(alerts).toEqual([]);
+    expect(await db.firestore.collection('designations_header').listDocuments()).toHaveLength(0);
+  });
+
+  test('UC-WORK-29 — Missing legacy header progress does not alert the publisher', async ({ page, seed, db }) => {
+    const header = seed.factories.buildDesignationsHeader({ id: 'work-progress-missing', congregationId: seed.ids.congregation, createdBy: seed.ids.adminUser });
+    const { territory, designation: original, designationId } = seedActiveDesignation(seed);
+    const designation = { ...original, designationHeaderId: header.id };
+    await seed.write({ territories: [territory], designations: [designation], designationsHeaders: [header] });
+    const alerts: string[] = [];
+    page.on('dialog', async (dialog) => { alerts.push(dialog.message()); await dialog.dismiss(); });
+    const work = new WorkPage(page);
+    await work.goto(designationId);
+    await work.itemByAddress(territory.address).getByTestId('work-item-checkbox').click();
+    await new WorkItemCompleteDialogPage(page).submit();
+    await expect(work.completedHeading).toBeVisible();
+    expect(alerts).toEqual([]);
+    expect(await db.firestore.collection(db.collections.designations_header).doc(header.id).collection('progress').doc('summary').get().then((snapshot) => snapshot.exists)).toBe(false);
   });
 });
 
