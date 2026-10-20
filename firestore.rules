@@ -90,6 +90,26 @@ service cloud.firestore {
         && (callerRoleIn(['APP_ADMIN']) || isCallerInCongregation(request.resource.data.congregationId));
       allow update, delete: if request.auth != null
         && (callerRoleIn(['APP_ADMIN']) || isCallerInCongregation(resource.data.congregationId));
+
+      // Cycle progress aggregation (subcollection).
+      // Reading requires congregation membership (non-existent docs return empty without 403).
+      // Anonymous publishers holding a designation link may only update `territories`; signed-in
+      // users from another congregation get no anonymous path.
+      match /progress/{progressId} {
+        allow read: if request.auth != null
+          && (resource == null || callerRoleIn(['APP_ADMIN']) || isCallerInCongregation(resource.data.congregationId));
+        allow create: if request.auth != null
+          && (callerRoleIn(['APP_ADMIN']) || isCallerInCongregation(request.resource.data.congregationId));
+        allow update: if (
+            request.auth != null
+            && (callerRoleIn(['APP_ADMIN']) || isCallerInCongregation(resource.data.congregationId))
+          ) || (
+            request.auth == null
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['territories'])
+          );
+        allow delete: if request.auth != null
+          && (callerRoleIn(['APP_ADMIN']) || isCallerInCongregation(resource.data.congregationId));
+      }
     }
 
     // Catch-all for every other collection. `logs`, `users`, and `designations_header` are excluded
