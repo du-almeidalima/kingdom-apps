@@ -29,6 +29,7 @@ This directory is the **behavioural specification of Ministry Maps written for t
 | [`features/navigation-shell.md`](./features/navigation-shell.md)             | `UC-NAV`    | header, home hub links, role gating, unknown routes                       |
 | [`features/territories-management.md`](./features/territories-management.md) | `UC-TERR`   | `/territories` list, filters, CRUD, alerts, history, CSV                  |
 | [`features/territories-assign.md`](./features/territories-assign.md)         | `UC-ASSIGN` | `/territories/assign` designation creation & sharing                      |
+| [`features/territories-designations-history.md`](./features/territories-designations-history.md) | `UC-HIST` | `/territories/designations` session history and live progress |
 | [`features/territories-statistics.md`](./features/territories-statistics.md) | `UC-STAT`   | `/territories/statistics` metrics                                         |
 | [`features/work-designations.md`](./features/work-designations.md)           | `UC-WORK`   | `/work/:id` receiving and completing designations                         |
 | [`features/users-invites.md`](./features/users-invites.md)                   | `UC-USERS`  | `/users` list, edit, delete, invitation links                             |

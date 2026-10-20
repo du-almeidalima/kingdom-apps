@@ -305,6 +305,44 @@ Read that table before writing any expiry test (UC-WORK-20/21): the naming sugge
 - **Expected persistence:** `db.getDoc(db.collections.designations, '<non-existent-id>')` is `undefined`
 - **Priority:** P0 · **Gaps:** none (`data-testid="work-designation-not-found"`, `data-testid="designation-not-found-heading"`, `data-testid="designation-not-found-icon"` present)
 
+The visit write-back now performs a fourth sequenced write to the header progress summary. Its error is swallowed by
+`WorkBO`, so a missing legacy summary does not raise the publisher alert.
+
+#### UC-WORK-25 — Completing a visit writes the latest outcome to progress
+
+- **Actor:** Anonymous publisher
+- **Route:** `/work/:id`
+- **Expected persistence:** `territories.{designationId}_{territoryId}` stores the outcome and completion timestamp.
+- **Priority:** P0 · **Coverage:** `work-designation.spec.ts`
+
+#### UC-WORK-26 — Editing a visit overwrites its progress outcome
+
+- **Actor:** Anonymous publisher
+- **Route:** `/work/:id`
+- **Expected persistence:** The same territory map key contains the edited outcome.
+- **Priority:** P1 · **Coverage:** `work-designation.spec.ts`
+
+#### UC-WORK-27 — Undo removes the progress entry
+
+- **Actor:** Anonymous publisher
+- **Route:** `/work/:id`
+- **Expected persistence:** The territory key is deleted while the existing undo writes complete.
+- **Priority:** P1 · **Coverage:** `work-designation.spec.ts`
+
+#### UC-WORK-28 — Legacy designation without a header completes normally
+
+- **Actor:** Anonymous publisher
+- **Route:** `/work/:id`
+- **Expected persistence:** Visit completes and no progress document is created.
+- **Priority:** P0 · **Coverage:** `work-designation.spec.ts`
+
+#### UC-WORK-29 — Missing legacy progress does not alert the publisher
+
+- **Actor:** Anonymous publisher
+- **Route:** `/work/:id`
+- **Expected persistence:** Visit completes; missing summary remains absent and does not fail the write-back flow.
+- **Priority:** P1 · **Coverage:** `work-designation.spec.ts`
+
 ## Testability gaps (summary)
 
 - **Zero `data-testid`s exist on `/work/:id`** — the four app-wide ids (`territories-heading`, `territories-list`,

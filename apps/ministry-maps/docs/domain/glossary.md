@@ -28,6 +28,8 @@ Portuguese strings. This file is the shared vocabulary; screen-specific labels l
 | Superintendente                      | `SUPERINTENDENT`        | Circuit-level oversight; may switch congregation.                                |
 | Pessoas                              | users                   | The `/users` screen is labelled "Pessoas" (people), not "usuários".              |
 | Convite / Link de Convite            | `InvitationLink`        | Single-use onboarding link that grants a role.                                   |
+| Histórico de Designações             | designations history    | Congregation-scoped list and progress detail for assignment sessions.             |
+| Sessão de designações                | `designations_header`   | Designations created during one Assign cycle.                                    |
 | Mudou de endereço                    | `MOVED` outcome         | The householder moved away.                                                      |
 | Alerta                               | alert / badge           | Attention marker on a territory list item.                                       |
 
@@ -48,9 +50,11 @@ Shared components, so these strings appear on many screens.
 | `Crie listas com territórios e compartilhe com os publicadores` | `/home` card subtitle                   |                                                |
 | `Administrar Territórios`                                       | `/home` link                            | → `/territories`                               |
 | `Estatísticas Territórios`                                      | `/home` link                            | → `/territories/statistics`                    |
+| `Histórico de Designações`                                      | `/home` link                            | → `/territories/designations`                  |
 | `Pessoas`                                                       | `/home` card title                      |                                                |
 | `Administrar pessoas associadas a sua congregação`              | `/home` card subtitle                   |                                                |
 | `Administrar Pessoas`                                           | `/home` link                            | → `/users`                                     |
+| `Contatados` / `Ninguém atendeu` / `Mudaram` / `Não visitar` / `Revisita` | Designations history outcome labels | Short labels for visit outcomes. |
 | `Criar Link de Convite`                                         | `/users` floating action button `title` | `ADMIN` only                                   |
 
 ## 3. Visit dialog labels (`Concluir Visita` / `Editar Visita`)

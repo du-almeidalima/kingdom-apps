@@ -414,6 +414,16 @@ seed.ids.adminUser`; both `D1.designationHeaderId` and `D2.designationHeaderId` 
   [`../../../ARCHITECTURE.md`](../../../ARCHITECTURE.md))
 - **Priority:** P2 · **Gaps:** optional; verified manually 2026-09-03, no automated spec yet
 
+#### UC-ASSIGN-32 — Registers each created designation in the progress summary
+
+- **Actor:** Admin
+- **Route:** `/territories/assign`
+- **Preconditions (seed):** default baseline, no open header
+- **Steps:** submit one territory, then submit a territory from another city in the same session
+- **Expected UI:** Both designation shares open normally.
+- **Expected persistence:** One `progress/summary` doc contains both designation keys, the header and congregation ids, and its TTL date.
+- **Priority:** P0 · **Coverage:** `territories-assign.spec.ts`
+
 ### Access control
 
 #### UC-ASSIGN-22 — Authorised roles reach `/territories/assign`; `APP_ADMIN` bypasses the role list

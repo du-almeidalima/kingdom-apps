@@ -15,10 +15,11 @@ Everything an E2E author needs to build **realistic seeds** and write **backend 
 | `territories/{id}/history` | visit id (client-generated)               | Work page (complete/edit/undo visit)                | **Full** visit log, one doc per visit.                                               |
 | `designations`             | auto-id                                   | Assign page                                         | Embeds a **snapshot** of the assigned territories.                                   |
 | `designations_header`      | auto-id                                   | Assign page (lazy, on first designation of a cycle) | One `IN_PROGRESS` doc per congregation; closed by the Stop button or the daily cron. |
+| `designations_header/{id}/progress/summary` | fixed id `summary` | Assign and anonymous Work page | One denormalized progress document per header; independently TTL-deleted. |
 | `invitation_links`         | auto-id                                   | Users screen (invite dialog)                        | ⚠ note the **underscore** in the collection name.                                    |
 
 The E2E layer re-declares these in `e2e/seed/collections.ts`
-(`db.collections.congregations | users | territories | designations | designations_header`, `db.historySubcollection === 'history'`).
+(`db.collections.congregations | users | territories | designations | designations_header`, `db.historySubcollection === 'history'`; progress subcollection `progress`, document `summary`).
 
 ```
 congregations/{congregationId}
@@ -27,6 +28,7 @@ territories/{territoryId}        → congregationId: string (plain id, NOT a ref
 territories/{territoryId}/history/{visitId}
 designations/{designationId}     → congregationId: string, territories: DesignationTerritory[], designationHeaderId?: string
 designations_header/{headerId}   → congregationId: string (plain id, NOT a ref), status: 'IN_PROGRESS' | 'DONE'
+designations_header/{headerId}/progress/summary → per-designation totals + territory completion map; independent TTL
 invitation_links/{linkId}        → congregation: DocumentReference on create, embedded object after update (§2.6)
 ```
 
@@ -156,6 +158,17 @@ array (unbounded arrays are avoided). The resume query
 (`congregationId == X && status == 'IN_PROGRESS' orderBy createdAt desc limit 1`) needs the composite index
 declared in `firestore.indexes.json`; `where('designationHeaderId','==',H)` and `where('status','==','IN_PROGRESS')`
 are covered by automatic single-field indexes.
+
+### 2.8 `DesignationsProgress` — `src/models/designations-progress.ts`
+
+The fixed document `designations_header/{headerId}/progress/summary` stores a `designations` map keyed by
+designation id (`territoriesTotal`, `createdAt`, `expiresAt`) and a `territories` map keyed by
+`${designationId}_${territoryId}` (`designationId`, `territoryId`, numeric `outcome`, `completedAt`). The app model
+uses `Date`; Firestore stores `Timestamp`. `congregationId` is a plain id for rules, and `expireAt` has its own TTL
+because Firestore does not cascade parent TTL deletion to subcollections.
+
+Assign creates or merge-registers designation totals. Anonymous `/work` completion and edit update one map key;
+undo deletes that key. The map shape allows concurrent visits to write separate field paths without reading the doc.
 
 ---
 
@@ -317,6 +330,14 @@ Consequences:
 - Stopping closes the header only; the designations and their territories are kept untouched.
 - Security: `designations_header` is **not** in the public rules — a dedicated rule in `firestore.rules` restricts read/write to authenticated users belonging to the same congregation (or `APP_ADMIN`).
 
+### 4.10 Designation progress tracking
+
+- Client writers only: Assign registers a designation; `/work` records the latest completed visit and edit overwrites its key; undo deletes the key.
+- Anonymous users may update only the top-level `territories` map. They cannot read, create, delete, or change designation totals. Authenticated users from the owning congregation (or APP_ADMIN) may read/create/update.
+- Legacy designations without `designationHeaderId` are skipped. A missing progress document is swallowed by Work after a warning; backfill creates or reconciles summaries from the header's designations.
+- `progress/summary.expireAt` uses the header's `expireAt`, or `createdAt + 180 days`; its TTL policy is independent because subcollections are not deleted with a TTL parent.
+- The list reads headers only. Detail listens to one header and one summary document; each expanded card makes one one-shot designation read.
+
 ---
 
 ## 5. Default E2E baseline seed
@@ -360,6 +381,7 @@ Every seeded user gets an Auth emulator account with `DEFAULT_PASSWORD = 'test-p
 | `buildDesignation`          | `createdAt 2024-02-01`, `expiresAt 2024-02-08` (**past** — override for active designations), one embedded territory, `settings.shouldDesignationBlockAfterExpired: true`                                               |
 | `buildDesignationTerritory` | `Av. Paulista, 1000 - Bela Vista`, `note: ''`, `icon MAN`, `status PENDING`, **no `history`**                                                                                                                           |
 | `buildDesignationsHeader`   | `status IN_PROGRESS`, `createdAt 2026-09-01T12:00Z`, `congregationId: ''` (**always override**) — no `closedAt`/`closedBy` unless you pass them with a `DONE` status                                                    |
+| `buildDesignationsProgress` | Empty maps, fixed `id: summary`; callers must override owning `headerId` and `congregationId`                                                                                                                         |
 
 The seeder derives the parent territory's `lastVisit` (newest history date, else `null`) and
 `recentHistory` (newest 5, **descending**) from `history`. Note the ordering difference versus the app's
@@ -372,6 +394,8 @@ The seeder derives the parent territory's `lastVisit` (newest history date, else
 - `apps/ministry-maps/src/models/territory.ts`, `designation.ts`, `designations-header.ts`, `territory-visit-history.ts`, `user.ts`,
   `congregation.ts`, `invitation-link.ts`, `enums/{role,visit-outcome,designation-status,designations-header-status,designations-header-closed-by}.ts`
 - `apps/ministry-maps/src/app/repositories/firebase/firebase-territory-datasource.service.ts`
+- `apps/ministry-maps/src/models/designations-progress.ts`, `src/app/repositories/firebase/firebase-designations-progress-datasource.service.ts`
+- `functions/ministry-maps/src/scripts/backfill-designations-progress.ts`
 - `apps/ministry-maps/src/app/repositories/firebase/firebase-user-datasource.service.ts`
 - `apps/ministry-maps/src/app/repositories/firebase/firebase-designation-datasource.service.ts`
 - `apps/ministry-maps/src/app/repositories/firebase/firebase-designations-header-datasource.service.ts`

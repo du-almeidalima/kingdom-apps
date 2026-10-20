@@ -34,7 +34,7 @@ From `src/app/app-routes.ts` + `src/app/core/features/auth/auth-routes.ts` and e
 | `/no-account`                                                    | —                               | —                                         | Everyone.                                                                                                                                                      |
 | `/sign-in/:inviteId`                                             | —                               | —                                         | Everyone (invite landing page).                                                                                                                                |
 | `/work/:id`                                                      | **none**                        | `['*']` (unused, no guard attached)       | **Everyone, including anonymous.** By design: publishers receive a bare link.                                                                                  |
-| `/territories`, `/territories/assign`, `/territories/statistics` | `canActivateChild: [authGuard]` | `ORGANIZER, ADMIN, ELDER, SUPERINTENDENT` | Those roles + `APP_ADMIN`. Publisher → `/welcome`. Anonymous → `/login`.                                                                                       |
+| `/territories`, `/territories/assign`, `/territories/statistics`, `/territories/designations`, `/territories/designations/:headerId` | inherited `canActivateChild: [authGuard]` | `ORGANIZER, ADMIN, ELDER, SUPERINTENDENT` | Those roles + `APP_ADMIN`. Publisher → `/welcome`. Anonymous → `/login`. |
 | `/home`                                                          | `canActivate: [authGuard]`      | `ORGANIZER, ADMIN, ELDER, SUPERINTENDENT` | Same as above.                                                                                                                                                 |
 | `/users`                                                         | `canActivate: [authGuard]`      | `ORGANIZER, ADMIN, ELDER, SUPERINTENDENT` | Same as above.                                                                                                                                                 |
 | `/profile`                                                       | `canActivate: [authGuard]`      | `['*']`                                   | **Everyone, including anonymous** (see §3.1).                                                                                                                  |
@@ -146,6 +146,11 @@ publisher redirect is never reached because step 1 returns first.
 ---
 
 ## 6. Testing identities
+
+The nested `designations_header/{headerId}/progress/{progressId}` rule allows same-congregation authenticated users
+(or APP_ADMIN) to read/create/update/delete summaries. Anonymous `/work` links can update only the top-level
+`territories` map; they cannot read, create, delete, or change designation totals. Authenticated users from another
+congregation cannot use the anonymous update path.
 
 `signInAs(role)` mints a custom token for `ROLE_UIDS[role]`. One baseline user per role is seeded (HX-1,
 landed in WP-01):

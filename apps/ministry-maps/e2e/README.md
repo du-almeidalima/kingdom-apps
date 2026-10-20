@@ -52,6 +52,8 @@ apps/ministry-maps/e2e/
 │   ├── territory-alerts.page.ts   # territory alert-resolution dialogs
 │   ├── assign-territories.page.ts # /territories/assign locators
 │   ├── statistics.page.ts        # /territories/statistics locators
+│   ├── designations-history.page.ts # /territories/designations locators
+│   ├── designations-history-details.page.ts # designation history detail locators
 │   ├── confirm-dialog.page.ts    # shared confirm-dialog overlay
 │   ├── history-dialog.page.ts    # shared visit-history dialog
 │   ├── sort-filter-dialog.page.ts # shared sort/filter trigger + dialog
@@ -80,6 +82,7 @@ apps/ministry-maps/e2e/
     ├── territories-alerts.spec.ts # territory badges, history, and alerts
     ├── territories-export.spec.ts # CSV export and role gating
     ├── territories-assign.spec.ts # designation selection, creation, and sharing
+    ├── territories-designations-history.spec.ts # UC-HIST list, progress, access, and live updates
     ├── territories-statistics.spec.ts # territory metrics and period filters
     ├── work-designation.spec.ts  # receive, complete, edit, undo, and expiry paths
     ├── users.spec.ts             # user management & role editing specs
@@ -138,6 +141,9 @@ test('on-demand seeding', async ({ seed, db }) => {
 > `DEFAULT_PASSWORD` (`config/auth.config.ts`) — the single source of truth
 > for the seeded password. Override `password` only when a test needs a
 > different one.
+
+For history scenarios, `buildDesignationsProgress()` returns empty maps with the fixed `summary` id;
+always override its owning `headerId` and `congregationId`.
 
 ### Firestore Storage Contract (critical)
 

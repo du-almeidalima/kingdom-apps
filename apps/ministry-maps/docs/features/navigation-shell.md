@@ -169,6 +169,16 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Edge cases:** none
 - **Priority:** P0 · **Gaps:** no `data-testid` on Users page heading
 
+#### UC-NAV-15 — Home link opens Designations History
+
+- **Actor:** Admin
+- **Route:** `/home` → `/territories/designations`
+- **Preconditions (seed):** default baseline; sign in as admin
+- **Steps:** click `Histórico de Designações`
+- **Expected UI:** URL becomes `/territories/designations`; the history heading renders.
+- **Expected persistence:** none
+- **Priority:** P0 · **Coverage:** `navigation.spec.ts`
+
 ## Testability gaps (summary)
 
 - **Selectors:** No `data-testid` on `/home` cards or links. No `data-testid` on the headings of `/territories/assign`, `/territories/statistics`, or `/users`.

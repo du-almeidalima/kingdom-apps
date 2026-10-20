@@ -64,6 +64,7 @@ Suggested spec files are proposals — keep one feature area per file and mirror
 | UC-NAV-12 | Home link → `/territories/assign`                 | Admin       | P0  | ✅ `navigation.spec.ts` | `navigation.spec.ts` | `HomePage`        | —                | testid (heading)                        |
 | UC-NAV-13 | Home link → `/territories/statistics`             | Admin       | P0  | ✅ `navigation.spec.ts` | `navigation.spec.ts` | `HomePage`        | —                | testid (heading)                        |
 | UC-NAV-14 | Home link → `/users`                              | Admin       | P0  | ✅ `navigation.spec.ts` | `navigation.spec.ts` | `HomePage`        | —                | testid (heading)                        |
+| UC-NAV-15 | Home link → `/territories/designations`           | Admin       | P0  | ✅ `navigation.spec.ts` | `navigation.spec.ts` | `HomePage`        | —                | —                                       |
 
 ## UC-TERR — territories management → [`features/territories-management.md`](./features/territories-management.md)
 
@@ -142,6 +143,7 @@ Suggested spec files are proposals — keep one feature area per file and mirror
 | UC-ASSIGN-29 | Manual Stop via dock closes the header (`DONE`/`USER`)   | Admin             | P0  | ✅ `territories-assign.spec.ts` | `territories-assign.spec.ts`                                | `AssignTerritoriesPage` | —                                                  | —                                            |
 | UC-ASSIGN-30 | Cart survives navigation, prunes foreign assigns         | Admin             | P1  | ✅ `territories-assign.spec.ts` | `territories-assign.spec.ts`                                | `AssignTerritoriesPage` | header w/ foreign designation                      | —                                            |
 | UC-ASSIGN-31 | Cron closes every open header (`DONE`/`CRON`)            | System (cron)     | P2  | —                               | unit-only (`close-designations-headers.spec.ts`, functions) | —                       | open headers                                       | functions-emulator HTTP route (optional e2e) |
+| UC-ASSIGN-32 | Each submission registers a designation progress entry | Admin             | P0  | ✅ `territories-assign.spec.ts` | `territories-assign.spec.ts` | `AssignTerritoriesPage` | header + multiple designations | — |
 
 ## UC-STAT — territories statistics → [`features/territories-statistics.md`](./features/territories-statistics.md)
 
@@ -195,6 +197,25 @@ Suggested spec files are proposals — keep one feature area per file and mirror
 | UC-WORK-22 | All done → `Parabéns!` state                         | Publisher | P1  | ✅ `work-designation.spec.ts` | `work-designation.spec.ts` | `WorkPage`               | 1-territory designation               | —                        |
 | UC-WORK-23 | Write-back overwrites `recentHistory` ⚠              | Publisher | P0  | ✅ `work-designation.spec.ts` | `work-designation.spec.ts` | `WorkItemCompleteDialog` | 5-visit territory + fresh designation | ⚠                        |
 | UC-WORK-24 | Non-existent designation id renders not-found screen | Anonymous | P0  | ✅ `work-not-found.spec.ts`   | `work-not-found.spec.ts`   | `WorkPage`               | —                                     | —                        |
+| UC-WORK-25 | Complete visit writes header progress outcome       | Publisher | P0  | ✅ `work-designation.spec.ts` | `work-designation.spec.ts` | `WorkPage`               | header + progress summary              | —                        |
+| UC-WORK-26 | Edit overwrites progress outcome                    | Publisher | P1  | ✅ `work-designation.spec.ts` | `work-designation.spec.ts` | `WorkPage`               | completed header-linked designation    | —                        |
+| UC-WORK-27 | Undo deletes progress entry                         | Publisher | P1  | ✅ `work-designation.spec.ts` | `work-designation.spec.ts` | `WorkPage`               | completed header-linked designation    | —                        |
+| UC-WORK-28 | Legacy designation completes without progress       | Publisher | P0  | ✅ `work-designation.spec.ts` | `work-designation.spec.ts` | `WorkPage`               | designation without header id           | —                        |
+| UC-WORK-29 | Missing legacy summary does not alert               | Publisher | P1  | ✅ `work-designation.spec.ts` | `work-designation.spec.ts` | `WorkPage`               | header without progress summary         | —                        |
+
+## UC-HIST — designations history → [`features/territories-designations-history.md`](./features/territories-designations-history.md)
+
+| ID | Title | Actor | Pri | Covered | Spec file | Page object | Seed work | Blockers |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| UC-HIST-01 | Home link opens history list | Admin | P0 | ✅ `territories-designations-history.spec.ts` | same | `DesignationsHistoryPage` | — | — |
+| UC-HIST-02 | Scoped newest-first list, status and closure source | Admin | P0 | ✅ `territories-designations-history.spec.ts` | same | `DesignationsHistoryPage` | headers from two congregations | — |
+| UC-HIST-03 | Load more appends the next page | Admin | P1 | ✅ `territories-designations-history.spec.ts` | same | `DesignationsHistoryPage` | 21 headers | — |
+| UC-HIST-04 | Empty list state | Admin | P1 | ✅ `territories-designations-history.spec.ts` | same | `DesignationsHistoryPage` | no headers | — |
+| UC-HIST-05 | Overall, outcomes and designation summaries | Admin | P0 | ✅ `territories-designations-history.spec.ts` | same | `DesignationsHistoryDetailsPage` | two designations + progress | — |
+| UC-HIST-06 | Expand territories and re-share designation | Admin | P1 | ✅ `territories-designations-history.spec.ts` | same | `DesignationsHistoryDetailsPage` | completed and pending territory | WhatsApp capture |
+| UC-HIST-07 | Legacy and unknown header states | Admin | P1 | ✅ `territories-designations-history.spec.ts` | same | `DesignationsHistoryDetailsPage` | header without progress | — |
+| UC-HIST-08 | Role matrix | Multi-role | P0 | ✅ `territories-designations-history.spec.ts` | same | `DesignationsHistoryPage` | seeded roles | — |
+| UC-HIST-09 | Anonymous visit updates detail live | Admin + anonymous | P0 | ✅ `territories-designations-history.spec.ts` | same | detail + `WorkPage` | header, summary, active designation | — |
 
 ## UC-USERS — users & invites → [`features/users-invites.md`](./features/users-invites.md)
 
@@ -280,6 +301,9 @@ Suggested spec files are proposals — keep one feature area per file and mirror
 | UC-RULES-10 | Users self-update: name 200, role escalation 403                                   | Publisher            | P0  | ✅ `firestore-rules.spec.ts` | `firestore-rules.spec.ts` | —           | —           | —        |
 | UC-RULES-11 | Users ADMIN edit matrix: same-congregation 200, protected targets/role grants 403  | Admin                | P0  | ✅ `firestore-rules.spec.ts` | `firestore-rules.spec.ts` | —           | —           | —        |
 | UC-RULES-12 | Users delete matrix: ADMIN same-congregation 200, protected targets/non-admins 403 | Admin, Publisher     | P0  | ✅ `firestore-rules.spec.ts` | `firestore-rules.spec.ts` | —           | —           | —        |
+| UC-RULES-13 | Anonymous progress: only territories update allowed | Anonymous | P0 | ✅ `firestore-rules.spec.ts` | `firestore-rules.spec.ts` | — | progress summary | — |
+| UC-RULES-14 | Same-congregation admin progress access | Admin | P0 | ✅ `firestore-rules.spec.ts` | `firestore-rules.spec.ts` | — | progress summary | — |
+| UC-RULES-15 | Foreign-congregation progress read/update denied | Admin | P0 | ✅ `firestore-rules.spec.ts` | `firestore-rules.spec.ts` | — | foreign admin + summary | — |
 
 ## Journeys → [`journeys/`](./journeys/README.md)
 
@@ -341,20 +365,21 @@ The planning prerequisites are retained here for traceability. HX-1, HX-2, HX-3,
 | Area      | Entries | P0     | P1     | P2     | Covered    | Intentionally not automated                                                 |
 | --------- | ------- | ------ | ------ | ------ | ---------- | --------------------------------------------------------------------------- |
 | UC-AUTH   | 23      | 12     | 8      | 3      | 14 ✅      | 8 ✋, 1 HX-4                                                                |
-| UC-NAV    | 14      | 8      | 4      | 2      | 14 ✅      | —                                                                           |
+| UC-NAV    | 15      | 9      | 4      | 2      | 15 ✅      | —                                                                           |
 | UC-TERR   | 37      | 8      | 21     | 8      | 37 ✅      | —                                                                           |
-| UC-ASSIGN | 31      | 17     | 10     | 4      | 25 ✅      | 1 HX-4 (unit-pinned), 5 unit-pinned (UC-ASSIGN-27..31, designations-header) |
+| UC-ASSIGN | 32      | 18     | 10     | 4      | 26 ✅      | 1 HX-4 (unit-pinned), 5 unit-pinned (UC-ASSIGN-27..31, designations-header) |
 | UC-STAT   | 19      | 5      | 10     | 4      | 19 ✅      | —                                                                           |
-| UC-WORK   | 24      | 8      | 13     | 3      | 24 ✅      | —                                                                           |
+| UC-WORK   | 29      | 10     | 16     | 3      | 29 ✅      | —                                                                           |
+| UC-HIST   | 9       | 5      | 4      | 0      | 9 ✅       | —                                                                           |
 | UC-USERS  | 23      | 15     | 5      | 3      | 22 ✅      | 1 unit-only                                                                 |
 | UC-PROF   | 10      | 2      | 6      | 2      | 10 ✅      | —                                                                           |
 | UC-CFG    | 13      | 7      | 6      | 0      | 13 ✅      | —                                                                           |
 | UC-TTL    | 2       | 1      | 1      | 0      | 2 ✅       | —                                                                           |
-| UC-RULES  | 12      | 12     | 0      | 0      | 12 ✅      | —                                                                           |
+| UC-RULES  | 15      | 15     | 0      | 0      | 15 ✅      | —                                                                           |
 | Journeys  | 9       | 4      | 5      | 0      | 9 ✅       | —                                                                           |
-| **Total** | **217** | **99** | **88** | **30** | **201 ✅** | **16**                                                                      |
+| **Total** | **236** | **111** | **95** | **30** | **220 ✅** | **16**                                                                      |
 
-Coverage arithmetic: 192 of 208 UC rows plus all 9 journeys are covered. The 16 exceptions are exactly the eight manual OAuth-popup rows, `UC-AUTH-21` and `UC-ASSIGN-21` (HX-4 deferred; the assign rollback semantics are unit-pinned since 2026-09), `UC-USERS-12` (unit-only), and the five designations-header rows `UC-ASSIGN-27..31` (unit-pinned since 2026-09; e2e specs pending, seed harness extended). `UC-PROF-07` is an explicitly accepted `test.fixme` and remains covered; redirect duplicates are owned once by the matrices in `auth.spec.ts`.
+Coverage arithmetic: 211 of 227 UC rows plus all 9 journeys are covered. The 16 exceptions are exactly the eight manual OAuth-popup rows, `UC-AUTH-21` and `UC-ASSIGN-21` (HX-4 deferred; assign rollback semantics unit-pinned), `UC-USERS-12` (unit-only), and the five designations-header rows `UC-ASSIGN-27..31` (unit-pinned since 2026-09). `UC-PROF-07` is an explicitly accepted `test.fixme` and remains covered; redirect duplicates are owned once by the matrices in `auth.spec.ts`.
 
 ## Sources
 
