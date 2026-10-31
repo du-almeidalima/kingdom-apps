@@ -56,7 +56,7 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 - **Expected UI:** `ngOnInit` runs `this.selectedCity = this.cities.length >= 0 ? this.cities[0] : ALL_OPTION` — since an array's `length` is **always** `>= 0`, `cities[0]` (i.e. `undefined`) is assigned instead of falling back to `ALL_OPTION`. `cityFilter(t, undefined)` then calls `undefined.toLowerCase()` and throws inside the `map()` in `territoriesFilterPipe`, which errors the `filteredTerritories$` observable. **Today's reality (verified):** the error aborts rendering of the **entire** page content — the router outlet renders an empty `<main>` with no heading, no city `<select>` and no `territories-list` section (no error banner either)
 - **Expected persistence:** `db.getDoc(db.collections.congregations, id)` has `cities: []`; `db.getCollectionDocs(db.collections.territories)` is empty
 - **Edge cases:** assert `data-testid="territories-heading"`, `territories-city-filter` and `territories-list` are **all** absent (empty outlet), and that the congregation doc has `cities: []` — do not assert a graceful empty state, that is not current behaviour
-- **Priority:** P1 · **Gaps:** `⚠ suspected defect` — condition should be `cities.length > 0`; consolidate in `testability-gaps.md`
+- **Priority:** P1 · **Gaps:** `⚠ suspected defect` — condition should be `cities.length > 0`
 
 ### Search
 

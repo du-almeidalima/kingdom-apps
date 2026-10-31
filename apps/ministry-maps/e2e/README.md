@@ -322,8 +322,7 @@ await toast.expectText('Salvo com sucesso');
 
 ## Browser-Interaction Utilities (`utils/`)
 
-Canonical helpers for the browser-level techniques catalogued in
-[`../docs/testability-gaps.md`](../docs/testability-gaps.md) §2 — use them instead of copying boilerplate into specs. All are pure Playwright + Node (no
+Canonical helpers for browser-level interactions — use them instead of copying boilerplate into specs. All are pure Playwright + Node (no
 `test`/`expect` imports), so they also work from fixtures.
 
 | Helper                                               | Technique                                                                                                                                         | Serves                                          |
@@ -370,13 +369,12 @@ npx nx typecheck-e2e ministry-maps
 5. For guarded routes, use the `authenticatedPage` fixture (with
    `test.use({ role })`) or call `signInAs(role)` first.
 
-> **What should I test?** The full behavioural use-case and journey catalog lives in
+> **What should I test?** The full behavioural use-case and journey specifications live in
 > [`../docs`](../docs/README.md) (`UC-<AREA>-NN` entries, `J-NN` journeys, priorities, seed preconditions,
-> Firestore assertions, and the testability-gap list). Start from [`../docs/test-catalog.md`](../docs/test-catalog.md)
-> — test titles should reference the UC/J ID they implement.
+> and Firestore assertions) — test titles should reference the UC/J ID they implement.
 
 ## Out of Scope (Future)
 
-- Fault-injecting targeted Firestore read/write failures (HX-4 is deliberately deferred; see `docs/test-catalog.md`).
-- Exercising the real `signInWithPopup` OAuth flow (manual regression only).
+- Fault-injecting targeted Firestore read/write failures (deliberately deferred; no production test hooks or emulator fault shims added).
+- Exercising the real `signInWithPopup` OAuth flow (manual regression only; see [`MANUAL-ACCEPTANCE.md`](./MANUAL-ACCEPTANCE.md)).
 - Cross-test session reuse (currently sign-in per test).

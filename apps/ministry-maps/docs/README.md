@@ -17,9 +17,6 @@ This directory is the **behavioural specification of Ministry Maps written for t
 | [`domain/glossary.md`](./domain/glossary.md)                           | pt-BR ↔ English domain terms and the UI label dictionary used for locale-accurate selectors.                                              |
 | [`features/*.md`](./features)                                          | One file per feature area, containing the numbered use cases (`UC-<AREA>-NN`).                                                            |
 | [`journeys/*.md`](./journeys)                                          | Cross-feature, multi-role scripts (`J-NN`) composing several use cases.                                                                   |
-| [`test-catalog.md`](./test-catalog.md)                                 | Flat worklist: every UC/J with priority, suggested spec file, harness needs and blocking gaps.                                            |
-| [`testability-gaps.md`](./testability-gaps.md)                         | What must be added to the app (selectors, hooks) or worked around before certain specs can exist.                                         |
-| [`developer-follow-up.md`](./developer-follow-up.md)                   | Prioritized developer actions for defects, manual checks, and engineering debt surfaced by the E2E sweep.                                 |
 
 ### Feature documents
 
@@ -35,17 +32,17 @@ This directory is the **behavioural specification of Ministry Maps written for t
 | [`features/users-invites.md`](./features/users-invites.md)                   | `UC-USERS`  | `/users` list, edit, delete, invitation links                             |
 | [`features/profile.md`](./features/profile.md)                               | `UC-PROF`   | `/profile` identity card, congregation switch, logout                     |
 | [`features/configuration-cities.md`](./features/configuration-cities.md)     | `UC-CFG`    | `/configuration` congregation cities                                      |
+| [`features/theme-and-appearance.md`](./features/theme-and-appearance.md)     | —           | theme architecture, token contract, FOIT prevention, dark/light mode      |
 
 ---
 
 ## How to use this artifact (E2E-authoring workflow)
 
 1. Read [`domain/data-model.md`](./domain/data-model.md) once — it prevents seeds that the app cannot read (e.g. `User.congregation` must be a Firestore `DocumentReference`, `visitOutcome` is a **number**).
-2. Open [`test-catalog.md`](./test-catalog.md) and pick the highest-priority rows that are **not blocked**.
-3. If a row is blocked, resolve the corresponding item in [`testability-gaps.md`](./testability-gaps.md) first (usually adding a `data-testid`), in a separate change from the spec.
-4. Open the feature document, read the full use-case entry, and translate it 1:1 into a `test()` whose title starts with the UC ID, e.g. `test('UC-WORK-03 — completes a visit accepting a revisit', ...)`.
-5. Assert **both** the DOM and Firestore. Every entry ships at least one persistence assertion; it is not optional — this suite exists to prove real backend behaviour.
-6. Journeys become their own spec files; keep the step order and assert at every hand-off point.
+2. Pick the target use cases from the relevant feature or journey document (prioritizing P0, then P1/P2).
+3. Open the feature document, read the full use-case entry, and translate it 1:1 into a `test()` whose title starts with the UC ID, e.g. `test('UC-WORK-03 — completes a visit accepting a revisit', ...)`.
+4. Assert **both** the DOM and Firestore. Every entry ships at least one persistence assertion; it is not optional — this suite exists to prove real backend behaviour.
+5. Journeys become their own spec files; keep the step order and assert at every hand-off point.
 
 ## Maintaining and extending this artifact
 
@@ -55,11 +52,10 @@ Treat these documents as a versioned contract for **current behaviour**, not int
 | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | Domain model, persistence invariant, role, or terminology       | Update the relevant file under `domain/`; update the glossary when user-visible language changes.                                          |
 | New feature area                                                | Create a kebab-case `features/<area>.md`, choose an unused `UC-<AREA>` prefix, and register both in this README.                           |
-| New or changed use case                                         | Append or revise the entry in its feature document, preserve stable IDs, and add or update its single row in `test-catalog.md`.            |
-| New cross-feature journey                                       | Add the next `J-NN` file under `journeys/`, compose existing UC IDs where possible, and add its catalog row.                               |
-| Selector, harness limitation, manual check, or suspected defect | Update `testability-gaps.md`; add actionable product or engineering work to `developer-follow-up.md` when developer follow-up is required. |
+| New or changed use case                                         | Append or revise the entry in its feature document and preserve stable IDs.                                                                 |
+| New cross-feature journey                                       | Add the next `J-NN` file under `journeys/` and compose existing UC IDs where possible.                                                     |
 | Fixture, factory, page object, utility, or auth surface         | Update `../e2e/README.md` and, when a binding rule changes, `.agents/rules/e2e-testing.md`.                                                |
-| Automated coverage                                              | Set only the affected catalog row's `Covered` cell, name the owning spec, and recalculate the coverage summary.                            |
+| Automated coverage                                              | Add or update the spec under `../e2e/tests/` matching the UC or journey ID.                                                                 |
 
 Follow this sequence:
 
@@ -68,9 +64,8 @@ Follow this sequence:
 3. Add or revise each use case using the template below. Include actor, route, seed preconditions, ordered steps, expected UI, expected persistence (including explicit no-write expectations), edge cases, priority, gaps, and verified `Sources`.
 4. Keep IDs permanent and unique. Never renumber or reuse an ID; mark removed behaviour `(deprecated)` and assign the next free number to new behaviour.
 5. For a journey, identify every participating UC, identity switch, hand-off assertion, and persisted state that the next leg consumes. Do not duplicate a single-feature scenario merely to create a journey.
-6. Add exactly one catalog row per new UC or journey. Keep priority, spec ownership, page-object needs, seed work, blockers, coverage state, and summary totals synchronized.
-7. Update tests for behaviour changes according to [`../../../AGENTS.md`](../../../AGENTS.md). Keep docs and tests truthful together when implementation reality differs from an older entry.
-8. Before finishing, verify relative links and source paths, search for duplicate IDs, reconcile catalog totals, and run `git diff --check`. Run the relevant Nx checks whenever code or executable tests changed.
+6. Update tests for behaviour changes according to [`../../../AGENTS.md`](../../../AGENTS.md). Keep docs and tests truthful together when implementation reality differs from an older entry.
+7. Before finishing, verify relative links and source paths, search for duplicate IDs, and run `git diff --check`. Run the relevant Nx checks whenever code or executable tests changed.
 
 ### The harness you must use
 
@@ -113,7 +108,7 @@ Available today:
   `signInAsUser(uid)`, and the `authenticatedPage` fixture
 - `resetAndSeed` — automatic per-test wipe + default seed (the emulator starts **empty**)
 
-The exact live surface is maintained in [`../e2e/README.md`](../e2e/README.md). Delivered and deferred harness extensions are recorded in [`test-catalog.md`](./test-catalog.md#harness-extensions-needed).
+The exact live surface and harness extensions are maintained in [`../e2e/README.md`](../e2e/README.md).
 
 ---
 
@@ -139,8 +134,7 @@ Prose is **English**. Every user-visible string is quoted **verbatim in pt-BR**,
 
 ### Behaviour vs intent
 
-Where the implementation contradicts what a reader would expect, the entry documents **what the code does today** and adds a `⚠ suspected defect` note plus the assertion a test should make _now_. Tests must lock in reality; changing the behaviour is a separate product decision. All such items are consolidated in
-[`testability-gaps.md`](./testability-gaps.md#documented-current-behaviour-vs-suspected-defects).
+Where the implementation contradicts what a reader would expect, the entry documents **what the code does today** and adds a `⚠ suspected defect` note plus the assertion a test should make _now_. Tests must lock in reality; changing the behaviour is a separate product decision.
 
 ### Use-case entry template
 

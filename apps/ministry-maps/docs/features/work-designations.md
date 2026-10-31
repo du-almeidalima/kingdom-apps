@@ -70,7 +70,7 @@ Read that table before writing any expiry test (UC-WORK-20/21): the naming sugge
 - **Expected UI:** `convertHistoryDateFirebaseTimestampToDate` runs `t.history.map((h) => ({...}))` for every embedded territory with no `t.history ?? []` fallback; since the seeded doc has no `history` field, this throws `Cannot read properties of undefined (reading 'map')` inside the `docData` conversion. The returned observable errors; `.subscribe(designation => {...})` has **no** error callback, so the error is unhandled and the emission never reaches `tap`. **Today's reality:** `isLoading` stays `true` forever — the page shows `Loading...` indefinitely, and the browser console logs the uncaught error
 - **Expected persistence:** N/A — assert the read never completed: the designation doc itself is unaffected (`db.getDoc(db.collections.designations, 'd-no-history').territories[0].status === 'PENDING'`, i.e. nothing changed, only the UI is stuck)
 - **Edge cases:** this reproduces for the **default baseline** `seed-designation` too, since its embedded territory has no `history` override either — never navigate to `/work/seed-designation` in a spec without first patching that field
-- **Priority:** P0 · **Gaps:** `⚠ suspected defect` — the converter needs `(t.history ?? []).map(...)`; consolidate in the testability-gaps summary below; test must assert the stuck `Loading...` text, not a rendered list
+- **Priority:** P0 · **Gaps:** `⚠ suspected defect` — the converter needs `(t.history ?? []).map(...)`; test must assert the stuck `Loading...` text, not a rendered list
 
 #### UC-WORK-05 — Rendering reflects the frozen embedded snapshot, not the live territory doc
 

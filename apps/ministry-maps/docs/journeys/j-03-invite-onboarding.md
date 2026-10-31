@@ -9,10 +9,9 @@
 
 ## Seed
 
-Default baseline. Invite documents are read/written via the raw `db.firestore.collection('invitation_links')`
-escape hatch (note the **underscore**) — ⚙ HARNESS-EXTENSION: no `Collections` entry, no
-`buildInvitationLink` factory, no seeder support today (see
-[`../test-catalog.md#harness-extensions-needed`](../test-catalog.md#harness-extensions-needed)).
+Default baseline. Seed invitation links using `seed.factories.buildInvitationLink` / `Collections.invitation_links`
+(or via the raw `db.firestore.collection('invitation_links')` escape hatch; note the **underscore** — see
+[`../../e2e/README.md`](../../e2e/README.md)).
 
 ## Script
 
@@ -53,7 +52,7 @@ shape-drift caveat in [`../domain/data-model.md §2.6`](../domain/data-model.md#
    with `role: 'ORGANIZER'` and `congregation` referencing `seed-congregation`; the invite flips to
    `isValid: false` with `usedAt` ≈ now and `usedBy: 'novo.organizador@example.com'`; the user lands on
    `/home` (non-publisher role). The OAuth popup is not automatable today — see
-   [`../testability-gaps.md`](../testability-gaps.md).
+   [`../../e2e/MANUAL-ACCEPTANCE.md`](../../e2e/MANUAL-ACCEPTANCE.md).
 8. **Automated simulation (keeps the journey executable in CI):** mark the invite as consumed directly —
    `db.firestore.doc('invitation_links/' + inviteId).update({ isValid: false, usedAt: new Date(),
 usedBy: 'novo.organizador@example.com' })`. Add a comment in the spec: _"simulates UC-AUTH-17, which is
@@ -99,7 +98,7 @@ manual leg ran) still valid.
   `context.grantPermissions(['clipboard-read', 'clipboard-write'])` — optional here; the journey only reads
   the rendered link text.
 - The `Enviar` (WhatsApp) button on the copy-link view is out of scope for this journey (UC-USERS-14 —
-  `window.open` with a `whatsapp://` URL; see [`../testability-gaps.md`](../testability-gaps.md)).
+  `window.open` with a `whatsapp://` URL; tested via `stubWindowOpen`).
 
 ## Sources
 

@@ -22,18 +22,15 @@ English vocabulary in [`../domain/glossary.md`](../domain/glossary.md).
 >
 > 1. **The OAuth popup leg is not automatable.** Both `/login` and `/sign-in/:inviteId` sign in via
 >    `signInWithPopup(auth, new GoogleAuthProvider())` — a real browser popup against a Google account,
->    which the Playwright suite does not exercise (see
->    [`../testability-gaps.md`](../testability-gaps.md)). Entries whose core behaviour **requires** that
->    popup (marked _manual-only leg_) are documented with full steps/persistence contracts so they can be
->    executed as manual acceptance checks today and automated later if the suite ever adopts the Auth
->    emulator's popup automation. Everything else uses the `signInAs` custom-token fixture.
-> 2. **There is no `invitation_links` support in the seed harness yet.** The collection (note the
->    **underscore**) is absent from `e2e/seed/collections.ts`, there is no `buildInvitationLink` factory,
->    and the seeder writes no invites. Invite entries below write the raw doc via the `db.firestore`
->    escape hatch until the harness extension lands — see
->    [`../test-catalog.md#harness-extensions-needed`](../test-catalog.md#harness-extensions-needed). The
->    persisted shape that matters: `congregation` is stored as a **`DocumentReference`** (the datasource
->    resolves it on read), and the doc's own `id` is also written **inside** the document body.
+>    which the Playwright suite does not exercise (see [`../../e2e/MANUAL-ACCEPTANCE.md`](../../e2e/MANUAL-ACCEPTANCE.md)).
+>    Entries whose core behaviour **requires** that popup (marked _manual-only leg_) are documented with full
+>    steps/persistence contracts so they can be executed as manual acceptance checks today and automated later
+>    if the suite ever adopts the Auth emulator's popup automation. Everything else uses the `signInAs` custom-token fixture.
+> 2. **`invitation_links` seed support:** The collection (note the **underscore**) is supported via
+>    `seed.factories.buildInvitationLink` and `Collections.invitation_links` (see
+>    [`../../e2e/README.md`](../../e2e/README.md)). The persisted shape that matters:
+>    `congregation` is stored as a **`DocumentReference`** (the datasource resolves it on read), and the doc's own
+>    `id` is also written **inside** the document body.
 >
 > Also note the fixture invariant the whole suite relies on: **`/login` never auto-navigates on
 > auth-state change** (UC-AUTH-03) — that is why `signInAs` can leave the page on `/login` with a live
@@ -187,7 +184,7 @@ English vocabulary in [`../domain/glossary.md`](../domain/glossary.md).
 - **Expected UI:** none of them redirect — the guard's step 1 (`!roles || roles.includes('*')`) returns `true` **before** any authentication check (full analysis in [`../domain/roles-and-permissions.md §3.1`](../domain/roles-and-permissions.md#31-suspected-defect--roles--short-circuits-the-login-check)); `/profile` shows the placeholder identity of UC-PROF-03, `/configuration` shows the no-congregation state of UC-CFG-12, and `/work/:id` is unguarded **by design** (a publisher receives a bare link — UC-WORK-01)
 - **Expected persistence:** N/A; assert `db.getCollectionDocs(db.collections.users)` unchanged after all three visits
 - **Edge cases:** ⚠ suspected defect for `/profile` and `/configuration` (they should arguably require a session); `/work/:id` is intentional and must **not** be "fixed" by a test expecting a redirect; the detailed per-page assertions live in UC-PROF-03 / UC-CFG-12 / UC-NAV-10 — this entry only owns the consolidated guard-level statement
-- **Priority:** P1 · **Gaps:** ⚠ suspected defect (consolidated in [`../testability-gaps.md`](../testability-gaps.md#documented-current-behaviour-vs-suspected-defects))
+- **Priority:** P1 · **Gaps:** ⚠ suspected defect
 
 ### Invite sign-in (`/sign-in/:inviteId`)
 
@@ -312,13 +309,10 @@ English vocabulary in [`../domain/glossary.md`](../domain/glossary.md).
 - **The OAuth popup is the fundamental blocker of this feature** (`signInWithPopup` on both `/login` and
   `/sign-in/:inviteId`): UC-AUTH-04/05/06/07 and UC-AUTH-17/18/19/20 are **manual-only legs** today. Their
   render-level and persistence-level pre/post-conditions are fully documented above so they can run as
-  manual acceptance checks; the automatable approximations (`signInAs` + `goto`) are stated per entry.
-  Consolidated, with candidate techniques, in
-  [`../testability-gaps.md`](../testability-gaps.md).
-- **No `invitation_links` harness support** — the collection is missing from `e2e/seed/collections.ts`,
-  there is no factory, and the seeder never writes invites (UC-AUTH-14/16/17/18/19/20 all seed via the raw
-  `db.firestore` escape hatch). See
-  [`../test-catalog.md#harness-extensions-needed`](../test-catalog.md#harness-extensions-needed).
+  manual acceptance checks (see [`../../e2e/MANUAL-ACCEPTANCE.md`](../../e2e/MANUAL-ACCEPTANCE.md)); the
+  automatable approximations (`signInAs` + `goto`) are stated per entry.
+- **`invitation_links` harness support (HX-2)** — delivered via `seed.factories.buildInvitationLink` and
+  `Collections.invitation_links` (see [`../../e2e/README.md`](../../e2e/README.md)).
 - **Zero `data-testid`s on any auth screen** — usable selectors today: `h1` text (`Login`, `Cadastrar`),
   `button.provider-login-button`, `a#profile-link`, `img[alt="MM Image"]`, and the verbatim pt-BR error
   paragraphs.

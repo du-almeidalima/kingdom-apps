@@ -3,8 +3,7 @@ import { Page } from '@playwright/test';
 /**
  * Registers a one-shot handler that **accepts** the next native dialog
  * (`window.confirm`/`alert`/`prompt`) — UC-CFG-10's city delete calls
- * `window.confirm('Are you sure you want to delete this city?')` (see
- * `docs/testability-gaps.md` §2.2).
+ * `window.confirm('Are you sure you want to delete this city?')`.
  *
  * **Registration-before-click rule:** a native dialog has no DOM presence, so
  * no locator can see it, and Playwright's default auto-dismiss would hang the

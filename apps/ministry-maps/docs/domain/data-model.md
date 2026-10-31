@@ -283,8 +283,7 @@ and the underlying promise is created **eagerly** when the method is called. Con
 
 ### 4.4 Alerts depend on `note`
 
-The alert badges (bible student / recently moved / unresolved "not answered") are rendered inside a block that is only shown when the territory has a non-empty `note`. **⚠ suspected defect** — seeds for badge assertions must therefore always set a `note`. Consolidated in
-[`../testability-gaps.md`](../testability-gaps.md#documented-current-behaviour-vs-suspected-defects).
+The alert badges (bible student / recently moved / unresolved "not answered") are rendered inside a block that is only shown when the territory has a non-empty `note`. **⚠ suspected defect** — seeds for badge assertions must therefore always set a `note`.
 
 ### 4.5 Identity
 

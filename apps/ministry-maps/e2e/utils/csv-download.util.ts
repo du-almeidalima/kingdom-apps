@@ -16,8 +16,8 @@ export interface CsvDownload {
 }
 
 /**
- * Captures the CSV download triggered by a UI action (UC-TERR-34, J-08; see
- * `docs/testability-gaps.md` §2.4) by wrapping `page.waitForEvent('download')`
+ * Captures the CSV download triggered by a UI action (UC-TERR-34, J-08) by
+ * wrapping `page.waitForEvent('download')`
  * around the trigger and reading the saved file back from `download.path()`.
  *
  * ```ts

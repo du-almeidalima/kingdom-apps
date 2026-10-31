@@ -106,8 +106,7 @@ Used in the manage dialog, the CSV export and the list item's accessible text.
 
 ## 6. Writing selectors against pt-BR text
 
-- Prefer `data-testid` where it exists (only four exist today — see
-  [`../testability-gaps.md`](../testability-gaps.md)).
+- Prefer `data-testid` where it exists, or the shared page objects under `apps/ministry-maps/e2e/page-objects/`.
 - Otherwise use accessible-name queries with the **verbatim** string:
   `page.getByRole('button', { name: 'Concluir' })`.
 - Accents matter: `Ninguém`, `Ancião`, `Estatísticas`, `Congregação`. Never normalise them.

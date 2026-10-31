@@ -411,7 +411,7 @@ seed.ids.adminUser`; both `D1.designationHeaderId` and `D2.designationHeaderId` 
 - **Edge cases:** do **not** use the Pub/Sub emulator route for this: on firebase-tools 14.x the topic
   `firebase-schedule-closeDesignationsHeaders` is registered, but v2 scheduled triggers have signature
   `http`, so topic publishes are acked without executing (verified against 14.27.0 — see
-  [`../../../ARCHITECTURE.md`](../../../ARCHITECTURE.md))
+  [`../../../../ARCHITECTURE.md`](../../../../ARCHITECTURE.md))
 - **Priority:** P2 · **Gaps:** optional; verified manually 2026-09-03, no automated spec yet
 
 #### UC-ASSIGN-32 — Registers each created designation in the progress summary

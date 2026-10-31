@@ -41,7 +41,7 @@ export async function recordedOpenUrls(page: Page): Promise<string[]> {
 
 /**
  * Captures a `whatsapp://send?text=…` share by recording the URL passed to
- * `window.open` (UC-ASSIGN-19; see `docs/testability-gaps.md` §2.3).
+ * `window.open` (UC-ASSIGN-19).
  *
  * Custom-protocol caveat: `whatsapp://` has no registered handler in headless
  * Chromium, so it does not produce a reliable Playwright `popup` event. The

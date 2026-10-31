@@ -12,8 +12,8 @@ declare global {
  * survives every navigation) that pushes attempted URLs onto
  * `window.__openedUrls` instead of opening anything.
  *
- * Serves UC-USERS-14 and the Firefox/Safari branch of UC-WORK-19 (see
- * `docs/testability-gaps.md` §2.3): `page.waitForEvent('popup')` is the wrong
+ * Serves UC-USERS-14 and the Firefox/Safari branch of UC-WORK-19:
+ * `page.waitForEvent('popup')` is the wrong
  * tool for these flows — it never fires for a `_self` navigation (the
  * Chromium branch of UC-WORK-19) and is unreliable for custom, unregistered
  * protocols like `whatsapp://` (UC-USERS-14's desktop path).
