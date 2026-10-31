@@ -8,30 +8,7 @@ Portuguese strings. This file is the shared vocabulary; screen-specific labels l
 
 ## 1. Domain vocabulary
 
-| pt-BR (UI / user speech)             | English (code)          | Meaning                                                                          |
-| ------------------------------------ | ----------------------- | -------------------------------------------------------------------------------- |
-| Território                           | `Territory`             | A household/address to visit. **Not** a map area — one `Territory` ≈ one door.   |
-| Endereço                             | `address`               | Street address of the territory.                                                 |
-| Cidade                               | `city`                  | City the territory belongs to; also the grouping key for ordering and filtering. |
-| Nota / Observação                    | `note`                  | Free-text note about the household.                                              |
-| Designação                           | `Designation`           | A shareable list of territories assigned to a publisher for a period.            |
-| Designar                             | assign                  | The act of creating a designation.                                               |
-| Visita                               | `TerritoryVisitHistory` | A recorded contact attempt at a territory.                                       |
-| Revisita                             | `isRevisit`             | A return visit that the householder agreed to.                                   |
-| Resultado da visita                  | `visitOutcome`          | Outcome of the contact attempt (4 selectable options).                           |
-| Estudante da Bíblia / Estudo bíblico | `isBibleStudent`        | Territory that is an ongoing bible study.                                        |
-| Instrutor                            | `bibleInstructor`       | User id of the publisher conducting the study.                                   |
-| Congregação                          | `Congregation`          | Tenant of the system; owns cities, users, territories.                           |
-| Publicador                           | `PUBLISHER`             | Regular member who receives designations.                                        |
-| Organizador                          | `ORGANIZER`             | Organises field-service group work.                                              |
-| Ancião                               | `ELDER`                 | Elder.                                                                           |
-| Superintendente                      | `SUPERINTENDENT`        | Circuit-level oversight; may switch congregation.                                |
-| Pessoas                              | users                   | The `/users` screen is labelled "Pessoas" (people), not "usuários".              |
-| Convite / Link de Convite            | `InvitationLink`        | Single-use onboarding link that grants a role.                                   |
-| Histórico de Designações             | designations history    | Congregation-scoped list and progress detail for assignment sessions.             |
-| Sessão de designações                | `designations_header`   | Designations created during one Assign cycle.                                    |
-| Mudou de endereço                    | `MOVED` outcome         | The householder moved away.                                                      |
-| Alerta                               | alert / badge           | Attention marker on a territory list item.                                       |
+Canonical domain definitions and preferred terminology live in [`../../GLOSSARY.md`](../../GLOSSARY.md) (mapped from the workspace root [`/GLOSSARY-MAP.md`](../../../../GLOSSARY-MAP.md)). This document retains only the verbatim UI label and E2E selector dictionary below.
 
 ---
 

@@ -94,3 +94,17 @@ In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the re
 
 If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is the user's decision.
 <!-- CODEGRAPH_END -->
+
+## Agent skills
+
+### Issue tracker
+
+Local markdown files under `.scratch/<feature-slug>/`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five canonical labels (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Multi-context layout routed through root `GLOSSARY-MAP.md`. See `docs/agents/domain.md`.
