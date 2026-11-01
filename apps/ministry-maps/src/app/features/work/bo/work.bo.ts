@@ -53,12 +53,17 @@ export class WorkBO {
       designationTerritoryCopy.history?.[designationTerritoryCopy.history.length - 1]?.date ?? null;
     designationTerritoryCopy.status = DesignationStatusEnum.PENDING;
 
-    const { status: _status, ...territory } = designationTerritoryCopy;
     const updatedDesignation = this.updateDesignationTerritoryObject(designation, designationTerritoryCopy);
 
     const designationUpdate$ = this.designationRepository.update(updatedDesignation);
-    const territoryUpdate$ = this.territoryRepository.update(territory);
-    const visitHistoryDelete$ = this.territoryRepository.deleteVisitHistory(territory.id, removedHistory.id);
+    const territoryUpdate$ = this.territoryRepository.update({
+      id: designationTerritoryCopy.id,
+      lastVisit: designationTerritoryCopy.lastVisit,
+    });
+    const visitHistoryDelete$ = this.territoryRepository.deleteVisitHistory(
+      designationTerritoryCopy.id,
+      removedHistory.id,
+    );
 
     const progressRevert$ = this.revertTerritoryProgress(designation, designationTerritoryCopy);
     return forkJoin([designationUpdate$, territoryUpdate$, visitHistoryDelete$, progressRevert$]);

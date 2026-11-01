@@ -11,7 +11,7 @@
 Default baseline (`cities: ['São Paulo', 'Osasco']`; `seed-territory-1`/`-3` in `São Paulo`,
 `seed-territory-2` in `Osasco`).
 
-> **Locale reminder:** `/configuration` is the app's only English-language screen — every string below is
+> **Locale reminder:** `/congregation` is the app's only English-language screen — every string below is
 > verbatim and intentionally **not** pt-BR (see [`../features/configuration-cities.md`](../features/configuration-cities.md)
 > header note).
 
@@ -19,7 +19,7 @@ Default baseline (`cities: ['São Paulo', 'Osasco']`; `seed-territory-1`/`-3` in
 
 ### Leg 1 — Rename `São Paulo` → `São Paulo Centro` and verify the cascade
 
-1. `signInAs('admin')` → `page.goto('/configuration')` → assert the heading `Manage Congregation Cities`,
+1. `signInAs('admin')` → `page.goto('/congregation')` → assert the heading `Manage Congregation Cities`,
    the subtitle `Congregação Jardim Primavera`, and 2 rows (UC-CFG-01).
 2. Click `Edit` on the `São Paulo` row → clear the input → type `São Paulo Centro` → click
    `Save Changes` (UC-CFG-03; `Save Changes` is clickable even while the row is mid-edit — UC-CFG-05).
@@ -37,7 +37,7 @@ UC-CFG-08/09).
 4. Navigate to `/territories` **without reloading** (SPA-style `page.goto('/territories')` — the app's own
    in-memory user state is what matters here).
 5. Assert the city `<select>` (`territories-city-filter`) still offers the **old** names
-   `São Paulo` / `Osasco` / `Todas` — `ConfigurationBO` never calls `UserStateService.setUser(...)`, so the
+   `São Paulo` / `Osasco` / `Todas` — `CongregationBO` never calls `UserStateService.setUser(...)`, so the
    in-memory congregation is stale (UC-CFG-11, ⚠ suspected defect — assert the staleness, not a graceful
    update).
 6. `page.reload()` → assert the `<select>` now offers `São Paulo Centro` / `Osasco` / `Todas`
@@ -49,7 +49,7 @@ client cache was stale.
 
 ### Leg 3 — Delete `Osasco` and observe the orphaned territory
 
-8. `page.goto('/configuration')`.
+8. `page.goto('/congregation')`.
 9. **Before clicking**, register the native-dialog handler:
    `page.once('dialog', dialog => dialog.accept())` — the `Delete` button calls the browser's native
    `confirm('Are you sure you want to delete this city?')`, which a locator can never see and which hangs

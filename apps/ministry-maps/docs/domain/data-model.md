@@ -110,7 +110,7 @@ Reading a user resolves the reference. If the congregation document is missing, 
 | `id`                                          | `string`   |                                                                                              |
 | `name`                                        | `string`   | Shown on the profile card.                                                                   |
 | `locatedOn`                                   | `string`   | e.g. `'São Paulo, SP'`.                                                                      |
-| `cities`                                      | `string[]` | Source of the city `<select>` options everywhere; renamed/added/deleted on `/configuration`. |
+| `cities`                                      | `string[]` | Source of the city `<select>` options everywhere; renamed/added/deleted on `/congregation`. |
 | `settings.designationAccessExpiryDays`        | `number`   | Days added to "now" to compute `Designation.expiresAt`.                                      |
 | `settings.shouldDesignationBlockAfterExpired` | `boolean`  | When `true`, an expired `/work/:id` blocks its actions.                                      |
 
@@ -251,7 +251,7 @@ Resolving an alert (`TerritoryAlertsBO.resolveTerritoryHistoryAlert`) marks the 
 ### 4.2 Designation territories are frozen snapshots
 
 `Designation.territories` embeds `Omit<Territory, 'recentHistory'> & { status }` at creation time. Editing or deleting the source territory afterwards does **not** change the designation, so `/work/:id`
-can legitimately show an address that no longer exists in `territories`. The visit write-back, however, targets the **real** `territories/{id}` document by id.
+can legitimately show an address that no longer exists in `territories`. The visit write-back, however, targets the **real** `territories/{id}` document by id, patching only `lastVisit` and `recentHistory` so that any subsequent `city` rename or metadata update on `territories/{id}` is preserved.
 
 Because `recentHistory` is omitted but `history` is not, an embedded designation territory may carry a
 `history` array. The Work page uses it to decide whether to show the history affordance — a designation territory built without `history` entries therefore hides that button (see `UC-WORK` entries).

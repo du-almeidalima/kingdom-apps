@@ -143,6 +143,11 @@ describe('WorkPageComponent', () => {
 
         expect(spies.designationUpdate).toHaveBeenCalledTimes(1);
         expect(spies.territoryUpdate).toHaveBeenCalledTimes(1);
+        expect(spies.territoryUpdate).toHaveBeenCalledWith({
+          id: designationTerritory.id,
+          lastVisit: expect.any(Date),
+          history: designationTerritory.history,
+        });
         expect(spies.setVisitHistory).toHaveBeenCalledWith(
           designationTerritory.id,
           expect.objectContaining({

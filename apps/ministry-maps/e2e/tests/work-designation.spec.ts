@@ -978,6 +978,102 @@ test.describe('Work designation — completion state', () => {
       expect(territoryDoc?.['recentHistory']?.length).toBe(1);
     }).toPass();
   });
+
+  test('UC-WORK-30 — Completing, editing, and undoing a visit preserves current territory city and metadata', async ({
+    page,
+    seed,
+    db,
+  }) => {
+    const { territory, designation, designationId, territoryId } = seedActiveDesignation(seed, {
+      territory: {
+        city: 'São Paulo',
+        address: 'Rua Original, 100',
+        note: 'Nota Original',
+        positionIndex: 1,
+      },
+      designationTerritory: {
+        city: 'São Paulo',
+        address: 'Rua Original, 100',
+        note: 'Nota Original',
+        positionIndex: 1,
+      },
+    });
+    await seed.write({ territories: [territory], designations: [designation] });
+
+    // Simulate a City rename and Territory metadata update AFTER the designation was created
+    await db.firestore.collection(db.collections.territories).doc(territoryId).update({
+      city: 'São Paulo Zona Sul',
+      address: 'Rua Atualizada, 200',
+      note: 'Nota Atualizada',
+      positionIndex: 5,
+    });
+
+    const workPage = new WorkPage(page);
+    const dialog = new WorkItemCompleteDialogPage(page);
+    const confirmDialog = new ConfirmDialogPage(page);
+    await workPage.goto(designationId);
+
+    // 1. Complete the visit
+    await workPage.itemByAddress('Rua Original, 100').getByTestId('work-item-checkbox').click();
+    await dialog.notesTextarea.fill('Primeira visita');
+    await dialog.submit();
+
+    await expect(workPage.completedHeading).toBeVisible();
+    await expect
+      .poll(async () => {
+        const doc = await db.getDoc(db.collections.territories, territoryId);
+        return doc?.['recentHistory']?.length;
+      })
+      .toBe(1);
+
+    let liveTerritory = await db.getDoc(db.collections.territories, territoryId);
+    expect(liveTerritory?.['city']).toBe('São Paulo Zona Sul');
+    expect(liveTerritory?.['address']).toBe('Rua Atualizada, 200');
+    expect(liveTerritory?.['note']).toBe('Nota Atualizada');
+    expect(liveTerritory?.['positionIndex']).toBe(5);
+    expect(liveTerritory?.['lastVisit']).toBeTruthy();
+
+    // 2. Edit the completed visit
+    const doneRow = workPage.completedList.filter({ hasText: 'Rua Original, 100' });
+    await doneRow.getByTestId('work-item-edit').click();
+    await expect(dialog.dialog.getByText('Editar Visita')).toBeVisible();
+    await expect(dialog.notesTextarea).toHaveValue('Primeira visita');
+    await dialog.notesTextarea.clear();
+    await dialog.notesTextarea.fill('Visita editada');
+    await dialog.submit();
+
+    await expect
+      .poll(async () => {
+        const doc = await db.getDoc(db.collections.territories, territoryId);
+        return doc?.['recentHistory']?.[0]?.['notes'];
+      })
+      .toBe('Visita editada');
+
+    liveTerritory = await db.getDoc(db.collections.territories, territoryId);
+    expect(liveTerritory?.['city']).toBe('São Paulo Zona Sul');
+    expect(liveTerritory?.['address']).toBe('Rua Atualizada, 200');
+    expect(liveTerritory?.['note']).toBe('Nota Atualizada');
+    expect(liveTerritory?.['positionIndex']).toBe(5);
+
+    // 3. Undo the completed visit
+    await doneRow.getByTestId('work-item-undo').click();
+    await expect(confirmDialog.dialog).toBeVisible();
+    await confirmDialog.confirm();
+
+    await expect
+      .poll(async () => {
+        const doc = await db.getDoc(db.collections.territories, territoryId);
+        return doc?.['lastVisit'];
+      })
+      .toBeNull();
+
+    liveTerritory = await db.getDoc(db.collections.territories, territoryId);
+    expect(liveTerritory?.['city']).toBe('São Paulo Zona Sul');
+    expect(liveTerritory?.['address']).toBe('Rua Atualizada, 200');
+    expect(liveTerritory?.['note']).toBe('Nota Atualizada');
+    expect(liveTerritory?.['positionIndex']).toBe(5);
+    expect(liveTerritory?.['recentHistory']).toEqual([]);
+  });
 });
 
 // ─── Defect: missing history crashes read ────────────────────────────────────

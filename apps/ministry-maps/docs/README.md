@@ -29,9 +29,9 @@ This directory is the **behavioural specification of Ministry Maps written for t
 | [`features/territories-designations-history.md`](./features/territories-designations-history.md) | `UC-HIST` | `/territories/designations` session history and live progress |
 | [`features/territories-statistics.md`](./features/territories-statistics.md) | `UC-STAT`   | `/territories/statistics` metrics                                         |
 | [`features/work-designations.md`](./features/work-designations.md)           | `UC-WORK`   | `/work/:id` receiving and completing designations                         |
-| [`features/users-invites.md`](./features/users-invites.md)                   | `UC-USERS`  | `/users` list, edit, delete, invitation links                             |
+| [`features/users-invites.md`](./features/users-invites.md)                   | `UC-USERS`  | `/congregation/users` list, edit, delete, invitation links                |
 | [`features/profile.md`](./features/profile.md)                               | `UC-PROF`   | `/profile` identity card, congregation switch, logout                     |
-| [`features/configuration-cities.md`](./features/configuration-cities.md)     | `UC-CFG`    | `/configuration` congregation cities                                      |
+| [`features/configuration-cities.md`](./features/configuration-cities.md)     | `UC-CFG`    | `/congregation` congregation cities                                       |
 | [`features/theme-and-appearance.md`](./features/theme-and-appearance.md)     | —           | theme architecture, token contract, FOIT prevention, dark/light mode      |
 
 ---

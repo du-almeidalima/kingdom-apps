@@ -36,9 +36,9 @@ From `src/app/app-routes.ts` + `src/app/core/features/auth/auth-routes.ts` and e
 | `/work/:id`                                                      | **none**                        | `['*']` (unused, no guard attached)       | **Everyone, including anonymous.** By design: publishers receive a bare link.                                                                                  |
 | `/territories`, `/territories/assign`, `/territories/statistics`, `/territories/designations`, `/territories/designations/:headerId` | inherited `canActivateChild: [authGuard]` | `ORGANIZER, ADMIN, ELDER, SUPERINTENDENT` | Those roles + `APP_ADMIN`. Publisher → `/welcome`. Anonymous → `/login`. |
 | `/home`                                                          | `canActivate: [authGuard]`      | `ORGANIZER, ADMIN, ELDER, SUPERINTENDENT` | Same as above.                                                                                                                                                 |
-| `/users`                                                         | `canActivate: [authGuard]`      | `ORGANIZER, ADMIN, ELDER, SUPERINTENDENT` | Same as above.                                                                                                                                                 |
+| `/congregation`                                                  | `canActivate: [authGuard]`      | `ADMIN`                                   | `ADMIN` and `APP_ADMIN` only. `ORGANIZER`, `ELDER`, and `SUPERINTENDENT` are denied (`false`). Publisher → `/welcome`. Anonymous → `/login`.                   |
+| `/congregation/users`                                            | `canActivate: [authGuard]`      | `ORGANIZER, ADMIN, ELDER, SUPERINTENDENT` | Those roles + `APP_ADMIN`. Publisher → `/welcome`. Anonymous → `/login`.                                                                                       |
 | `/profile`                                                       | `canActivate: [authGuard]`      | `['*']`                                   | **Everyone, including anonymous** (see §3.1).                                                                                                                  |
-| `/configuration`                                                 | `canActivate: [authGuard]`      | `['*']`                                   | **Everyone, including anonymous** (see §3.1).                                                                                                                  |
 | `''`                                                             | —                               | —                                         | Redirects to `/home` (which then applies the guard).                                                                                                           |
 | unknown path                                                     | —                               | —                                         | **No wildcard route and no 404 component** → Angular logs an `Error: Cannot match any routes` and the shell renders with an empty router outlet (header only). |
 
@@ -64,10 +64,10 @@ Redirects come from the custom `authGuard` only — no other guard is registered
 
 ### 3.1 ⚠ Suspected defect — `roles: ['*']` short-circuits the login check
 
-Step 1 returns `true` **before** any authentication check. Consequently `/profile` and `/configuration`
-render for anonymous visitors (they show empty/placeholder state rather than redirecting to `/login`).
+Step 1 returns `true` **before** any authentication check. Consequently `/profile`
+renders for anonymous visitors (showing empty/placeholder state rather than redirecting to `/login`).
 
-**Assert today's behaviour:** anonymous navigation to `/profile` and `/configuration` stays on that URL
+**Assert today's behaviour:** anonymous navigation to `/profile` stays on that URL
 (no redirect) and shows placeholder content. Do not write a test that expects a redirect to `/login`.
 
 ### 3.2 Returning `false` vs redirecting
@@ -79,7 +79,7 @@ and anonymous cases produce actual redirects.
 ### 3.3 Publisher lock-in
 
 Any signed-in `PUBLISHER` hitting a guarded route is pushed to `/welcome` — including
-`/territories/*`, `/users` and `/home`. `/work/:id` is unaffected (unguarded).
+`/territories/*`, `/congregation`, `/congregation/users` and `/home`. `/work/:id` is unaffected (unguarded).
 
 ### 3.4 `APP_ADMIN` bypass
 
@@ -96,7 +96,7 @@ Note step 2a is evaluated _before_ it, but an `APP_ADMIN` is never a `PUBLISHER`
 - Reads `AuthUserStateService` (a **separate**, common-ui-scoped state holding `{ roles, name }`), which
   `AuthService` fills on sign-in / user resolution / server refresh.
 - Empty or missing roles → content is rendered.
-- **No user → content is cleared.** So on `/profile` and `/configuration` an anonymous visitor sees no
+- **No user → content is cleared.** So on `/profile` an anonymous visitor sees no
   role-gated blocks at all.
 - Renders when any directive role matches, or when the user has `APP_ADMIN`.
 - Evaluated **once in `ngOnInit`** — it is not reactive. If the role changes later, the affordance does not
@@ -110,8 +110,9 @@ Note step 2a is evaluated _before_ it, but an `APP_ADMIN` is never a `PUBLISHER`
 | Territory list-item menu: edit, alerts block, separator, delete | `territory-list-item.component.ts` (`EDIT_ALLOWED`)                     | `ADMIN, ELDER, SUPERINTENDENT` (+ `APP_ADMIN` bypass) — **not** `ORGANIZER` |
 | User list-item overflow menu (edit / remove)                    | `user-list-item.component.ts`                                           | `APP_ADMIN, SUPERINTENDENT, ADMIN`                                          |
 | "Criar Link de Convite" FAB                                     | `users-page.component.html` (`CREATE_INVITE_LINK_ALLOWED`)              | `ADMIN` (+ `APP_ADMIN` bypass)                                              |
+| "Administrar Congregação" link on `/home`                       | `home-page.component.html` (`CONGREGATION_ALLOWED_ROLES`)               | `ADMIN` (+ `APP_ADMIN` bypass)                                              |
 | Congregation switch on profile                                  | `profile-page.component.html` (`ProfileBO.CHANGE_CONGREGATION_ALLOWED`) | `APP_ADMIN, SUPERINTENDENT`                                                 |
-| Congregation cities editing                                     | `configuration-roles.config.ts` (`EDIT_CONGREGATION_CONFIGURATION`)     | `ADMIN` (+ `APP_ADMIN` bypass)                                              |
+| Congregation cities editing                                     | `congregation-roles.config.ts` (`CONGREGATION_ALLOWED_ROLES`)           | `ADMIN` (+ `APP_ADMIN` bypass)                                              |
 
 `ProfileBO.changeUserCongregation` also enforces the rule in code: it throws
 `Changing congregations is not authorized by Non-Admin users.` for any role outside
@@ -133,15 +134,12 @@ Read as "can reach and use":
 | ↳ overflow menu (filter/CSV) | –            | ✖ hidden  | ✖ hidden  | ✔         | ✔              | ✔         | –                     |
 | `/territories/assign`        | → `/welcome` | ✔         | ✔         | ✔         | ✔              | ✔         | → `/login`            |
 | `/territories/statistics`    | → `/welcome` | ✔         | ✔         | ✔         | ✔              | ✔         | → `/login`            |
-| `/users` (list)              | → `/welcome` | ✔         | ✔         | ✔         | ✔              | ✔         | → `/login`            |
+| `/congregation/users` (list) | → `/welcome` | ✔         | ✔         | ✔         | ✔              | ✔         | → `/login`            |
 | ↳ edit / delete user menu    | –            | ✖ hidden  | ✖ hidden  | ✔         | ✔              | ✔         | –                     |
 | ↳ create invite link         | –            | ✖ hidden  | ✖ hidden  | ✔         | ✖ hidden       | ✔         | –                     |
 | `/profile`                   | ✔            | ✔         | ✔         | ✔         | ✔              | ✔         | ✔ (placeholders)      |
 | ↳ change congregation        | ✖ hidden     | ✖ hidden  | ✖ hidden  | ✖ hidden  | ✔              | ✔         | ✖ hidden              |
-| `/configuration`             | ✔ ⚠          | ✔         | ✔         | ✔         | ✔              | ✔         | ✔ ⚠ (no congregation) |
-
-⚠ `/configuration` uses `roles: ['*']`, so even a `PUBLISHER` reaches it directly by URL — the guard's
-publisher redirect is never reached because step 1 returns first.
+| `/congregation`              | → `/welcome` | ✖ denied  | ✖ denied  | ✔         | ✖ denied       | ✔         | → `/login`            |
 
 ---
 
@@ -178,9 +176,9 @@ user disappears, clears both state services and navigates to `/login`.
 - `apps/ministry-maps/src/app/core/features/auth/auth-routes.ts`
 - `apps/ministry-maps/src/app/core/features/auth/guards/auth.guard.ts`
 - `apps/ministry-maps/src/app/core/features/auth/services/auth.service.ts`
-- `apps/ministry-maps/src/app/features/{territory,home,users}/*-routes.module.ts`
-- `apps/ministry-maps/src/app/features/users/config/users-roles.config.ts`
-- `apps/ministry-maps/src/app/features/configuration/config/configuration-roles.config.ts`
+- `apps/ministry-maps/src/app/features/{territory,home,congregation}/*.routes.ts`
+- `apps/ministry-maps/src/app/features/congregation/config/users-roles.config.ts`
+- `apps/ministry-maps/src/app/features/congregation/config/congregation-roles.config.ts`
 - `apps/ministry-maps/src/app/features/profile/bo/profile.bo.ts`
 - `libs/common-ui/src/lib/directives/authorize/authorize.directive.ts`
 - `libs/common-ui/src/lib/state/auth-user/auth-user.state.service.ts`

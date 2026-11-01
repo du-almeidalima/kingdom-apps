@@ -83,7 +83,8 @@ test.describe('Auth', () => {
     '/territories',
     '/territories/assign',
     '/territories/statistics',
-    '/users',
+    '/congregation',
+    '/congregation/users',
     '/welcome',
   ];
   for (const route of anonymousGuards) {
@@ -96,7 +97,14 @@ test.describe('Auth', () => {
 
   // UC-AUTH-12 Matrix
   // Resolves duplicates: UC-NAV-06, UC-ASSIGN-23, UC-STAT-16, UC-USERS-16
-  const publisherGuards = ['/home', '/territories', '/territories/assign', '/territories/statistics', '/users'];
+  const publisherGuards = [
+    '/home',
+    '/territories',
+    '/territories/assign',
+    '/territories/statistics',
+    '/congregation',
+    '/congregation/users',
+  ];
   for (const route of publisherGuards) {
     test(`UC-AUTH-12 — publisher navigating to ${route} redirects to /welcome`, async ({
       page,
@@ -115,11 +123,23 @@ test.describe('Auth', () => {
   test('UC-AUTH-13 — routes with no redirect for roles: ["*"]', async ({ page, db }) => {
     await page.goto('/profile');
     await expect(page).toHaveURL(/.*\/profile/);
-
-    await page.goto('/configuration');
-    await expect(page).toHaveURL(/.*\/configuration/);
     expect(await db.getCollectionDocs(db.collections.users)).toHaveLength(8);
   });
+
+  for (const role of ['organizer', 'elder', 'superintendent'] as const) {
+    test(`UC-AUTH-24 — ${role} cannot access /congregation but can access /congregation/users`, async ({
+      page,
+      signInAs,
+    }) => {
+      await signInAs(role);
+      await page.goto('/congregation');
+      await expect(page.getByRole('heading', { name: 'Configurações' })).toHaveCount(0);
+
+      await page.goto('/congregation/users');
+      await expect(page).toHaveURL(/\/congregation\/users$/);
+      await expect(page.getByTestId('users-heading')).toBeVisible();
+    });
+  }
 
   test('UC-AUTH-22 — Admin signout clears state and navigates to /login', async ({ page, signInAs, db }) => {
     await signInAs('admin');

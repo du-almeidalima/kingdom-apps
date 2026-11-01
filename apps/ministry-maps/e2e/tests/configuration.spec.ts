@@ -9,7 +9,7 @@ import { RoleEnum } from '../../src/models/enums/role';
 test.describe('Configuration — Cities (WP-25)', () => {
   test.use({ role: 'admin' });
 
-  // Helper to ensure UserStateService is fully hydrated before client-side navigation to /configuration
+  // Helper to ensure UserStateService is fully hydrated before client-side navigation to /congregation
   async function gotoConfigWithResolvedUser(page: Page) {
     await page.goto('/home');
     await expect(page).toHaveURL(/\/(home|welcome)/, { timeout: 15000 });
@@ -19,10 +19,10 @@ test.describe('Configuration — Cities (WP-25)', () => {
 
     // Client-side Angular Router navigation via popstate so in-memory UserState is preserved
     await page.evaluate(() => {
-      window.history.pushState({}, '', '/configuration');
+      window.history.pushState({}, '', '/congregation');
       window.dispatchEvent(new Event('popstate'));
     });
-    await expect(page).toHaveURL(/\/configuration/, { timeout: 15000 });
+    await expect(page).toHaveURL(/\/congregation/, { timeout: 15000 });
     return new ConfigurationPage(page);
   }
 
@@ -202,19 +202,24 @@ test.describe('Configuration — Cities (WP-25)', () => {
     );
   });
 
-  test('UC-CFG-12 — Unauthenticated access loads route (app-routes.ts specifies roles: [*])', async ({ page }) => {
-    await page.goto('/configuration');
+  test('UC-CFG-12 — Unauthenticated access redirects to /login', async ({ page }) => {
+    await page.goto('/congregation');
 
-    await expect(page).toHaveURL(/\/configuration/);
+    await expect(page).toHaveURL(/\/login$/);
   });
 
-  test('UC-CFG-13 — Non-admin (PUBLISHER) access loads route (app-routes.ts specifies roles: [*])', async ({
+  test('UC-CFG-13 — Non-admin access is blocked (PUBLISHER redirects to /welcome; ORGANIZER/ELDER/SUPERINTENDENT denied)', async ({
     signInAs,
     page,
   }) => {
     await signInAs('publisher');
-    await page.goto('/configuration');
+    await page.goto('/congregation');
+    await expect(page).toHaveURL(/\/welcome$/);
 
-    await expect(page).toHaveURL(/\/configuration/);
+    for (const role of ['organizer', 'elder', 'superintendent'] as const) {
+      await signInAs(role);
+      await page.goto('/congregation');
+      await expect(page.getByRole('heading', { name: 'Manage Congregation Cities' })).toHaveCount(0);
+    }
   });
 });

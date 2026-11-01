@@ -160,15 +160,19 @@ describe('WorkBO', () => {
       expect(TestBed.inject(DesignationsProgressRepository).removeTerritoryProgress).not.toHaveBeenCalled();
     });
 
-    it('saves the territory back without the designation status field', async () => {
+    it('saves only the territory id and lastVisit without overwriting city or other metadata', async () => {
       const territory = designationTerritory();
 
       await lastValueFrom(workBO.undoLastVisitChanges(designation([territory]), territory));
 
-      const territoryArg = territoryRepository.update.mock.calls[0][0] as DesignationTerritory;
+      const territoryArg = territoryRepository.update.mock.calls[0][0];
+      expect(territoryArg).toEqual({
+        id: 'TERRITORY-1',
+        lastVisit: new Date(2024, 0, 1),
+      });
       expect('status' in territoryArg).toBe(false);
-      expect(territoryArg.id).toBe('TERRITORY-1');
-      expect(territoryArg.lastVisit).toEqual(new Date(2024, 0, 1));
+      expect('city' in territoryArg).toBe(false);
+      expect('address' in territoryArg).toBe(false);
     });
 
     it('does not mutate the input designation and territory', async () => {

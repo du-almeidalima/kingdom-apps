@@ -27,8 +27,8 @@ test('J-05 — City rename cascades to territories; city delete leaves an orphan
 }) => {
   await signInAs('admin');
 
-  // Helper: navigate to /configuration with UserStateService fully hydrated.
-  // Direct `page.goto('/configuration')` can race the user-state subscription;
+  // Helper: navigate to /congregation with UserStateService fully hydrated.
+  // Direct `page.goto('/congregation')` can race the user-state subscription;
   // landing on /home first guarantees the in-memory user is populated, then a
   // client-side popstate navigation preserves it (same pattern as
   // `configuration.spec.ts`'s `gotoConfigWithResolvedUser`).
@@ -39,10 +39,10 @@ test('J-05 — City rename cascades to territories; city delete leaves an orphan
       timeout: 15000,
     });
     await page.evaluate(() => {
-      window.history.pushState({}, '', '/configuration');
+      window.history.pushState({}, '', '/congregation');
       window.dispatchEvent(new Event('popstate'));
     });
-    await expect(page).toHaveURL(/\/configuration/, { timeout: 15000 });
+    await expect(page).toHaveURL(/\/congregation/, { timeout: 15000 });
     return new ConfigurationPage(page);
   }
 

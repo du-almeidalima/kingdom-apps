@@ -3,9 +3,22 @@ import { MockBuilder, MockRender, ngMocks } from 'ng-mocks';
 import { By } from '@angular/platform-browser';
 import { UserStateService } from '../../../../state/user.state.service';
 import { RouterLink } from '@angular/router';
+import { AuthorizeDirective, AuthUserStateService, CardHeaderComponent } from '@kingdom-apps/common-ui';
+import { RoleEnum } from '../../../../../models/enums/role';
 
 describe('HomePageComponent', () => {
-  beforeEach(() => MockBuilder(HomePageComponent));
+  beforeEach(() =>
+    MockBuilder(HomePageComponent)
+      .keep(AuthorizeDirective)
+      .provide({
+        provide: AuthUserStateService,
+        useFactory: () => {
+          const state = new AuthUserStateService();
+          state.setUser({ name: 'Carlos Almeida', roles: [RoleEnum.ADMIN] });
+          return state;
+        },
+      }),
+  );
 
   it('should create', () => {
     const fixture = MockRender(HomePageComponent);
@@ -30,9 +43,70 @@ describe('HomePageComponent', () => {
 
   it('links to the designations history page', () => {
     const fixture = MockRender(HomePageComponent);
-    const historyLink = fixture.debugElement.queryAll(By.directive(RouterLink)).find((candidate) => candidate.nativeElement.textContent.includes('Histórico de Designações'));
+    const historyLink = fixture.debugElement
+      .queryAll(By.directive(RouterLink))
+      .find((candidate) => candidate.nativeElement.textContent.includes('Histórico de Designações'));
     if (!historyLink) throw new Error('O link do histórico de designações não foi renderizado.');
     expect(ngMocks.input(historyLink, 'routerLink')).toBe('/territories/designations');
     expect(historyLink.nativeElement.textContent).toContain('Histórico de Designações');
+  });
+
+  it('renders the Congregação card with title, subtitle, icon, and consolidated links', () => {
+    const fixture = MockRender(HomePageComponent);
+    const card = ngMocks.find(fixture, '[data-testid="home-card-congregation"]');
+    const header = ngMocks.find(card, CardHeaderComponent);
+
+    expect(ngMocks.input(header, 'icon')).toBe('user-29');
+    expect(ngMocks.input(header, 'title')).toBe('Congregação');
+    expect(ngMocks.input(header, 'subtitle')).toBe('Administrar congregação e publicadores');
+
+    const links = fixture.debugElement.queryAll(By.directive(RouterLink));
+    const usersLink = links.find((candidate) => candidate.nativeElement.textContent.includes('Administrar Pessoas'));
+    const congregationLink = links.find((candidate) =>
+      candidate.nativeElement.textContent.includes('Administrar Congregação'),
+    );
+
+    if (!usersLink) throw new Error('Expected Administrar Pessoas link to be rendered');
+    expect(ngMocks.input(usersLink, 'routerLink')).toBe('/congregation/users');
+
+    if (!congregationLink) throw new Error('Expected Administrar Congregação link to be rendered');
+    expect(ngMocks.input(congregationLink, 'routerLink')).toBe('/congregation');
+  });
+
+  const renderForRole = (role: RoleEnum) => {
+    const authUserState = new AuthUserStateService();
+    authUserState.setUser({ name: 'Test User', roles: [role] });
+
+    const fixture = MockRender(
+      HomePageComponent,
+      {},
+      {
+        providers: [{ provide: AuthUserStateService, useValue: authUserState }],
+      },
+    );
+    return fixture.debugElement.queryAll(By.directive(RouterLink));
+  };
+
+  it.each([RoleEnum.ORGANIZER, RoleEnum.ELDER, RoleEnum.SUPERINTENDENT])(
+    'hides Administrar Congregação while keeping Administrar Pessoas visible for %s',
+    (role) => {
+      const links = renderForRole(role);
+      const usersLink = links.find((candidate) => candidate.nativeElement.textContent.includes('Administrar Pessoas'));
+      const congregationLink = links.find((candidate) =>
+        candidate.nativeElement.textContent.includes('Administrar Congregação'),
+      );
+
+      expect(usersLink).toBeDefined();
+      expect(congregationLink).toBeUndefined();
+    },
+  );
+
+  it.each([RoleEnum.ADMIN, RoleEnum.APP_ADMIN])('shows Administrar Congregação for %s', (role) => {
+    const links = renderForRole(role);
+    const congregationLink = links.find((candidate) =>
+      candidate.nativeElement.textContent.includes('Administrar Congregação'),
+    );
+
+    expect(congregationLink).toBeDefined();
   });
 });

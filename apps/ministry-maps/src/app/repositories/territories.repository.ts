@@ -7,6 +7,8 @@ export type TerritoryRepositoryQueryOptions = {
   getHistory?: boolean;
 };
 
+export type TerritoryUpdate = Pick<Territory, 'id'> & Partial<Territory>;
+
 export abstract class TerritoryRepository {
   abstract getAllByCongregation(
     congregationId: string,
@@ -19,7 +21,7 @@ export abstract class TerritoryRepository {
 
   abstract add(territory: Omit<Territory, 'id'>): Observable<Territory>;
 
-  abstract update(territory: Territory): Observable<void>;
+  abstract update(territory: TerritoryUpdate): Observable<void>;
 
   abstract batchUpdate(territories: Territory[]): Observable<void>;
 

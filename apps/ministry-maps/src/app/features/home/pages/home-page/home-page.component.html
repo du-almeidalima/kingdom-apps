@@ -36,15 +36,26 @@
       </ul>
     </lib-card-body>
   </lib-card>
-  <!-- Users -->
-  <lib-card class="mt-5" data-testid="home-card-people" [customStyle]="{ padding: 0 }">
-    <lib-card-header icon="user-29" title="Pessoas" subtitle="Administrar pessoas associadas a sua congregação">
-    </lib-card-header>
+  <!-- Congregation -->
+  <lib-card class="mt-5" data-testid="home-card-congregation" [customStyle]="{ padding: 0 }">
+    <lib-card-header
+      icon="user-29"
+      title="Congregação"
+      subtitle="Administrar congregação e publicadores"
+    ></lib-card-header>
     <lib-card-body>
       <ul class="card-body__link-list">
         <li class="card-body__link-list-item">
-          <a class="card-body__link" routerLink="/{{ FeatureRoutes.USERS }}/{{ UsersRoutesEnum.INDEX }}">
+          <a
+            class="card-body__link"
+            routerLink="/{{ FeatureRoutes.CONGREGATION }}/{{ CongregationRoutes.USERS }}"
+          >
             Administrar Pessoas
+          </a>
+        </li>
+        <li *libAuthorize="CONGREGATION_ALLOWED_ROLES" class="card-body__link-list-item">
+          <a class="card-body__link" routerLink="/{{ FeatureRoutes.CONGREGATION }}">
+            Administrar Congregação
           </a>
         </li>
       </ul>

@@ -56,10 +56,10 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Route:** `/home`
 - **Preconditions (seed):** default baseline (`seed-user-admin` name is `Carlos Almeida`); `signInAs('admin')`
 - **Steps:** 1. Open `/home`
-- **Expected UI:** Heading `Bem-Vindo Carlos!`; Two cards: `Designar Territórios` (with links `Designar Territórios`, `Administrar Territórios`, `Estatísticas Territórios`) and `Pessoas` (with link `Administrar Pessoas`)
+- **Expected UI:** Heading `Bem-Vindo Carlos!`; Two cards: `Designar Territórios` (with links `Designar Territórios`, `Histórico de Designações`, `Administrar Territórios`, `Estatísticas Territórios`) and `Congregação` (subtitle `Administrar congregação e publicadores`, with links `Administrar Pessoas` and, for `ADMIN`/`APP_ADMIN` only, `Administrar Congregação`)
 - **Expected persistence:** `db.getDoc(db.collections.users, 'seed-user-admin')` has `name: 'Carlos Almeida'`, `role: 'ADMIN'`
-- **Edge cases:** if name is a single token `Carlos`, greeting is `Bem-Vindo Carlos!`
-- **Priority:** P0 · **Gaps:** no `data-testid` on cards or links; ORGANIZER/ELDER see the exact same UI as ADMIN (no template gating)
+- **Edge cases:** if name is a single token `Carlos`, greeting is `Bem-Vindo Carlos!`; `ORGANIZER`, `ELDER`, and `SUPERINTENDENT` see `Administrar Pessoas` but not `Administrar Congregação` (`*libAuthorize="[RoleEnum.ADMIN]"`)
+- **Priority:** P0 · **Gaps:** none (`data-testid="home-card-territories"` and `data-testid="home-card-congregation"` present)
 - **Sources:** `apps/ministry-maps/src/app/features/home/pages/home-page/home-page.component.ts`
 
 #### UC-NAV-06 — Publisher restricted from admin areas (Redirect to Welcome)
@@ -70,7 +70,7 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Steps:** 1. Try to open `/home`
 - **Expected UI:** Redirected to `/welcome`; heading `Bem-Vindo Ana!` (for `Ana Souza`); text "Sua conta foi criada com sucesso!" and instructions to contact an admin
 - **Expected persistence:** `db.getDoc(db.collections.users, 'seed-user-publisher-1').role === 'PUBLISHER'`
-- **Edge cases:** publisher trying to reach `/territories` or `/users` also redirects to `/welcome`
+- **Edge cases:** publisher trying to reach `/territories`, `/congregation`, or `/congregation/users` also redirects to `/welcome`
 - **Priority:** P0 · **Gaps:** none
 
 #### UC-NAV-07 — Anonymous restricted from home hub (Redirect to Login)
@@ -81,7 +81,7 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Steps:** 1. Try to open `/home` directly
 - **Expected UI:** Redirected to `/login`
 - **Expected persistence:** `db.auth` current user is null
-- **Edge cases:** any guarded route (except Profile/Configuration due to defect) redirects to `/login`
+- **Edge cases:** any guarded route (except Profile due to `roles: ['*']`) redirects to `/login`
 - **Priority:** P0 · **Gaps:** none
 
 ### Router Behavior and Guards
@@ -110,16 +110,16 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Priority:** P2 · **Gaps:** no 404 page exists; test should assert empty outlet and console error presence
 - **Sources:** `apps/ministry-maps/src/app/app-routes.ts`
 
-#### UC-NAV-10 — Anonymous can reach Profile and Configuration (⚠ suspected defect)
+#### UC-NAV-10 — Anonymous can reach Profile (⚠ suspected defect)
 
 - **Actor:** Anonymous visitor
 - **Route:** `/profile`
 - **Preconditions (seed):** none
-- **Steps:** 1. Navigate to `/profile` or `/configuration` while signed out
+- **Steps:** 1. Navigate to `/profile` while signed out
 - **Expected UI:** Navigation succeeds (no redirect to `/login`); page shows empty/placeholder state (e.g., Profile shows no name/role)
 - **Expected persistence:** `db.auth` current user is null
 - **Edge cases:** `authGuard` short-circuits because `roles: ['*']` is evaluated before the login check
-- **Priority:** P1 · **Gaps:** `⚠ suspected defect`: these routes should require authentication
+- **Priority:** P1 · **Gaps:** `⚠ suspected defect`: this route should require authentication
 - **Sources:** `apps/ministry-maps/src/app/core/features/auth/guards/auth.guard.ts`
 
 ### Smoke Navigation Links
@@ -164,10 +164,10 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Route:** `/home`
 - **Preconditions (seed):** default baseline; `signInAs('admin')`
 - **Steps:** 1. click `Administrar Pessoas` link
-- **Expected UI:** URL becomes `/users`; page renders the users list
+- **Expected UI:** URL becomes `/congregation/users`; page renders the users list (`users-heading` visible)
 - **Expected persistence:** `db.getDoc(db.collections.users, 'seed-user-admin').role === 'ADMIN'`
 - **Edge cases:** none
-- **Priority:** P0 · **Gaps:** no `data-testid` on Users page heading
+- **Priority:** P0 · **Gaps:** none
 
 #### UC-NAV-15 — Home link opens Designations History
 
@@ -177,6 +177,16 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Steps:** click `Histórico de Designações`
 - **Expected UI:** URL becomes `/territories/designations`; the history heading renders.
 - **Expected persistence:** none
+- **Priority:** P0 · **Coverage:** `navigation.spec.ts`
+
+#### UC-NAV-16 — Home link opens Congregation Administration
+
+- **Actor:** Admin
+- **Route:** `/home` → `/congregation`
+- **Preconditions (seed):** default baseline; sign in as admin
+- **Steps:** click `Administrar Congregação`
+- **Expected UI:** URL becomes `/congregation`; the congregation administration heading renders.
+- **Expected persistence:** `db.getDoc(db.collections.users, 'seed-user-admin').role === 'ADMIN'`
 - **Priority:** P0 · **Coverage:** `navigation.spec.ts`
 
 ## Testability gaps (summary)

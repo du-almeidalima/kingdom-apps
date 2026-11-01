@@ -1,17 +1,17 @@
 import { TestBed } from '@angular/core/testing';
-import { ConfigurationBO, UpdateCongregationCityDTO } from './configuration.bo';
+import { CongregationBO, UpdateCongregationCityDTO } from './congregation.bo';
 import { MockProvider, ngMocks } from 'ng-mocks';
-import { CongregationRepository } from '../../repositories/congregation.repository';
-import { TerritoryRepository } from '../../repositories/territories.repository';
-import { UserStateService } from '../../state/user.state.service';
-import { LoggerService } from '../services/logger/logger.service';
+import { CongregationRepository } from '../../../../repositories/congregation.repository';
+import { TerritoryRepository } from '../../../../repositories/territories.repository';
+import { UserStateService } from '../../../../state/user.state.service';
+import { LoggerService } from '../../../../shared/services/logger/logger.service';
 import { of } from 'rxjs';
-import { elderUser, congregationMock } from '../../../test/mocks';
-import { territoryMockBuilder } from '../../../test/mocks/models/territory.mock';
-import { Territory } from '../../../models/territory';
+import { elderUser, congregationMock } from '../../../../../test/mocks';
+import { territoryMockBuilder } from '../../../../../test/mocks/models/territory.mock';
+import { Territory } from '../../../../../models/territory';
 
-describe('ConfigurationBO', () => {
-  let service: ConfigurationBO;
+describe('CongregationBO', () => {
+  let service: CongregationBO;
   let congregationRepository: jest.Mocked<CongregationRepository>;
   let territoryRepository: jest.Mocked<TerritoryRepository>;
   let userState: UserStateService;
@@ -38,7 +38,7 @@ describe('ConfigurationBO', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        ConfigurationBO,
+        CongregationBO,
         MockProvider(UserStateService),
         MockProvider(LoggerService),
         MockProvider(CongregationRepository, {
@@ -51,7 +51,7 @@ describe('ConfigurationBO', () => {
       ],
     });
 
-    service = TestBed.inject(ConfigurationBO);
+    service = TestBed.inject(CongregationBO);
     congregationRepository = ngMocks.get(CongregationRepository) as jest.Mocked<CongregationRepository>;
     territoryRepository = ngMocks.get(TerritoryRepository) as jest.Mocked<TerritoryRepository>;
     userState = ngMocks.get(UserStateService);

@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ToasterService } from '@kingdom-apps/common-ui';
 
 import { Congregation } from '../../../../../models/congregation';
-import { ConfigurationBO, UpdateCongregationCityDTO } from '../../../../shared/business-objects/configuration.bo';
+import { CongregationBO, UpdateCongregationCityDTO } from '../../bo/congregation/congregation.bo';
 import { UserStateService } from '../../../../state/user.state.service';
 
 interface CityItem {
@@ -134,7 +134,7 @@ interface CityItem {
   `,
 })
 export class ConfigCongregationCitiesComponent implements OnInit {
-  private configurationBO = inject(ConfigurationBO);
+  private congregationBO = inject(CongregationBO);
   private userState = inject(UserStateService);
   private toaster = inject(ToasterService);
 
@@ -148,7 +148,7 @@ export class ConfigCongregationCitiesComponent implements OnInit {
 
   private loadCongregation(): void {
     const user = this.userState.currentUser;
-    this.congregation = user?.congregation || null;
+    this.congregation = user?.congregation?.id ? user.congregation : null;
 
     if (this.congregation) {
       this.cities.set(
@@ -219,7 +219,7 @@ export class ConfigCongregationCitiesComponent implements OnInit {
 
     this.isLoading.set(true);
 
-    this.configurationBO.updateCongregationCities(updates).subscribe({
+    this.congregationBO.updateCongregationCities(updates).subscribe({
       next: () => {
         this.toaster.success('Cities updated successfully!');
         this.isLoading.set(false);

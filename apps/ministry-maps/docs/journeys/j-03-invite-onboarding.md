@@ -17,7 +17,7 @@ Default baseline. Seed invitation links using `seed.factories.buildInvitationLin
 
 ### Leg 1 — Admin creates an invite for an Organizer
 
-1. `signInAs('admin')` → `page.goto('/users')` → click the FAB (`title="Criar Link de Convite"` —
+1. `signInAs('admin')` → `page.goto('/congregation/users')` → click the FAB (`title="Criar Link de Convite"` —
    UC-USERS-10).
 2. In the dialog `Criar Link de Convite`: keep the pre-selected `Organizador` radio (the default —
    UC-USERS-11), type `novo.organizador@example.com` into `Email (opcional)`, click `Criar Link`.

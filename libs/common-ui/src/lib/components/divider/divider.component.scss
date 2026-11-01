@@ -1,0 +1,13 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.divider {
+  width: 100%;
+  border: 0;
+  border-top: 1px solid var(--kui-color-border, #{variables.$light-grey-100});
+  margin: 0;
+}

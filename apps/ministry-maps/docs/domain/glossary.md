@@ -28,11 +28,12 @@ Shared components, so these strings appear on many screens.
 | `Administrar Territórios`                                       | `/home` link                            | → `/territories`                               |
 | `Estatísticas Territórios`                                      | `/home` link                            | → `/territories/statistics`                    |
 | `Histórico de Designações`                                      | `/home` link                            | → `/territories/designations`                  |
-| `Pessoas`                                                       | `/home` card title                      |                                                |
-| `Administrar pessoas associadas a sua congregação`              | `/home` card subtitle                   |                                                |
-| `Administrar Pessoas`                                           | `/home` link                            | → `/users`                                     |
+| `Congregação`                                                   | `/home` card title                      |                                                |
+| `Administrar congregação e publicadores`                        | `/home` card subtitle                   |                                                |
+| `Administrar Pessoas`                                           | `/home` link                            | → `/congregation/users`                        |
+| `Administrar Congregação`                                       | `/home` link                            | → `/congregation` (`ADMIN` / `APP_ADMIN` only) |
 | `Contatados` / `Ninguém atendeu` / `Mudaram` / `Não visitar` / `Revisita` | Designations history outcome labels | Short labels for visit outcomes. |
-| `Criar Link de Convite`                                         | `/users` floating action button `title` | `ADMIN` only                                   |
+| `Criar Link de Convite`                                         | `/congregation/users` FAB `title`       | `ADMIN` only                                   |
 
 ## 3. Visit dialog labels (`Concluir Visita` / `Editar Visita`)
 
@@ -100,6 +101,6 @@ Used in the manage dialog, the CSV export and the list item's accessible text.
 - `apps/ministry-maps/src/app/features/home/pages/home-page/home-page.component.html`
 - `apps/ministry-maps/src/app/features/work/components/work-item-complete-dialog/work-item-complete-dialog.component.ts`
 - `apps/ministry-maps/src/app/shared/pipes/territory-icon-translator/territory-icon-translator.pipe.ts`
-- `apps/ministry-maps/src/app/features/users/pages/users-page/users-page.component.html`
+- `apps/ministry-maps/src/app/features/congregation/pages/users-page/users-page.component.html`
 - `libs/common-ui/src/lib/components/confirm-dialog/confirm-dialog.component.ts`
 - `apps/ministry-maps/src/models/enums/role.ts`

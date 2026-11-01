@@ -91,10 +91,11 @@ export class WorkPageComponent implements OnInit, OnDestroy {
     const designationTerritoryUpdate$ = this.designationRepository.update(updatedDesignation);
 
     // Update Territory lastVisit and history
-    const { status: _, ...territory } = designationTerritory;
-    territory.lastVisit = new Date();
-
-    const territoryUpdate$ = this.territoryRepository.update(territory);
+    const territoryUpdate$ = this.territoryRepository.update({
+      id: designationTerritory.id,
+      lastVisit: new Date(),
+      history: designationTerritory.history,
+    });
     let visitHistoryUpdate$ = of(undefined) as Observable<void>;
 
     // Updating also the territory with the new history entry

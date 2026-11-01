@@ -1,7 +1,7 @@
 import { Locator, Page } from '@playwright/test';
 
 /**
- * Page object for the `/configuration` route ("Manage Congregation Cities").
+ * Page object for the `/congregation` route ("Manage Congregation Cities").
  *
  * Exposes locators for the city list, inline editing inputs, buttons (`+ Add City`,
  * `Save Changes`, `Edit`, `Delete`, `Cancel`), and the no-congregation banner.
@@ -29,9 +29,9 @@ export class ConfigurationPage {
     this.noCongregationBanner = page.getByTestId('config-no-congregation-banner');
   }
 
-  /** Navigate to the configuration page. */
+  /** Navigate to the congregation administration page. */
   async goto(): Promise<void> {
-    await this.page.goto('/configuration');
+    await this.page.goto('/congregation');
   }
 
   /** Locator for a city row matching `name`. */

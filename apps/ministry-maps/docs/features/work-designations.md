@@ -343,6 +343,15 @@ The visit write-back now performs a fourth sequenced write to the header progres
 - **Expected persistence:** Visit completes; missing summary remains absent and does not fail the write-back flow.
 - **Priority:** P1 · **Coverage:** `work-designation.spec.ts`
 
+#### UC-WORK-30 — Completing, editing, and undoing a visit preserves current territory city and metadata
+
+- **Actor:** Anonymous publisher
+- **Route:** `/work/:id`
+- **Preconditions (seed):** A territory and active designation seeded with initial `city` / `address` / `note` / `positionIndex`, followed by a direct Firestore update mutating `territories/{id}` (`city`, `address`, `note`, `positionIndex`) after the designation snapshot was created.
+- **Steps:** 1. Open `/work/:id` and complete the visit → 2. Edit the completed visit's notes → 3. Undo the completed visit
+- **Expected persistence:** Completing, editing, and undoing the visit update only `lastVisit` and `recentHistory` on `territories/{id}`; the parent territory's updated `city`, `address`, `note`, and `positionIndex` remain intact throughout.
+- **Priority:** P0 · **Coverage:** `work-designation.spec.ts`
+
 ## Testability gaps (summary)
 
 - **Zero `data-testid`s exist on `/work/:id`** — the four app-wide ids (`territories-heading`, `territories-list`,

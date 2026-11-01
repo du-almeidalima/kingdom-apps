@@ -66,11 +66,11 @@ apps/ministry-maps/e2e/
 │   ├── home.page.ts              # home hub
 │   ├── work.page.ts              # receiving designation page
 │   ├── work-item-complete-dialog.page.ts # visit completion/edit dialog
-│   ├── users.page.ts             # /users list locators
+│   ├── users.page.ts             # /congregation/users list locators
 │   ├── user-edit-dialog.page.ts  # user edit overlay
 │   ├── invite-create-dialog.page.ts # invite link creation overlay
 │   ├── profile.page.ts           # /profile locators
-│   └── configuration.page.ts     # /configuration locators
+│   └── configuration.page.ts     # /congregation locators
 └── tests/
     ├── smoke.spec.ts             # baseline integrity checks
     ├── auth.spec.ts              # auth rendering, guards, and session lifecycle

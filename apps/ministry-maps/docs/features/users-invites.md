@@ -1,9 +1,9 @@
 # Users & invitations (`UC-USERS`)
 
-This document describes the behavioural use cases for the `/users` ("Pessoas") screen: the congregation's
+This document describes the behavioural use cases for the `/congregation/users` ("Pessoas") screen: the congregation's
 user list, the edit-user dialog, the delete-user confirmation, and invitation-link creation/sharing.
 
-**Route:** `/users`
+**Route:** `/congregation/users`
 **Actors:** `ADMIN`, `ELDER`, `ORGANIZER`, `SUPERINTENDENT`, `APP_ADMIN` can reach the page (see
 [`../domain/roles-and-permissions.md`](../domain/roles-and-permissions.md)); `PUBLISHER` is redirected to
 `/welcome`; anonymous visitors are redirected to `/login`. Within the page, only `APP_ADMIN`,
@@ -13,7 +13,7 @@ shapes referenced below are defined in [`../domain/data-model.md`](../domain/dat
 English vocabulary is in [`../domain/glossary.md`](../domain/glossary.md).
 
 The invite flow (creation → composed link → sign-in via `/sign-in/:inviteId` → consumption) spans two
-feature areas; this document only covers the `/users`-side half (creation and sharing). Consumption of the
+feature areas; this document only covers the `/congregation/users`-side half (creation and sharing). Consumption of the
 link and the resulting account creation belong to `UC-AUTH` (`features/auth-onboarding.md`) and are out of
 scope here except where needed to explain what a created `invitation_links` doc means for a later test.
 
@@ -22,9 +22,9 @@ scope here except where needed to explain what a created `invitation_links` doc 
 #### UC-USERS-01 — List is scoped to the signed-in user's congregation and ordered by role priority
 
 - **Actor:** Admin
-- **Route:** `/users`
+- **Route:** `/congregation/users`
 - **Preconditions (seed):** default baseline (8 users since WP-01: `seed-user-admin` `ADMIN`, `seed-user-publisher-1..3` `PUBLISHER`, plus `seed-user-elder` `ELDER`, `seed-user-organizer` `ORGANIZER`, `seed-user-superintendent` `SUPERINTENDENT`, `seed-user-app-admin` `APP_ADMIN`)
-- **Steps:** 1. sign in as admin → 2. open `/users`
+- **Steps:** 1. sign in as admin → 2. open `/congregation/users`
 - **Expected UI:** all 8 baseline users render as `kingdom-apps-user-list-item` rows. `UsersPageComponent.sortUserFn` sorts by a fixed priority map — `APP_ADMIN`(1) → `SUPERINTENDENT`(2) → `ADMIN`(3) → `ELDER`(4) → `ORGANIZER`(5) → `PUBLISHER`(6), unknown role → 99 — and `Array.prototype.sort` is stable, so same-priority users keep whatever relative order the Firestore query returned. The baseline therefore renders in role-priority order: Daniel Ferreira (`APP_ADMIN`), Felipe Rodrigues (`SUPERINTENDENT`), Carlos Almeida (`ADMIN`), Marcos Oliveira (`ELDER`), Ricardo Santos (`ORGANIZER`), then the 3 `PUBLISHER`s (priority 6) — in practice (no explicit `orderBy` in `getAllByCongregation`) the emulator returns Ana Souza, Pedro Lima, Mariana Costa in ascending document-id order
 - **Expected persistence:** `db.getDoc(db.collections.users, seed.ids.adminUser).role === 'ADMIN'`; `db.getCollectionDocs(db.collections.users)` has length `8`
 - **Edge cases:** the tie-break order among same-role users is **not** a documented contract (no `orderBy` clause exists) — a test asserting the exact order of the 3 publishers is locking in incidental Firestore behaviour, not a guarantee; re-verify if the seeder or query changes
@@ -33,9 +33,9 @@ scope here except where needed to explain what a created `invitation_links` doc 
 #### UC-USERS-02 — Each row shows initials, name and the translated role badge
 
 - **Actor:** Admin
-- **Route:** `/users`
+- **Route:** `/congregation/users`
 - **Preconditions (seed):** default baseline
-- **Steps:** 1. open `/users` → 2. inspect the Carlos Almeida row
+- **Steps:** 1. open `/congregation/users` → 2. inspect the Carlos Almeida row
 - **Expected UI:** the figure caption shows initials `CA` (`getUserInitials`: first letter of the first two space-separated name tokens — a single-word name instead yields its first two characters without uppercasing the second, e.g. `'Maria'` → `Ma`; a missing/`undefined` name falls back to `XX`); the `<h2>` shows `Carlos Almeida`; the badge shows the `getTranslatedRole` label `Admin` with CSS class `user-item__privilege-badge--admin` (`role.toLowerCase()`)
 - **Expected persistence:** `db.getDoc(db.collections.users, seed.ids.adminUser)` has `name === 'Carlos Almeida'` and `role === 'ADMIN'`
 - **Edge cases:** the badge class is derived from the raw enum value lower-cased, not from the pt-BR label — a role added to `RoleEnum` without a matching SCSS class (`user-item__privilege-badge--<value>`) renders text with no badge styling, not an error
@@ -44,9 +44,9 @@ scope here except where needed to explain what a created `invitation_links` doc 
 #### UC-USERS-03 — A user from another congregation is never listed
 
 - **Actor:** Admin
-- **Route:** `/users`
+- **Route:** `/congregation/users`
 - **Preconditions (seed):** default baseline; plus `buildCongregation()` (a second congregation) and `buildUser({ congregationId: <second congregation id>, role: 'ADMIN' })` in it
-- **Steps:** 1. sign in as admin (of `seed-congregation`) → 2. open `/users`
+- **Steps:** 1. sign in as admin (of `seed-congregation`) → 2. open `/congregation/users`
 - **Expected UI:** exactly the 8 baseline rows render; the foreign user never appears, regardless of its role
 - **Expected persistence:** `db.getCollectionDocs(db.collections.users)` returns `9` total docs; a query built as `db.queryWhere(db.collections.users, 'congregation', '==', db.firestore.collection('congregations').doc(seed.ids.congregation))` returns exactly the `8` baseline users
 - **Edge cases:** the scoping query (`getAllByCongregation`) compares `DocumentReference` equality only — it does not additionally filter by role, so even a foreign `APP_ADMIN` is excluded from this list (congregation scoping is unconditional)
@@ -57,9 +57,9 @@ scope here except where needed to explain what a created `invitation_links` doc 
 #### UC-USERS-04 — Dialog fields and role options; `SUPERINTENDENT` is offered only to an `APP_ADMIN` editor
 
 - **Actor:** Admin
-- **Route:** `/users`
+- **Route:** `/congregation/users`
 - **Preconditions (seed):** default baseline
-- **Steps:** 1. sign in as admin → 2. open `/users` → 3. row menu (`⋮`) on Ana Souza → `Editar`
+- **Steps:** 1. sign in as admin → 2. open `/congregation/users` → 3. row menu (`⋮`) on Ana Souza → `Editar`
 - **Expected UI:** dialog title `Editar Usuário`; fields `Nome` (text input, prefilled `Ana Souza`) and `Permissão` (a `kingdom-apps-icon-radio` group, prefilled to the user's current role). As an `ADMIN` editor, exactly 4 options render, in this order: `Publicador` ("Permisão mais básica, apenas está associado a uma congregação."), `Organizador` ("Indicada para Publicadores qualificados ou Servos Ministeriais; Pode designar e atualizar territórios."), `Ancião` ("Tem todas as permissões de um Organizador, mas também pode adicionar/remover territórios e ver pessoas da congregação."), `Administrador` ("Permissões geralmente dada ao SS. Tem acesso total aos mapas da congregação além de poder adicionar, excluir e alterar permissões de usuários."); `Superintendente` is **not** rendered (`canEditAdminRoles = currentUser.role.includes('APP_ADMIN')` is `false` for an `ADMIN` editor). Footer: `Cancelar` / `Salvar` (spinner while submitting)
 - **Expected persistence:** N/A — opening the dialog performs no write
 - **Edge cases:** `canEditAdminRoles` is computed once in the constructor from a strict equality check on the editor's own role (`userState.currentUser?.role === RoleEnum.APP_ADMIN`) — fixed 2026-08 from a fragile `String.prototype.includes` substring check
@@ -68,7 +68,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 #### UC-USERS-05 — The edit form is disabled only for admin-level users edited by non-`APP_ADMIN` editors (fixed 2026-08)
 
 - **Actor:** Admin
-- **Route:** `/users`
+- **Route:** `/congregation/users`
 - **Preconditions (seed):** default baseline
 - **Steps:** 1. sign in as admin → 2. row menu on Ana Souza (`PUBLISHER`) → `Editar` → 3. observe the `Nome` input and `Permissão` radios → 4. click `Salvar` without changes
 - **Expected UI:** the form is fully interactive — editing a non-admin-level user (`PUBLISHER`/`ORGANIZER`/`ELDER`) as a non-`APP_ADMIN` editor is allowed, matching the Firestore rules (UC-RULES-11: same-congregation `ADMIN` edits of non-protected users are permitted). `Salvar` closes the dialog
@@ -79,7 +79,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 #### UC-USERS-06 — An `APP_ADMIN` editor gets a usable form and edits persist
 
 - **Actor:** App Admin (harness extension needed — only `admin`/`publisher` exist in `signInAs` today)
-- **Route:** `/users`
+- **Route:** `/congregation/users`
 - **Preconditions (seed):** default baseline; an extra seeded user with `role: 'APP_ADMIN'`
 - **Steps:** 1. sign in as that `APP_ADMIN` user → 2. row menu on Ana Souza → `Editar` → 3. change `Nome` to `Ana Souza Silva`, select `Ancião` → 4. `Salvar`
 - **Expected UI:** both fields are interactive (form not disabled); the `Superintendente` option is also visible (per UC-USERS-04's gate); dialog closes on save; the list re-renders immediately (live `collectionData`) showing the new name and the `Ancião` badge, and the row moves up (priority 4, above the two remaining publishers)
@@ -90,7 +90,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 #### UC-USERS-07 — Editing your own account is not special-cased
 
 - **Actor:** Admin
-- **Route:** `/users`
+- **Route:** `/congregation/users`
 - **Preconditions (seed):** default baseline
 - **Steps:** 1. sign in as admin → 2. row menu on **Carlos Almeida** (the signed-in admin's own row) → `Editar`
 - **Expected UI:** the dialog opens exactly as for any other user — there is no `data.user.id === currentUser.id` check anywhere in `UsersEditDialogComponent`. Because the edited user's role is `ADMIN` (an admin-level role) and the editor is not `APP_ADMIN`, the form is disabled per UC-USERS-05's gate; there is no "you are editing your own account" warning or confirmation of any kind
@@ -103,9 +103,9 @@ scope here except where needed to explain what a created `invitation_links` doc 
 #### UC-USERS-08 — Delete confirmation dialog and Firestore doc removal
 
 - **Actor:** Admin
-- **Route:** `/users`
+- **Route:** `/congregation/users`
 - **Preconditions (seed):** default baseline (`seed-user-publisher-1`, Ana Souza)
-- **Steps:** 1. sign in as admin → 2. open `/users` → 3. row menu on Ana Souza → `Apagar` → 4. observe the confirmation dialog → 5. `Confirmar`
+- **Steps:** 1. sign in as admin → 2. open `/congregation/users` → 3. row menu on Ana Souza → `Apagar` → 4. observe the confirmation dialog → 5. `Confirmar`
 - **Expected UI:** dialog title `Apagar Usuário`; body exactly `Você realmente deseja apagar esse Usuário?` then `Essa ação não poderá ser desfeita.`; footer buttons `Cancelar` / `Confirmar`; after confirming, the row disappears from the list immediately (live `collectionData` listener, no reload needed)
 - **Expected persistence:** `db.getDoc(db.collections.users, seed.ids.publisherUsers[0])` is `undefined`
 - **Edge cases:** clicking `Cancelar` closes the dialog with no request sent — `userRepository.delete` is never called and the row remains
@@ -114,7 +114,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 #### UC-USERS-09 — ⚠ suspected defect: deleting a user removes the Firestore doc but the Auth account survives
 
 - **Actor:** Admin
-- **Route:** `/users`
+- **Route:** `/congregation/users`
 - **Preconditions (seed):** default baseline (`seed-user-publisher-1`, Ana Souza — every seeded user also has an Auth emulator account, password `test-password-123`)
 - **Steps:** 1–5. same as UC-USERS-08 (delete Ana Souza and confirm)
 - **Expected UI:** same as UC-USERS-08 — the row disappears
@@ -127,9 +127,9 @@ scope here except where needed to explain what a created `invitation_links` doc 
 #### UC-USERS-10 — "Criar Link de Convite" is an `ADMIN`-only floating action button
 
 - **Actor:** Admin
-- **Route:** `/users`
+- **Route:** `/congregation/users`
 - **Preconditions (seed):** default baseline
-- **Steps:** 1. sign in as admin → 2. open `/users` → 3. observe the floating action button
+- **Steps:** 1. sign in as admin → 2. open `/congregation/users` → 3. observe the floating action button
 - **Expected UI:** a green FAB with `title="Criar Link de Convite"` and a plus icon renders, gated by `*libAuthorize="CREATE_INVITE_LINK_ALLOWED"` where `CREATE_INVITE_LINK_ALLOWED = [RoleEnum.ADMIN]`; clicking it opens the invite-create dialog (UC-USERS-11)
 - **Expected persistence:** N/A (UI-only gate); `db.getDoc(db.collections.users, seed.ids.adminUser).role === 'ADMIN'`
 - **Edge cases:** `APP_ADMIN` also sees the FAB via the directive's universal role bypass even though it is not in the listed array; `SUPERINTENDENT`, `ELDER`, `ORGANIZER` never see it (see UC-USERS-15)
@@ -138,7 +138,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 #### UC-USERS-11 — Invite dialog defaults to `ORGANIZER`, email is optional, and the persisted doc's `congregation` is a `DocumentReference`
 
 - **Actor:** Admin
-- **Route:** `/users`
+- **Route:** `/congregation/users`
 - **Preconditions (seed):** default baseline
 - **Steps:** 1. sign in as admin → 2. click the FAB → 3. observe the role radios and default selection → 4. optionally type an email into `Email (opcional)` → 5. click `Criar Link`
 - **Expected UI:** dialog title `Criar Link de Convite`; `Email (opcional)` input with helper text `Para criar um link que só possa ser usado com esse email.`; `Permissão` radio group offering only **`Publicador`, `Organizador`, `Ancião`** (no `Administrador`/`Superintendente`/`App Admin.` options here, unlike the edit dialog), with `Organizador` pre-selected (`role: formBuilder.control(RoleEnum.ORGANIZER, { nonNullable: true })`); submit button `Criar Link` (spinner while submitting); on success the dialog swaps to the copy-link view (UC-USERS-13)
@@ -149,9 +149,9 @@ scope here except where needed to explain what a created `invitation_links` doc 
 #### UC-USERS-12 — Invite creation with no congregation is effectively unreachable via the UI; the guard only fires when the whole user is `null`
 
 - **Actor:** Admin (hypothetical — see Edge cases)
-- **Route:** `/users`
+- **Route:** `/congregation/users`
 - **Preconditions (seed):** none reproducible through normal seed + UI flow
-- **Steps:** none — this state cannot be reached by signing in and navigating, because by the time `/users` renders and the FAB is visible, `UserStateService.currentUser` is always a fully resolved, non-null `User`
+- **Steps:** none — this state cannot be reached by signing in and navigating, because by the time `/congregation/users` renders and the FAB is visible, `UserStateService.currentUser` is always a fully resolved, non-null `User`
 - **Expected UI:** N/A
 - **Expected persistence:** N/A
 - **Edge cases:** `InviteBO.createInviteLink` guards with `if (!this.userState.currentUser?.congregation) { ...; return EMPTY; }`. This only evaluates truthy when `currentUser` itself is `null`/`undefined` — a merely-**empty** congregation is not enough: `FirebaseUserDatasourceService.resolveUser` always backstops a user doc with a missing `congregation` field by substituting a **truthy** `EMPTY_CONGREGATION` object (`{ id: '', name: '', cities: [], ... }`), so a real signed-in user whose Firestore doc lacks a congregation still passes this guard and proceeds to call `add()` with `congregation.id === ''` — which would call `createDocumentRef('')` and likely throw (Firestore document ids must be non-empty), an unhandled case distinct from the "no doc written, logged error" premise. The only way the documented `EMPTY`+log branch is actually exercised is `currentUser === null`, which the existing unit test `invite.bo.spec.ts` ("should return EMPTY when user has no congregation") reproduces via `userState.setUser(null)` — i.e. it tests "no user", not "user with no congregation". Reaching `currentUser === null` while the invite dialog is open is not possible through normal navigation (the `authGuard` and `*libAuthorize` both require a resolved user with an `ADMIN` role before the FAB even renders)
@@ -162,7 +162,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 #### UC-USERS-13 — The generated link is `${environment.baseUrl}sign-in/{id}` and is copyable to the clipboard
 
 - **Actor:** Admin
-- **Route:** `/users`
+- **Route:** `/congregation/users`
 - **Preconditions (seed):** default baseline; continues right after UC-USERS-11's successful submit
 - **Steps:** 1. after `Criar Link` succeeds → 2. observe the copy-link screen → 3. click the copy icon button
 - **Expected UI:** the dialog view swaps to `kingdom-apps-invite-create-dialog-copy-link` (same dialog `title` `Criar Link de Convite`); heading `Link de convite criado`; paragraph `Compartilhe esse link com o irmão que vai acessar o aplicativo.`; a `lib-copy-text-block` shows the composed link `${environment.baseUrl}sign-in/{newDocId}` with help text `Esse link só pode ser usado uma vez.`; clicking the copy button calls Angular CDK `Clipboard.copy()` and swaps the icon to a checkmark for 2 seconds; footer buttons `Fechar` / `Enviar` (paper-plane icon, UC-USERS-14)
@@ -173,7 +173,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 #### UC-USERS-14 — "Enviar" builds a `whatsapp://` link; desktop opens a new window, mobile navigates in place
 
 - **Actor:** Admin
-- **Route:** `/users`
+- **Route:** `/congregation/users`
 - **Preconditions (seed):** default baseline; continues right after UC-USERS-13
 - **Steps:** 1. on the copy-link screen, click `Enviar`
 - **Expected UI:** `handleSendInvitationLink` builds the message `Por favor, acesse o link abaixo e conecte com sua conta Google para acessar o MM.%0a%0a{link}` and passes it to `createSendWhatsAppLink`, producing `whatsapp://send?text=...` (a custom, non-`http(s)` protocol URL, and only the two `%0a` newlines are encoded — accented pt-BR characters and the link itself are left raw). `isMobileDevice()` tests the `User-Agent` against `/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i`: on a **desktop** UA it calls `window.open(builtUrl)`; on a **mobile** UA it instead sets `window.location.href = builtUrl` (a same-tab navigation, not a new window)
@@ -186,39 +186,39 @@ scope here except where needed to explain what a created `invitation_links` doc 
 #### UC-USERS-15 — `ORGANIZER`/`ELDER` see the list but not the edit/delete menu or the invite FAB
 
 - **Actor:** Organizer (harness extension needed — only `admin`/`publisher` exist in `signInAs` today)
-- **Route:** `/users`
+- **Route:** `/congregation/users`
 - **Preconditions (seed):** default baseline; an extra user with `role: 'ORGANIZER'` in `seed-congregation`
-- **Steps:** 1. sign in as that user → 2. open `/users`
+- **Steps:** 1. sign in as that user → 2. open `/congregation/users`
 - **Expected UI:** the page and its rows render normally — `ORGANIZER` is included in the route's allowed roles (`USERS_ALLOWED_ROLES = [ORGANIZER, ADMIN, ELDER, SUPERINTENDENT]`). However every row's `⋮` overflow trigger (`*libAuthorize="[APP_ADMIN, SUPERINTENDENT, ADMIN]"`) is absent, so `Editar`/`Apagar` are unreachable from any row (including the organizer's own); the `Criar Link de Convite` FAB (`[ADMIN]`) is also absent
 - **Expected persistence:** `db.getDoc(db.collections.users, thatUid).role === 'ORGANIZER'`
-- **Edge cases:** `ELDER` gets the identical reduced UI on this screen — unlike `/territories`, where `ELDER` can edit but `ORGANIZER` cannot (see [`../domain/roles-and-permissions.md §4`](../domain/roles-and-permissions.md#4-in-template-authorization---libauthorize)), `/users`' overflow menu excludes both `ELDER` and `ORGANIZER` equally; `SUPERINTENDENT` sits in between — it gets the overflow menu (edit/delete) but **not** the invite FAB, since `CREATE_INVITE_LINK_ALLOWED` is `[ADMIN]` only
+- **Edge cases:** `ELDER` gets the identical reduced UI on this screen — unlike `/territories`, where `ELDER` can edit but `ORGANIZER` cannot (see [`../domain/roles-and-permissions.md §4`](../domain/roles-and-permissions.md#4-in-template-authorization---libauthorize)), `/congregation/users`' overflow menu excludes both `ELDER` and `ORGANIZER` equally; `SUPERINTENDENT` sits in between — it gets the overflow menu (edit/delete) but **not** the invite FAB, since `CREATE_INVITE_LINK_ALLOWED` is `[ADMIN]` only
 - **Priority:** P1 · **Gaps:** `signInAs('organizer')`/`signInAs('elder')` harness extension needed
 
 #### UC-USERS-16 — Publisher is redirected to `/welcome`
 
 - **Actor:** Publisher
-- **Route:** `/users`
+- **Route:** `/congregation/users`
 - **Preconditions (seed):** default baseline
-- **Steps:** 1. sign in as publisher → 2. `page.goto('/users')`
+- **Steps:** 1. sign in as publisher → 2. `page.goto('/congregation/users')`
 - **Expected UI:** the URL becomes `/welcome` (`authGuard` step 2a: `role === PUBLISHER && path !== 'welcome'`)
 - **Expected persistence:** N/A (guard-only, no write); assert `db.getCollectionDocs(db.collections.users)` is unchanged (still `8` baseline docs) to prove no side effect
-- **Edge cases:** this is the same redirect target as every other guarded admin route (`/territories`, `/home`) — publishers are locked out of `/users` uniformly
+- **Edge cases:** this is the same redirect target as every other guarded admin route (`/territories`, `/home`) — publishers are locked out of `/congregation/users` uniformly
 - **Priority:** P0 · **Gaps:** none
 
 #### UC-USERS-17 — Anonymous access redirects to `/login`
 
 - **Actor:** Anonymous
-- **Route:** `/users`
+- **Route:** `/congregation/users`
 - **Preconditions (seed):** none required
-- **Steps:** 1. `page.goto('/users')` without signing in
+- **Steps:** 1. `page.goto('/congregation/users')` without signing in
 - **Expected UI:** the URL becomes `/login`
 - **Expected persistence:** N/A (auth guard, no Firestore write); assert `db.getCollectionDocs(db.collections.users)` is unchanged
-- **Edge cases:** contrast with `/profile`/`/configuration`, which use `roles: ['*']` and do **not** redirect anonymous visitors (see [`../domain/roles-and-permissions.md §3.1`](../domain/roles-and-permissions.md#31--suspected-defect--roles--short-circuits-the-login-check)) — `/users` redirects because its `data.roles` is a concrete list, not `['*']`
+- **Edge cases:** contrast with `/profile`, which uses `roles: ['*']` and does **not** redirect anonymous visitors (see [`../domain/roles-and-permissions.md §3.1`](../domain/roles-and-permissions.md#31--suspected-defect--roles--short-circuits-the-login-check)) — `/congregation/users` redirects because its `data.roles` is a concrete list, not `['*']`
 - **Priority:** P0 · **Gaps:** none
 
 ## Testability gaps (summary)
 
-- Zero `data-testid`s exist anywhere on `/users` — the list, list-item menu, edit dialog, invite dialog and
+- Zero `data-testid`s exist anywhere on `/congregation/users` — the list, list-item menu, edit dialog, invite dialog and
   copy-link screen must all be selected by pt-BR text, role, or `title` attribute.
 - `invitation_links` is not in `db.collections` and has no `buildInvitationLink` factory — every assertion
   against it today must use the raw `db.firestore.collection('invitation_links')` escape hatch
@@ -247,16 +247,16 @@ scope here except where needed to explain what a created `invitation_links` doc 
 
 ## Sources
 
-- `apps/ministry-maps/src/app/features/users/pages/users-page/users-page.component.ts`
-- `apps/ministry-maps/src/app/features/users/pages/users-page/users-page.component.html`
-- `apps/ministry-maps/src/app/features/users/components/user-list-item/user-list-item.component.ts`
-- `apps/ministry-maps/src/app/features/users/components/user-edit-dialog/users-edit-dialog.component.ts`
-- `apps/ministry-maps/src/app/features/users/components/invite-create-dialog/invite-create-dialog.component.ts`
-- `apps/ministry-maps/src/app/features/users/components/invite-create-dialog/invite-create-form/invite-create-dialog-form.component.ts`
-- `apps/ministry-maps/src/app/features/users/components/invite-create-dialog/invite-create-copy-link/invite-create-dialog-copy-link.component.ts`
-- `apps/ministry-maps/src/app/features/users/bo/invite/invite-bo.service.ts`, `invite.bo.spec.ts`
-- `apps/ministry-maps/src/app/features/users/config/users-roles.config.ts`
-- `apps/ministry-maps/src/app/features/users/users-routes.module.ts`
+- `apps/ministry-maps/src/app/features/congregation/pages/users-page/users-page.component.ts`
+- `apps/ministry-maps/src/app/features/congregation/pages/users-page/users-page.component.html`
+- `apps/ministry-maps/src/app/features/congregation/components/user-list-item/user-list-item.component.ts`
+- `apps/ministry-maps/src/app/features/congregation/components/user-edit-dialog/users-edit-dialog.component.ts`
+- `apps/ministry-maps/src/app/features/congregation/components/invite-create-dialog/invite-create-dialog.component.ts`
+- `apps/ministry-maps/src/app/features/congregation/components/invite-create-dialog/invite-create-form/invite-create-dialog-form.component.ts`
+- `apps/ministry-maps/src/app/features/congregation/components/invite-create-dialog/invite-create-copy-link/invite-create-dialog-copy-link.component.ts`
+- `apps/ministry-maps/src/app/features/congregation/bo/invite/invite-bo.service.ts`, `invite.bo.spec.ts`
+- `apps/ministry-maps/src/app/features/congregation/config/users-roles.config.ts`
+- `apps/ministry-maps/src/app/features/congregation/congregation.routes.ts`
 - `apps/ministry-maps/src/app/repositories/firebase/firebase-user-datasource.service.ts`
 - `apps/ministry-maps/src/app/repositories/firebase/firebase-invitation-link-datasource.service.ts`
 - `apps/ministry-maps/src/app/repositories/user.repository.ts`, `invitation-link.repository.ts`

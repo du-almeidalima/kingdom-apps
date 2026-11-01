@@ -1,0 +1,68 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+
+:host {
+  display: inline-block;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 3.2rem;
+  padding: 0.4rem 1.2rem;
+  border-radius: 9999px;
+  border: 1px solid var(--kui-color-border, #{variables.$light-grey-100});
+  background-color: var(--kui-color-surface-elevated, #{variables.$white-100});
+  color: var(--kui-color-text, #{variables.$text});
+  font-size: 1.4rem;
+  line-height: 1.2;
+
+  &__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    margin-right: -0.4rem;
+    padding: 0.2rem;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--kui-color-text-muted, #{variables.$text-medium});
+    cursor: pointer;
+    transition: variables.$background-transition;
+
+    &:hover,
+    &:active {
+      background-color: var(--kui-color-surface-hover, #{variables.$white-300});
+      color: var(--kui-color-text, #{variables.$text});
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--kui-color-focus, #{variables.$primary-green});
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      color: var(--kui-color-text-disabled, #{variables.$text-low});
+      cursor: not-allowed;
+    }
+  }
+
+  &__remove-icon {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  &--disabled {
+    background-color: var(--kui-color-control-disabled, #{variables.$white-400});
+    color: var(--kui-color-text-disabled, #{variables.$text-low});
+    border-color: var(--kui-color-border, #{variables.$light-grey-100});
+  }
+}

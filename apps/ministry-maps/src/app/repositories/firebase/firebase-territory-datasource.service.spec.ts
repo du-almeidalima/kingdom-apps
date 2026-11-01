@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { collection, collectionGroup, doc, getDocs, query } from 'firebase/firestore';
+import { collection, collectionGroup, deleteDoc, doc, getDoc, getDocs, query, updateDoc } from 'firebase/firestore';
 import { lastValueFrom, of } from 'rxjs';
 
 import { FirebaseTerritoryDatasourceService } from './firebase-territory-datasource.service';
@@ -13,9 +13,12 @@ jest.mock('firebase/firestore', () => ({
   ...jest.requireActual('firebase/firestore'),
   collection: jest.fn(),
   collectionGroup: jest.fn(),
+  deleteDoc: jest.fn(),
   doc: jest.fn(),
+  getDoc: jest.fn(),
   getDocs: jest.fn(),
   query: jest.fn(),
+  updateDoc: jest.fn(),
 }));
 
 jest.mock('./firebase-rxjs-interop', () => ({
@@ -135,5 +138,53 @@ describe('FirebaseTerritoryDatasourceService — getAllByCongregation with histo
 
     expect(getDocs).not.toHaveBeenCalled();
     expect(result[0].history).toBeUndefined();
+  });
+
+  it('patches only id, lastVisit and recentHistory when updating visit summary fields', async () => {
+    (updateDoc as jest.Mock).mockResolvedValue(undefined);
+    const visitDate = new Date(2024, 5, 10);
+    const entry = historyEntry('H1', 'T1');
+
+    await lastValueFrom(
+      service.update({
+        id: 'T1',
+        lastVisit: visitDate,
+        history: [entry],
+      }),
+    );
+
+    expect(updateDoc).toHaveBeenCalledWith(
+      { id: 'T1' },
+      {
+        id: 'T1',
+        lastVisit: visitDate,
+        recentHistory: [entry],
+      },
+    );
+  });
+
+  it('updates only id and recentHistory on the parent territory when deleting a visit history entry', async () => {
+    const h1 = historyEntry('H1', 'T1');
+    const h2 = historyEntry('H2', 'T1');
+    (deleteDoc as jest.Mock).mockResolvedValue(undefined);
+    (updateDoc as jest.Mock).mockResolvedValue(undefined);
+    (getDoc as jest.Mock).mockResolvedValue({
+      data: () => ({
+        ...territory('T1'),
+        city: 'Renamed City',
+        recentHistory: [h1, h2],
+      }),
+    });
+
+    await lastValueFrom(service.deleteVisitHistory('T1', 'H2'));
+
+    expect(deleteDoc).toHaveBeenCalledWith({ id: 'H2' });
+    expect(updateDoc).toHaveBeenCalledWith(
+      { id: 'T1' },
+      {
+        id: 'T1',
+        recentHistory: [h1],
+      },
+    );
   });
 });

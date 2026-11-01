@@ -4,7 +4,7 @@ import { MockBuilder, MockRender, ngMocks } from 'ng-mocks';
 import { ToasterService } from '@kingdom-apps/common-ui';
 
 import { ConfigCongregationCitiesComponent } from './config-congregation-cities.component';
-import { ConfigurationBO } from '../../../../shared/business-objects/configuration.bo';
+import { CongregationBO } from '../../bo/congregation/congregation.bo';
 import { UserStateService } from '../../../../state/user.state.service';
 import { congregationMock, userMockBuilder } from '../../../../../test/mocks';
 
@@ -17,7 +17,7 @@ describe('ConfigCongregationCitiesComponent', () => {
   const render = () => {
     const fixture = MockRender(ConfigCongregationCitiesComponent, undefined, {
       providers: [
-        { provide: ConfigurationBO, useValue: { updateCongregationCities } },
+        { provide: CongregationBO, useValue: { updateCongregationCities } },
         { provide: ToasterService, useValue: toasterMock },
         {
           provide: UserStateService,
@@ -52,7 +52,7 @@ describe('ConfigCongregationCitiesComponent', () => {
   it('shows the no-congregation banner when the user has no congregation', () => {
     const fixture = MockRender(ConfigCongregationCitiesComponent, undefined, {
       providers: [
-        { provide: ConfigurationBO, useValue: { updateCongregationCities } },
+        { provide: CongregationBO, useValue: { updateCongregationCities } },
         {
           provide: UserStateService,
           useValue: (() => {

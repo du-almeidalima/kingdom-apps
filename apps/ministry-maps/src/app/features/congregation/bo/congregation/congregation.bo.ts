@@ -1,11 +1,11 @@
 import { inject, Injectable } from '@angular/core';
 import { catchError, forkJoin, map, Observable, of, switchMap, take, throwError } from 'rxjs';
-import { UserStateService } from '../../state/user.state.service';
-import { CongregationRepository } from '../../repositories/congregation.repository';
-import { TerritoryRepository } from '../../repositories/territories.repository';
-import { LoggerService } from '../services/logger/logger.service';
-import { type Congregation } from '../../../models/congregation';
-import { Territory } from '../../../models/territory';
+import { UserStateService } from '../../../../state/user.state.service';
+import { CongregationRepository } from '../../../../repositories/congregation.repository';
+import { TerritoryRepository } from '../../../../repositories/territories.repository';
+import { LoggerService } from '../../../../shared/services/logger/logger.service';
+import { type Congregation } from '../../../../../models/congregation';
+import { Territory } from '../../../../../models/territory';
 
 export interface UpdateCongregationCityDTO {
   /**
@@ -16,7 +16,7 @@ export interface UpdateCongregationCityDTO {
 }
 
 @Injectable({ providedIn: 'root' })
-export class ConfigurationBO {
+export class CongregationBO {
   private userState = inject(UserStateService);
   private congregationRepository = inject(CongregationRepository);
   private territoryRepository = inject(TerritoryRepository);

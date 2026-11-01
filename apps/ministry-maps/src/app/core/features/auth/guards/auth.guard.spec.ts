@@ -4,6 +4,8 @@ import { authGuard } from './auth.guard';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/router';
 import { MockProvider, ngMocks } from 'ng-mocks';
 import { APP_ROUTES, FeatureRoutesEnum } from '../../../../app-routes';
+import { CONGREGATION_ROUTES } from '../../../../features/congregation/congregation.routes';
+import { CongregationRoutesEnum } from '../../../../features/congregation/models/enums/congregation-routes';
 import { UserStateService } from '../../../../state/user.state.service';
 import { organizerUserStateServiceMock, userMockBuilder } from '../../../../../test/mocks';
 import { RoleEnum } from '../../../../../models/enums/role';
@@ -171,7 +173,13 @@ describe('AuthGuard', () => {
   });
 
   describe('Admins users', () => {
-    it.each([FeatureRoutesEnum.TERRITORIES, FeatureRoutesEnum.HOME, FeatureRoutesEnum.WORK, FeatureRoutesEnum.PROFILE])(
+    it.each([
+      FeatureRoutesEnum.TERRITORIES,
+      FeatureRoutesEnum.HOME,
+      FeatureRoutesEnum.WORK,
+      FeatureRoutesEnum.PROFILE,
+      FeatureRoutesEnum.CONGREGATION,
+    ])(
       'should Access %s',
       (featureRoute) => {
         const route = APP_ROUTES.find((r) => r.path === featureRoute);
@@ -196,6 +204,55 @@ describe('AuthGuard', () => {
         const result = TestBed.runInInjectionContext(() => authGuard(routeSnapshotMock, state));
 
         expect(result).toBeTruthy();
+      },
+    );
+  });
+
+  describe('Congregation routes authorization', () => {
+    const indexRoute = CONGREGATION_ROUTES.find((r) => r.path === CongregationRoutesEnum.INDEX);
+    const usersRoute = CONGREGATION_ROUTES.find((r) => r.path === CongregationRoutesEnum.USERS);
+
+    it.each([RoleEnum.ADMIN, RoleEnum.APP_ADMIN])('allows %s on /congregation', (role) => {
+      const userStateService = ngMocks.get(UserStateService);
+      userStateService.setUser(userMockBuilder({ role }));
+
+      const routeSnapshot: ActivatedRouteSnapshot = {
+        data: indexRoute?.data,
+        routeConfig: { path: CongregationRoutesEnum.INDEX },
+      } as never;
+      const state: RouterStateSnapshot = { url: `/${FeatureRoutesEnum.CONGREGATION}` } as never;
+
+      expect(TestBed.runInInjectionContext(() => authGuard(routeSnapshot, state))).toBe(true);
+    });
+
+    it.each([RoleEnum.ORGANIZER, RoleEnum.ELDER, RoleEnum.SUPERINTENDENT])('denies %s on /congregation', (role) => {
+      const userStateService = ngMocks.get(UserStateService);
+      userStateService.setUser(userMockBuilder({ role }));
+
+      const routeSnapshot: ActivatedRouteSnapshot = {
+        data: indexRoute?.data,
+        routeConfig: { path: CongregationRoutesEnum.INDEX },
+      } as never;
+      const state: RouterStateSnapshot = { url: `/${FeatureRoutesEnum.CONGREGATION}` } as never;
+
+      expect(TestBed.runInInjectionContext(() => authGuard(routeSnapshot, state))).toBe(false);
+    });
+
+    it.each([RoleEnum.ORGANIZER, RoleEnum.ELDER, RoleEnum.ADMIN, RoleEnum.SUPERINTENDENT, RoleEnum.APP_ADMIN])(
+      'allows %s on /congregation/users',
+      (role) => {
+        const userStateService = ngMocks.get(UserStateService);
+        userStateService.setUser(userMockBuilder({ role }));
+
+        const routeSnapshot: ActivatedRouteSnapshot = {
+          data: usersRoute?.data,
+          routeConfig: { path: CongregationRoutesEnum.USERS },
+        } as never;
+        const state: RouterStateSnapshot = {
+          url: `/${FeatureRoutesEnum.CONGREGATION}/${CongregationRoutesEnum.USERS}`,
+        } as never;
+
+        expect(TestBed.runInInjectionContext(() => authGuard(routeSnapshot, state))).toBe(true);
       },
     );
   });

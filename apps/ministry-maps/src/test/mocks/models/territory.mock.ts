@@ -2,7 +2,7 @@ import { Territory, TerritoryIcon } from '../../../models/territory';
 import { congregationMock } from './congregation.mock';
 import { TerritoryVisitHistory } from '../../../models/territory-visit-history';
 import { VisitOutcomeEnum } from '../../../models/enums/visit-outcome';
-import { TerritoryRepository } from '../../../app/repositories/territories.repository';
+import { TerritoryRepository, TerritoryUpdate } from '../../../app/repositories/territories.repository';
 import { EMPTY, Observable, of } from 'rxjs';
 
 const mockDateBuilder = (daysAgo = 0) => {
@@ -50,7 +50,7 @@ export class TerritoryRepositoryMock implements TerritoryRepository {
     return EMPTY;
   }
 
-  update(_territory: Territory): Observable<void> {
+  update(_territory: TerritoryUpdate): Observable<void> {
     return EMPTY;
   }
 
