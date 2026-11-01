@@ -4,6 +4,8 @@ import { addDoc, collection, Timestamp } from 'firebase/firestore';
 import { LoggerService, LogLevelEnum } from './logger.service';
 import { FIRESTORE } from '../../../repositories/firebase/firebase-providers';
 import { environment } from '../../../../environments/environment';
+import { UserStateService } from '../../../state/user.state.service';
+import { congregationMock, userMockBuilder } from '../../../../test/mocks';
 
 jest.mock('firebase/firestore', () => ({
   ...jest.requireActual('firebase/firestore'),
@@ -51,6 +53,9 @@ describe('LoggerService', () => {
         level: LogLevelEnum.DEBUG,
         message,
         metadata: {
+          userId: null,
+          userEmail: null,
+          congregationId: null,
           ...metadata,
           environment: environment.env,
           url: locationUrl,
@@ -70,6 +75,9 @@ describe('LoggerService', () => {
         level: LogLevelEnum.INFO,
         message,
         metadata: {
+          userId: null,
+          userEmail: null,
+          congregationId: null,
           ...metadata,
           environment: environment.env,
           url: locationUrl,
@@ -89,6 +97,9 @@ describe('LoggerService', () => {
         level: LogLevelEnum.WARN,
         message,
         metadata: {
+          userId: null,
+          userEmail: null,
+          congregationId: null,
           ...metadata,
           environment: environment.env,
           url: locationUrl,
@@ -109,6 +120,9 @@ describe('LoggerService', () => {
         level: LogLevelEnum.ERROR,
         message,
         metadata: {
+          userId: null,
+          userEmail: null,
+          congregationId: null,
           ...metadata,
           environment: environment.env,
           url: locationUrl,
@@ -155,6 +169,9 @@ describe('LoggerService', () => {
         level: LogLevelEnum.ERROR,
         message: 'Error while logging entry',
         metadata: {
+          userId: null,
+          userEmail: null,
+          congregationId: null,
           logExceptionMetadata: {
             ...metadata,
             error,
@@ -191,6 +208,77 @@ describe('LoggerService', () => {
         level: LogLevelEnum.INFO,
         message,
         metadata: {
+          userId: null,
+          userEmail: null,
+          congregationId: null,
+          environment: environment.env,
+          url: locationUrl,
+          userAgent,
+        },
+      });
+    });
+  });
+  describe('user and congregation context', () => {
+    it('should include userId, userEmail, and congregationId in metadata when a user is logged in', async () => {
+      const userState = new UserStateService();
+      const mockUser = userMockBuilder({ congregation: congregationMock });
+      userState.setUser(mockUser);
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          { provide: FIRESTORE, useValue: {} },
+          { provide: UserStateService, useValue: userState },
+        ],
+      });
+      const localService = TestBed.inject(LoggerService);
+
+      await localService.info('Message with user context');
+
+      expect(addDoc).toHaveBeenCalledWith(expect.anything(), {
+        timestamp: expect.any(Date),
+        expireAt: expect.any(Timestamp),
+        level: LogLevelEnum.INFO,
+        message: 'Message with user context',
+        metadata: {
+          userId: mockUser.id,
+          userEmail: mockUser.email,
+          congregationId: congregationMock.id,
+          environment: environment.env,
+          url: locationUrl,
+          userAgent,
+        },
+      });
+    });
+
+    it('should allow caller metadata to override userId, userEmail, and congregationId', async () => {
+      const userState = new UserStateService();
+      userState.setUser(userMockBuilder({ congregation: congregationMock }));
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          { provide: FIRESTORE, useValue: {} },
+          { provide: UserStateService, useValue: userState },
+        ],
+      });
+      const localService = TestBed.inject(LoggerService);
+
+      await localService.info('Overridden context', {
+        userId: 'custom-user-id',
+        userEmail: 'custom@example.com',
+        congregationId: 'custom-congregation-id',
+      });
+
+      expect(addDoc).toHaveBeenCalledWith(expect.anything(), {
+        timestamp: expect.any(Date),
+        expireAt: expect.any(Timestamp),
+        level: LogLevelEnum.INFO,
+        message: 'Overridden context',
+        metadata: {
+          userId: 'custom-user-id',
+          userEmail: 'custom@example.com',
+          congregationId: 'custom-congregation-id',
           environment: environment.env,
           url: locationUrl,
           userAgent,

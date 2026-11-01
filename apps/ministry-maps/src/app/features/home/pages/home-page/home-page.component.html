@@ -24,13 +24,12 @@
         </li>
         <li class="card-body__link-list-item">
           <a class="card-body__link" routerLink="/{{ FeatureRoutes.TERRITORIES }}/{{ TerritoryRoutes.LIST }}">
-            Administrar Territórios
+            Territórios
           </a>
         </li>
-        <!-- Novo Link "Estatísticas Territórios" -->
         <li class="card-body__link-list-item">
           <a class="card-body__link" routerLink="/{{ FeatureRoutes.TERRITORIES }}/{{ TerritoryRoutes.STATISTICS }}">
-            Estatísticas Territórios
+            Estatísticas
           </a>
         </li>
       </ul>
@@ -50,12 +49,12 @@
             class="card-body__link"
             routerLink="/{{ FeatureRoutes.CONGREGATION }}/{{ CongregationRoutes.USERS }}"
           >
-            Administrar Pessoas
+            Pessoas
           </a>
         </li>
         <li *libAuthorize="CONGREGATION_ALLOWED_ROLES" class="card-body__link-list-item">
           <a class="card-body__link" routerLink="/{{ FeatureRoutes.CONGREGATION }}">
-            Administrar Congregação
+            Congregação
           </a>
         </li>
       </ul>

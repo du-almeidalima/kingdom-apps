@@ -1,6 +1,7 @@
 import { TerritoryDialogData, TerritoryManageDialogComponent } from './territory-manage-dialog.component';
 import { MockBuilder, MockRender } from 'ng-mocks';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { of } from 'rxjs';
 import { TerritoryAlertsBO } from '../../bo/territory-alerts/territory-alerts.bo';
 import { TerritoryBO } from '../../bo/territory/territory.bo';
 import { TerritoryStatisticsBO } from '../../bo/territory-statistics/territory-statistics.bo';
@@ -30,5 +31,35 @@ describe('TerritoryManageDialogComponent', () => {
     const fixture = MockRender(TerritoryManageDialogComponent);
 
     expect(fixture.point.componentInstance).toBeTruthy();
+  });
+
+  it('calls territoryBO.updateTerritory when editing a territory', () => {
+    const dialogRefMock = { close: jest.fn() };
+    const territoryBOMock = { updateTerritory: jest.fn().mockReturnValue(of(undefined)) };
+
+    const fixture = MockRender(
+      TerritoryManageDialogComponent,
+      {},
+      {
+        providers: [
+          { provide: DialogRef, useValue: dialogRefMock },
+          { provide: TerritoryBO, useValue: territoryBOMock },
+        ],
+      },
+    );
+
+    const component = fixture.point.componentInstance;
+    component.form.patchValue({
+      address: 'Rua das Flores, 123',
+    });
+
+    component.handleSubmission();
+
+    expect(territoryBOMock.updateTerritory).toHaveBeenCalledWith(
+      expect.objectContaining({
+        address: 'Rua das Flores, 123',
+      }),
+    );
+    expect(dialogRefMock.close).toHaveBeenCalled();
   });
 });

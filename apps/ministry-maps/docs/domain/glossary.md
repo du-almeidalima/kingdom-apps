@@ -25,13 +25,12 @@ Shared components, so these strings appear on many screens.
 | `Bem-Vindo {firstName}!`                                        | `/home` heading                         | first token of `User.name`                     |
 | `Designar Territórios`                                          | `/home` card title **and** link         | → `/territories/assign`                        |
 | `Crie listas com territórios e compartilhe com os publicadores` | `/home` card subtitle                   |                                                |
-| `Administrar Territórios`                                       | `/home` link                            | → `/territories`                               |
-| `Estatísticas Territórios`                                      | `/home` link                            | → `/territories/statistics`                    |
+| `Territórios`                                                   | `/home` link and `/territories` heading | → `/territories`                               |
+| `Estatísticas`                                                  | `/home` link                            | → `/territories/statistics`                    |
 | `Histórico de Designações`                                      | `/home` link                            | → `/territories/designations`                  |
-| `Congregação`                                                   | `/home` card title                      |                                                |
+| `Congregação`                                                   | `/home` card title, link, and `/congregation` heading | link → `/congregation` (`ADMIN` / `APP_ADMIN` only) |
 | `Administrar congregação e publicadores`                        | `/home` card subtitle                   |                                                |
-| `Administrar Pessoas`                                           | `/home` link                            | → `/congregation/users`                        |
-| `Administrar Congregação`                                       | `/home` link and `/congregation` heading | → `/congregation` (`ADMIN` / `APP_ADMIN` only) |
+| `Pessoas`                                                       | `/home` link and `/congregation/users` heading | → `/congregation/users`                        |
 | `Adicionar Congregação`                                         | `/congregation` button & dialog title   | `APP_ADMIN` only                               |
 | `Nome da Congregação`                                           | `/congregation` name-card caption       | name is edited through the adjacent pencil icon |
 | `Cidades`                                                       | `/congregation` card heading            | cities show a per-city territory count          |

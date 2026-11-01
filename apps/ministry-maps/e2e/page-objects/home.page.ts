@@ -5,22 +5,22 @@ export class HomePage {
   readonly cardTerritories: Locator;
   readonly cardCongregation: Locator;
   readonly linkDesignarTerritorios: Locator;
-  readonly linkAdministrarTerritorios: Locator;
-  readonly linkEstatisticasTerritorios: Locator;
+  readonly linkTerritorios: Locator;
+  readonly linkEstatisticas: Locator;
   readonly linkHistoricoDesignacoes: Locator;
-  readonly linkAdministrarPessoas: Locator;
-  readonly linkAdministrarCongregacao: Locator;
+  readonly linkPessoas: Locator;
+  readonly linkCongregacao: Locator;
 
   constructor(private readonly page: Page) {
     this.heading = page.getByTestId('home-heading');
     this.cardTerritories = page.getByTestId('home-card-territories');
     this.cardCongregation = page.getByTestId('home-card-congregation');
     this.linkDesignarTerritorios = page.getByRole('link', { name: 'Designar Territórios' }).first();
-    this.linkAdministrarTerritorios = page.getByRole('link', { name: 'Administrar Territórios' });
-    this.linkEstatisticasTerritorios = page.getByRole('link', { name: 'Estatísticas Territórios' });
+    this.linkTerritorios = page.getByRole('link', { name: 'Territórios', exact: true });
+    this.linkEstatisticas = page.getByRole('link', { name: 'Estatísticas', exact: true });
     this.linkHistoricoDesignacoes = page.getByRole('link', { name: 'Histórico de Designações' });
-    this.linkAdministrarPessoas = page.getByRole('link', { name: 'Administrar Pessoas' });
-    this.linkAdministrarCongregacao = page.getByRole('link', { name: 'Administrar Congregação' });
+    this.linkPessoas = page.getByRole('link', { name: 'Pessoas', exact: true });
+    this.linkCongregacao = page.getByRole('link', { name: 'Congregação', exact: true });
   }
 
   async goto() {

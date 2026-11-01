@@ -1,4 +1,5 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { ReactiveFormsModule } from '@angular/forms';
 import { MockBuilder, MockRender, ngMocks } from 'ng-mocks';
 import {
   ButtonComponent,
@@ -14,6 +15,7 @@ import {
   CongregationRemoveCityDialogComponent,
   CongregationRemoveCityDialogData,
 } from './congregation-remove-city-dialog.component';
+import { IconRadioComponent } from '../../../../shared/components/visit-outcome-option/icon-radio.component';
 
 describe('CongregationRemoveCityDialogComponent', () => {
   const closeSpy = jest.fn();
@@ -27,7 +29,9 @@ describe('CongregationRemoveCityDialogComponent', () => {
       .keep(DialogComponent)
       .keep(DialogFooterComponent)
       .keep(ButtonComponent)
-      .keep(DialogCloseDirective);
+      .keep(DialogCloseDirective)
+      .keep(IconRadioComponent)
+      .keep(ReactiveFormsModule);
   });
 
   const renderWithData = (data: CongregationRemoveCityDialogData) =>
@@ -105,8 +109,9 @@ describe('CongregationRemoveCityDialogComponent', () => {
     });
 
     const transferOption = ngMocks.find(fixture, '[data-testid="remove-city-option-transfer"]')
-      .nativeElement as HTMLButtonElement;
-    expect(transferOption.disabled).toBe(true);
+      .nativeElement as HTMLElement;
+    expect(transferOption.getAttribute('aria-disabled')).toBe('true');
+    expect(transferOption.hasAttribute('disabled')).toBe(true);
     expect(ngMocks.find(fixture, '[data-testid="remove-city-option-delete"]').nativeElement.getAttribute('aria-checked')).toBe(
       'true',
     );

@@ -34,7 +34,9 @@ export class CongregationBO {
         return Object.fromEntries(counts);
       }),
       catchError((error) => {
-        this.loggerService.error('Error loading territory counts by city: ' + error);
+        this.loggerService.error('Error loading territory counts by city: ' + error, {
+          congregationId,
+        });
         return of({});
       }),
     );
@@ -84,12 +86,23 @@ export class CongregationBO {
               ...(updatedUser ?? user),
               congregation: { ...createdCongregation, cities: [...createdCongregation.cities] },
             });
+            this.loggerService.info(
+              `Congregation [${createdCongregation.name}] (${createdCongregation.id}) created by User [${user.name}] (${user.id}).`,
+              {
+                userId: user.id,
+                userEmail: user.email,
+                congregationId: createdCongregation.id,
+              },
+            );
           }),
           map(() => createdCongregation),
         ),
       ),
       catchError((error) => {
-        this.loggerService.error('Error creating congregation: ' + error);
+        this.loggerService.error('Error creating congregation: ' + error, {
+          userId: user.id,
+          userEmail: user.email,
+        });
         return throwError(() => error);
       }),
     );
@@ -113,11 +126,20 @@ export class CongregationBO {
       tap(() => {
         this.loggerService.info(
           `Congregation [${context.congregation.name}] (${context.congregation.id}) renamed to [${trimmedName}] by User [${context.user.name}] (${context.user.id}).`,
+          {
+            userId: context.user.id,
+            userEmail: context.user.email,
+            congregationId: context.congregation.id,
+          },
         );
         this.syncUserCongregation(context.user, updatedCongregation);
       }),
       catchError((error) => {
-        this.loggerService.error('Error updating congregation name: ' + error);
+        this.loggerService.error('Error updating congregation name: ' + error, {
+          userId: context.user.id,
+          userEmail: context.user.email,
+          congregationId: context.congregation.id,
+        });
         return throwError(() => error);
       }),
     );
@@ -146,11 +168,20 @@ export class CongregationBO {
       tap(() => {
         this.loggerService.info(
           `Congregation [${context.congregation.name}] (${context.congregation.id}) added city [${trimmedCity}] by User [${context.user.name}] (${context.user.id}).`,
+          {
+            userId: context.user.id,
+            userEmail: context.user.email,
+            congregationId: context.congregation.id,
+          },
         );
         this.syncUserCongregation(context.user, updatedCongregation);
       }),
       catchError((error) => {
-        this.loggerService.error('Error adding congregation city: ' + error);
+        this.loggerService.error('Error adding congregation city: ' + error, {
+          userId: context.user.id,
+          userEmail: context.user.email,
+          congregationId: context.congregation.id,
+        });
         return throwError(() => error);
       }),
     );
@@ -202,7 +233,18 @@ export class CongregationBO {
                 return of(undefined);
               }
 
-              return this.territoryRepository.batchUpdate(updatedTerritories);
+              return this.territoryRepository.batchUpdate(updatedTerritories).pipe(
+                tap(() => {
+                  this.loggerService.info(
+                    `Congregation [${context.congregation.name}] (${context.congregation.id}) updated ${updatedTerritories.length} territories from city [${oldCityName}] to [${trimmedNewCity}] by User [${context.user.name}] (${context.user.id}).`,
+                    {
+                      userId: context.user.id,
+                      userEmail: context.user.email,
+                      congregationId: context.congregation.id,
+                    },
+                  );
+                }),
+              );
             }),
           );
 
@@ -210,12 +252,21 @@ export class CongregationBO {
       tap(() => {
         this.loggerService.info(
           `Congregation [${context.congregation.name}] (${context.congregation.id}) renamed city from [${oldCityName}] to [${trimmedNewCity}] by User [${context.user.name}] (${context.user.id}).`,
+          {
+            userId: context.user.id,
+            userEmail: context.user.email,
+            congregationId: context.congregation.id,
+          },
         );
         this.syncUserCongregation(context.user, updatedCongregation);
       }),
       map(() => undefined),
       catchError((error) => {
-        this.loggerService.error('Error renaming congregation city: ' + error);
+        this.loggerService.error('Error renaming congregation city: ' + error, {
+          userId: context.user.id,
+          userEmail: context.user.email,
+          congregationId: context.congregation.id,
+        });
         return throwError(() => error);
       }),
     );
@@ -230,10 +281,22 @@ export class CongregationBO {
 
     return this.congregationRepository.update(updatedCongregation).pipe(
       tap(() => {
+        this.loggerService.info(
+          `Congregation [${context.congregation.name}] (${context.congregation.id}) reordered cities by User [${context.user.name}] (${context.user.id}).`,
+          {
+            userId: context.user.id,
+            userEmail: context.user.email,
+            congregationId: context.congregation.id,
+          },
+        );
         this.syncUserCongregation(context.user, updatedCongregation);
       }),
       catchError((error) => {
-        this.loggerService.error('Error reordering congregation cities: ' + error);
+        this.loggerService.error('Error reordering congregation cities: ' + error, {
+          userId: context.user.id,
+          userEmail: context.user.email,
+          congregationId: context.congregation.id,
+        });
         return throwError(() => error);
       }),
     );
@@ -277,7 +340,18 @@ export class CongregationBO {
                 positionIndex: nextPositionIndex + idx,
               }));
 
-              return this.territoryRepository.batchUpdate(transferred);
+              return this.territoryRepository.batchUpdate(transferred).pipe(
+                tap(() => {
+                  this.loggerService.info(
+                    `Congregation [${context.congregation.name}] (${context.congregation.id}) transferred ${transferred.length} territories from city [${cityName}] to [${resolution.targetCity}] by User [${context.user.name}] (${context.user.id}).`,
+                    {
+                      userId: context.user.id,
+                      userEmail: context.user.email,
+                      congregationId: context.congregation.id,
+                    },
+                  );
+                }),
+              );
             }),
           )
         : this.territoryRepository.getAllByCongregationAndCities(context.congregation.id, [cityName]).pipe(
@@ -288,7 +362,18 @@ export class CongregationBO {
                 return of(undefined);
               }
 
-              return this.territoryRepository.batchDelete(idsToDelete);
+              return this.territoryRepository.batchDelete(idsToDelete).pipe(
+                tap(() => {
+                  this.loggerService.info(
+                    `Congregation [${context.congregation.name}] (${context.congregation.id}) deleted ${idsToDelete.length} territories from city [${cityName}] by User [${context.user.name}] (${context.user.id}).`,
+                    {
+                      userId: context.user.id,
+                      userEmail: context.user.email,
+                      congregationId: context.congregation.id,
+                    },
+                  );
+                }),
+              );
             }),
           );
 
@@ -296,12 +381,21 @@ export class CongregationBO {
       tap(() => {
         this.loggerService.info(
           `Congregation [${context.congregation.name}] (${context.congregation.id}) removed city [${cityName}] (${resolution.action}) by User [${context.user.name}] (${context.user.id}).`,
+          {
+            userId: context.user.id,
+            userEmail: context.user.email,
+            congregationId: context.congregation.id,
+          },
         );
         this.syncUserCongregation(context.user, updatedCongregation);
       }),
       map(() => undefined),
       catchError((error) => {
-        this.loggerService.error('Error removing congregation city: ' + error);
+        this.loggerService.error('Error removing congregation city: ' + error, {
+          userId: context.user.id,
+          userEmail: context.user.email,
+          congregationId: context.congregation.id,
+        });
         return throwError(() => error);
       }),
     );

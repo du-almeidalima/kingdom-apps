@@ -14,7 +14,7 @@ Default baseline (`cities: ['São Paulo', 'Osasco']`; `seed-territory-1`/`-3` in
 
 ### Leg 1 — Rename `São Paulo` → `São Paulo Centro` and verify the cascade
 
-1. `signInAs('admin')` → `page.goto('/congregation')` → assert heading `Administrar Congregação`, subtitle `Congregação Jardim Primavera`, and 2 city rows (`UC-CFG-01`).
+1. `signInAs('admin')` → `page.goto('/congregation')` → assert heading `Congregação`, subtitle `Congregação Jardim Primavera`, and 2 city rows (`UC-CFG-01`).
 2. Click `Editar` on `São Paulo` → fill `São Paulo Centro` → click `Salvar` (`UC-CFG-04`).
 3. Assert toast `Cidade atualizada com sucesso!` and row reading `São Paulo Centro`.
 

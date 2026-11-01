@@ -51,6 +51,20 @@ describe('HomePageComponent', () => {
     expect(historyLink.nativeElement.textContent).toContain('Histórico de Designações');
   });
 
+  it('links to territories and statistics pages', () => {
+    const fixture = MockRender(HomePageComponent);
+    const links = fixture.debugElement.queryAll(By.directive(RouterLink));
+
+    const territoriesLink = links.find((c) => c.nativeElement.textContent.trim() === 'Territórios');
+    const statisticsLink = links.find((c) => c.nativeElement.textContent.trim() === 'Estatísticas');
+
+    if (!territoriesLink) throw new Error('Expected Territórios link to be rendered');
+    expect(ngMocks.input(territoriesLink, 'routerLink')).toBe('/territories/');
+
+    if (!statisticsLink) throw new Error('Expected Estatísticas link to be rendered');
+    expect(ngMocks.input(statisticsLink, 'routerLink')).toBe('/territories/statistics');
+  });
+
   it('renders the Congregação card with title, subtitle, icon, and consolidated links', () => {
     const fixture = MockRender(HomePageComponent);
     const card = ngMocks.find(fixture, '[data-testid="home-card-congregation"]');
@@ -61,15 +75,15 @@ describe('HomePageComponent', () => {
     expect(ngMocks.input(header, 'subtitle')).toBe('Administrar congregação e publicadores');
 
     const links = fixture.debugElement.queryAll(By.directive(RouterLink));
-    const usersLink = links.find((candidate) => candidate.nativeElement.textContent.includes('Administrar Pessoas'));
+    const usersLink = links.find((candidate) => candidate.nativeElement.textContent.trim() === 'Pessoas');
     const congregationLink = links.find((candidate) =>
-      candidate.nativeElement.textContent.includes('Administrar Congregação'),
+      candidate.nativeElement.textContent.trim() === 'Congregação',
     );
 
-    if (!usersLink) throw new Error('Expected Administrar Pessoas link to be rendered');
+    if (!usersLink) throw new Error('Expected Pessoas link to be rendered');
     expect(ngMocks.input(usersLink, 'routerLink')).toBe('/congregation/users');
 
-    if (!congregationLink) throw new Error('Expected Administrar Congregação link to be rendered');
+    if (!congregationLink) throw new Error('Expected Congregação link to be rendered');
     expect(ngMocks.input(congregationLink, 'routerLink')).toBe('/congregation');
   });
 
@@ -88,12 +102,12 @@ describe('HomePageComponent', () => {
   };
 
   it.each([RoleEnum.ORGANIZER, RoleEnum.ELDER, RoleEnum.SUPERINTENDENT])(
-    'hides Administrar Congregação while keeping Administrar Pessoas visible for %s',
+    'hides Congregação while keeping Pessoas visible for %s',
     (role) => {
       const links = renderForRole(role);
-      const usersLink = links.find((candidate) => candidate.nativeElement.textContent.includes('Administrar Pessoas'));
+      const usersLink = links.find((candidate) => candidate.nativeElement.textContent.trim() === 'Pessoas');
       const congregationLink = links.find((candidate) =>
-        candidate.nativeElement.textContent.includes('Administrar Congregação'),
+        candidate.nativeElement.textContent.trim() === 'Congregação',
       );
 
       expect(usersLink).toBeDefined();
@@ -101,10 +115,10 @@ describe('HomePageComponent', () => {
     },
   );
 
-  it.each([RoleEnum.ADMIN, RoleEnum.APP_ADMIN])('shows Administrar Congregação for %s', (role) => {
+  it.each([RoleEnum.ADMIN, RoleEnum.APP_ADMIN])('shows Congregação for %s', (role) => {
     const links = renderForRole(role);
     const congregationLink = links.find((candidate) =>
-      candidate.nativeElement.textContent.includes('Administrar Congregação'),
+      candidate.nativeElement.textContent.trim() === 'Congregação',
     );
 
     expect(congregationLink).toBeDefined();

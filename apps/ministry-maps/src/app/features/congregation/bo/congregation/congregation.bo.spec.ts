@@ -69,6 +69,14 @@ describe('CongregationBO', () => {
         name: 'Congregação Renomeada',
       });
       expect(userState.currentUser?.congregation?.name).toBe('Congregação Renomeada');
+      expect(ngMocks.get(LoggerService).info).toHaveBeenCalledWith(
+        expect.stringContaining('renamed to [Congregação Renomeada]'),
+        {
+          userId: elderUser.id,
+          userEmail: elderUser.email,
+          congregationId: congregationMock.id,
+        },
+      );
     });
 
     it('errors when the new congregation name is empty or whitespace-only', async () => {
@@ -102,6 +110,7 @@ describe('CongregationBO', () => {
       await expect(lastValueFrom(service.getTerritoryCountsByCity())).resolves.toEqual({});
       expect(ngMocks.get(LoggerService).error).toHaveBeenCalledWith(
         expect.stringContaining('Error loading territory counts by city'),
+        expect.objectContaining({ congregationId: congregationMock.id }),
       );
     });
   });
@@ -117,6 +126,14 @@ describe('CongregationBO', () => {
         cities: ['City 1', 'City 2', 'City 3', 'City 4'],
       });
       expect(userState.currentUser?.congregation?.cities).toEqual(['City 1', 'City 2', 'City 3', 'City 4']);
+      expect(ngMocks.get(LoggerService).info).toHaveBeenCalledWith(
+        expect.stringContaining('added city [City 4]'),
+        {
+          userId: elderUser.id,
+          userEmail: elderUser.email,
+          congregationId: congregationMock.id,
+        },
+      );
     });
 
     it('rejects empty city names', async () => {
@@ -151,6 +168,22 @@ describe('CongregationBO', () => {
         { ...t2, city: 'City 1 Centro' },
       ]);
       expect(userState.currentUser?.congregation?.cities).toEqual(['City 1 Centro', 'City 2', 'City 3']);
+      expect(ngMocks.get(LoggerService).info).toHaveBeenCalledWith(
+        expect.stringContaining('updated 2 territories from city [City 1] to [City 1 Centro]'),
+        {
+          userId: elderUser.id,
+          userEmail: elderUser.email,
+          congregationId: congregationMock.id,
+        },
+      );
+      expect(ngMocks.get(LoggerService).info).toHaveBeenCalledWith(
+        expect.stringContaining('renamed city from [City 1] to [City 1 Centro]'),
+        {
+          userId: elderUser.id,
+          userEmail: elderUser.email,
+          congregationId: congregationMock.id,
+        },
+      );
     });
 
     it('allows a case-only rename of the same city', async () => {
@@ -186,6 +219,14 @@ describe('CongregationBO', () => {
         cities: reordered,
       });
       expect(userState.currentUser?.congregation?.cities).toEqual(reordered);
+      expect(ngMocks.get(LoggerService).info).toHaveBeenCalledWith(
+        expect.stringContaining('reordered cities'),
+        {
+          userId: elderUser.id,
+          userEmail: elderUser.email,
+          congregationId: congregationMock.id,
+        },
+      );
     });
   });
 
@@ -210,6 +251,22 @@ describe('CongregationBO', () => {
         cities: ['City 2', 'City 3'],
       });
       expect(userState.currentUser?.congregation?.cities).toEqual(['City 2', 'City 3']);
+      expect(ngMocks.get(LoggerService).info).toHaveBeenCalledWith(
+        expect.stringContaining('transferred 2 territories from city [City 1] to [City 2]'),
+        {
+          userId: elderUser.id,
+          userEmail: elderUser.email,
+          congregationId: congregationMock.id,
+        },
+      );
+      expect(ngMocks.get(LoggerService).info).toHaveBeenCalledWith(
+        expect.stringContaining('removed city [City 1] (transfer)'),
+        {
+          userId: elderUser.id,
+          userEmail: elderUser.email,
+          congregationId: congregationMock.id,
+        },
+      );
     });
 
     it('deletes all territories and their history via batchDelete and removes the city', async () => {
@@ -227,6 +284,22 @@ describe('CongregationBO', () => {
         cities: ['City 2', 'City 3'],
       });
       expect(userState.currentUser?.congregation?.cities).toEqual(['City 2', 'City 3']);
+      expect(ngMocks.get(LoggerService).info).toHaveBeenCalledWith(
+        expect.stringContaining('deleted 2 territories from city [City 1]'),
+        {
+          userId: elderUser.id,
+          userEmail: elderUser.email,
+          congregationId: congregationMock.id,
+        },
+      );
+      expect(ngMocks.get(LoggerService).info).toHaveBeenCalledWith(
+        expect.stringContaining('removed city [City 1] (delete)'),
+        {
+          userId: elderUser.id,
+          userEmail: elderUser.email,
+          congregationId: congregationMock.id,
+        },
+      );
     });
   });
 
@@ -259,6 +332,14 @@ describe('CongregationBO', () => {
       expect(profileBO.changeUserCongregation).toHaveBeenCalledWith('app-admin-1', 'cong-new-1');
       expect(result).toEqual(createdCong);
       expect(userState.currentUser?.congregation).toEqual(createdCong);
+      expect(ngMocks.get(LoggerService).info).toHaveBeenCalledWith(
+        expect.stringContaining('created by User'),
+        {
+          userId: appAdmin.id,
+          userEmail: appAdmin.email,
+          congregationId: 'cong-new-1',
+        },
+      );
     });
   });
 });

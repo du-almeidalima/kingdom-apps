@@ -56,9 +56,9 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Route:** `/home`
 - **Preconditions (seed):** default baseline (`seed-user-admin` name is `Carlos Almeida`); `signInAs('admin')`
 - **Steps:** 1. Open `/home`
-- **Expected UI:** Heading `Bem-Vindo Carlos!`; Two cards: `Designar Territórios` (with links `Designar Territórios`, `Histórico de Designações`, `Administrar Territórios`, `Estatísticas Territórios`) and `Congregação` (subtitle `Administrar congregação e publicadores`, with links `Administrar Pessoas` and, for `ADMIN`/`APP_ADMIN` only, `Administrar Congregação`)
+- **Expected UI:** Heading `Bem-Vindo Carlos!`; Two cards: `Designar Territórios` (with links `Designar Territórios`, `Histórico de Designações`, `Territórios`, `Estatísticas`) and `Congregação` (subtitle `Administrar congregação e publicadores`, with links `Pessoas` and, for `ADMIN`/`APP_ADMIN` only, `Congregação`)
 - **Expected persistence:** `db.getDoc(db.collections.users, 'seed-user-admin')` has `name: 'Carlos Almeida'`, `role: 'ADMIN'`
-- **Edge cases:** if name is a single token `Carlos`, greeting is `Bem-Vindo Carlos!`; `ORGANIZER`, `ELDER`, and `SUPERINTENDENT` see `Administrar Pessoas` but not `Administrar Congregação` (`*libAuthorize="[RoleEnum.ADMIN]"`)
+- **Edge cases:** if name is a single token `Carlos`, greeting is `Bem-Vindo Carlos!`; `ORGANIZER`, `ELDER`, and `SUPERINTENDENT` see `Pessoas` but not `Congregação` (`*libAuthorize="[RoleEnum.ADMIN]"`)
 - **Priority:** P0 · **Gaps:** none (`data-testid="home-card-territories"` and `data-testid="home-card-congregation"` present)
 - **Sources:** `apps/ministry-maps/src/app/features/home/pages/home-page/home-page.component.ts`
 
@@ -129,7 +129,7 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Actor:** Admin
 - **Route:** `/home`
 - **Preconditions (seed):** default baseline; `signInAs('admin')`
-- **Steps:** 1. click `Administrar Territórios` link
+- **Steps:** 1. click `Territórios` link
 - **Expected UI:** URL becomes `/territories`; heading `territories-heading` (`data-testid`) is visible
 - **Expected persistence:** `db.getDoc(db.collections.users, 'seed-user-admin').role === 'ADMIN'`
 - **Edge cases:** none
@@ -152,7 +152,7 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Actor:** Admin
 - **Route:** `/home`
 - **Preconditions (seed):** default baseline; `signInAs('admin')`
-- **Steps:** 1. click `Estatísticas Territórios` link
+- **Steps:** 1. click `Estatísticas` link
 - **Expected UI:** URL becomes `/territories/statistics`; page renders statistics charts/metrics
 - **Expected persistence:** `db.getDoc(db.collections.users, 'seed-user-admin').role === 'ADMIN'`
 - **Edge cases:** none
@@ -163,7 +163,7 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Actor:** Admin
 - **Route:** `/home`
 - **Preconditions (seed):** default baseline; `signInAs('admin')`
-- **Steps:** 1. click `Administrar Pessoas` link
+- **Steps:** 1. click `Pessoas` link
 - **Expected UI:** URL becomes `/congregation/users`; page renders the users list (`users-heading` visible)
 - **Expected persistence:** `db.getDoc(db.collections.users, 'seed-user-admin').role === 'ADMIN'`
 - **Edge cases:** none
@@ -184,7 +184,7 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Actor:** Admin
 - **Route:** `/home` → `/congregation`
 - **Preconditions (seed):** default baseline; sign in as admin
-- **Steps:** click `Administrar Congregação`
+- **Steps:** click `Congregação`
 - **Expected UI:** URL becomes `/congregation`; the congregation administration heading renders.
 - **Expected persistence:** `db.getDoc(db.collections.users, 'seed-user-admin').role === 'ADMIN'`
 - **Priority:** P0 · **Coverage:** `navigation.spec.ts`

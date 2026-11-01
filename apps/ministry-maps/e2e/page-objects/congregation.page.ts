@@ -1,7 +1,7 @@
 import { Locator, Page } from '@playwright/test';
 
 /**
- * Page object for the `/congregation` route ("Administrar Congregação").
+ * Page object for the `/congregation` route ("Congregação").
  */
 export class CongregationPage {
   readonly heading: Locator;

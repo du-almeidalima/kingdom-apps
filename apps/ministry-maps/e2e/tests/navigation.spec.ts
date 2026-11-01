@@ -70,31 +70,31 @@ test.describe('Navigation & Shell', () => {
 
     // Links
     await expect(home.linkDesignarTerritorios).toBeVisible();
-    await expect(home.linkAdministrarTerritorios).toBeVisible();
-    await expect(home.linkEstatisticasTerritorios).toBeVisible();
-    await expect(home.linkAdministrarPessoas).toBeVisible();
-    await expect(home.linkAdministrarCongregacao).toBeVisible();
+    await expect(home.linkTerritorios).toBeVisible();
+    await expect(home.linkEstatisticas).toBeVisible();
+    await expect(home.linkPessoas).toBeVisible();
+    await expect(home.linkCongregacao).toBeVisible();
 
     const userDoc = await db.getDoc(db.collections.users, seed.ids.adminUser);
     expect(userDoc?.role).toBe(RoleEnum.ADMIN);
     expect(userDoc?.name).toBe('Carlos Almeida');
   });
 
-  test('UC-NAV-05b — Home hub role-gates Administrar Congregação link', async ({ page, signInAs }) => {
+  test('UC-NAV-05b — Home hub role-gates Congregação link', async ({ page, signInAs }) => {
     const home = new HomePage(page);
 
     for (const role of ['organizer', 'elder', 'superintendent'] as const) {
       await signInAs(role);
       await home.goto();
       await expect(home.cardCongregation).toBeVisible();
-      await expect(home.linkAdministrarPessoas).toBeVisible();
-      await expect(home.linkAdministrarCongregacao).toHaveCount(0);
+      await expect(home.linkPessoas).toBeVisible();
+      await expect(home.linkCongregacao).toHaveCount(0);
     }
 
     await signInAs('app_admin');
     await home.goto();
-    await expect(home.linkAdministrarPessoas).toBeVisible();
-    await expect(home.linkAdministrarCongregacao).toBeVisible();
+    await expect(home.linkPessoas).toBeVisible();
+    await expect(home.linkCongregacao).toBeVisible();
   });
 
   test('UC-NAV-08 — Unauthorized role cancelled navigation', async ({ page, signInAsUser, seed, db }) => {
@@ -140,7 +140,7 @@ test.describe('Navigation & Shell', () => {
     const home = new HomePage(page);
     await home.goto();
 
-    await home.linkAdministrarTerritorios.click();
+    await home.linkTerritorios.click();
     await expect(page).toHaveURL(/\/territories$/);
     await expect(page.getByTestId('territories-heading')).toBeVisible();
     expect((await db.getDoc(db.collections.users, seed.ids.adminUser))?.['role']).toBe(RoleEnum.ADMIN);
@@ -162,7 +162,7 @@ test.describe('Navigation & Shell', () => {
     const home = new HomePage(page);
     await home.goto();
 
-    await home.linkEstatisticasTerritorios.click();
+    await home.linkEstatisticas.click();
     await expect(page).toHaveURL(/\/territories\/statistics$/);
     await expect(page.getByTestId('statistics-heading')).toBeVisible();
     expect((await db.getDoc(db.collections.users, seed.ids.adminUser))?.['role']).toBe(RoleEnum.ADMIN);
@@ -173,7 +173,7 @@ test.describe('Navigation & Shell', () => {
     const home = new HomePage(page);
     await home.goto();
 
-    await home.linkAdministrarPessoas.click();
+    await home.linkPessoas.click();
     await expect(page).toHaveURL(/\/congregation\/users$/);
     await expect(page.getByTestId('users-heading')).toBeVisible();
     expect((await db.getDoc(db.collections.users, seed.ids.adminUser))?.['role']).toBe(RoleEnum.ADMIN);
@@ -194,9 +194,9 @@ test.describe('Navigation & Shell', () => {
     const home = new HomePage(page);
     await home.goto();
 
-    await home.linkAdministrarCongregacao.click();
+    await home.linkCongregacao.click();
     await expect(page).toHaveURL(/\/congregation$/);
-    await expect(page.getByRole('heading', { name: 'Administrar Congregação' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Congregação', exact: true })).toBeVisible();
     expect((await db.getDoc(db.collections.users, seed.ids.adminUser))?.['role']).toBe(RoleEnum.ADMIN);
   });
 });

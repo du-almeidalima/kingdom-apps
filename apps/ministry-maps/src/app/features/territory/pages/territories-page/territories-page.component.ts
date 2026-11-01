@@ -179,7 +179,9 @@ export class TerritoriesPageComponent implements OnInit {
         return originalTerritory && originalTerritory.positionIndex !== tUpdated.positionIndex;
       });
 
-      this.territoryRepository.batchUpdate(changedTerritories);
+      if (changedTerritories.length > 0) {
+        this.territoryBO.batchUpdateTerritories(changedTerritories).subscribe();
+      }
 
       // This is for updating the UI instantly, not necessary though
       this.filteredTerritories$ = this.filteredTerritories$.pipe(
@@ -212,7 +214,7 @@ export class TerritoriesPageComponent implements OnInit {
 
   handleRemoveTerritory(territoryId: string) {
     this.dialog.open<object, TerritoryDialogData>(TerritoryDeleteDialogComponent).closed.subscribe((result) => {
-      if (result) this.territoryBO.deleteTerritory(territoryId);
+      if (result) this.territoryBO.deleteTerritory(territoryId).subscribe();
     });
   }
 

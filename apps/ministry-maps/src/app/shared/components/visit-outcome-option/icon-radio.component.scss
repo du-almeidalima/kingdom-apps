@@ -3,6 +3,11 @@
 
 kingdom-apps-icon-radio {
   display: block;
+
+  &[disabled] {
+    pointer-events: none;
+    cursor: not-allowed;
+  }
 }
 
 .icon-radio {
@@ -19,6 +24,12 @@ kingdom-apps-icon-radio {
   background-color: var(--kui-color-surface-elevated, #{variables.$white-200});
   color: var(--kui-color-text, #{variables.$text});
   border: 1px solid var(--kui-color-border-strong, #{variables.$grey-100});
+
+  &--disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
 
   // Active state
   &:is(:hover, :focus-visible),

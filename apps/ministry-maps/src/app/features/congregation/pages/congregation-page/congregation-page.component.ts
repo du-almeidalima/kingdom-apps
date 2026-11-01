@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signa
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Dialog } from '@angular/cdk/dialog';
 import { finalize, of, switchMap } from 'rxjs';
-import { AuthorizeDirective, ButtonComponent, CardComponent, ToasterService } from '@kingdom-apps/common-ui';
+import { AuthorizeDirective, ButtonComponent, ToasterService } from '@kingdom-apps/common-ui';
 
 import { CongregationBO, RemoveCityResolution } from '../../bo/congregation/congregation.bo';
 import { UserStateService } from '../../../../state/user.state.service';
@@ -26,7 +26,6 @@ import { CongregationAddDialogComponent } from '../../components/congregation-ad
   imports: [
     AuthorizeDirective,
     ButtonComponent,
-    CardComponent,
     CongregationNameFormComponent,
     CongregationCitiesComponent,
   ],
@@ -57,7 +56,6 @@ export class CongregationPageComponent {
     ),
     { initialValue: {} },
   );
-  protected readonly cardStyle = { padding: '1.6rem 1.2rem' };
 
   handleSaveCongregationName(newName: string): void {
     const trimmed = newName.trim();

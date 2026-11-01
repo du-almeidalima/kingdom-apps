@@ -16,7 +16,7 @@ test.describe('Congregation Administration (/congregation)', () => {
     const configPage = new CongregationPage(authenticatedPage);
     await configPage.goto();
 
-    await expect(configPage.heading).toHaveText('Administrar Congregação');
+    await expect(configPage.heading).toHaveText('Congregação');
     await expect(configPage.congregationName).toHaveText('Congregação Jardim Primavera');
     await expect(configPage.editNameButton).toBeVisible();
     await expect(configPage.congregationNameInput).toHaveCount(0);
