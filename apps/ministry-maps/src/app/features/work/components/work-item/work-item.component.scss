@@ -1,3 +1,4 @@
+@use 'apps/ministry-maps/src/styles/components/panel' as *;
 @use 'libs/common-ui/src/lib/styles/abstract/variables';
 @use 'libs/common-ui/src/lib/styles/base/typography';
 
@@ -6,6 +7,9 @@
 }
 
 .work-item {
+  @extend .panel;
+  padding: 0;
+
   $flex-checkbox: 1;
   $flex-container: 6;
 
@@ -18,7 +22,6 @@
   min-height: 10rem;
   border-radius: 4px;
   overflow: hidden;
-  border: 1px solid var(--kui-color-border, #{variables.$light-grey-100});
 
   &__content-container {
     flex: $flex-container;

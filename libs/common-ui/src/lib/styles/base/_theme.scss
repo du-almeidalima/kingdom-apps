@@ -1,3 +1,5 @@
+@use '../abstract/variables';
+
 @mixin light-theme-tokens {
   // Canvas, surfaces, and shadows
   --kui-color-canvas: #e7e6e4;
@@ -112,6 +114,10 @@
   --kui-color-info-surface: #172554;
   --kui-color-on-info: #dbeafe;
   --kui-color-info-border: #60a5fa;
+}
+
+:root {
+  --kui-control-height: #{variables.$control-height};
 }
 
 :root,
