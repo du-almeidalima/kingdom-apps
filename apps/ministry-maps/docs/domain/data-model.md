@@ -9,7 +9,7 @@ Everything an E2E author needs to build **realistic seeds** and write **backend 
 
 | Collection                 | Doc id                                    | Written by                                          | Notes                                                                                |
 | -------------------------- | ----------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `congregations`            | free-form (seed uses `seed-congregation`) | Configuration screen (`cities` only)                | Holds `cities[]` + `settings`.                                                       |
+| `congregations`            | auto-id (seed uses `seed-congregation`)   | `/congregation` screen (`name`, `cities`, `APP_ADMIN` create) | Holds `name`, `locatedOn`, `cities[]` + `settings`. Create restricted to `APP_ADMIN`. |
 | `users`                    | **=== Firebase Auth `uid`**               | sign-in (auto-create), Users screen                 | `congregation` is a `DocumentReference`.                                             |
 | `territories`              | auto-id (`doc(collection)`)               | Territories screen, Work page write-back            | Parent doc carries `recentHistory` + `lastVisit`.                                    |
 | `territories/{id}/history` | visit id (client-generated)               | Work page (complete/edit/undo visit)                | **Full** visit log, one doc per visit.                                               |
@@ -299,7 +299,7 @@ The alert badges (bible student / recently moved / unresolved "not answered") ar
 | Designation (`getById`)                                   | `docData$`        | **Yes**.                                                                                |
 | Congregation (`getById`)                                  | `docData$`        | **Yes**.                                                                                |
 | Territory by id, `getAllInIds`, visit history, statistics | `getDocs`         | **No** — snapshot at call time.                                                         |
-| `UserStateService` (signal-backed)                        | in-memory         | Only when explicitly `setUser(...)`; a congregation edit made elsewhere needs a reload. |
+| `UserStateService` (signal-backed)                        | in-memory         | Updated immediately on `/congregation` and `/profile` mutations via `setUser(...)`; external edits made in another browser session need a reload. |
 
 So: a background Admin-SDK write is expected to appear on `/territories` **without** a reload, but the statistics page and the profile/configuration user state require a navigation or reload.
 

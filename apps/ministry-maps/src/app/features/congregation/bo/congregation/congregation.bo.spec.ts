@@ -1,52 +1,43 @@
 import { TestBed } from '@angular/core/testing';
-import { CongregationBO, UpdateCongregationCityDTO } from './congregation.bo';
 import { MockProvider, ngMocks } from 'ng-mocks';
+import { lastValueFrom, of } from 'rxjs';
+
+import { CongregationBO } from './congregation.bo';
 import { CongregationRepository } from '../../../../repositories/congregation.repository';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { UserStateService } from '../../../../state/user.state.service';
 import { LoggerService } from '../../../../shared/services/logger/logger.service';
-import { of } from 'rxjs';
-import { elderUser, congregationMock } from '../../../../../test/mocks';
+import { ProfileBO } from '../../../profile/bo/profile.bo';
+import { congregationMock, elderUser, userMockBuilder } from '../../../../../test/mocks';
 import { territoryMockBuilder } from '../../../../../test/mocks/models/territory.mock';
-import { Territory } from '../../../../../models/territory';
+import { RoleEnum } from '../../../../../models/enums/role';
+import { Congregation } from '../../../../../models/congregation';
 
 describe('CongregationBO', () => {
   let service: CongregationBO;
   let congregationRepository: jest.Mocked<CongregationRepository>;
   let territoryRepository: jest.Mocked<TerritoryRepository>;
+  let profileBO: jest.Mocked<ProfileBO>;
   let userState: UserStateService;
-
-  const keysToCheck = (type: 'territory' | 'congregation'): string[] => {
-    if (type === 'territory') {
-      return [
-        'id',
-        'congregationId',
-        'icon',
-        'note',
-        'lastVisit',
-        'address',
-        'mapsLink',
-        'positionIndex',
-        'history',
-        'recentHistory',
-      ];
-    }
-
-    return ['id', 'name', 'locatedOn', 'settings'];
-  };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         CongregationBO,
-        MockProvider(UserStateService),
+        UserStateService,
         MockProvider(LoggerService),
+        MockProvider(ProfileBO, {
+          changeUserCongregation: jest.fn(),
+        }),
         MockProvider(CongregationRepository, {
+          add: jest.fn(),
           update: jest.fn(),
         }),
         MockProvider(TerritoryRepository, {
           getAllByCongregationAndCities: jest.fn(),
+          getNextPositionIndexForCity: jest.fn(),
           batchUpdate: jest.fn(),
+          batchDelete: jest.fn(),
         }),
       ],
     });
@@ -54,187 +45,192 @@ describe('CongregationBO', () => {
     service = TestBed.inject(CongregationBO);
     congregationRepository = ngMocks.get(CongregationRepository) as jest.Mocked<CongregationRepository>;
     territoryRepository = ngMocks.get(TerritoryRepository) as jest.Mocked<TerritoryRepository>;
-    userState = ngMocks.get(UserStateService);
-    userState.setUser(elderUser);
+    profileBO = ngMocks.get(ProfileBO) as jest.Mocked<ProfileBO>;
+    userState = TestBed.inject(UserStateService);
+    userState.setUser({
+      ...elderUser,
+      congregation: { ...congregationMock, cities: ['City 1', 'City 2', 'City 3'] },
+    });
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
+  describe('updateCongregationName', () => {
+    it('updates the congregation name and refreshes UserStateService', async () => {
+      congregationRepository.update.mockReturnValue(of(undefined));
 
-  it('should add new cities without calling territory repo', (done) => {
-    const updated: UpdateCongregationCityDTO[] = [{ newCityName: 'CityA' }, { newCityName: 'CityB' }];
+      await lastValueFrom(service.updateCongregationName('  Congregação Renomeada  '));
 
-    congregationRepository.update.mockReturnValue(of(undefined));
+      expect(congregationRepository.update).toHaveBeenCalledWith({
+        ...congregationMock,
+        name: 'Congregação Renomeada',
+      });
+      expect(userState.currentUser?.congregation?.name).toBe('Congregação Renomeada');
+    });
 
-    service.updateCongregationCities(updated).subscribe({
-      next: () => {
-        expect(congregationRepository.update).toHaveBeenCalledWith(
-          expect.objectContaining({ cities: ['CityA', 'CityB'] }),
-        );
-        expect(territoryRepository.getAllByCongregationAndCities).not.toHaveBeenCalled();
-        done();
-      },
-      error: (err) => done(err),
+    it('errors when the new congregation name is empty or whitespace-only', async () => {
+      await expect(lastValueFrom(service.updateCongregationName('   '))).rejects.toThrow(
+        /congregation name cannot be empty/i,
+      );
+      expect(congregationRepository.update).not.toHaveBeenCalled();
     });
   });
 
-  it('should rename city and update territories', (done) => {
-    const updated: UpdateCongregationCityDTO[] = [{ oldCityName: 'OldCity', newCityName: 'NewCity' }];
+  describe('addCity', () => {
+    it('appends a trimmed city, persists the congregation, and refreshes UserStateService', async () => {
+      congregationRepository.update.mockReturnValue(of(undefined));
 
-    congregationRepository.update.mockReturnValue(of(undefined));
+      await lastValueFrom(service.addCity('  City 4  '));
 
-    const territories: Territory[] = [
-      territoryMockBuilder({ id: 't1', city: 'OldCity' }),
-      territoryMockBuilder({ id: 't2', city: 'OtherCity' }),
-    ];
+      expect(congregationRepository.update).toHaveBeenCalledWith({
+        ...congregationMock,
+        cities: ['City 1', 'City 2', 'City 3', 'City 4'],
+      });
+      expect(userState.currentUser?.congregation?.cities).toEqual(['City 1', 'City 2', 'City 3', 'City 4']);
+    });
 
-    territoryRepository.getAllByCongregationAndCities.mockReturnValue(of(territories));
-    territoryRepository.batchUpdate.mockReturnValue(of(undefined));
+    it('rejects empty city names', async () => {
+      await expect(lastValueFrom(service.addCity('   '))).rejects.toThrow(/city name cannot be empty/i);
+      expect(congregationRepository.update).not.toHaveBeenCalled();
+    });
 
-    service.updateCongregationCities(updated).subscribe({
-      next: () => {
-        expect(congregationRepository.update).toHaveBeenCalledWith(expect.objectContaining({ cities: ['NewCity'] }));
-
-        expect(territoryRepository.getAllByCongregationAndCities).toHaveBeenCalledWith(congregationMock.id, [
-          'OldCity',
-        ]);
-
-        // batchUpdate should receive only territories that had city changed
-        expect(territoryRepository.batchUpdate).toHaveBeenCalledWith(
-          expect.arrayContaining([expect.objectContaining({ id: 't1', city: 'NewCity' })]),
-        );
-
-        done();
-      },
-      error: (err) => done(err),
+    it('rejects case-insensitively duplicate city names', async () => {
+      await expect(lastValueFrom(service.addCity('city 1'))).rejects.toThrow(/already exists/i);
+      expect(congregationRepository.update).not.toHaveBeenCalled();
     });
   });
 
-  it('should only change the city property for multiple updated territories (three territories)', (done) => {
-    const updated: UpdateCongregationCityDTO[] = [{ oldCityName: 'OldCity', newCityName: 'NewCity' }];
+  describe('renameCity', () => {
+    it('updates the city in place, cascades the new name to matching territories, and refreshes UserStateService', async () => {
+      congregationRepository.update.mockReturnValue(of(undefined));
+      const t1 = territoryMockBuilder({ id: 't1', city: 'City 1' });
+      const t2 = territoryMockBuilder({ id: 't2', city: 'City 1' });
+      const t3 = territoryMockBuilder({ id: 't3', city: 'City 2' });
+      territoryRepository.getAllByCongregationAndCities.mockReturnValue(of([t1, t2, t3]));
+      territoryRepository.batchUpdate.mockReturnValue(of(undefined));
 
-    congregationRepository.update.mockReturnValue(of(undefined));
+      await lastValueFrom(service.renameCity('City 1', 'City 1 Centro'));
 
-    const territories: Territory[] = [
-      territoryMockBuilder({ id: 't1', city: 'OldCity' }),
-      territoryMockBuilder({ id: 't2', city: 'OldCity' }),
-      territoryMockBuilder({ id: 't3', city: 'OtherCity' }),
-    ];
+      expect(congregationRepository.update).toHaveBeenCalledWith({
+        ...congregationMock,
+        cities: ['City 1 Centro', 'City 2', 'City 3'],
+      });
+      expect(territoryRepository.getAllByCongregationAndCities).toHaveBeenCalledWith(congregationMock.id, ['City 1']);
+      expect(territoryRepository.batchUpdate).toHaveBeenCalledWith([
+        { ...t1, city: 'City 1 Centro' },
+        { ...t2, city: 'City 1 Centro' },
+      ]);
+      expect(userState.currentUser?.congregation?.cities).toEqual(['City 1 Centro', 'City 2', 'City 3']);
+    });
 
-    // clone originals for later comparison
-    const originalTerritories = territories.map((t) => ({ ...t }));
+    it('allows a case-only rename of the same city', async () => {
+      congregationRepository.update.mockReturnValue(of(undefined));
+      const t1 = territoryMockBuilder({ id: 't1', city: 'City 1' });
+      territoryRepository.getAllByCongregationAndCities.mockReturnValue(of([t1]));
+      territoryRepository.batchUpdate.mockReturnValue(of(undefined));
 
-    territoryRepository.getAllByCongregationAndCities.mockReturnValue(of(territories));
-    territoryRepository.batchUpdate.mockReturnValue(of(undefined));
+      await lastValueFrom(service.renameCity('City 1', 'CITY 1'));
 
-    service.updateCongregationCities(updated).subscribe({
-      next: () => {
-        expect(territoryRepository.batchUpdate).toHaveBeenCalled();
+      expect(congregationRepository.update).toHaveBeenCalledWith({
+        ...congregationMock,
+        cities: ['CITY 1', 'City 2', 'City 3'],
+      });
+      expect(territoryRepository.batchUpdate).toHaveBeenCalledWith([{ ...t1, city: 'CITY 1' }]);
+    });
 
-        const updatedArgs = territoryRepository.batchUpdate.mock.calls[0][0] as Territory[];
-        // only t1 and t2 should be updated
-        expect(updatedArgs.length).toBe(2);
-
-        const updatedIds = updatedArgs.map((t) => t.id).sort();
-        expect(updatedIds).toEqual(['t1', 't2']);
-
-        for (const origTerr of originalTerritories.filter((t) => t.city === 'OldCity')) {
-          const updatedTerr = updatedArgs.find((t) => t.id === origTerr.id) as Territory;
-          expect(updatedTerr).toBeDefined();
-          // city updated
-          expect(updatedTerr.city).toBe('NewCity');
-
-          // check other props unchanged
-          for (const key of keysToCheck('territory')) {
-            const updatedRecord = updatedTerr as unknown as Record<string, unknown>;
-            const origRecord = origTerr as unknown as Record<string, unknown>;
-            expect(updatedRecord[key]).toEqual(origRecord[key]);
-          }
-        }
-
-        // ensure territory that didn't match old city was not included in updates
-        expect(updatedArgs.find((t) => t.id === 't3')).toBeUndefined();
-
-        done();
-      },
-      error: (err) => done(err),
+    it('rejects renaming a city to collide case-insensitively with another existing city', async () => {
+      await expect(lastValueFrom(service.renameCity('City 1', 'city 2'))).rejects.toThrow(/already exists/i);
+      expect(congregationRepository.update).not.toHaveBeenCalled();
     });
   });
 
-  it('should only change congregation.cities and no other congregation properties', (done) => {
-    const updated: UpdateCongregationCityDTO[] = [
-      { oldCityName: 'City 1', newCityName: 'City 1 Renamed' },
-      { oldCityName: 'City 2', newCityName: 'City 2 Renamed' },
-    ];
+  describe('reorderCities', () => {
+    it('persists the new city array order and refreshes UserStateService', async () => {
+      congregationRepository.update.mockReturnValue(of(undefined));
+      const reordered = ['City 3', 'City 1', 'City 2'];
 
-    // prepare congregation clone and spy return
-    const originalCongregation = { ...congregationMock };
-    const expectedCities = updated.map((u) => u.newCityName);
+      await lastValueFrom(service.reorderCities(reordered));
 
-    congregationRepository.update.mockImplementation((c: unknown) => {
-      // ensure the update is called with cities replaced
-      const cRecord = c as unknown as Record<string, unknown>;
-      expect(cRecord['cities']).toEqual(expectedCities);
-      // ensure no other top-level properties changed except cities
-      const origRecord = originalCongregation as unknown as Record<string, unknown>;
-      for (const key of keysToCheck('congregation')) {
-        expect(cRecord[key]).toEqual(origRecord[key]);
-      }
-
-      return of(undefined);
-    });
-
-    // no territories affected for this test
-    territoryRepository.getAllByCongregationAndCities.mockReturnValue(of([]));
-    territoryRepository.batchUpdate.mockReturnValue(of(undefined));
-
-    service.updateCongregationCities(updated).subscribe({
-      next: () => done(),
-      error: (err) => done(err),
+      expect(congregationRepository.update).toHaveBeenCalledWith({
+        ...congregationMock,
+        cities: reordered,
+      });
+      expect(userState.currentUser?.congregation?.cities).toEqual(reordered);
     });
   });
 
-  it('should error when payload has duplicate new city names (case-insensitive)', (done) => {
-    const updated: UpdateCongregationCityDTO[] = [{ newCityName: 'City' }, { newCityName: 'city' }];
+  describe('removeCity', () => {
+    it('transfers territories to targetCity with sequential positionIndex values and removes the city', async () => {
+      congregationRepository.update.mockReturnValue(of(undefined));
+      const t1 = territoryMockBuilder({ id: 't1', city: 'City 1', positionIndex: 3 });
+      const t2 = territoryMockBuilder({ id: 't2', city: 'City 1', positionIndex: 0 });
+      territoryRepository.getAllByCongregationAndCities.mockReturnValue(of([t1, t2]));
+      territoryRepository.getNextPositionIndexForCity.mockReturnValue(of(5));
+      territoryRepository.batchUpdate.mockReturnValue(of(undefined));
 
-    service.updateCongregationCities(updated).subscribe({
-      next: () => done(new Error('Expected error')),
-      error: (err) => {
-        expect(err).toBeInstanceOf(Error);
-        expect(String(err.message || err)).toMatch(/Duplicate new city name/i);
-        expect(congregationRepository.update).not.toHaveBeenCalled();
-        done();
-      },
+      await lastValueFrom(service.removeCity('City 1', { action: 'transfer', targetCity: 'City 2' }));
+
+      expect(territoryRepository.getNextPositionIndexForCity).toHaveBeenCalledWith('City 2');
+      expect(territoryRepository.batchUpdate).toHaveBeenCalledWith([
+        { ...t2, city: 'City 2', positionIndex: 5 },
+        { ...t1, city: 'City 2', positionIndex: 6 },
+      ]);
+      expect(congregationRepository.update).toHaveBeenCalledWith({
+        ...congregationMock,
+        cities: ['City 2', 'City 3'],
+      });
+      expect(userState.currentUser?.congregation?.cities).toEqual(['City 2', 'City 3']);
+    });
+
+    it('deletes all territories and their history via batchDelete and removes the city', async () => {
+      congregationRepository.update.mockReturnValue(of(undefined));
+      const t1 = territoryMockBuilder({ id: 't1', city: 'City 1' });
+      const t2 = territoryMockBuilder({ id: 't2', city: 'City 1' });
+      territoryRepository.getAllByCongregationAndCities.mockReturnValue(of([t1, t2]));
+      territoryRepository.batchDelete.mockReturnValue(of(undefined));
+
+      await lastValueFrom(service.removeCity('City 1', { action: 'delete' }));
+
+      expect(territoryRepository.batchDelete).toHaveBeenCalledWith(['t1', 't2']);
+      expect(congregationRepository.update).toHaveBeenCalledWith({
+        ...congregationMock,
+        cities: ['City 2', 'City 3'],
+      });
+      expect(userState.currentUser?.congregation?.cities).toEqual(['City 2', 'City 3']);
     });
   });
 
-  it('should error when adding a city that already exists in congregation', (done) => {
-    // set congregation to have existing city
-    const user = { ...elderUser, congregation: { ...congregationMock, cities: ['ExistingCity'] } };
-    userState.setUser(user);
+  describe('createCongregation', () => {
+    it('creates the congregation and switches the APP_ADMIN active congregation in UserStateService', async () => {
+      const appAdmin = userMockBuilder({
+        id: 'app-admin-1',
+        role: RoleEnum.APP_ADMIN,
+        congregation: congregationMock,
+      });
+      userState.setUser(appAdmin);
 
-    const updated: UpdateCongregationCityDTO[] = [{ newCityName: 'existingcity' }];
+      const newCongData: Omit<Congregation, 'id'> = {
+        name: 'Congregação Sul',
+        locatedOn: 'Santos, SP',
+        cities: ['Santos', 'São Vicente'],
+        settings: {
+          designationAccessExpiryDays: 30,
+          shouldDesignationBlockAfterExpired: true,
+        },
+      };
+      const createdCong: Congregation = { ...newCongData, id: 'cong-new-1' };
 
-    service.updateCongregationCities(updated).subscribe({
-      next: () => done(new Error('Expected error')),
-      error: (err) => {
-        expect(err).toBeInstanceOf(Error);
-        expect(String(err.message || err)).toMatch(/already exists in congregation/i);
-        done();
-      },
+      congregationRepository.add.mockReturnValue(of(createdCong));
+      profileBO.changeUserCongregation.mockReturnValue(of({ ...appAdmin, congregation: createdCong }));
+
+      const result = await lastValueFrom(service.createCongregation(newCongData));
+
+      expect(congregationRepository.add).toHaveBeenCalledWith(newCongData);
+      expect(profileBO.changeUserCongregation).toHaveBeenCalledWith('app-admin-1', 'cong-new-1');
+      expect(result).toEqual(createdCong);
+      expect(userState.currentUser?.congregation).toEqual(createdCong);
     });
-  });
-
-  it('should throw when there is no user or congregation', () => {
-    userState.setUser(null);
-
-    expect(() => service.updateCongregationCities([{ newCityName: 'X' }])).toThrow(
-      'No User or Congregation found while updating congregation cities.',
-    );
   });
 });

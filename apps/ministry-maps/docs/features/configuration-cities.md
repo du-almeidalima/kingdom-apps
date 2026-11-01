@@ -1,208 +1,136 @@
-# Congregation configuration — cities (`UC-CFG`)
+# Congregation administration — name, cities, and provisioning (`UC-CFG`)
 
-This document describes the behavioural use cases for the `/congregation` screen: listing, adding,
-renaming and deleting a congregation's `cities[]`, the single-edit-at-a-time constraint, validation, the
-save write (congregation doc + territory batch rename) and its staleness/atomicity caveats.
+This document describes the behavioural use cases for the `/congregation` screen (`Administrar Congregação`):
+immediate-persistence Congregation name editing, adding, inline-renaming, drag-and-drop reordering, and
+removing a Congregation's `cities[]` (with Territory transfer or deletion), plus the `APP_ADMIN`-only
+`Adicionar Congregação` dialog.
 
 **Route:** `/congregation`
-**Actors:** `ADMIN` and `APP_ADMIN` reach and edit the page (`data.roles: [RoleEnum.ADMIN]` with `APP_ADMIN` bypass in `authGuard`). `PUBLISHER` is redirected to `/welcome`, anonymous visitors are redirected to `/login`, and `ORGANIZER`, `ELDER`, and `SUPERINTENDENT` are denied by `authGuard`.
+**Actors:** `ADMIN` and `APP_ADMIN` reach and edit the page (`data.roles: [RoleEnum.ADMIN]` with `APP_ADMIN` bypass in `authGuard`). Only `APP_ADMIN` sees and can use `Adicionar Congregação` (`*libAuthorize="[RoleEnum.APP_ADMIN]"` and Firestore `/congregations` `create` security rule). `PUBLISHER` is redirected to `/welcome`, anonymous visitors are redirected to `/login`, and `ORGANIZER`, `ELDER`, and `SUPERINTENDENT` are denied by `authGuard`.
 Field/model shapes are in [`../domain/data-model.md`](../domain/data-model.md); pt-BR ↔ English vocabulary
 is in [`../domain/glossary.md`](../domain/glossary.md).
 
-> **⚠ Locale note:** unlike every other screen catalogued in this app, `ConfigCongregationCitiesComponent`'s
-> template and every `ToasterService` message on it are hard-coded in **English** (`"Manage Congregation
-Cities"`, `"Edit"`, `"Save Changes"`, …), not pt-BR. All literal strings below are quoted verbatim as they
-> appear in the running app — do **not** "correct" them to Portuguese.
+### Screen rendering & role gating
 
-### Cities list
-
-#### UC-CFG-01 — Cities list renders `congregation.cities` for the signed-in admin
+#### UC-CFG-01 — Renders congregation name and cities in `pt-BR` and hides `Adicionar Congregação` for `ADMIN`
 
 - **Actor:** Admin
 - **Route:** `/congregation`
-- **Preconditions (seed):** default baseline (`seed.ids.congregation` cities `['São Paulo', 'Osasco']`)
+- **Preconditions (seed):** default baseline (`seed.ids.congregation` name `Congregação Jardim Primavera`, cities `['São Paulo', 'Osasco']`)
 - **Steps:** 1. `signInAs('admin')` → 2. open `/congregation`
-- **Expected UI:** heading `Manage Congregation Cities`; subtitle `Congregação Jardim Primavera`; the list renders exactly 2 rows, in array order, each showing `São Paulo` then `Osasco` with `Edit`/`Delete` buttons; `Save Changes` is present but disabled (`hasChanges()` is `false` on load)
-- **Expected persistence:** `db.getDoc(db.collections.congregations, seed.ids.congregation).cities` deep-equals `['São Paulo', 'Osasco']` — the list is a pure client-side render of `UserStateService.currentUser.congregation.cities`, a snapshot taken once in `ngOnInit`, not a live listener
-- **Edge cases:** if `congregation.cities` were `[]`, the empty-state paragraph `No cities configured yet. Add your first city below.` renders instead of the list container's rows
-- **Priority:** P0 · **Gaps:** no `data-testid` anywhere on this screen; select rows by their text content
+- **Expected UI:** heading `Administrar Congregação` (`config-heading`); subtitle `Congregação Jardim Primavera` (`config-congregation-subtitle`); name input pre-filled with `Congregação Jardim Primavera` (`config-congregation-name-input`) and `Salvar Nome` (`config-save-name`) disabled; `Adicionar Congregação` (`config-add-congregation`) not rendered in DOM; 2 city rows (`config-city-row`) in array order showing `São Paulo` and `Osasco` with drag handles (`config-city-drag-handle`), `Editar` (`config-edit-city`), and `Remover` (`config-delete-city`) buttons
+- **Expected persistence:** `db.getDoc(db.collections.congregations, seed.ids.congregation).cities` deep-equals `['São Paulo', 'Osasco']`
+- **Edge cases:** when `congregation.cities` is `[]`, `config-empty-cities` renders `Nenhuma cidade cadastrada. Adicione uma cidade acima.`
+- **Priority:** P0
 
-### Add / rename / cancel
+### Congregation name
 
-#### UC-CFG-02 — Add a city opens a new, empty, editable row
-
-- **Actor:** Admin
-- **Route:** `/congregation`
-- **Preconditions (seed):** default baseline
-- **Steps:** 1. open `/congregation` → 2. click `+ Add City`
-- **Expected UI:** a third row appears at the end of the list, already `isEditing`, with an empty text `<input placeholder="Enter city name">` and a `Cancel` button (no `Edit`/`Delete` on this row while it is new); the input carries a green border class (`border-green-500`) distinguishing "new" from "renaming" (blue border) rows; `+ Add City` itself becomes disabled (`hasEditingCities` is now `true`)
-- **Expected persistence:** N/A — nothing is written until `Save Changes`; assert `db.getDoc(db.collections.congregations, seed.ids.congregation).cities` is still `['São Paulo', 'Osasco']` (unchanged) while the row is only local component state
-- **Edge cases:** typing a name and navigating away (no `beforeunload` guard) discards the unsaved row entirely
-- **Priority:** P0 · **Gaps:** none
-
-#### UC-CFG-03 — Rename an existing city inline
+#### UC-CFG-02 — Edits and saves the congregation name immediately with empty/unchanged guard
 
 - **Actor:** Admin
 - **Route:** `/congregation`
 - **Preconditions (seed):** default baseline
-- **Steps:** 1. open `/congregation` → 2. click `Edit` on the `São Paulo` row → 3. clear the input and type `São Paulo Centro`
-- **Expected UI:** the row switches to its editing layout (`-mx-6 -my-4 px-6 py-4 bg-gray-50` highlight, blue-border input pre-filled `São Paulo`) with only a `Cancel` button; `Save Changes` becomes enabled as soon as the text differs from the original (`hasChanges()` compares `currentName !== originalName`)
-- **Expected persistence:** N/A until save; the underlying doc is untouched at this point
-- **Edge cases:** every other row's `Edit`/`Delete` buttons and the `+ Add City` button are disabled the instant this row enters edit mode (see `UC-CFG-05`)
-- **Priority:** P0 · **Gaps:** none
+- **Steps:** 1. open `/congregation` → 2. clear/whitespace `config-congregation-name-input` (observe `Salvar Nome` disabled) → 3. type `Congregação Nova Primavera` → 4. click `Salvar Nome`
+- **Expected UI:** toast `Nome da congregação atualizado com sucesso!`; subtitle updates immediately to `Congregação Nova Primavera`; `Salvar Nome` becomes disabled again because the input now matches the saved name
+- **Expected persistence:** `db.getDoc(db.collections.congregations, seed.ids.congregation).name === 'Congregação Nova Primavera'`; `UserStateService` is updated in-place via `setUser`
+- **Priority:** P0
 
-#### UC-CFG-04 — Cancel an in-progress edit
+### Cities management (add, inline rename, drag-and-drop reorder, remove)
 
-- **Actor:** Admin
-- **Route:** `/congregation`
-- **Preconditions (seed):** default baseline
-- **Steps:** 1. edit `Osasco` → type `Osasco Norte` → click `Cancel` → observe → 2. click `+ Add City` → type `Sorocaba` → click `Cancel` on that row → observe
-- **Expected UI:** step 1: the row exits edit mode and reverts to displaying `Osasco` (`city.currentName = city.originalName`) — the typed text is discarded; step 2: the entire new row is removed from the list (`this.cities.splice(index, 1)`), not merely cleared
-- **Expected persistence:** `db.getDoc(db.collections.congregations, seed.ids.congregation).cities` unaffected in both cases (no write ever happened)
-- **Edge cases:** `cancelEdit` branches on `city.isNew` — this is why an existing city reverts in place while a freshly-added one disappears entirely; there is no confirmation prompt for discarding typed text
-- **Priority:** P1 · **Gaps:** none
-
-#### UC-CFG-05 — Single-edit-at-a-time constraint disables other rows and "Add", but not "Save Changes"
+#### UC-CFG-03 — Adds a city immediately and rejects empty or case-insensitively duplicate names with `pt-BR` toasts
 
 - **Actor:** Admin
 - **Route:** `/congregation`
 - **Preconditions (seed):** default baseline
-- **Steps:** 1. click `Edit` on `São Paulo` → 2. observe the `Osasco` row's `Edit`/`Delete` buttons and the `+ Add City` button → 3. without clicking `Cancel`, type a new name and click `Save Changes` directly while the row is still `isEditing`
-- **Expected UI:** step 2: `Osasco`'s `Edit` and `Delete` are both `disabled` (`[disabled]="hasEditingCities"`), and `+ Add City` is disabled too — only one row can ever be mid-edit; step 3: `Save Changes` is **not** gated by `hasEditingCities`, only by `!hasChanges() || isLoading` — clicking it while `São Paulo`'s row is still visually in edit mode still runs `saveChanges()` against the typed (uncommitted) `currentName`, and on success every row (including the one that was mid-edit) is reset to `isEditing: false`
-- **Expected persistence:** after step 3's successful save, `db.getDoc(db.collections.congregations, seed.ids.congregation).cities` contains the typed new name, proving the edit did not need to be "confirmed" out of edit mode first
-- **Edge cases:** this means a test can save a rename without ever seeing the row return to its read-only state first — do not assume `Cancel`/blur is required before `Save Changes` is clickable
-- **Priority:** P1 · **Gaps:** none
+- **Steps:** 1. click `Adicionar Cidade` with whitespace input → 2. type `são paulo` and click `Adicionar Cidade` → 3. type `Guarulhos` and click `Adicionar Cidade`
+- **Expected UI:** step 1 shows error toast `O nome da cidade não pode estar vazio.`; step 2 shows error toast `O nome da cidade deve ser único.`; step 3 shows success toast `Cidade adicionada com sucesso!`, clears `config-new-city-input`, and renders `Guarulhos` as the 3rd city row
+- **Expected persistence:** `db.getDoc(db.collections.congregations, seed.ids.congregation).cities` deep-equals `['São Paulo', 'Osasco', 'Guarulhos']`; `UserStateService` is updated immediately
+- **Priority:** P0
 
-### Validation
-
-#### UC-CFG-06 — ⚠ Empty city name blocks save with a toast; nothing persisted
+#### UC-CFG-04 — Inline city rename allows one row at a time, supports cancel, and cascades rename to territories on save
 
 - **Actor:** Admin
 - **Route:** `/congregation`
-- **Preconditions (seed):** default baseline
-- **Steps:** 1. click `+ Add City` → 2. leave the input empty (or type only spaces) → 3. click `Save Changes`
-- **Expected UI:** an error toast reads exactly `All cities must have a name.` (`ToasterService.error`, icon `error-8`); the new empty row remains on screen, still editable; `isLoading` never flips to `true` — the check runs client-side in `saveChanges()` before `CongregationBO` is even called
-- **Expected persistence:** `db.getDoc(db.collections.congregations, seed.ids.congregation).cities` is unchanged (still `['São Paulo', 'Osasco']`); no territory writes occur
-- **Edge cases:** the check is `!city.currentName.trim()` across **every** row, not just the new one — a pre-existing row emptied out via `Edit` triggers the same toast
-- **Priority:** P0 · **Gaps:** `⚠ suspected defect`-adjacent only in that the message is in English on an otherwise pt-BR app; the behaviour itself (block + toast) is correct and should be asserted as-is; no `data-testid` on the toast — assert via its rendered text
+- **Preconditions (seed):** default baseline (`seed-territory-1`/`-3` in `São Paulo`, `seed-territory-2` in `Osasco`)
+- **Steps:** 1. click `Editar` on `São Paulo` → 2. observe `Osasco`'s `Editar`/`Remover` buttons are disabled → 3. type a temporary name and click `Cancelar` (reverts to `São Paulo`) → 4. click `Editar` on `São Paulo`, type `Sampa`, and click `Salvar`
+- **Expected UI:** toast `Cidade atualizada com sucesso!`; row exits edit mode and displays `Sampa`
+- **Expected persistence:** `congregations/{id}.cities` is `['Sampa', 'Osasco']`; `seed-territory-1` and `seed-territory-3` have `city: 'Sampa'`; `seed-territory-2` remains `city: 'Osasco'`; `UserStateService` is updated immediately
+- **Priority:** P0
 
-#### UC-CFG-07 — ⚠ Duplicate city name blocks save with a toast; nothing persisted
-
-- **Actor:** Admin
-- **Route:** `/congregation`
-- **Preconditions (seed):** default baseline
-- **Steps:** 1. click `Edit` on `Osasco` → rename it to `São Paulo` (case-insensitive duplicate of the other row, e.g. also try `são paulo`) → 2. click `Save Changes`
-- **Expected UI:** error toast reads exactly `City names must be unique.`; the component's own duplicate check (`cityNames.indexOf(name) !== index` over `trim().toLowerCase()`) fires **before** `CongregationBO` is invoked, so `ConfigurationBO.validateUpdateCongregationCities`'s own duplicate/collision checks (which throw `Duplicate new city name in payload: …` or `City already exists in congregation: …`) are effectively unreachable from this UI — they would only surface as an unhandled `error:` callback text `Error updating cities: <message>` if the component-level check were ever bypassed
-- **Expected persistence:** `db.getDoc(db.collections.congregations, seed.ids.congregation).cities` unchanged; no `batchUpdate` on territories
-- **Edge cases:** the comparison is case-insensitive (`toLowerCase()`) but accent-sensitive, matching the general search behaviour documented in [`territories-management.md`](./territories-management.md#uc-terr-06--search-is-case-insensitive-but-accent-sensitive)
-- **Priority:** P0 · **Gaps:** none beyond the English-copy note above
-
-### Save & persistence
-
-#### UC-CFG-08 — Save persists `congregations/{id}.cities` and batch-renames every affected territory
-
-- **Actor:** Admin
-- **Route:** `/congregation`
-- **Preconditions (seed):** default baseline; `seed-territory-1`/`seed-territory-3` in `São Paulo`, `seed-territory-2` in `Osasco`
-- **Steps:** 1. `Edit` on `São Paulo` → rename to `São Paulo Zona Sul` → 2. `Save Changes`
-- **Expected UI:** button shows `Saving...` while `isLoading`; on success, a toast reads exactly `Cities updated successfully!`; the row returns to read-only, now showing `São Paulo Zona Sul`
-- **Expected persistence:** `db.getDoc(db.collections.congregations, seed.ids.congregation).cities` deep-equals `['São Paulo Zona Sul', 'Osasco']` (order preserved); `db.getDoc(db.collections.territories, 'seed-territory-1').city === 'São Paulo Zona Sul'` and `db.getDoc(db.collections.territories, 'seed-territory-3').city === 'São Paulo Zona Sul'` (both batch-updated via a Firestore `runTransaction` in `FirebaseTerritoryDatasourceService.batchUpdate`); `db.getDoc(db.collections.territories, 'seed-territory-2').city === 'Osasco'` (untouched, different city)
-- **Edge cases:** the two writes — `CongregationRepository.update` (a plain `updateDoc`) and the territory `batchUpdate` (a `runTransaction`) — are combined with `forkJoin([congregationUpdate$, affectedTerritoriesUpdate$])` inside `ConfigurationBO.updateCongregationCities`: they run **in parallel, not as one atomic unit**. If the transaction fails after the congregation doc already committed (or vice versa), the congregation's `cities` array and the territories' `city` fields can disagree; a test asserting robustness under failure would need to fault-inject one of the two writes, which the current harness cannot do
-- **Priority:** P0 · **Gaps:** `⚠ suspected defect` (partial-failure window from non-atomic `forkJoin`) — today's happy-path assertion is both writes landing, as above; no fault-injection harness exists to exercise the failure window
-
-#### UC-CFG-09 — A newly added city needs no territory updates; an untouched city is skipped by the rename batch
-
-- **Actor:** Admin
-- **Route:** `/congregation`
-- **Preconditions (seed):** default baseline
-- **Steps:** 1. `+ Add City` → type `Guarulhos` → 2. `Save Changes`
-- **Expected UI:** toast `Cities updated successfully!`; `Guarulhos` now listed as a third, read-only row
-- **Expected persistence:** `db.getDoc(db.collections.congregations, seed.ids.congregation).cities` deep-equals `['São Paulo', 'Osasco', 'Guarulhos']`; `db.getCollectionDocs(db.collections.territories)` — all 3 baseline territories keep their original `city` values, since `updateCitiesOfTerritory` builds its rename list from `oldCityName` (`undefined` for a new city) and filters out anything where `oldCityName` is falsy — a new city is never a rename target, so the territory `batchUpdate` step is skipped entirely (`updatedTerritories.length === 0` short-circuits to `of(undefined)`)
-- **Edge cases:** the same short-circuit applies to any row whose `currentName === originalName` (untouched) — it is excluded from the rename map even though it is still included, unchanged, in the new `cities` array sent to `CongregationRepository.update`
-- **Priority:** P1 · **Gaps:** none
-
-### Delete a city
-
-#### UC-CFG-10 — ⚠ Delete removes the city from `congregation.cities` but leaves territories orphaned, pointing at a name that no longer exists
-
-- **Actor:** Admin
-- **Route:** `/congregation`
-- **Preconditions (seed):** default baseline (`seed-territory-2` is in `Osasco`)
-- **Steps:** 1. click `Delete` on the `Osasco` row → 2. a **native** browser `confirm()` dialog appears with text `Are you sure you want to delete this city?` → 3. accept it → 4. `Save Changes`
-- **Expected UI:** after accepting the confirm, the `Osasco` row disappears immediately (local splice, before any save) and `Save Changes` is **enabled** — a delete-only change counts in `hasChanges()` (fixed 2026-08: the row count is compared against the congregation snapshot; previously a plain delete left Save disabled and deletions were unsavable on their own). Because this is `window.confirm(...)`, not an in-app dialog component, Playwright must register `page.on('dialog', dialog => dialog.accept())` (or `.dismiss()`) **before** the click that triggers it — a normal `getByRole('dialog')`/`getByText` locator will never see it, and an unhandled native dialog will hang the test. After `Save Changes`, toast `Cities updated successfully!`
-- **Expected persistence:** `db.getDoc(db.collections.congregations, seed.ids.congregation).cities` deep-equals `['São Paulo']` (no `Osasco`); **but** `db.getDoc(db.collections.territories, 'seed-territory-2').city` is still exactly `'Osasco'` — `deleteCity` only removes the array entry client-side and is never translated into an `UpdateCongregationCityDTO`, so `CongregationBO` has no record that `Osasco` was removed and performs **no** territory update for it. `seed-territory-2` is now an orphan: its `city` value no longer appears in any city `<select>` on `/territories` (it was built from `congregation.cities`), yet the territory document and its history are fully intact and still returned by `db.queryWhere(db.collections.territories, 'congregationId', '==', seed.ids.congregation)`
-- **Edge cases:** dismissing the native confirm (via `dialog.dismiss()` or a manual `Cancelar`-equivalent) leaves the row in place with no change at all
-- **Priority:** P1 · **Gaps:** `⚠ suspected defect` — orphaned territories after a city delete; test today must assert the territory **survives with its stale city name** (not that it is migrated or deleted), and must use `page.on('dialog')` for the native `confirm()`
-
-### Stale state after save
-
-#### UC-CFG-11 — ⚠ `/territories`'s city `<select>` does not reflect a cities save until a full reload
+#### UC-CFG-05 — Drag-and-drop reorders cities, persists immediately on drop, and refreshes `/territories` without reload
 
 - **Actor:** Admin
 - **Route:** `/congregation` then `/territories`
 - **Preconditions (seed):** default baseline
-- **Steps:** 1. open `/congregation` → rename `Osasco` to `Osasco Centro` → `Save Changes` → 2. navigate (SPA `routerLink`/`page.goto`, no reload) to `/territories` → 3. observe `territories-city-filter` → 4. `page.reload()` → 5. observe again
-- **Expected UI:** after step 2, the city filter still lists `São Paulo`/`Osasco`/`Todas` — the **old** name — because `ConfigCongregationCitiesComponent`/`CongregationBO` never call `UserStateService.setUser(...)`; `TerritoriesPageComponent.ngOnInit` reads `this.userState.currentUser?.congregation?.cities`, which is still the pre-rename in-memory object. Only after step 4's hard reload — which resets `UserStateService` to `null` and forces `AuthService.resolveUserFromAuthProvider()` to refetch and re-hydrate the user (and its congregation) from Firestore — does the filter show `Osasco Centro`
-- **Expected persistence:** `db.getDoc(db.collections.congregations, seed.ids.congregation).cities` already contains `Osasco Centro` immediately after step 1's save (the backend is correct the whole time; only the cached client state is stale)
-- **Edge cases:** contrast with `UC-PROF-06`, where the profile congregation-switch flow **does** call `setUser` and therefore does not need a hard reload — the two "state goes stale" stories in this app have different fixes
-- **Priority:** P1 · **Gaps:** `⚠ suspected defect` (or at least a UX gap) — test must call `page.reload()` between the save and the `/territories` assertion, not just navigate
+- **Steps:** 1. drag `Osasco` handle onto `São Paulo` row → 2. SPA-navigate to `/territories` without browser reload
+- **Expected UI:** city rows on `/congregation` reorder to `['Osasco', 'São Paulo']`; `/territories` city filter options immediately list `['Osasco', 'São Paulo', 'Todas']` without `page.reload()`
+- **Expected persistence:** `db.getDoc(db.collections.congregations, seed.ids.congregation).cities` deep-equals `['Osasco', 'São Paulo']`
+- **Priority:** P0
 
-### Anonymous access & role gating
+#### UC-CFG-06 — Remove city with Transfer moves territories to destination city with sequential `positionIndex` values
+
+- **Actor:** Admin
+- **Route:** `/congregation`
+- **Preconditions (seed):** default baseline (`São Paulo` has `seed-territory-1` at index `0` and `seed-territory-3` at index `2`; `Osasco` has `seed-territory-2` at index `1`)
+- **Steps:** 1. click `Remover` on `São Paulo` → 2. in the `Remover Cidade` dialog (`remove-city-dialog`), keep `Transferir para outra cidade` (`remove-city-option-transfer`) selected with destination `Osasco` (`remove-city-target-select`) → 3. click `Confirmar` (`remove-city-confirm`)
+- **Expected UI:** toast `Cidade removida com sucesso!`; `São Paulo` row is removed
+- **Expected persistence:** `congregations/{id}.cities` is `['Osasco']`; `seed-territory-1` and `seed-territory-3` move to `city: 'Osasco'` with sequential `positionIndex` values `2` and `3` (appended after `seed-territory-2`'s max index `1`)
+- **Priority:** P0
+
+#### UC-CFG-07 — Remove city with Delete deletes territories and their `history` subcollections; transfer is disabled when only 1 city remains
+
+- **Actor:** Admin
+- **Route:** `/congregation`
+- **Preconditions (seed):** default baseline
+- **Steps:** 1. click `Remover` on `São Paulo` → 2. select `Excluir territórios` (`remove-city-option-delete`) and click `Confirmar` → 3. click `Remover` on the sole remaining city `Osasco`
+- **Expected UI:** after step 2, `São Paulo` is removed; in step 3, `remove-city-option-transfer` radio input and `remove-city-target-select` are disabled and `Excluir territórios` is pre-selected; confirming leaves 0 rows and renders `config-empty-cities`
+- **Expected persistence:** `seed-territory-1` and `seed-territory-3` parent documents and their `history` subcollection documents are permanently deleted in a Firestore transaction; `seed-territory-2` is untouched until `Osasco` is deleted
+- **Priority:** P0
+
+### Add Congregation (`APP_ADMIN` only)
+
+#### UC-CFG-08 — `APP_ADMIN` creates a new Congregation via `Adicionar Congregação` dialog and switches active Congregation
+
+- **Actor:** App Admin (`signInAs('app_admin')`)
+- **Route:** `/congregation`
+- **Preconditions (seed):** default baseline
+- **Steps:** 1. click `Adicionar Congregação` (`config-add-congregation`) → 2. fill name `Congregação Vale Verde` and location `Campinas, SP` → 3. add cities via `Enter` and `Adicionar` button (`add-congregation-add-city-btn`) and remove an unwanted chip via its accessible remove button → 4. configure `Configurações` (`add-congregation-expiry-days-input`, `add-congregation-block-expired-checkbox`) → 5. click `Criar` (`add-congregation-submit`)
+- **Expected UI:** toast `Congregação criada com sucesso!`; dialog closes; `/congregation` immediately displays `Congregação Vale Verde` and its cities (`Campinas`, `Valinhos`)
+- **Expected persistence:** new document created in `congregations` with auto-generated `id`, `name`, `locatedOn`, `cities`, and `settings`; `users/{appAdminUid}.congregation` reference updated to the newly created congregation
+- **Priority:** P0
+
+### Error & access states
+
+#### UC-CFG-11 — User without a congregation sees `pt-BR` error banner
+
+- **Actor:** Admin with a dangling congregation reference
+- **Route:** `/congregation`
+- **Expected UI:** `config-no-congregation-banner` renders `Nenhuma congregação encontrada. Verifique se você está autenticado.`
+- **Priority:** P1
 
 #### UC-CFG-12 — Anonymous visit redirects to `/login`
 
 - **Actor:** Anonymous
 - **Route:** `/congregation`
-- **Preconditions (seed):** none required; do not sign in
-- **Steps:** 1. `page.goto('/congregation')` without signing in
-- **Expected UI:** URL redirects to `/login` (`authGuard` evaluates `data.roles: [RoleEnum.ADMIN]`)
-- **Expected persistence:** N/A; assert `db.getCollectionDocs(db.collections.congregations)` unchanged (still 1 baseline doc) to prove no side effect
-- **Priority:** P0 · **Gaps:** none
+- **Expected UI:** URL redirects to `/login`
+- **Priority:** P0
 
 #### UC-CFG-13 — Non-admin roles cannot access `/congregation`
 
 - **Actor:** Publisher, Organizer, Elder, Superintendent
 - **Route:** `/congregation`
-- **Preconditions (seed):** default baseline
-- **Steps:** 1. `signInAs('publisher')` → `page.goto('/congregation')` → 2. `signInAs('organizer' | 'elder' | 'superintendent')` → `page.goto('/congregation')`
-- **Expected UI:** `PUBLISHER` is redirected to `/welcome`; `ORGANIZER`, `ELDER`, and `SUPERINTENDENT` have navigation cancelled by `authGuard` (`canAccessRoute` returns `false`, heading never renders)
-- **Expected persistence:** N/A
-- **Priority:** P0 · **Gaps:** none
-
-## Testability gaps (summary)
-
-- Zero `data-testid`s exist on `/congregation` — every row, button, input and toast must be selected by
-  its (English) text content or CSS class.
-- Native-dialog obstacle: deleting a city uses `window.confirm(...)`, not an in-app dialog — every delete
-  spec must register `page.on('dialog', dialog => dialog.accept())` before the triggering click, or the
-  test will hang (`UC-CFG-10`).
-- No fault-injection harness exists to exercise the non-atomic `forkJoin` window in `UC-CFG-08` (congregation
-  update succeeding while the territory batch rename fails, or vice versa).
-- Documented current-behaviour-vs-defect items (see the corresponding entry for the assertion to make
-  today): `UC-CFG-08` (save is two independent, non-atomic writes), `UC-CFG-10` (deleting a city orphans
-  territories that still point at the removed name), `UC-CFG-11` (a full `page.reload()` — not just a SPA
-  navigation — is required for `/territories` to see a renamed city), `UC-CFG-12` (anonymous visitor is not
-  redirected and sees the "no congregation" banner), `UC-CFG-13` (role gating for this screen is entirely
-  unenforced — any signed-in role, including `PUBLISHER`, can edit and persist city changes).
-- Locale inconsistency: this is the only feature in the app whose UI copy and toast messages are in English
-  rather than pt-BR — do not "fix" the quoted strings in this document or in a spec to match the rest of the
-  app's language.
+- **Expected UI:** `PUBLISHER` is redirected to `/welcome`; `ORGANIZER`, `ELDER`, and `SUPERINTENDENT` have navigation cancelled by `authGuard` (`config-heading` never renders)
+- **Priority:** P0
 
 ## Sources
 
-- `apps/ministry-maps/src/app/features/congregation/components/config-manage-congregation-citites/config-congregation-cities.component.ts`
-- `apps/ministry-maps/src/app/features/congregation/pages/main-page/configuration-main-page.component.ts`
-- `apps/ministry-maps/src/app/features/congregation/pages/main-page/configuration-main-page.component.html`
-- `apps/ministry-maps/src/app/features/congregation/congregation.routes.ts`
-- `apps/ministry-maps/src/app/features/congregation/config/congregation-roles.config.ts`
+- `apps/ministry-maps/src/app/features/congregation/pages/congregation-page/congregation-page.component.ts`
+- `apps/ministry-maps/src/app/features/congregation/components/congregation-name-form/congregation-name-form.component.ts`
+- `apps/ministry-maps/src/app/features/congregation/components/congregation-cities/congregation-cities.component.ts`
+- `apps/ministry-maps/src/app/features/congregation/components/congregation-remove-city-dialog/congregation-remove-city-dialog.component.ts`
+- `apps/ministry-maps/src/app/features/congregation/components/congregation-add-dialog/congregation-add-dialog.component.ts`
 - `apps/ministry-maps/src/app/features/congregation/bo/congregation/congregation.bo.ts`
 - `apps/ministry-maps/src/app/repositories/firebase/firebase-congregation-datasource.service.ts`
 - `apps/ministry-maps/src/app/repositories/firebase/firebase-territory-datasource.service.ts`
-- `apps/ministry-maps/src/app/repositories/territories.repository.ts`, `congregation.repository.ts`
-- `apps/ministry-maps/src/app/state/user.state.service.ts`
-- `apps/ministry-maps/src/app/core/features/auth/services/auth.service.ts`
-- `libs/common-ui/src/lib/components/toaster/toaster.service.ts`
-- `apps/ministry-maps/src/app/features/territory/pages/territories-page/territories-page.component.ts`
-- `apps/ministry-maps/src/app/app-routes.ts`
-- `apps/ministry-maps/e2e/seed/default.seed.ts`, `e2e/config/auth.config.ts`
-- `apps/ministry-maps/docs/README.md`, `docs/domain/data-model.md`, `docs/domain/roles-and-permissions.md`, `docs/domain/glossary.md`
+- `apps/ministry-maps/e2e/page-objects/configuration.page.ts`
+- `apps/ministry-maps/e2e/tests/configuration.spec.ts`

@@ -25,6 +25,8 @@ export abstract class TerritoryRepository {
 
   abstract batchUpdate(territories: Territory[]): Observable<void>;
 
+  abstract batchDelete(ids: string[]): Observable<void>;
+
   abstract delete(id: string): Observable<void>;
 
   abstract getTerritoryVisitHistory(id: string): Observable<TerritoryVisitHistory[]>;

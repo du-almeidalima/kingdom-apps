@@ -36,7 +36,8 @@ service cloud.firestore {
 
     match /congregations/{document=**} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow create: if callerRoleIn(['APP_ADMIN']);
+      allow update, delete: if request.auth != null;
     }
 
     // Logs: writable by anyone (client logging), readable by APP_ADMIN only.
@@ -112,13 +113,14 @@ service cloud.firestore {
       }
     }
 
-    // Catch-all for every other collection. `logs`, `users`, and `designations_header` are excluded
+    // Catch-all for every other collection. `logs`, `users`, `designations_header`, and `congregations` are excluded
     // so the dedicated rules above stay their only granters (rules union grants, they never subtract).
     match /{collectionId}/{document=**} {
       allow read, write: if request.auth != null
         && collectionId != 'logs'
         && collectionId != 'users'
-        && collectionId != 'designations_header';
+        && collectionId != 'designations_header'
+        && collectionId != 'congregations';
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────────────

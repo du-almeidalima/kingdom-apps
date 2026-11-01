@@ -31,7 +31,12 @@ Shared components, so these strings appear on many screens.
 | `Congregação`                                                   | `/home` card title                      |                                                |
 | `Administrar congregação e publicadores`                        | `/home` card subtitle                   |                                                |
 | `Administrar Pessoas`                                           | `/home` link                            | → `/congregation/users`                        |
-| `Administrar Congregação`                                       | `/home` link                            | → `/congregation` (`ADMIN` / `APP_ADMIN` only) |
+| `Administrar Congregação`                                       | `/home` link and `/congregation` heading | → `/congregation` (`ADMIN` / `APP_ADMIN` only) |
+| `Adicionar Congregação`                                         | `/congregation` button & dialog title   | `APP_ADMIN` only                               |
+| `Salvar Nome`                                                   | `/congregation` button                  | saves updated congregation name                |
+| `Adicionar Cidade`                                              | `/congregation` button                  | appends a new city to the congregation         |
+| `Remover Cidade`                                                | `/congregation` dialog title            | final city removal confirmation dialog         |
+| `Transferir para outra cidade` / `Excluir territórios`          | `Remover Cidade` dialog radio options   | resolution choices when removing a city        |
 | `Contatados` / `Ninguém atendeu` / `Mudaram` / `Não visitar` / `Revisita` | Designations history outcome labels | Short labels for visit outcomes. |
 | `Criar Link de Convite`                                         | `/congregation/users` FAB `title`       | `ADMIN` only                                   |
 

@@ -22,6 +22,10 @@ export class TerritoryRepositoryMock implements TerritoryRepository {
     return EMPTY;
   }
 
+  batchDelete(_ids: string[]): Observable<void> {
+    return EMPTY;
+  }
+
   getAllByCongregation(_congregationId: string): Observable<Territory[]> {
     return of([]);
   }

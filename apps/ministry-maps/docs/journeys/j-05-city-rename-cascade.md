@@ -1,101 +1,48 @@
-# J-05 — City rename cascade, and the orphaned-territory consequence of a city delete
+# J-05 — City rename cascade, immediate client-state sync, safe visit write-backs, and city removal transfer
 
-- **Priority:** P1 — configuration writes cascade into territories, with two documented rough edges
-  (stale client state; orphans after delete) that this journey locks in as today's behaviour.
-- **Identities:** `Admin` throughout (`signInAs('admin')`).
+- **Priority:** P1 — congregation city mutations cascade to territories, immediately update `UserStateService` without a hard reload, preserve renamed cities when pre-rename Designations record visits, and transfer or delete territories on city removal.
+- **Identities:** `Admin` (`signInAs('admin')`) + anonymous/publisher `/work/:id` visit completion.
 - **Suggested spec file:** `e2e/tests/journey-city-rename.spec.ts`.
-- **Composes:** UC-CFG-01, UC-CFG-03, UC-CFG-08, UC-CFG-09, UC-CFG-10, UC-CFG-11, UC-TERR-02.
+- **Composes:** UC-CFG-01, UC-CFG-04, UC-CFG-06, UC-TERR-02, UC-WORK-10.
 
 ## Seed
 
 Default baseline (`cities: ['São Paulo', 'Osasco']`; `seed-territory-1`/`-3` in `São Paulo`,
-`seed-territory-2` in `Osasco`).
-
-> **Locale reminder:** `/congregation` is the app's only English-language screen — every string below is
-> verbatim and intentionally **not** pt-BR (see [`../features/configuration-cities.md`](../features/configuration-cities.md)
-> header note).
+`seed-territory-2` in `Osasco`), plus an active `Designation` created before the city rename embedding a snapshot of `seed-territory-1` with `city: 'São Paulo'`.
 
 ## Script
 
 ### Leg 1 — Rename `São Paulo` → `São Paulo Centro` and verify the cascade
 
-1. `signInAs('admin')` → `page.goto('/congregation')` → assert the heading `Manage Congregation Cities`,
-   the subtitle `Congregação Jardim Primavera`, and 2 rows (UC-CFG-01).
-2. Click `Edit` on the `São Paulo` row → clear the input → type `São Paulo Centro` → click
-   `Save Changes` (UC-CFG-03; `Save Changes` is clickable even while the row is mid-edit — UC-CFG-05).
-3. Assert the success toast `Cities updated successfully!` and the row now reading `São Paulo Centro`.
+1. `signInAs('admin')` → `page.goto('/congregation')` → assert heading `Administrar Congregação`, subtitle `Congregação Jardim Primavera`, and 2 city rows (`UC-CFG-01`).
+2. Click `Editar` on `São Paulo` → fill `São Paulo Centro` → click `Salvar` (`UC-CFG-04`).
+3. Assert toast `Cidade atualizada com sucesso!` and row reading `São Paulo Centro`.
 
-⟶ **HAND-OFF (Firestore):** `db.getDoc(db.collections.congregations, seed.ids.congregation).cities`
-deep-equals `['São Paulo Centro', 'Osasco']` (order preserved); **and** the batch rename landed —
-`db.getDoc(db.collections.territories, 'seed-territory-1').city === 'São Paulo Centro'`,
-`db.getDoc(db.collections.territories, 'seed-territory-3').city === 'São Paulo Centro'`, while
-`db.getDoc(db.collections.territories, 'seed-territory-2').city === 'Osasco'` (untouched, different city —
-UC-CFG-08/09).
+⟶ **HAND-OFF (Firestore):** `congregations/{id}.cities` deep-equals `['São Paulo Centro', 'Osasco']`; `seed-territory-1` and `seed-territory-3` have `city === 'São Paulo Centro'`; `seed-territory-2` remains `city === 'Osasco'`.
 
-### Leg 2 — Observe the stale `/territories` filter, then the reload fix
+### Leg 2 — SPA navigate to `/territories` without reload and verify immediate city selector update
 
-4. Navigate to `/territories` **without reloading** (SPA-style `page.goto('/territories')` — the app's own
-   in-memory user state is what matters here).
-5. Assert the city `<select>` (`territories-city-filter`) still offers the **old** names
-   `São Paulo` / `Osasco` / `Todas` — `CongregationBO` never calls `UserStateService.setUser(...)`, so the
-   in-memory congregation is stale (UC-CFG-11, ⚠ suspected defect — assert the staleness, not a graceful
-   update).
-6. `page.reload()` → assert the `<select>` now offers `São Paulo Centro` / `Osasco` / `Todas`
-   (UC-CFG-11's reload requirement).
-7. Select `São Paulo Centro` → both renamed territories are listed under it (UC-TERR-02).
+4. Navigate via client-side router (`popstate`) to `/territories` without `page.reload()`.
+5. Assert `territories-city-filter` immediately offers `['São Paulo Centro', 'Osasco', 'Todas']` because `CongregationBO.renameCity` refreshed `UserStateService`.
+6. Select `São Paulo Centro` → both renamed territories render under it (`UC-TERR-02`).
 
-⟶ **HAND-OFF (Firestore):** unchanged since leg 1 — the backend was correct the whole time; only the
-client cache was stale.
+### Leg 3 — Complete a visit on the pre-rename Designation and verify `city` is preserved
 
-### Leg 3 — Delete `Osasco` and observe the orphaned territory
+7. Open `/work/j05-pre-rename-designation` (whose frozen snapshot still has `city: 'São Paulo'`).
+8. Complete the visit on `Rua das Acácias, 45 - Pinheiros`.
 
-8. `page.goto('/congregation')`.
-9. **Before clicking**, register the native-dialog handler:
-   `page.once('dialog', dialog => dialog.accept())` — the `Delete` button calls the browser's native
-   `confirm('Are you sure you want to delete this city?')`, which a locator can never see and which hangs
-   the test if unhandled (UC-CFG-10).
-10. Click `Delete` on the `Osasco` row → the row disappears immediately (local splice). A delete-only
-    change now counts in `hasChanges()` (fixed 2026-08 — it compares the row count against the
-    congregation snapshot), so `Save Changes` is enabled directly: click it to persist the deletion.
-    Toast: `Cities updated successfully!`.
+⟶ **HAND-OFF (Firestore):** `territories/seed-territory-1` receives the new visit in `history` and `recentHistory` / `lastVisit`, while `territories/seed-territory-1.city` remains `'São Paulo Centro'` (never overwritten by the stale snapshot).
 
-⟶ **HAND-OFF (Firestore):** `db.getDoc(db.collections.congregations, seed.ids.congregation).cities`
-deep-equals `['São Paulo Centro']`; **but** `db.getDoc(db.collections.territories, 'seed-territory-2')
-.city` is **still exactly `'Osasco'`** — the delete is never translated into a territory update
-(UC-CFG-10, ⚠ suspected defect). The territory document and its `history` subcollection are fully intact:
-`db.getSubcollectionDocs(db.collections.territories, 'seed-territory-2', db.historySubcollection)` still
-returns its baseline visit.
+### Leg 4 — Remove `Osasco` and transfer its territory to `São Paulo Centro`
 
-### Leg 4 — The orphan is unreachable in the UI but alive in the data
-
-11. `page.goto('/territories')` → `page.reload()` (apply the reload lesson from leg 2).
-12. Assert the city `<select>` now offers only `São Paulo Centro` and `Todas`; assert
-    `Av. dos Autonomistas, 1200 - Centro` (`seed-territory-2`) is **NOT listed under the only selectable
-    city** (`São Paulo Centro`) — its `city` value (`Osasco`) matches no `<option>`. Note (observed reality):
-    the orphan **does** still render under `Todas`, because that view fetches every congregation territory
-    and the grouping pipe does not filter out cities absent from the select — so the non-negotiable
-    "unreachable" assertion is the per-city view, not the `Todas` view.
-13. Contrast with the backend: `db.queryWhere(db.collections.territories, 'congregationId', '==',
-seed.ids.congregation)` still returns **3** docs — the orphan is unreachable via city selection, but
-    alive in Firestore (not deleted).
-
-⟶ **FINAL SWEEP (Firestore):** `congregations/{id}.cities === ['São Paulo Centro']`; territories =
-3 docs with cities `São Paulo Centro`, `Osasco` (orphan), `São Paulo Centro`; no history doc was lost at
-any point in the journey.
-
-## Testability notes
-
-- **Gaps:** no `data-testid` anywhere on `/configuration` — rows/buttons by their English text; the native
-  `confirm()` requires `page.once('dialog', …)` registered **before** the triggering click (UC-CFG-10);
-  the toast has no testid — assert its exact text.
-- Leg 2's stale-filter assertion is **today's reality** (⚠ suspected defect) — if the app is later fixed to
-  refresh user state on save, this journey's step 5 must be rewritten to expect the new names immediately.
-- The leg-4 `Todas`-view assertion is written defensively because the pipe's city grouping against a
-  stale/absent city name is not contractually documented — assert what you observe and cross-check against
-  UC-TERR-02's ordering rules; the non-negotiable assertion is step 13's backend count.
+9. Navigate to `/congregation` → click `Remover` on `Osasco` (`UC-CFG-06`).
+10. In the `Remover Cidade` dialog, confirm `Transferir para outra cidade` with target `São Paulo Centro`.
+11. Assert toast `Cidade removida com sucesso!` and `Osasco` row removed.
+12. SPA-navigate to `/territories` → assert city selector offers `['São Paulo Centro', 'Todas']` and `Av. dos Autonomistas, 1200 - Centro` (`seed-territory-2`) is now listed under `São Paulo Centro` with sequential `positionIndex: 3`.
 
 ## Sources
 
-- `docs/features/configuration-cities.md` (UC-CFG-01/03/05/08/09/10/11)
-- `docs/features/territories-management.md` (UC-TERR-02)
-- `docs/domain/data-model.md` (§4.6 realtime vs one-shot reads)
+- `docs/features/configuration-cities.md`
+- `docs/features/territories-management.md`
+- `docs/features/work-designations.md`
+- `e2e/tests/journey-city-rename.spec.ts`

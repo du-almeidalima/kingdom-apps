@@ -1,82 +1,115 @@
 import { Locator, Page } from '@playwright/test';
 
 /**
- * Page object for the `/congregation` route ("Manage Congregation Cities").
- *
- * Exposes locators for the city list, inline editing inputs, buttons (`+ Add City`,
- * `Save Changes`, `Edit`, `Delete`, `Cancel`), and the no-congregation banner.
+ * Page object for the `/congregation` route ("Administrar Congregação").
  */
 export class ConfigurationPage {
   readonly heading: Locator;
   readonly congregationNameSubtitle: Locator;
+  readonly congregationNameInput: Locator;
+  readonly saveNameButton: Locator;
+  readonly newCityInput: Locator;
+  readonly addCityButton: Locator;
+  readonly addCongregationButton: Locator;
   readonly citiesListContainer: Locator;
   readonly cityRows: Locator;
-  readonly addCityButton: Locator;
-  readonly saveButton: Locator;
-
-  readonly cancelButton: Locator;
-
+  readonly emptyCitiesState: Locator;
   readonly noCongregationBanner: Locator;
 
+  // Remove City Dialog
+  readonly removeCityDialog: Locator;
+  readonly removeCityTransferOption: Locator;
+  readonly removeCityDeleteOption: Locator;
+  readonly removeCityTargetSelect: Locator;
+  readonly removeCityConfirmButton: Locator;
+  readonly removeCityCancelButton: Locator;
+
+  // Add Congregation Dialog
+  readonly addCongregationDialog: Locator;
+  readonly addCongregationNameInput: Locator;
+  readonly addCongregationLocationInput: Locator;
+  readonly addCongregationCityInput: Locator;
+  readonly addCongregationAddCityButton: Locator;
+  readonly addCongregationChipsList: Locator;
+  readonly addCongregationExpiryDaysInput: Locator;
+  readonly addCongregationBlockExpiredCheckbox: Locator;
+  readonly addCongregationSubmitButton: Locator;
+  readonly addCongregationCancelButton: Locator;
+
   constructor(private readonly page: Page) {
-    this.heading = page.getByRole('heading', { name: 'Manage Congregation Cities' });
+    this.heading = page.getByTestId('config-heading');
     this.congregationNameSubtitle = page.getByTestId('config-congregation-subtitle');
+    this.congregationNameInput = page.getByTestId('config-congregation-name-input');
+    this.saveNameButton = page.getByTestId('config-save-name');
+    this.newCityInput = page.getByTestId('config-new-city-input');
+    this.addCityButton = page.getByTestId('config-add-city');
+    this.addCongregationButton = page.getByTestId('config-add-congregation');
     this.citiesListContainer = page.getByTestId('config-cities-list');
     this.cityRows = page.getByTestId('config-city-row');
-    this.addCityButton = page.getByTestId('config-add-city');
-    this.saveButton = page.getByTestId('config-save');
-    this.cancelButton = page.getByRole('button', { name: 'Cancel' });
+    this.emptyCitiesState = page.getByTestId('config-empty-cities');
     this.noCongregationBanner = page.getByTestId('config-no-congregation-banner');
+
+    this.removeCityDialog = page.getByTestId('remove-city-dialog');
+    this.removeCityTransferOption = page.getByTestId('remove-city-option-transfer');
+    this.removeCityDeleteOption = page.getByTestId('remove-city-option-delete');
+    this.removeCityTargetSelect = page.getByTestId('remove-city-target-select');
+    this.removeCityConfirmButton = page.getByTestId('remove-city-confirm');
+    this.removeCityCancelButton = page.getByTestId('remove-city-cancel');
+
+    this.addCongregationDialog = page.getByTestId('add-congregation-dialog');
+    this.addCongregationNameInput = page.getByTestId('add-congregation-name-input');
+    this.addCongregationLocationInput = page.getByTestId('add-congregation-location-input');
+    this.addCongregationCityInput = page.getByTestId('add-congregation-city-input');
+    this.addCongregationAddCityButton = page.getByTestId('add-congregation-add-city-btn');
+    this.addCongregationChipsList = page.getByTestId('add-congregation-cities-chips');
+    this.addCongregationExpiryDaysInput = page.getByTestId('add-congregation-expiry-days-input');
+    this.addCongregationBlockExpiredCheckbox = page.getByTestId('add-congregation-block-expired-checkbox');
+    this.addCongregationSubmitButton = page.getByTestId('add-congregation-submit');
+    this.addCongregationCancelButton = page.getByTestId('add-congregation-cancel');
   }
 
-  /** Navigate to the congregation administration page. */
   async goto(): Promise<void> {
     await this.page.goto('/congregation');
   }
 
-  /** Locator for a city row matching `name`. */
   rowByName(name: string): Locator {
     return this.cityRows.filter({ hasText: name });
   }
 
-  /** The input field inside an inline-editing city row. */
+  dragHandle(name: string): Locator {
+    return this.rowByName(name).getByTestId('config-city-drag-handle');
+  }
+
   cityInput(row?: Locator): Locator {
     return (row ?? this.page).getByTestId('config-city-input');
   }
 
-  /** Fill a city input field. */
-  async fillCityInput(inputLocator: Locator, value: string): Promise<void> {
-    await inputLocator.fill(value);
+  saveCityButton(row?: Locator): Locator {
+    return (row ?? this.page).getByTestId('config-save-city');
   }
 
-  /** The `Edit` button on a row. */
+  cancelCityButton(row?: Locator): Locator {
+    return (row ?? this.page).getByTestId('config-cancel-city');
+  }
+
   editButton(row: Locator): Locator {
     return row.getByTestId('config-edit-city');
   }
 
-  /** Edit a city by name. */
   async editCity(name: string): Promise<void> {
     await this.editButton(this.rowByName(name)).click();
   }
 
-  /** The `Delete` button on a row. */
   deleteButton(row: Locator): Locator {
     return row.getByTestId('config-delete-city');
   }
 
-  /** Delete a city by name and accept the confirmation dialog. */
-  async deleteCity(name: string): Promise<void> {
-    this.page.once('dialog', (dialog) => dialog.accept());
+  async openRemoveCityDialog(name: string): Promise<void> {
     await this.deleteButton(this.rowByName(name)).click();
   }
 
-  /** Click the Save button. */
-  async save(): Promise<void> {
-    await this.saveButton.click();
-  }
-
-  /** Click the Add City button. */
-  async addCity(): Promise<void> {
+  async addCity(name: string): Promise<void> {
+    await this.newCityInput.fill(name);
     await this.addCityButton.click();
   }
 }

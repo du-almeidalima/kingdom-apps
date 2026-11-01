@@ -1,5 +1,15 @@
 import { TestBed } from '@angular/core/testing';
-import { collection, collectionGroup, deleteDoc, doc, getDoc, getDocs, query, updateDoc } from 'firebase/firestore';
+import {
+  collection,
+  collectionGroup,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  runTransaction,
+  updateDoc,
+} from 'firebase/firestore';
 import { lastValueFrom, of } from 'rxjs';
 
 import { FirebaseTerritoryDatasourceService } from './firebase-territory-datasource.service';
@@ -18,6 +28,7 @@ jest.mock('firebase/firestore', () => ({
   getDoc: jest.fn(),
   getDocs: jest.fn(),
   query: jest.fn(),
+  runTransaction: jest.fn(),
   updateDoc: jest.fn(),
 }));
 
@@ -186,5 +197,27 @@ describe('FirebaseTerritoryDatasourceService — getAllByCongregation with histo
         recentHistory: [h1],
       },
     );
+  });
+
+  it('deletes all history subcollection docs and parent territory docs in a transaction on batchDelete', async () => {
+    const deletedRefs: Array<{ id: string }> = [];
+    (getDocs as jest.Mock)
+      .mockResolvedValueOnce({
+        docs: [{ ref: { id: 'T1-H1' } }, { ref: { id: 'T1-H2' } }],
+      })
+      .mockResolvedValueOnce({
+        docs: [{ ref: { id: 'T2-H1' } }],
+      });
+    (runTransaction as jest.Mock).mockImplementation(async (_firestore, callback) => {
+      await callback({
+        delete: (ref: { id: string }) => deletedRefs.push(ref),
+      });
+    });
+
+    await lastValueFrom(service.batchDelete(['T1', 'T2']));
+
+    expect(getDocs).toHaveBeenCalledTimes(2);
+    expect(runTransaction).toHaveBeenCalledTimes(1);
+    expect(deletedRefs).toEqual([{ id: 'T1-H1' }, { id: 'T1-H2' }, { id: 'T2-H1' }, { id: 'T1' }, { id: 'T2' }]);
   });
 });

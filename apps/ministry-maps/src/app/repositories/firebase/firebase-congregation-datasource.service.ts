@@ -1,5 +1,16 @@
 import { inject, Injectable } from '@angular/core';
-import { collection, CollectionReference, doc, getDoc, getDocFromCache, getDocs, orderBy, query, updateDoc } from 'firebase/firestore';
+import {
+  collection,
+  CollectionReference,
+  doc,
+  getDoc,
+  getDocFromCache,
+  getDocs,
+  orderBy,
+  query,
+  setDoc,
+  updateDoc,
+} from 'firebase/firestore';
 import type { DocumentData, DocumentReference } from 'firebase/firestore';
 import { from, map, Observable } from 'rxjs';
 
@@ -68,6 +79,16 @@ export class FirebaseCongregationDatasourceService implements CongregationReposi
         }));
       }),
     );
+  }
+
+  add(congregation: Omit<Congregation, 'id'>): Observable<Congregation> {
+    const newCongregationDocRef = doc(this.congregationCollection);
+    const createdCongregation: Congregation = {
+      ...congregation,
+      id: newCongregationDocRef.id,
+    };
+
+    return from(setDoc(newCongregationDocRef, createdCongregation)).pipe(map(() => createdCongregation));
   }
 
   /**

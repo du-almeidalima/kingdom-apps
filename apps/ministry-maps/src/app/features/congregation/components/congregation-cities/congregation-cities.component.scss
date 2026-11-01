@@ -1,0 +1,19 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+
+.cities-list {
+  border: 1px solid var(--kui-color-border, #{variables.$grey-200});
+  border-radius: 0.8rem;
+  overflow: hidden;
+}
+
+.city-row {
+  border-bottom: 1px solid var(--kui-color-border, #{variables.$grey-200});
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.city-drag-handle {
+  cursor: grab;
+}

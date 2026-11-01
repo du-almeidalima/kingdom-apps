@@ -235,6 +235,35 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
     return from(deletePromise);
   }
 
+  batchDelete(ids: string[]): Observable<void> {
+    if (!ids || ids.length === 0) {
+      return of(undefined);
+    }
+
+    return defer(() =>
+      from(
+        (async () => {
+          const historySnapshots = await Promise.all(
+            ids.map((id) => getDocs(this.getTerritoryHistoryCollection(id))),
+          );
+
+          await runTransaction(this.firestore, async (transaction) => {
+            for (const snapshot of historySnapshots) {
+              for (const historyDoc of snapshot.docs) {
+                transaction.delete(historyDoc.ref);
+              }
+            }
+
+            for (const id of ids) {
+              const territoryDocRef = doc(this.territoriesCollection, `${id}`);
+              transaction.delete(territoryDocRef);
+            }
+          });
+        })(),
+      ),
+    );
+  }
+
   getTerritoryVisitHistory(id: string): Observable<TerritoryVisitHistory[]> {
     const territoryHistoryCollection = collection(this.territoriesCollection, `${id}/history`);
 

@@ -391,4 +391,62 @@ test.describe('Firestore Security Rules', () => {
       .get();
     expect(stored.data()?.['territories']).toEqual({});
   });
+
+  test('UC-RULES-16 — Congregations write matrix: only APP_ADMIN can create (200); non-APP_ADMIN create denied (403); authenticated update allowed (200)', async ({
+    db,
+    seed,
+  }) => {
+    const adminToken = await mintIdToken(seed.ids.adminUser);
+    const publisherToken = await mintIdToken(seed.ids.publisherUsers[0]);
+    const superintendentToken = await mintIdToken(seed.ids.superintendentUser);
+    const appAdminToken = await mintIdToken(seed.ids.appAdminUser);
+
+    // Anonymous create -> 403
+    expect(
+      await createDocAs('congregations/anon-cong', {
+        name: 'Anon Congregação',
+        locatedOn: 'São Paulo, SP',
+        cities: ['São Paulo'],
+      }),
+    ).toBe(403);
+
+    // Non-APP_ADMIN roles create -> 403
+    for (const token of [publisherToken, adminToken, superintendentToken]) {
+      expect(
+        await createDocAs(
+          'congregations/non-app-admin-cong',
+          {
+            name: 'Unauthorized Congregação',
+            locatedOn: 'São Paulo, SP',
+            cities: ['São Paulo'],
+          },
+          token,
+        ),
+      ).toBe(403);
+    }
+    expect(await db.getDoc(db.collections.congregations, 'non-app-admin-cong')).toBeUndefined();
+
+    // APP_ADMIN create -> 200
+    expect(
+      await createDocAs(
+        'congregations/app-admin-created-cong',
+        {
+          id: 'app-admin-created-cong',
+          name: 'Congregação Criada pelo App Admin',
+          locatedOn: 'Campinas, SP',
+          cities: ['Campinas'],
+        },
+        appAdminToken,
+      ),
+    ).toBe(200);
+    const createdCong = await db.getDoc(db.collections.congregations, 'app-admin-created-cong');
+    expect(createdCong?.['name']).toBe('Congregação Criada pelo App Admin');
+
+    // Authenticated user (ADMIN) can update an existing congregation -> 200
+    expect(
+      await updateDocAs(`congregations/${seed.ids.congregation}`, { name: 'Congregação Atualizada' }, adminToken),
+    ).toBe(200);
+    const updatedCong = await db.getDoc(db.collections.congregations, seed.ids.congregation);
+    expect(updatedCong?.['name']).toBe('Congregação Atualizada');
+  });
 });

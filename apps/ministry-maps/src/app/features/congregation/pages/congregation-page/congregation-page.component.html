@@ -1,0 +1,44 @@
+<main class="container">
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <div>
+      <h2 class="t-headline2" data-testid="config-heading">Administrar Congregação</h2>
+      @if (congregation(); as cong) {
+        <p class="t-body2 mt-1" data-testid="config-congregation-subtitle">{{ cong.name }}</p>
+      }
+    </div>
+
+    <button
+      lib-button
+      btnType="primary"
+      type="button"
+      data-testid="config-add-congregation"
+      *libAuthorize="[RoleEnum.APP_ADMIN]"
+      (click)="handleOpenAddCongregationDialog()"
+    >
+      Adicionar Congregação
+    </button>
+  </div>
+
+  @if (congregation(); as cong) {
+    <kingdom-apps-congregation-name-form
+      class="block mb-8"
+      [name]="cong.name"
+      [disabled]="isLoading()"
+      (saveName)="handleSaveCongregationName($event)"
+    />
+
+    <kingdom-apps-congregation-cities
+      class="block"
+      [cities]="cities()"
+      [disabled]="isLoading()"
+      (addCity)="handleAddCity($event)"
+      (renameCity)="handleRenameCity($event)"
+      (reorderCities)="handleReorderCities($event)"
+      (removeCity)="handleRemoveCity($event)"
+    />
+  } @else {
+    <div class="p-8 text-center rounded-lg border" data-testid="config-no-congregation-banner">
+      <p class="t-body1">Nenhuma congregação encontrada. Verifique se você está autenticado.</p>
+    </div>
+  }
+</main>

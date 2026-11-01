@@ -1060,19 +1060,15 @@ test.describe('Work designation — completion state', () => {
     await expect(confirmDialog.dialog).toBeVisible();
     await confirmDialog.confirm();
 
-    await expect
-      .poll(async () => {
-        const doc = await db.getDoc(db.collections.territories, territoryId);
-        return doc?.['lastVisit'];
-      })
-      .toBeNull();
-
-    liveTerritory = await db.getDoc(db.collections.territories, territoryId);
-    expect(liveTerritory?.['city']).toBe('São Paulo Zona Sul');
-    expect(liveTerritory?.['address']).toBe('Rua Atualizada, 200');
-    expect(liveTerritory?.['note']).toBe('Nota Atualizada');
-    expect(liveTerritory?.['positionIndex']).toBe(5);
-    expect(liveTerritory?.['recentHistory']).toEqual([]);
+    await expect(async () => {
+      const doc = await db.getDoc(db.collections.territories, territoryId);
+      expect(doc?.['lastVisit']).toBeNull();
+      expect(doc?.['recentHistory']).toEqual([]);
+      expect(doc?.['city']).toBe('São Paulo Zona Sul');
+      expect(doc?.['address']).toBe('Rua Atualizada, 200');
+      expect(doc?.['note']).toBe('Nota Atualizada');
+      expect(doc?.['positionIndex']).toBe(5);
+    }).toPass();
   });
 });
 

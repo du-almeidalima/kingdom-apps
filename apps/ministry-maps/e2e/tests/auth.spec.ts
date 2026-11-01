@@ -133,7 +133,7 @@ test.describe('Auth', () => {
     }) => {
       await signInAs(role);
       await page.goto('/congregation');
-      await expect(page.getByRole('heading', { name: 'Configurações' })).toHaveCount(0);
+      await expect(page.getByTestId('config-heading')).toHaveCount(0);
 
       await page.goto('/congregation/users');
       await expect(page).toHaveURL(/\/congregation\/users$/);

@@ -1,156 +1,312 @@
 import { inject, Injectable } from '@angular/core';
-import { catchError, forkJoin, map, Observable, of, switchMap, take, throwError } from 'rxjs';
+import { catchError, forkJoin, map, Observable, of, switchMap, take, tap, throwError } from 'rxjs';
 import { UserStateService } from '../../../../state/user.state.service';
 import { CongregationRepository } from '../../../../repositories/congregation.repository';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { LoggerService } from '../../../../shared/services/logger/logger.service';
+import { ProfileBO } from '../../../profile/bo/profile.bo';
 import { type Congregation } from '../../../../../models/congregation';
 import { Territory } from '../../../../../models/territory';
+import { User } from '../../../../../models/user';
 
-export interface UpdateCongregationCityDTO {
-  /**
-   * The current city name. This is null when it's a new city being added
-   */
-  oldCityName?: string;
-  newCityName: string;
-}
+export type RemoveCityResolution =
+  | { action: 'transfer'; targetCity: string }
+  | { action: 'delete' };
 
 @Injectable({ providedIn: 'root' })
 export class CongregationBO {
-  private userState = inject(UserStateService);
-  private congregationRepository = inject(CongregationRepository);
-  private territoryRepository = inject(TerritoryRepository);
-  private loggerService = inject(LoggerService);
+  private readonly userState = inject(UserStateService);
+  private readonly congregationRepository = inject(CongregationRepository);
+  private readonly territoryRepository = inject(TerritoryRepository);
+  private readonly profileBO = inject(ProfileBO);
+  private readonly loggerService = inject(LoggerService);
 
-  /**
-   * Updates a city name in the congregation's city array and all associated territories.
-   * When oldCityName is null, treats it as adding a new city to the congregation.
-   */
-  updateCongregationCities(updatedCongregationCities: UpdateCongregationCityDTO[]): Observable<void> {
+  createCongregation(data: Omit<Congregation, 'id'>): Observable<Congregation> {
     const user = this.userState.currentUser;
-    const congregation = user?.congregation;
-
-    if (!congregation || !user) {
-      throw new Error('No User or Congregation found while updating congregation cities.');
+    if (!user) {
+      return throwError(() => new Error('No User found while creating congregation.'));
     }
 
-    // Validate input (also check for duplicates/collisions against existing congregation cities)
-    try {
-      this.validateUpdateCongregationCities(updatedCongregationCities, congregation.cities ?? []);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        this.loggerService.error('Error validating update congregation cities:' + err.message);
-        return throwError(() => err);
-      } else {
-        this.loggerService.error('Unknown error validating update congregation cities:' + err);
-        return throwError(() => new Error(String(err)));
-      }
+    const trimmedName = data.name?.trim() ?? '';
+    const trimmedLocation = data.locatedOn?.trim() ?? '';
+    if (!trimmedName) {
+      return throwError(() => new Error('Congregation name cannot be empty.'));
+    }
+    if (!trimmedLocation) {
+      return throwError(() => new Error('Congregation location cannot be empty.'));
     }
 
-    // Logging
-    updatedCongregationCities.forEach((updatedCity) => {
-      if (updatedCity.oldCityName) {
-        this.loggerService.info(
-          `Congregation [${congregation.name}] (${congregation.id}) renamed city from [${updatedCity.oldCityName}] to [${updatedCity.newCityName}] by User [${user.name}] (${user.id}).`,
-        );
-      } else {
-        this.loggerService.info(
-          `Congregation [${congregation.name}] (${congregation.id}) added city [${updatedCity.newCityName}] by User [${user.name}] (${user.id}).`,
-        );
+    const trimmedCities = (data.cities ?? []).map((c) => c.trim()).filter(Boolean);
+    if (trimmedCities.length === 0) {
+      return throwError(() => new Error('At least one city is required.'));
+    }
+
+    const seen = new Set<string>();
+    for (const city of trimmedCities) {
+      const normalized = city.toLowerCase();
+      if (seen.has(normalized)) {
+        return throwError(() => new Error(`Duplicate city name: ${city}`));
       }
-    });
+      seen.add(normalized);
+    }
 
-    // Update Congregation
-    const cities = updatedCongregationCities.map((city) => city.newCityName);
-    // structuredClone may not be available in the test/node environment; use a shallow clone instead
-    const updatedCongregation: Congregation = { ...congregation, cities } as Congregation;
+    const payload: Omit<Congregation, 'id'> = {
+      ...data,
+      name: trimmedName,
+      locatedOn: trimmedLocation,
+      cities: trimmedCities,
+    };
 
-    const congregationUpdate$ = this.congregationRepository.update(updatedCongregation);
-
-    // Update Territories
-    const affectedTerritoriesUpdate$ = this.updateCitiesOfTerritory(updatedCongregationCities, congregation);
-
-    // Run both updates in parallel using forkJoin
-    return forkJoin([congregationUpdate$, affectedTerritoriesUpdate$]).pipe(
-      map(() => undefined),
+    return this.congregationRepository.add(payload).pipe(
+      switchMap((createdCongregation) =>
+        this.profileBO.changeUserCongregation(user.id, createdCongregation.id).pipe(
+          tap((updatedUser) => {
+            this.userState.setUser({
+              ...(updatedUser ?? user),
+              congregation: { ...createdCongregation, cities: [...createdCongregation.cities] },
+            });
+          }),
+          map(() => createdCongregation),
+        ),
+      ),
       catchError((error) => {
-        this.loggerService.error('Error updating congregation cities: ' + error);
+        this.loggerService.error('Error creating congregation: ' + error);
         return throwError(() => error);
       }),
     );
   }
 
-  private validateUpdateCongregationCities(updatedCities: UpdateCongregationCityDTO[], existingCities: string[] = []) {
-    const normalizedExisting = new Set(existingCities.map((c) => c.trim().toLowerCase()));
+  updateCongregationName(newName: string): Observable<void> {
+    const context = this.requireContext('updating congregation name');
+    const trimmedName = newName?.trim() ?? '';
 
-    const seen = new Set<string>();
-
-    for (const updatedCity of updatedCities) {
-      if (!updatedCity.newCityName || updatedCity.newCityName.trim() === '') {
-        throw new Error('New city name cannot be empty.');
-      }
-
-      const normalized = updatedCity.newCityName.trim().toLowerCase();
-
-      if (seen.has(normalized)) {
-        throw new Error(`Duplicate new city name in payload: ${updatedCity.newCityName}`);
-      }
-
-      seen.add(normalized);
-
-      // If adding a new city, ensure it doesn't already exist in congregation (case-insensitive)
-      if (!updatedCity.oldCityName && normalizedExisting.has(normalized)) {
-        throw new Error(`City already exists in congregation: ${updatedCity.newCityName}`);
-      }
-    }
-  }
-
-  /**
-   * Given a list of {@linkcode updatedCongregationCities} updates the territories affected by them.
-   */
-  private updateCitiesOfTerritory(
-    updatedCongregationCities: UpdateCongregationCityDTO[],
-    congregation: Congregation,
-  ): Observable<void> {
-    // Gets only the cities that were renamed
-    const renamedUpdatedCongregationCities = updatedCongregationCities.filter(
-      (c) => !!c.oldCityName && c.oldCityName !== c.newCityName,
-    );
-
-    const oldCities = renamedUpdatedCongregationCities.map((c) => c.oldCityName as string);
-
-    // If there are no renames, nothing to update in territories.
-    if (oldCities.length === 0) {
-      return of(undefined);
+    if (!trimmedName) {
+      return throwError(() => new Error('Congregation name cannot be empty.'));
     }
 
-    const updatedCitiesMap = new Map<string, UpdateCongregationCityDTO>(
-      renamedUpdatedCongregationCities.map((c) => [c.oldCityName as string, c]),
-    );
+    const updatedCongregation: Congregation = {
+      ...context.congregation,
+      cities: [...context.congregation.cities],
+      name: trimmedName,
+    };
 
-    return this.territoryRepository.getAllByCongregationAndCities(congregation.id, oldCities).pipe(
-      take(1),
-      switchMap((territories) => {
-        const updatedTerritories = territories
-          .map((territory) => {
-            const cityUpdate = updatedCitiesMap.get(territory.city);
-
-            if (cityUpdate && cityUpdate.newCityName && territory.city !== cityUpdate.newCityName) {
-              return {
-                ...territory,
-                city: cityUpdate.newCityName,
-              };
-            }
-            return null;
-          })
-          .filter((t): t is Territory => !!t);
-
-        if (updatedTerritories.length === 0) {
-          return of(undefined);
-        }
-
-        return this.territoryRepository.batchUpdate(updatedTerritories);
+    return this.congregationRepository.update(updatedCongregation).pipe(
+      tap(() => {
+        this.loggerService.info(
+          `Congregation [${context.congregation.name}] (${context.congregation.id}) renamed to [${trimmedName}] by User [${context.user.name}] (${context.user.id}).`,
+        );
+        this.syncUserCongregation(context.user, updatedCongregation);
+      }),
+      catchError((error) => {
+        this.loggerService.error('Error updating congregation name: ' + error);
+        return throwError(() => error);
       }),
     );
+  }
+
+  addCity(cityName: string): Observable<void> {
+    const context = this.requireContext('adding congregation city');
+    const trimmedCity = cityName?.trim() ?? '';
+
+    if (!trimmedCity) {
+      return throwError(() => new Error('New city name cannot be empty.'));
+    }
+
+    const existingCities = context.congregation.cities ?? [];
+    const normalizedNew = trimmedCity.toLowerCase();
+    if (existingCities.some((c) => c.trim().toLowerCase() === normalizedNew)) {
+      return throwError(() => new Error(`City already exists in congregation: ${trimmedCity}`));
+    }
+
+    const updatedCongregation: Congregation = {
+      ...context.congregation,
+      cities: [...existingCities, trimmedCity],
+    };
+
+    return this.congregationRepository.update(updatedCongregation).pipe(
+      tap(() => {
+        this.loggerService.info(
+          `Congregation [${context.congregation.name}] (${context.congregation.id}) added city [${trimmedCity}] by User [${context.user.name}] (${context.user.id}).`,
+        );
+        this.syncUserCongregation(context.user, updatedCongregation);
+      }),
+      catchError((error) => {
+        this.loggerService.error('Error adding congregation city: ' + error);
+        return throwError(() => error);
+      }),
+    );
+  }
+
+  renameCity(oldCityName: string, newCityName: string): Observable<void> {
+    const context = this.requireContext('renaming congregation city');
+    const trimmedNewCity = newCityName?.trim() ?? '';
+
+    if (!trimmedNewCity) {
+      return throwError(() => new Error('New city name cannot be empty.'));
+    }
+
+    const existingCities = context.congregation.cities ?? [];
+    const oldIndex = existingCities.indexOf(oldCityName);
+    if (oldIndex === -1) {
+      return throwError(() => new Error(`City not found in congregation: ${oldCityName}`));
+    }
+
+    const normalizedNew = trimmedNewCity.toLowerCase();
+    const hasCollision = existingCities.some(
+      (c, index) => index !== oldIndex && c.trim().toLowerCase() === normalizedNew,
+    );
+    if (hasCollision) {
+      return throwError(() => new Error(`City already exists in congregation: ${trimmedNewCity}`));
+    }
+
+    const updatedCities = existingCities.map((c, index) => (index === oldIndex ? trimmedNewCity : c));
+    const updatedCongregation: Congregation = {
+      ...context.congregation,
+      cities: updatedCities,
+    };
+
+    const congregationUpdate$ = this.congregationRepository.update(updatedCongregation);
+    const territoryUpdate$ =
+      oldCityName === trimmedNewCity
+        ? of(undefined)
+        : this.territoryRepository.getAllByCongregationAndCities(context.congregation.id, [oldCityName]).pipe(
+            take(1),
+            switchMap((territories) => {
+              const updatedTerritories = territories
+                .filter((t) => t.city === oldCityName)
+                .map((territory) => ({
+                  ...territory,
+                  city: trimmedNewCity,
+                }));
+
+              if (updatedTerritories.length === 0) {
+                return of(undefined);
+              }
+
+              return this.territoryRepository.batchUpdate(updatedTerritories);
+            }),
+          );
+
+    return forkJoin([congregationUpdate$, territoryUpdate$]).pipe(
+      tap(() => {
+        this.loggerService.info(
+          `Congregation [${context.congregation.name}] (${context.congregation.id}) renamed city from [${oldCityName}] to [${trimmedNewCity}] by User [${context.user.name}] (${context.user.id}).`,
+        );
+        this.syncUserCongregation(context.user, updatedCongregation);
+      }),
+      map(() => undefined),
+      catchError((error) => {
+        this.loggerService.error('Error renaming congregation city: ' + error);
+        return throwError(() => error);
+      }),
+    );
+  }
+
+  reorderCities(cities: string[]): Observable<void> {
+    const context = this.requireContext('reordering congregation cities');
+    const updatedCongregation: Congregation = {
+      ...context.congregation,
+      cities: [...cities],
+    };
+
+    return this.congregationRepository.update(updatedCongregation).pipe(
+      tap(() => {
+        this.syncUserCongregation(context.user, updatedCongregation);
+      }),
+      catchError((error) => {
+        this.loggerService.error('Error reordering congregation cities: ' + error);
+        return throwError(() => error);
+      }),
+    );
+  }
+
+  removeCity(cityName: string, resolution: RemoveCityResolution): Observable<void> {
+    const context = this.requireContext('removing congregation city');
+    const existingCities = context.congregation.cities ?? [];
+    if (!existingCities.includes(cityName)) {
+      return throwError(() => new Error(`City not found in congregation: ${cityName}`));
+    }
+
+    const updatedCities = existingCities.filter((c) => c !== cityName);
+    if (resolution.action === 'transfer' && (!resolution.targetCity || !updatedCities.includes(resolution.targetCity))) {
+      return throwError(() => new Error(`Invalid target city for transfer: ${resolution.targetCity}`));
+    }
+
+    const updatedCongregation: Congregation = {
+      ...context.congregation,
+      cities: updatedCities,
+    };
+
+    const territoryAction$: Observable<void> =
+      resolution.action === 'transfer'
+        ? forkJoin([
+            this.territoryRepository.getAllByCongregationAndCities(context.congregation.id, [cityName]).pipe(take(1)),
+            this.territoryRepository.getNextPositionIndexForCity(resolution.targetCity).pipe(take(1)),
+          ]).pipe(
+            switchMap(([territories, nextPositionIndex]) => {
+              const matching = territories
+                .filter((t) => t.city === cityName)
+                .sort((a, b) => (a.positionIndex ?? 0) - (b.positionIndex ?? 0));
+
+              if (matching.length === 0) {
+                return of(undefined);
+              }
+
+              const transferred: Territory[] = matching.map((territory, idx) => ({
+                ...territory,
+                city: resolution.targetCity,
+                positionIndex: nextPositionIndex + idx,
+              }));
+
+              return this.territoryRepository.batchUpdate(transferred);
+            }),
+          )
+        : this.territoryRepository.getAllByCongregationAndCities(context.congregation.id, [cityName]).pipe(
+            take(1),
+            switchMap((territories) => {
+              const idsToDelete = territories.filter((t) => t.city === cityName).map((t) => t.id);
+              if (idsToDelete.length === 0) {
+                return of(undefined);
+              }
+
+              return this.territoryRepository.batchDelete(idsToDelete);
+            }),
+          );
+
+    return forkJoin([this.congregationRepository.update(updatedCongregation), territoryAction$]).pipe(
+      tap(() => {
+        this.loggerService.info(
+          `Congregation [${context.congregation.name}] (${context.congregation.id}) removed city [${cityName}] (${resolution.action}) by User [${context.user.name}] (${context.user.id}).`,
+        );
+        this.syncUserCongregation(context.user, updatedCongregation);
+      }),
+      map(() => undefined),
+      catchError((error) => {
+        this.loggerService.error('Error removing congregation city: ' + error);
+        return throwError(() => error);
+      }),
+    );
+  }
+
+  private requireContext(operation: string): { user: User; congregation: Congregation } {
+    const user = this.userState.currentUser;
+    const congregation = user?.congregation;
+
+    if (!congregation || !user) {
+      throw new Error(`No User or Congregation found while ${operation}.`);
+    }
+
+    return { user, congregation };
+  }
+
+  private syncUserCongregation(user: User, updatedCongregation: Congregation): void {
+    const latestUser = this.userState.currentUser ?? user;
+    this.userState.setUser({
+      ...latestUser,
+      congregation: {
+        ...updatedCongregation,
+        cities: [...updatedCongregation.cities],
+      },
+    });
   }
 }

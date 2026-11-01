@@ -196,7 +196,7 @@ test.describe('Navigation & Shell', () => {
 
     await home.linkAdministrarCongregacao.click();
     await expect(page).toHaveURL(/\/congregation$/);
-    await expect(page.getByRole('heading', { name: 'Configurações' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Administrar Congregação' })).toBeVisible();
     expect((await db.getDoc(db.collections.users, seed.ids.adminUser))?.['role']).toBe(RoleEnum.ADMIN);
   });
 });

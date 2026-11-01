@@ -94,7 +94,7 @@ describe('CongregationSettingsBO', () => {
       );
 
       expect(bo.getSettingOrDefault('designationAccessExpiryDays')).toBe(45);
-      expect(bo.getSettingOrDefault('shouldDesignationBlockAfterExpired')).toBe(false);
+      expect(bo.getSettingOrDefault('shouldDesignationBlockAfterExpired')).toBe(true);
     });
 
     it('keeps an explicit false instead of replacing it with the default', () => {

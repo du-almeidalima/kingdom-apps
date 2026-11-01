@@ -1,42 +1,28 @@
-import type { Page } from '@playwright/test';
-
 import { expect, test } from '../fixtures';
 import { ConfigurationPage } from '../page-objects/configuration.page';
+import { TerritoriesPage } from '../page-objects/territories.page';
+import { ToastPage } from '../page-objects/toast.page';
+import { dragRowByMouse } from '../utils/cdk-drag.util';
 import { RoleEnum } from '../../src/models/enums/role';
 
-// ─── WP-25: configuration (cities management) ───────────────────────────────
-
-test.describe('Configuration — Cities (WP-25)', () => {
+test.describe('Congregation Administration (/congregation)', () => {
   test.use({ role: 'admin' });
 
-  // Helper to ensure UserStateService is fully hydrated before client-side navigation to /congregation
-  async function gotoConfigWithResolvedUser(page: Page) {
-    await page.goto('/home');
-    await expect(page).toHaveURL(/\/(home|welcome)/, { timeout: 15000 });
-    await expect(page.getByTestId('welcome-heading').or(page.getByTestId('home-heading'))).toBeVisible({
-      timeout: 15000,
-    });
-
-    // Client-side Angular Router navigation via popstate so in-memory UserState is preserved
-    await page.evaluate(() => {
-      window.history.pushState({}, '', '/congregation');
-      window.dispatchEvent(new Event('popstate'));
-    });
-    await expect(page).toHaveURL(/\/congregation/, { timeout: 15000 });
-    return new ConfigurationPage(page);
-  }
-
-  test('UC-CFG-01 — Cities list renders congregation.cities for signed-in admin', async ({
+  test('UC-CFG-01 — Renders congregation name and cities in pt-BR and hides Add Congregation for ADMIN', async ({
     authenticatedPage,
     seed,
     db,
   }) => {
-    const configPage = await gotoConfigWithResolvedUser(authenticatedPage);
+    const configPage = new ConfigurationPage(authenticatedPage);
+    await configPage.goto();
 
-    await expect(configPage.heading).toBeVisible();
+    await expect(configPage.heading).toHaveText('Administrar Congregação');
     await expect(configPage.congregationNameSubtitle).toHaveText('Congregação Jardim Primavera');
-    await expect(configPage.cityRows).toHaveCount(2);
+    await expect(configPage.congregationNameInput).toHaveValue('Congregação Jardim Primavera');
+    await expect(configPage.saveNameButton).toBeDisabled();
+    await expect(configPage.addCongregationButton).toHaveCount(0);
 
+    await expect(configPage.cityRows).toHaveCount(2);
     await expect(configPage.rowByName('São Paulo')).toBeVisible();
     await expect(configPage.rowByName('Osasco')).toBeVisible();
 
@@ -44,147 +30,273 @@ test.describe('Configuration — Cities (WP-25)', () => {
     expect(congDoc?.['cities']).toEqual(['São Paulo', 'Osasco']);
   });
 
-  test('UC-CFG-02 — Add a city opens a new, empty, editable row', async ({ authenticatedPage }) => {
-    const configPage = await gotoConfigWithResolvedUser(authenticatedPage);
+  test('UC-CFG-02 — Edits and saves congregation name immediately with empty/unchanged guard', async ({
+    authenticatedPage,
+    seed,
+    db,
+  }) => {
+    const configPage = new ConfigurationPage(authenticatedPage);
+    const toast = new ToastPage(authenticatedPage);
+    await configPage.goto();
 
-    await configPage.addCity();
+    await expect(configPage.saveNameButton).toBeDisabled();
 
-    await expect(configPage.cityRows).toHaveCount(3);
+    await configPage.congregationNameInput.fill('   ');
+    await expect(configPage.saveNameButton).toBeDisabled();
 
-    const input = configPage.cityInput().last();
-    await expect(input).toBeVisible();
-    await expect(input).toHaveValue('');
+    await configPage.congregationNameInput.fill('Congregação Nova Primavera');
+    await expect(configPage.saveNameButton).toBeEnabled();
 
-    await expect(configPage.addCityButton).toBeDisabled();
-    await expect(configPage.saveButton).toBeEnabled();
+    await configPage.saveNameButton.click();
+    await toast.expectText('Nome da congregação atualizado com sucesso!');
+
+    await expect(configPage.congregationNameSubtitle).toHaveText('Congregação Nova Primavera');
+    await expect(configPage.saveNameButton).toBeDisabled();
+
+    await expect
+      .poll(async () => (await db.getDoc(db.collections.congregations, seed.ids.congregation))?.['name'])
+      .toBe('Congregação Nova Primavera');
   });
 
-  test('UC-CFG-03 — Rename an existing city inline', async ({ authenticatedPage }) => {
-    const configPage = await gotoConfigWithResolvedUser(authenticatedPage);
+  test('UC-CFG-03 — Adds a city immediately and rejects empty or duplicate names with pt-BR toasts', async ({
+    authenticatedPage,
+    seed,
+    db,
+  }) => {
+    const configPage = new ConfigurationPage(authenticatedPage);
+    const toast = new ToastPage(authenticatedPage);
+    await configPage.goto();
+
+    // Empty city rejected
+    await configPage.addCity('   ');
+    await toast.expectText('O nome da cidade não pode estar vazio.');
+
+    // Duplicate city (case-insensitive) rejected
+    await configPage.addCity('são paulo');
+    await toast.expectText('O nome da cidade deve ser único.');
+
+    // Valid new city persisted immediately
+    await configPage.addCity('Guarulhos');
+    await toast.expectText('Cidade adicionada com sucesso!');
+    await expect(configPage.rowByName('Guarulhos')).toBeVisible();
+    await expect(configPage.cityRows).toHaveCount(3);
+
+    await expect
+      .poll(async () => (await db.getDoc(db.collections.congregations, seed.ids.congregation))?.['cities'])
+      .toEqual(['São Paulo', 'Osasco', 'Guarulhos']);
+  });
+
+  test('UC-CFG-04 — Inline city rename allows one row at a time, supports cancel, and cascades rename on save', async ({
+    authenticatedPage,
+    seed,
+    db,
+  }) => {
+    const configPage = new ConfigurationPage(authenticatedPage);
+    const toast = new ToastPage(authenticatedPage);
+    await configPage.goto();
 
     await configPage.editCity('São Paulo');
-
-    const input = configPage.cityInput().first();
-    await expect(input).toBeVisible();
+    const input = configPage.cityInput();
     await expect(input).toHaveValue('São Paulo');
 
-    await configPage.fillCityInput(input, 'São Paulo Zona Sul');
-    await expect(configPage.saveButton).toBeEnabled();
-  });
+    // Only one row in edit mode at a time
+    await expect(configPage.editButton(configPage.rowByName('Osasco'))).toBeDisabled();
+    await expect(configPage.deleteButton(configPage.rowByName('Osasco'))).toBeDisabled();
 
-  test('UC-CFG-04 — Delete city removes row locally and counts as a change (Save enabled)', async ({
-    authenticatedPage,
-    db,
-    seed,
-  }) => {
-    const configPage = await gotoConfigWithResolvedUser(authenticatedPage);
-
-    await configPage.deleteCity('Osasco');
-
-    await expect(configPage.cityRows).toHaveCount(1);
-    await expect(configPage.rowByName('Osasco')).toHaveCount(0);
-
-    // Fixed (2026-08): hasChanges() also compares the row count against the congregation
-    // snapshot, so a delete-only change now enables Save Changes.
-    await expect(configPage.saveButton).toBeEnabled();
-
-    // Firestore unchanged before actually saving
-    const congDoc = await db.getDoc(db.collections.congregations, seed.ids.congregation);
-    expect(congDoc?.['cities']).toEqual(['São Paulo', 'Osasco']);
-  });
-
-  test('UC-CFG-05 — Cancel edit reverts city back to original name', async ({ authenticatedPage }) => {
-    const configPage = await gotoConfigWithResolvedUser(authenticatedPage);
-
-    await configPage.editCity('São Paulo');
-    const input = configPage.cityInput().first();
-    await configPage.fillCityInput(input, 'São Paulo Modificado');
-
-    await configPage.cancelButton.first().click();
-
+    // Cancel restores original name
+    await input.fill('Nome Descartado');
+    await configPage.cancelCityButton().click();
     await expect(configPage.rowByName('São Paulo')).toBeVisible();
-    await expect(configPage.saveButton).toBeDisabled();
-  });
 
-  test('UC-CFG-06 — Cancel new row removes the draft row', async ({ authenticatedPage }) => {
-    const configPage = await gotoConfigWithResolvedUser(authenticatedPage);
-
-    await configPage.addCity();
-    await expect(configPage.cityRows).toHaveCount(3);
-
-    await configPage.cancelButton.last().click();
-
-    await expect(configPage.cityRows).toHaveCount(2);
-    await expect(configPage.addCityButton).toBeEnabled();
-    await expect(configPage.saveButton).toBeDisabled();
-  });
-
-  test('UC-CFG-07 — Save changes cascades city rename to territories', async ({ authenticatedPage, seed, db }) => {
-    const configPage = await gotoConfigWithResolvedUser(authenticatedPage);
-
+    // Rename and save immediately
     await configPage.editCity('São Paulo');
-    const input = configPage.cityInput().first();
-    await configPage.fillCityInput(input, 'Sampa');
+    await configPage.cityInput().fill('Sampa');
+    await configPage.saveCityButton().click();
 
-    await configPage.save();
-
-    await expect(configPage.saveButton).toBeDisabled();
+    await toast.expectText('Cidade atualizada com sucesso!');
     await expect(configPage.rowByName('Sampa')).toBeVisible();
 
-    // Assert Firestore congregation cities updated
     await expect
-      .poll(async () => {
-        const snap = await db.getDocSnapshot(db.collections.congregations, seed.ids.congregation);
-        return snap.data()?.['cities'];
-      })
-      .toContain('Sampa');
-
-    // Assert territory city updated
+      .poll(async () => (await db.getDoc(db.collections.congregations, seed.ids.congregation))?.['cities'])
+      .toEqual(['Sampa', 'Osasco']);
     await expect
-      .poll(async () => {
-        const snap = await db.getDocSnapshot(db.collections.territories, seed.ids.territories[0]);
-        return snap.data()?.['city'];
-      })
+      .poll(async () => (await db.getDoc(db.collections.territories, seed.ids.territories[0]))?.['city'])
       .toBe('Sampa');
   });
 
-  test('UC-CFG-08 — Blank city name triggers validation toast and blocks save', async ({ authenticatedPage }) => {
-    const configPage = await gotoConfigWithResolvedUser(authenticatedPage);
+  test('UC-CFG-05 — Drag-and-drop reorders cities and immediately persists new order and refreshes /territories', async ({
+    authenticatedPage,
+    seed,
+    db,
+  }) => {
+    const configPage = new ConfigurationPage(authenticatedPage);
+    await configPage.goto();
 
-    await configPage.addCity();
-    const input = configPage.cityInput().last();
-    await configPage.fillCityInput(input, '   ');
+    await expect(configPage.cityRows.nth(0)).toContainText('São Paulo');
+    await expect(configPage.cityRows.nth(1)).toContainText('Osasco');
 
-    await configPage.save();
+    const sourceHandle = configPage.dragHandle('Osasco');
+    const targetRow = configPage.rowByName('São Paulo');
+    await dragRowByMouse(authenticatedPage, sourceHandle, targetRow);
 
-    // Verify error toast
-    await expect(authenticatedPage.locator('text=All cities must have a name.')).toBeVisible();
+    await expect(configPage.cityRows.nth(0)).toContainText('Osasco');
+    await expect(configPage.cityRows.nth(1)).toContainText('São Paulo');
+
+    await expect
+      .poll(async () => (await db.getDoc(db.collections.congregations, seed.ids.congregation))?.['cities'])
+      .toEqual(['Osasco', 'São Paulo']);
+
+    // SPA navigation to /territories reflects new city order immediately without reload
+    await authenticatedPage.evaluate(() => {
+      window.history.pushState({}, '', '/territories');
+      window.dispatchEvent(new Event('popstate'));
+    });
+    const territoriesPage = new TerritoriesPage(authenticatedPage);
+    await expect(territoriesPage.list).toBeVisible();
+    expect(await territoriesPage.cityOptions()).toEqual(['Osasco', 'São Paulo', 'Todas']);
   });
 
-  test('UC-CFG-09 — Duplicate city name triggers validation toast and blocks save', async ({ authenticatedPage }) => {
-    const configPage = await gotoConfigWithResolvedUser(authenticatedPage);
+  test('UC-CFG-06 — Remove city with Transfer moves territories with sequential positionIndex values', async ({
+    authenticatedPage,
+    seed,
+    db,
+  }) => {
+    const configPage = new ConfigurationPage(authenticatedPage);
+    const toast = new ToastPage(authenticatedPage);
+    await configPage.goto();
 
-    await configPage.addCity();
-    const input = configPage.cityInput().last();
-    await configPage.fillCityInput(input, 'São Paulo');
+    // São Paulo has seed-territory-1 (positionIndex 0) and seed-territory-3 (positionIndex 2).
+    // Osasco has seed-territory-2 (positionIndex 1), so next positionIndex in Osasco is 2.
+    await configPage.openRemoveCityDialog('São Paulo');
+    await expect(configPage.removeCityDialog).toBeVisible();
+    await expect(configPage.removeCityTargetSelect).toHaveValue('Osasco');
 
-    await configPage.save();
+    await configPage.removeCityConfirmButton.click();
+    await toast.expectText('Cidade removida com sucesso!');
+    await expect(configPage.rowByName('São Paulo')).toHaveCount(0);
 
-    // Verify error toast
-    await expect(authenticatedPage.locator('text=City names must be unique.')).toBeVisible();
+    await expect
+      .poll(async () => (await db.getDoc(db.collections.congregations, seed.ids.congregation))?.['cities'])
+      .toEqual(['Osasco']);
+
+    await expect(async () => {
+      const t1 = await db.getDoc(db.collections.territories, seed.ids.territories[0]);
+      const t2 = await db.getDoc(db.collections.territories, seed.ids.territories[1]);
+      const t3 = await db.getDoc(db.collections.territories, seed.ids.territories[2]);
+
+      expect(t1?.['city']).toBe('Osasco');
+      expect(t3?.['city']).toBe('Osasco');
+      expect(t2?.['positionIndex']).toBe(1);
+      expect(t1?.['positionIndex']).toBe(2);
+      expect(t3?.['positionIndex']).toBe(3);
+    }).toPass();
   });
 
-  test('UC-CFG-10 — Delete all cities renders empty state message', async ({ authenticatedPage }) => {
-    const configPage = await gotoConfigWithResolvedUser(authenticatedPage);
+  test('UC-CFG-07 — Remove city with Delete removes territories and their history subcollections, and disables transfer when only 1 city remains', async ({
+    authenticatedPage,
+    seed,
+    db,
+  }) => {
+    const configPage = new ConfigurationPage(authenticatedPage);
+    const toast = new ToastPage(authenticatedPage);
+    await configPage.goto();
 
-    await configPage.deleteCity('São Paulo');
-    await configPage.deleteCity('Osasco');
+    await configPage.openRemoveCityDialog('São Paulo');
+    await expect(configPage.removeCityDialog).toBeVisible();
+
+    await configPage.removeCityDeleteOption.click();
+    await configPage.removeCityConfirmButton.click();
+    await toast.expectText('Cidade removida com sucesso!');
+
+    await expect(async () => {
+      expect(await db.getDoc(db.collections.territories, seed.ids.territories[0])).toBeUndefined();
+      expect(await db.getDoc(db.collections.territories, seed.ids.territories[2])).toBeUndefined();
+      expect(
+        await db.getSubcollectionDocs(db.collections.territories, seed.ids.territories[0], db.historySubcollection),
+      ).toHaveLength(0);
+      expect(
+        await db.getSubcollectionDocs(db.collections.territories, seed.ids.territories[2], db.historySubcollection),
+      ).toHaveLength(0);
+      expect(await db.getDoc(db.collections.territories, seed.ids.territories[1])).toBeDefined();
+    }).toPass();
+
+    // Now only Osasco remains — opening remove dialog disables the transfer option
+    await configPage.openRemoveCityDialog('Osasco');
+    await expect(configPage.removeCityDialog).toBeVisible();
+    await expect(configPage.removeCityTransferOption.locator('input[type="radio"]')).toBeDisabled();
+    await configPage.removeCityConfirmButton.click();
 
     await expect(configPage.cityRows).toHaveCount(0);
-    await expect(authenticatedPage.locator('text=No cities configured yet.')).toBeVisible();
+    await expect(configPage.emptyCitiesState).toBeVisible();
   });
 
-  test('UC-CFG-11 — ⚠ User without a congregation sees error banner', async ({ page, seed, signInAsUser }) => {
+  test('UC-CFG-08 — APP_ADMIN can create a new Congregation via Add Congregation dialog and switch active congregation', async ({
+    page,
+    signInAs,
+    seed,
+    db,
+  }) => {
+    await signInAs('app_admin');
+    const configPage = new ConfigurationPage(page);
+    const toast = new ToastPage(page);
+    await configPage.goto();
+
+    await expect(configPage.addCongregationButton).toBeVisible();
+    await configPage.addCongregationButton.click();
+
+    await expect(configPage.addCongregationDialog).toBeVisible();
+    await expect(configPage.addCongregationSubmitButton).toBeDisabled();
+
+    await configPage.addCongregationNameInput.fill('Congregação Vale Verde');
+    await configPage.addCongregationLocationInput.fill('Campinas, SP');
+
+    // Add cities via Enter and button, and remove a mistake chip
+    await configPage.addCongregationCityInput.fill('Campinas');
+    await configPage.addCongregationCityInput.press('Enter');
+    await expect(configPage.addCongregationDialog).toBeVisible();
+
+    await configPage.addCongregationCityInput.fill('Cidade Errada');
+    await configPage.addCongregationAddCityButton.click();
+
+    await configPage.addCongregationCityInput.fill('Valinhos');
+    await configPage.addCongregationAddCityButton.click();
+
+    await expect(configPage.addCongregationChipsList.getByTestId('chip')).toHaveCount(3);
+    await configPage.addCongregationDialog.getByRole('button', { name: 'Remover Cidade Errada' }).click();
+    await expect(configPage.addCongregationChipsList.getByTestId('chip')).toHaveCount(2);
+
+    // Update settings
+    await configPage.addCongregationExpiryDaysInput.fill('30');
+    await configPage.addCongregationBlockExpiredCheckbox.check();
+
+    await expect(configPage.addCongregationSubmitButton).toBeEnabled();
+    await configPage.addCongregationSubmitButton.click();
+
+    await toast.expectText('Congregação criada com sucesso!');
+    await expect(configPage.addCongregationDialog).toHaveCount(0);
+
+    // Active congregation on /congregation immediately reflects the newly created congregation
+    await expect(configPage.congregationNameSubtitle).toHaveText('Congregação Vale Verde');
+    await expect(configPage.rowByName('Campinas')).toBeVisible();
+    await expect(configPage.rowByName('Valinhos')).toBeVisible();
+
+    await expect(async () => {
+      const congregations = await db.getCollectionDocs(db.collections.congregations);
+      const created = congregations.find((c) => c['name'] === 'Congregação Vale Verde');
+      expect(created).toBeDefined();
+      expect(created?.['locatedOn']).toBe('Campinas, SP');
+      expect(created?.['cities']).toEqual(['Campinas', 'Valinhos']);
+      expect(created?.['settings']).toEqual({
+        designationAccessExpiryDays: 30,
+        shouldDesignationBlockAfterExpired: true,
+      });
+
+      const appAdminSnap = await db.getDocSnapshot(db.collections.users, seed.ids.appAdminUser);
+      expect(appAdminSnap.data()?.['congregation'].path).toBe(`${db.collections.congregations}/${created?.['id']}`);
+    }).toPass();
+  });
+
+  test('UC-CFG-11 — User without a congregation sees pt-BR error banner', async ({ page, seed, signInAsUser }) => {
     const userNoCong = seed.factories.buildUser({
       role: RoleEnum.ADMIN,
       congregationId: 'non-existent-congregation',
@@ -198,13 +310,12 @@ test.describe('Configuration — Cities (WP-25)', () => {
 
     await expect(configPage.noCongregationBanner).toBeVisible();
     await expect(configPage.noCongregationBanner).toContainText(
-      'No congregation found. Please ensure you are logged in.',
+      'Nenhuma congregação encontrada. Verifique se você está autenticado.',
     );
   });
 
   test('UC-CFG-12 — Unauthenticated access redirects to /login', async ({ page }) => {
     await page.goto('/congregation');
-
     await expect(page).toHaveURL(/\/login$/);
   });
 
@@ -219,7 +330,7 @@ test.describe('Configuration — Cities (WP-25)', () => {
     for (const role of ['organizer', 'elder', 'superintendent'] as const) {
       await signInAs(role);
       await page.goto('/congregation');
-      await expect(page.getByRole('heading', { name: 'Manage Congregation Cities' })).toHaveCount(0);
+      await expect(page.getByTestId('config-heading')).toHaveCount(0);
     }
   });
 });
