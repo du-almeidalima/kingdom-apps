@@ -1,4 +1,55 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+
 :host {
   display: block;
-  width: clamp(24rem, 34rem, 90vw);
+  width: min(34rem, calc(100vw - 3.2rem));
+  max-width: 100%;
+}
+
+.choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.tile {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 1.2rem;
+  row-gap: 0.2rem;
+  align-items: start;
+  width: 100%;
+  padding: 1.2rem 1.4rem;
+  border: 2px solid var(--kui-color-border, #{variables.$grey-200});
+  border-radius: 1rem;
+  background: var(--kui-color-surface-elevated, #{variables.$white-100});
+  color: var(--kui-color-text, #{variables.$text});
+  text-align: left;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--kui-color-focus, #{variables.$primary-green});
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  &--selected {
+    border-color: var(--kui-color-action-primary, #{variables.$primary-green});
+    background: var(--kui-color-surface-selected, #{variables.$white-300});
+  }
+}
+
+.tile__icon {
+  grid-row: span 2;
+  width: 2.4rem;
+  height: 2.4rem;
+  margin-top: 0.2rem;
+}
+
+.target-select {
+  width: 100%;
 }

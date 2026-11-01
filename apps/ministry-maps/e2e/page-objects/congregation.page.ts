@@ -3,11 +3,13 @@ import { Locator, Page } from '@playwright/test';
 /**
  * Page object for the `/congregation` route ("Administrar Congregação").
  */
-export class ConfigurationPage {
+export class CongregationPage {
   readonly heading: Locator;
-  readonly congregationNameSubtitle: Locator;
+  readonly congregationName: Locator;
+  readonly editNameButton: Locator;
   readonly congregationNameInput: Locator;
   readonly saveNameButton: Locator;
+  readonly cancelNameButton: Locator;
   readonly newCityInput: Locator;
   readonly addCityButton: Locator;
   readonly addCongregationButton: Locator;
@@ -21,6 +23,7 @@ export class ConfigurationPage {
   readonly removeCityTransferOption: Locator;
   readonly removeCityDeleteOption: Locator;
   readonly removeCityTargetSelect: Locator;
+  readonly summary: Locator;
   readonly removeCityConfirmButton: Locator;
   readonly removeCityCancelButton: Locator;
 
@@ -38,9 +41,11 @@ export class ConfigurationPage {
 
   constructor(private readonly page: Page) {
     this.heading = page.getByTestId('config-heading');
-    this.congregationNameSubtitle = page.getByTestId('config-congregation-subtitle');
+    this.congregationName = page.getByTestId('config-congregation-name');
+    this.editNameButton = page.getByTestId('config-edit-name');
     this.congregationNameInput = page.getByTestId('config-congregation-name-input');
     this.saveNameButton = page.getByTestId('config-save-name');
+    this.cancelNameButton = page.getByTestId('config-cancel-name');
     this.newCityInput = page.getByTestId('config-new-city-input');
     this.addCityButton = page.getByTestId('config-add-city');
     this.addCongregationButton = page.getByTestId('config-add-congregation');
@@ -53,6 +58,7 @@ export class ConfigurationPage {
     this.removeCityTransferOption = page.getByTestId('remove-city-option-transfer');
     this.removeCityDeleteOption = page.getByTestId('remove-city-option-delete');
     this.removeCityTargetSelect = page.getByTestId('remove-city-target-select');
+    this.summary = page.getByTestId('remove-city-summary');
     this.removeCityConfirmButton = page.getByTestId('remove-city-confirm');
     this.removeCityCancelButton = page.getByTestId('remove-city-cancel');
 

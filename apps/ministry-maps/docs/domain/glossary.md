@@ -33,10 +33,13 @@ Shared components, so these strings appear on many screens.
 | `Administrar Pessoas`                                           | `/home` link                            | → `/congregation/users`                        |
 | `Administrar Congregação`                                       | `/home` link and `/congregation` heading | → `/congregation` (`ADMIN` / `APP_ADMIN` only) |
 | `Adicionar Congregação`                                         | `/congregation` button & dialog title   | `APP_ADMIN` only                               |
-| `Salvar Nome`                                                   | `/congregation` button                  | saves updated congregation name                |
-| `Adicionar Cidade`                                              | `/congregation` button                  | appends a new city to the congregation         |
+| `Nome da Congregação`                                           | `/congregation` name-card caption       | name is edited through the adjacent pencil icon |
+| `Cidades`                                                       | `/congregation` card heading            | cities show a per-city territory count          |
+| `Arraste para reordenar`                                        | `/congregation` cities hint             | drag a city row to change its order              |
+| `Adicionar`                                                     | `/congregation` city-row button         | appends a new city to the congregation         |
 | `Remover Cidade`                                                | `/congregation` dialog title            | final city removal confirmation dialog         |
-| `Transferir para outra cidade` / `Excluir territórios`          | `Remover Cidade` dialog radio options   | resolution choices when removing a city        |
+| `Transferir para outra cidade` / `Excluir territórios`          | `Remover Cidade` dialog choice tiles    | resolution choices; a warning summarizes the effect |
+| `Transferir territórios` / `Excluir cidade e territórios`       | `Remover Cidade` dialog confirm button | label and primary/danger style follow the choice |
 | `Contatados` / `Ninguém atendeu` / `Mudaram` / `Não visitar` / `Revisita` | Designations history outcome labels | Short labels for visit outcomes. |
 | `Criar Link de Convite`                                         | `/congregation/users` FAB `title`       | `ADMIN` only                                   |
 

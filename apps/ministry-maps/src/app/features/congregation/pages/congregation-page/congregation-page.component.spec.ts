@@ -6,6 +6,7 @@ import {
   AuthUserStateService,
   AuthorizeDirective,
   ButtonComponent,
+  CardComponent,
   FormFieldComponent,
   IconButtonComponent,
   IconComponent,
@@ -28,6 +29,7 @@ describe('CongregationPageComponent', () => {
   let congregationBOMock: {
     updateCongregationName: jest.Mock;
     addCity: jest.Mock;
+    getTerritoryCountsByCity: jest.Mock;
     renameCity: jest.Mock;
     reorderCities: jest.Mock;
     removeCity: jest.Mock;
@@ -66,6 +68,7 @@ describe('CongregationPageComponent', () => {
         }
         return of(undefined);
       }),
+      getTerritoryCountsByCity: jest.fn().mockReturnValue(of({ 'City 1': 2, 'City 2': 1 })),
       renameCity: jest.fn().mockImplementation((oldName: string, newName: string) => {
         const current = userState.currentUser;
         if (current?.congregation) {
@@ -111,6 +114,7 @@ describe('CongregationPageComponent', () => {
       .keep(FormsModule)
       .keep(AuthorizeDirective)
       .keep(ButtonComponent)
+      .keep(CardComponent)
       .keep(IconButtonComponent)
       .keep(IconComponent)
       .keep(InputComponent)
@@ -123,14 +127,18 @@ describe('CongregationPageComponent', () => {
       .provide({ provide: Dialog, useValue: { open: dialogOpenSpy } });
   });
 
-  it('renders congregation name and cities in pt-BR', () => {
+  it('renders congregation name, city list and territory counts in pt-BR', async () => {
     const fixture = MockRender(CongregationPageComponent);
+    await fixture.whenStable();
+    fixture.detectChanges();
 
     const rows = ngMocks.findAll(fixture, '[data-testid="config-city-row"]');
     expect(rows).toHaveLength(3);
-    expect(ngMocks.find(fixture, '[data-testid="config-congregation-subtitle"]').nativeElement.textContent).toContain(
+    expect(ngMocks.find(fixture, '[data-testid="config-congregation-name"]').nativeElement.textContent).toContain(
       congregationMock.name,
     );
+    expect(fixture.nativeElement.textContent).toContain('2 territórios');
+    expect(fixture.nativeElement.textContent).toContain('1 território');
   });
 
   it('shows the pt-BR no-congregation banner when the user has no congregation', () => {
@@ -191,17 +199,19 @@ describe('CongregationPageComponent', () => {
     expect(congregationBOMock.reorderCities).toHaveBeenCalledWith(['City 2', 'City 3', 'City 1 Renomeada']);
   });
 
-  it('opens CongregationRemoveCityDialogComponent and calls removeCity when confirmed', () => {
+  it('opens CongregationRemoveCityDialogComponent with territory counts and calls removeCity when confirmed', async () => {
     const closed$ = new Subject<RemoveCityResolution | undefined>();
     dialogOpenSpy.mockReturnValue({ closed: closed$.asObservable() } as DialogRef<RemoveCityResolution>);
 
     const fixture = MockRender(CongregationPageComponent);
+    await fixture.whenStable();
     fixture.point.componentInstance.handleRemoveCity('City 1');
 
     expect(dialogOpenSpy).toHaveBeenCalledWith(CongregationRemoveCityDialogComponent, {
       data: {
         cityName: 'City 1',
         remainingCities: ['City 2', 'City 3'],
+        territoryCounts: { 'City 1': 2, 'City 2': 1 },
       },
     });
 

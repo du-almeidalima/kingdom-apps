@@ -1,5 +1,5 @@
 import { expect, test } from '../fixtures';
-import { ConfigurationPage } from '../page-objects/configuration.page';
+import { CongregationPage } from '../page-objects/congregation.page';
 import { TerritoriesPage } from '../page-objects/territories.page';
 import { ToastPage } from '../page-objects/toast.page';
 import { WorkPage } from '../page-objects/work.page';
@@ -50,12 +50,12 @@ test('J-05 — City rename cascades to territories, refreshes client state witho
   }
 
   const toast = new ToastPage(page);
-  const configPage = new ConfigurationPage(page);
+  const configPage = new CongregationPage(page);
 
   // ── Leg 1 — Rename `São Paulo` → `São Paulo Centro` ─────────────────────────
   await configPage.goto();
   await expect(configPage.heading).toBeVisible();
-  await expect(configPage.congregationNameSubtitle).toHaveText('Congregação Jardim Primavera');
+  await expect(configPage.congregationName).toHaveText('Congregação Jardim Primavera');
   await expect(configPage.cityRows).toHaveCount(2);
 
   await configPage.editCity('São Paulo');

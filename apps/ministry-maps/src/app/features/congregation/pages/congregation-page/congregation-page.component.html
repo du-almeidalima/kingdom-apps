@@ -1,12 +1,6 @@
-<main class="container">
-  <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-    <div>
-      <h2 class="t-headline2" data-testid="config-heading">Administrar Congregação</h2>
-      @if (congregation(); as cong) {
-        <p class="t-body2 mt-1" data-testid="config-congregation-subtitle">{{ cong.name }}</p>
-      }
-    </div>
-
+<main class="container pb-24">
+  <header class="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <h2 class="t-headline2" data-testid="config-heading">Administrar Congregação</h2>
     <button
       lib-button
       btnType="primary"
@@ -17,25 +11,30 @@
     >
       Adicionar Congregação
     </button>
-  </div>
+  </header>
 
   @if (congregation(); as cong) {
-    <kingdom-apps-congregation-name-form
-      class="block mb-8"
-      [name]="cong.name"
-      [disabled]="isLoading()"
-      (saveName)="handleSaveCongregationName($event)"
-    />
+    <div class="flex flex-col gap-6">
+      <lib-card [customStyle]="cardStyle">
+        <kingdom-apps-congregation-name-form
+          [name]="cong.name"
+          [disabled]="isLoading()"
+          (saveName)="handleSaveCongregationName($event)"
+        />
+      </lib-card>
 
-    <kingdom-apps-congregation-cities
-      class="block"
-      [cities]="cities()"
-      [disabled]="isLoading()"
-      (addCity)="handleAddCity($event)"
-      (renameCity)="handleRenameCity($event)"
-      (reorderCities)="handleReorderCities($event)"
-      (removeCity)="handleRemoveCity($event)"
-    />
+      <lib-card [customStyle]="cardStyle">
+        <kingdom-apps-congregation-cities
+          [cities]="cities()"
+          [territoryCounts]="territoryCounts()"
+          [disabled]="isLoading()"
+          (addCity)="handleAddCity($event)"
+          (renameCity)="handleRenameCity($event)"
+          (reorderCities)="handleReorderCities($event)"
+          (removeCity)="handleRemoveCity($event)"
+        />
+      </lib-card>
+    </div>
   } @else {
     <div class="p-8 text-center rounded-lg border" data-testid="config-no-congregation-banner">
       <p class="t-body1">Nenhuma congregação encontrada. Verifique se você está autenticado.</p>

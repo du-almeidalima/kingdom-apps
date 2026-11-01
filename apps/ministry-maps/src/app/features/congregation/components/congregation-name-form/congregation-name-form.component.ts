@@ -1,40 +1,85 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { ButtonComponent, FormFieldComponent, InputComponent, LabelComponent } from '@kingdom-apps/common-ui';
+import {
+  IconButtonComponent,
+  IconComponent,
+  InputComponent,
+} from '@kingdom-apps/common-ui';
 
 @Component({
   selector: 'kingdom-apps-congregation-name-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, ButtonComponent, FormFieldComponent, InputComponent, LabelComponent],
+  imports: [IconButtonComponent, IconComponent, InputComponent],
   template: `
     <section data-testid="config-name-section">
-      <lib-form-field>
-        <label lib-label for="config-congregation-name">Nome da Congregação</label>
-        <div class="flex gap-3 items-center">
+      <p class="t-caption t-medium-emphasis mb-1">Nome da Congregação</p>
+      @if (editingName()) {
+        <div class="flex gap-2 items-center">
           <input
             lib-input
-            class="flex-1"
+            class="name-input flex-1"
             id="config-congregation-name"
             type="text"
             data-testid="config-congregation-name-input"
-            [ngModel]="nameInput()"
-            (ngModelChange)="nameInput.set($event)"
+            [value]="nameDraft()"
+            (input)="nameDraft.set($any($event.target).value)"
+            (keydown.enter)="handleSave()"
+            (keydown.escape)="cancelEdit()"
             [disabled]="disabled()"
             placeholder="Nome da congregação"
           />
           <button
-            lib-button
-            btnType="primary"
+            lib-icon-button
             type="button"
             data-testid="config-save-name"
+            title="Salvar nome"
             [disabled]="!canSave() || disabled()"
             (click)="handleSave()"
           >
-            Salvar Nome
+            <lib-icon class="icon" icon="check-mark-circle-lined" />
+          </button>
+          <button
+            lib-icon-button
+            type="button"
+            data-testid="config-cancel-name"
+            title="Cancelar edição"
+            [disabled]="disabled()"
+            (click)="cancelEdit()"
+          >
+            <lib-icon class="icon" icon="x-mark-lined" />
           </button>
         </div>
-      </lib-form-field>
+      } @else {
+        <div class="flex items-center justify-between gap-2">
+          <span class="t-headline4" data-testid="config-congregation-name">{{ name() }}</span>
+          <button
+            lib-icon-button
+            type="button"
+            data-testid="config-edit-name"
+            title="Editar nome da congregação"
+            [disabled]="disabled()"
+            (click)="startEdit()"
+          >
+            <lib-icon class="icon" icon="pencil-lined" />
+          </button>
+        </div>
+      }
     </section>
+  `,
+  styles: `
+    :host {
+      display: block;
+      min-width: 0;
+    }
+
+    .name-input {
+      min-width: 0;
+      width: 100%;
+    }
+
+    .icon {
+      width: 2rem;
+      height: 2rem;
+    }
   `,
 })
 export class CongregationNameFormComponent {
@@ -43,17 +88,33 @@ export class CongregationNameFormComponent {
 
   readonly saveName = output<string>();
 
-  readonly nameInput = signal('');
+  readonly editingName = signal(false);
+  readonly nameDraft = signal('');
 
   readonly canSave = computed(() => {
-    const trimmed = this.nameInput().trim();
+    const trimmed = this.nameDraft().trim();
     return trimmed.length > 0 && trimmed !== this.name();
   });
 
   constructor() {
     effect(() => {
-      this.nameInput.set(this.name());
+      this.nameDraft.set(this.name());
+      this.editingName.set(false);
     });
+  }
+
+  startEdit(): void {
+    if (this.disabled()) {
+      return;
+    }
+
+    this.nameDraft.set(this.name());
+    this.editingName.set(true);
+  }
+
+  cancelEdit(): void {
+    this.nameDraft.set(this.name());
+    this.editingName.set(false);
   }
 
   handleSave(): void {
@@ -61,6 +122,6 @@ export class CongregationNameFormComponent {
       return;
     }
 
-    this.saveName.emit(this.nameInput().trim());
+    this.saveName.emit(this.nameDraft().trim());
   }
 }

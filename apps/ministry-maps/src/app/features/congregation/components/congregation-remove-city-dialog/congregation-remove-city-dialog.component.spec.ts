@@ -1,14 +1,12 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { MockBuilder, MockRender, ngMocks } from 'ng-mocks';
-import { FormsModule } from '@angular/forms';
 import {
   ButtonComponent,
   DialogCloseDirective,
   DialogComponent,
   DialogFooterComponent,
-  FormFieldComponent,
-  LabelComponent,
-  RadioGroupComponent,
+  IconComponent,
+  NoteComponent,
   SelectComponent,
 } from '@kingdom-apps/common-ui';
 
@@ -22,11 +20,14 @@ describe('CongregationRemoveCityDialogComponent', () => {
 
   beforeEach(() => {
     closeSpy.mockReset();
-    return MockBuilder(CongregationRemoveCityDialogComponent).keep(FormsModule).keep(RadioGroupComponent).keep(
-      SelectComponent,
-    ).keep(FormFieldComponent).keep(LabelComponent).keep(DialogComponent).keep(DialogFooterComponent).keep(
-      ButtonComponent,
-    ).keep(DialogCloseDirective);
+    return MockBuilder(CongregationRemoveCityDialogComponent)
+      .keep(SelectComponent)
+      .keep(IconComponent)
+      .keep(NoteComponent)
+      .keep(DialogComponent)
+      .keep(DialogFooterComponent)
+      .keep(ButtonComponent)
+      .keep(DialogCloseDirective);
   });
 
   const renderWithData = (data: CongregationRemoveCityDialogData) =>
@@ -45,10 +46,17 @@ describe('CongregationRemoveCityDialogComponent', () => {
     const fixture = renderWithData({
       cityName: 'São Paulo',
       remainingCities: ['Osasco', 'Barueri'],
+      territoryCounts: { 'São Paulo': 2 },
     });
 
     expect(fixture.nativeElement.textContent).toContain('São Paulo');
     expect(fixture.nativeElement.textContent).toContain('não poderá ser desfeita');
+    expect(ngMocks.find(fixture, '[data-testid="remove-city-summary"]').nativeElement.textContent).toContain(
+      '2 territórios da cidade São Paulo serão transferidos para Osasco.',
+    );
+    expect(ngMocks.find(fixture, '[data-testid="remove-city-option-transfer"]').nativeElement.getAttribute('role')).toBe(
+      'radio',
+    );
 
     const selectEl = ngMocks.find(fixture, '[data-testid="remove-city-target-select"]')
       .nativeElement as HTMLSelectElement;
@@ -61,18 +69,27 @@ describe('CongregationRemoveCityDialogComponent', () => {
       action: 'transfer',
       targetCity: 'Osasco',
     });
+    expect(ngMocks.find(fixture, '[data-testid="remove-city-confirm"]').nativeElement.textContent).toContain(
+      'Transferir territórios',
+    );
   });
 
-  it('emits delete resolution when the user selects Excluir territórios', () => {
+  it('shows the delete summary and danger button when the user selects Excluir territórios', () => {
     const fixture = renderWithData({
       cityName: 'São Paulo',
       remainingCities: ['Osasco'],
+      territoryCounts: { 'São Paulo': 1 },
     });
 
-    const deleteRadio = ngMocks.find(fixture, '[data-testid="remove-city-option-delete"] input[type="radio"]');
-    ngMocks.trigger(deleteRadio, 'change');
+    ngMocks.click(ngMocks.find(fixture, '[data-testid="remove-city-option-delete"]'));
     fixture.detectChanges();
 
+    expect(ngMocks.find(fixture, '[data-testid="remove-city-summary"]').nativeElement.textContent).toContain(
+      '1 território da cidade São Paulo será excluído permanentemente.',
+    );
+    const confirmButton = ngMocks.find(fixture, '[data-testid="remove-city-confirm"]').nativeElement as HTMLButtonElement;
+    expect(confirmButton.className).toContain('button--danger');
+    expect(confirmButton.textContent).toContain('Excluir cidade e territórios');
     ngMocks.click(ngMocks.find(fixture, '[data-testid="remove-city-confirm"]'));
 
     expect(closeSpy).toHaveBeenCalledWith({
@@ -84,11 +101,15 @@ describe('CongregationRemoveCityDialogComponent', () => {
     const fixture = renderWithData({
       cityName: 'São Paulo',
       remainingCities: [],
+      territoryCounts: {},
     });
 
-    const transferRadio = ngMocks.find(fixture, '[data-testid="remove-city-option-transfer"] input[type="radio"]')
-      .nativeElement as HTMLInputElement;
-    expect(transferRadio.disabled).toBe(true);
+    const transferOption = ngMocks.find(fixture, '[data-testid="remove-city-option-transfer"]')
+      .nativeElement as HTMLButtonElement;
+    expect(transferOption.disabled).toBe(true);
+    expect(ngMocks.find(fixture, '[data-testid="remove-city-option-delete"]').nativeElement.getAttribute('aria-checked')).toBe(
+      'true',
+    );
 
     const selectEl = ngMocks.find(fixture, '[data-testid="remove-city-target-select"]')
       .nativeElement as HTMLSelectElement;
