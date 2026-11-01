@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Dialog } from '@angular/cdk/dialog';
-import { finalize } from 'rxjs';
-import { AuthorizeDirective, ButtonComponent, ToasterService } from '@kingdom-apps/common-ui';
+import { finalize, of, switchMap } from 'rxjs';
+import { AuthorizeDirective, ButtonComponent, CardComponent, ToasterService } from '@kingdom-apps/common-ui';
 
 import { CongregationBO, RemoveCityResolution } from '../../bo/congregation/congregation.bo';
 import { UserStateService } from '../../../../state/user.state.service';
@@ -23,7 +23,13 @@ import { CongregationAddDialogComponent } from '../../components/congregation-ad
   templateUrl: './congregation-page.component.html',
   styleUrl: './congregation-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AuthorizeDirective, ButtonComponent, CongregationNameFormComponent, CongregationCitiesComponent],
+  imports: [
+    AuthorizeDirective,
+    ButtonComponent,
+    CardComponent,
+    CongregationNameFormComponent,
+    CongregationCitiesComponent,
+  ],
 })
 export class CongregationPageComponent {
   private readonly congregationBO = inject(CongregationBO);
@@ -41,6 +47,17 @@ export class CongregationPageComponent {
 
   readonly cities = computed(() => this.congregation()?.cities ?? []);
   readonly isLoading = signal(false);
+  private readonly territoryCountsKey = computed(() => {
+    const congregation = this.congregation();
+    return congregation ? JSON.stringify([congregation.id, congregation.cities]) : null;
+  });
+  readonly territoryCounts = toSignal(
+    toObservable(this.territoryCountsKey).pipe(
+      switchMap((key) => (key ? this.congregationBO.getTerritoryCountsByCity() : of({}))),
+    ),
+    { initialValue: {} },
+  );
+  protected readonly cardStyle = { padding: '1.6rem 1.2rem' };
 
   handleSaveCongregationName(newName: string): void {
     const trimmed = newName.trim();
@@ -170,6 +187,7 @@ export class CongregationPageComponent {
         data: {
           cityName,
           remainingCities,
+          territoryCounts: this.territoryCounts(),
         },
       },
     );

@@ -1,5 +1,5 @@
 import { expect, test } from '../fixtures';
-import { ConfigurationPage } from '../page-objects/configuration.page';
+import { CongregationPage } from '../page-objects/congregation.page';
 import { TerritoriesPage } from '../page-objects/territories.page';
 import { ToastPage } from '../page-objects/toast.page';
 import { dragRowByMouse } from '../utils/cdk-drag.util';
@@ -13,13 +13,18 @@ test.describe('Congregation Administration (/congregation)', () => {
     seed,
     db,
   }) => {
-    const configPage = new ConfigurationPage(authenticatedPage);
+    const configPage = new CongregationPage(authenticatedPage);
     await configPage.goto();
 
     await expect(configPage.heading).toHaveText('Administrar Congregação');
-    await expect(configPage.congregationNameSubtitle).toHaveText('Congregação Jardim Primavera');
+    await expect(configPage.congregationName).toHaveText('Congregação Jardim Primavera');
+    await expect(configPage.editNameButton).toBeVisible();
+    await expect(configPage.congregationNameInput).toHaveCount(0);
+
+    await configPage.editNameButton.click();
     await expect(configPage.congregationNameInput).toHaveValue('Congregação Jardim Primavera');
     await expect(configPage.saveNameButton).toBeDisabled();
+    await configPage.cancelNameButton.click();
     await expect(configPage.addCongregationButton).toHaveCount(0);
 
     await expect(configPage.cityRows).toHaveCount(2);
@@ -35,10 +40,11 @@ test.describe('Congregation Administration (/congregation)', () => {
     seed,
     db,
   }) => {
-    const configPage = new ConfigurationPage(authenticatedPage);
+    const configPage = new CongregationPage(authenticatedPage);
     const toast = new ToastPage(authenticatedPage);
     await configPage.goto();
 
+    await configPage.editNameButton.click();
     await expect(configPage.saveNameButton).toBeDisabled();
 
     await configPage.congregationNameInput.fill('   ');
@@ -50,8 +56,8 @@ test.describe('Congregation Administration (/congregation)', () => {
     await configPage.saveNameButton.click();
     await toast.expectText('Nome da congregação atualizado com sucesso!');
 
-    await expect(configPage.congregationNameSubtitle).toHaveText('Congregação Nova Primavera');
-    await expect(configPage.saveNameButton).toBeDisabled();
+    await expect(configPage.congregationName).toHaveText('Congregação Nova Primavera');
+    await expect(configPage.editNameButton).toBeVisible();
 
     await expect
       .poll(async () => (await db.getDoc(db.collections.congregations, seed.ids.congregation))?.['name'])
@@ -63,7 +69,7 @@ test.describe('Congregation Administration (/congregation)', () => {
     seed,
     db,
   }) => {
-    const configPage = new ConfigurationPage(authenticatedPage);
+    const configPage = new CongregationPage(authenticatedPage);
     const toast = new ToastPage(authenticatedPage);
     await configPage.goto();
 
@@ -91,7 +97,7 @@ test.describe('Congregation Administration (/congregation)', () => {
     seed,
     db,
   }) => {
-    const configPage = new ConfigurationPage(authenticatedPage);
+    const configPage = new CongregationPage(authenticatedPage);
     const toast = new ToastPage(authenticatedPage);
     await configPage.goto();
 
@@ -129,7 +135,7 @@ test.describe('Congregation Administration (/congregation)', () => {
     seed,
     db,
   }) => {
-    const configPage = new ConfigurationPage(authenticatedPage);
+    const configPage = new CongregationPage(authenticatedPage);
     await configPage.goto();
 
     await expect(configPage.cityRows.nth(0)).toContainText('São Paulo');
@@ -161,7 +167,7 @@ test.describe('Congregation Administration (/congregation)', () => {
     seed,
     db,
   }) => {
-    const configPage = new ConfigurationPage(authenticatedPage);
+    const configPage = new CongregationPage(authenticatedPage);
     const toast = new ToastPage(authenticatedPage);
     await configPage.goto();
 
@@ -170,6 +176,7 @@ test.describe('Congregation Administration (/congregation)', () => {
     await configPage.openRemoveCityDialog('São Paulo');
     await expect(configPage.removeCityDialog).toBeVisible();
     await expect(configPage.removeCityTargetSelect).toHaveValue('Osasco');
+    await expect(configPage.summary).toContainText('2 territórios');
 
     await configPage.removeCityConfirmButton.click();
     await toast.expectText('Cidade removida com sucesso!');
@@ -197,14 +204,16 @@ test.describe('Congregation Administration (/congregation)', () => {
     seed,
     db,
   }) => {
-    const configPage = new ConfigurationPage(authenticatedPage);
+    const configPage = new CongregationPage(authenticatedPage);
     const toast = new ToastPage(authenticatedPage);
     await configPage.goto();
 
     await configPage.openRemoveCityDialog('São Paulo');
     await expect(configPage.removeCityDialog).toBeVisible();
+    await expect(configPage.summary).toContainText('2 territórios');
 
     await configPage.removeCityDeleteOption.click();
+    await expect(configPage.summary).toContainText('serão excluídos permanentemente');
     await configPage.removeCityConfirmButton.click();
     await toast.expectText('Cidade removida com sucesso!');
 
@@ -223,7 +232,7 @@ test.describe('Congregation Administration (/congregation)', () => {
     // Now only Osasco remains — opening remove dialog disables the transfer option
     await configPage.openRemoveCityDialog('Osasco');
     await expect(configPage.removeCityDialog).toBeVisible();
-    await expect(configPage.removeCityTransferOption.locator('input[type="radio"]')).toBeDisabled();
+    await expect(configPage.removeCityTransferOption).toBeDisabled();
     await configPage.removeCityConfirmButton.click();
 
     await expect(configPage.cityRows).toHaveCount(0);
@@ -237,7 +246,7 @@ test.describe('Congregation Administration (/congregation)', () => {
     db,
   }) => {
     await signInAs('app_admin');
-    const configPage = new ConfigurationPage(page);
+    const configPage = new CongregationPage(page);
     const toast = new ToastPage(page);
     await configPage.goto();
 
@@ -276,7 +285,7 @@ test.describe('Congregation Administration (/congregation)', () => {
     await expect(configPage.addCongregationDialog).toHaveCount(0);
 
     // Active congregation on /congregation immediately reflects the newly created congregation
-    await expect(configPage.congregationNameSubtitle).toHaveText('Congregação Vale Verde');
+    await expect(configPage.congregationName).toHaveText('Congregação Vale Verde');
     await expect(configPage.rowByName('Campinas')).toBeVisible();
     await expect(configPage.rowByName('Valinhos')).toBeVisible();
 
@@ -305,7 +314,7 @@ test.describe('Congregation Administration (/congregation)', () => {
 
     await signInAsUser(userNoCong.id);
 
-    const configPage = new ConfigurationPage(page);
+    const configPage = new CongregationPage(page);
     await configPage.goto();
 
     await expect(configPage.noCongregationBanner).toBeVisible();

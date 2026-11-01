@@ -18,9 +18,9 @@ is in [`../domain/glossary.md`](../domain/glossary.md).
 - **Route:** `/congregation`
 - **Preconditions (seed):** default baseline (`seed.ids.congregation` name `Congregação Jardim Primavera`, cities `['São Paulo', 'Osasco']`)
 - **Steps:** 1. `signInAs('admin')` → 2. open `/congregation`
-- **Expected UI:** heading `Administrar Congregação` (`config-heading`); subtitle `Congregação Jardim Primavera` (`config-congregation-subtitle`); name input pre-filled with `Congregação Jardim Primavera` (`config-congregation-name-input`) and `Salvar Nome` (`config-save-name`) disabled; `Adicionar Congregação` (`config-add-congregation`) not rendered in DOM; 2 city rows (`config-city-row`) in array order showing `São Paulo` and `Osasco` with drag handles (`config-city-drag-handle`), `Editar` (`config-edit-city`), and `Remover` (`config-delete-city`) buttons
+- **Expected UI:** heading `Administrar Congregação` (`config-heading`); a single-column page with a congregation-name card showing `Congregação Jardim Primavera` (`config-congregation-name`) and an edit icon (`config-edit-name`); the name input (`config-congregation-name-input`) is hidden until edit is clicked, then `Salvar` (`config-save-name`) is disabled while unchanged and `Cancelar` (`config-cancel-name`) is available; `Adicionar Congregação` (`config-add-congregation`) is not rendered in the DOM; the `Cidades` card has the reorder hint `Arraste para reordenar` and 2 rows (`config-city-row`) in array order showing `São Paulo` and `Osasco`, their Territory counts, drag handles (`config-city-drag-handle`), and icon actions (`config-edit-city`, `config-delete-city`)
 - **Expected persistence:** `db.getDoc(db.collections.congregations, seed.ids.congregation).cities` deep-equals `['São Paulo', 'Osasco']`
-- **Edge cases:** when `congregation.cities` is `[]`, `config-empty-cities` renders `Nenhuma cidade cadastrada. Adicione uma cidade acima.`
+- **Edge cases:** when `congregation.cities` is `[]`, `config-empty-cities` renders `Nenhuma cidade cadastrada. Adicione uma cidade abaixo.`
 - **Priority:** P0
 
 ### Congregation name
@@ -30,8 +30,8 @@ is in [`../domain/glossary.md`](../domain/glossary.md).
 - **Actor:** Admin
 - **Route:** `/congregation`
 - **Preconditions (seed):** default baseline
-- **Steps:** 1. open `/congregation` → 2. clear/whitespace `config-congregation-name-input` (observe `Salvar Nome` disabled) → 3. type `Congregação Nova Primavera` → 4. click `Salvar Nome`
-- **Expected UI:** toast `Nome da congregação atualizado com sucesso!`; subtitle updates immediately to `Congregação Nova Primavera`; `Salvar Nome` becomes disabled again because the input now matches the saved name
+- **Steps:** 1. open `/congregation` → 2. click `config-edit-name` → 3. clear/whitespace `config-congregation-name-input` (observe `config-save-name` disabled) → 4. type `Congregação Nova Primavera` → 5. click `config-save-name`
+- **Expected UI:** toast `Nome da congregação atualizado com sucesso!`; name text (`config-congregation-name`) updates immediately to `Congregação Nova Primavera` and edit mode closes; on entry to edit mode, `config-save-name` is disabled because the draft matches the saved name
 - **Expected persistence:** `db.getDoc(db.collections.congregations, seed.ids.congregation).name === 'Congregação Nova Primavera'`; `UserStateService` is updated in-place via `setUser`
 - **Priority:** P0
 
@@ -42,7 +42,7 @@ is in [`../domain/glossary.md`](../domain/glossary.md).
 - **Actor:** Admin
 - **Route:** `/congregation`
 - **Preconditions (seed):** default baseline
-- **Steps:** 1. click `Adicionar Cidade` with whitespace input → 2. type `são paulo` and click `Adicionar Cidade` → 3. type `Guarulhos` and click `Adicionar Cidade`
+- **Steps:** 1. type whitespace in `config-new-city-input` and click `Adicionar` → 2. type `são paulo` and click `Adicionar` → 3. type `Guarulhos` and click `Adicionar`
 - **Expected UI:** step 1 shows error toast `O nome da cidade não pode estar vazio.`; step 2 shows error toast `O nome da cidade deve ser único.`; step 3 shows success toast `Cidade adicionada com sucesso!`, clears `config-new-city-input`, and renders `Guarulhos` as the 3rd city row
 - **Expected persistence:** `db.getDoc(db.collections.congregations, seed.ids.congregation).cities` deep-equals `['São Paulo', 'Osasco', 'Guarulhos']`; `UserStateService` is updated immediately
 - **Priority:** P0
@@ -52,7 +52,7 @@ is in [`../domain/glossary.md`](../domain/glossary.md).
 - **Actor:** Admin
 - **Route:** `/congregation`
 - **Preconditions (seed):** default baseline (`seed-territory-1`/`-3` in `São Paulo`, `seed-territory-2` in `Osasco`)
-- **Steps:** 1. click `Editar` on `São Paulo` → 2. observe `Osasco`'s `Editar`/`Remover` buttons are disabled → 3. type a temporary name and click `Cancelar` (reverts to `São Paulo`) → 4. click `Editar` on `São Paulo`, type `Sampa`, and click `Salvar`
+- **Steps:** 1. click the edit icon (`config-edit-city`) on `São Paulo` → 2. observe `Osasco`'s edit/remove icon buttons are disabled → 3. type a temporary name and click the cancel icon (`config-cancel-city`) (reverts to `São Paulo`) → 4. click `config-edit-city` on `São Paulo`, type `Sampa`, and click the save icon (`config-save-city`)
 - **Expected UI:** toast `Cidade atualizada com sucesso!`; row exits edit mode and displays `Sampa`
 - **Expected persistence:** `congregations/{id}.cities` is `['Sampa', 'Osasco']`; `seed-territory-1` and `seed-territory-3` have `city: 'Sampa'`; `seed-territory-2` remains `city: 'Osasco'`; `UserStateService` is updated immediately
 - **Priority:** P0
@@ -72,7 +72,7 @@ is in [`../domain/glossary.md`](../domain/glossary.md).
 - **Actor:** Admin
 - **Route:** `/congregation`
 - **Preconditions (seed):** default baseline (`São Paulo` has `seed-territory-1` at index `0` and `seed-territory-3` at index `2`; `Osasco` has `seed-territory-2` at index `1`)
-- **Steps:** 1. click `Remover` on `São Paulo` → 2. in the `Remover Cidade` dialog (`remove-city-dialog`), keep `Transferir para outra cidade` (`remove-city-option-transfer`) selected with destination `Osasco` (`remove-city-target-select`) → 3. click `Confirmar` (`remove-city-confirm`)
+- **Steps:** 1. click the remove icon (`config-delete-city`) on `São Paulo` → 2. in the `Remover Cidade` dialog (`remove-city-dialog`), keep the `Transferir para outra cidade` choice tile (`remove-city-option-transfer`) selected with destination `Osasco` (`remove-city-target-select`) → 3. review the warning summary (`remove-city-summary`) and click `Transferir territórios` (`remove-city-confirm`)
 - **Expected UI:** toast `Cidade removida com sucesso!`; `São Paulo` row is removed
 - **Expected persistence:** `congregations/{id}.cities` is `['Osasco']`; `seed-territory-1` and `seed-territory-3` move to `city: 'Osasco'` with sequential `positionIndex` values `2` and `3` (appended after `seed-territory-2`'s max index `1`)
 - **Priority:** P0
@@ -82,8 +82,8 @@ is in [`../domain/glossary.md`](../domain/glossary.md).
 - **Actor:** Admin
 - **Route:** `/congregation`
 - **Preconditions (seed):** default baseline
-- **Steps:** 1. click `Remover` on `São Paulo` → 2. select `Excluir territórios` (`remove-city-option-delete`) and click `Confirmar` → 3. click `Remover` on the sole remaining city `Osasco`
-- **Expected UI:** after step 2, `São Paulo` is removed; in step 3, `remove-city-option-transfer` radio input and `remove-city-target-select` are disabled and `Excluir territórios` is pre-selected; confirming leaves 0 rows and renders `config-empty-cities`
+- **Steps:** 1. click the remove icon (`config-delete-city`) on `São Paulo` → 2. select `Excluir territórios` (`remove-city-option-delete`) and confirm with the danger-styled button → 3. click the remove icon on the sole remaining city `Osasco`
+- **Expected UI:** after step 2, `São Paulo` is removed; in step 3, the transfer choice (`remove-city-option-transfer`) and `remove-city-target-select` are disabled and `Excluir territórios` is pre-selected; confirming leaves 0 rows and renders `config-empty-cities`
 - **Expected persistence:** `seed-territory-1` and `seed-territory-3` parent documents and their `history` subcollection documents are permanently deleted in a Firestore transaction; `seed-territory-2` is untouched until `Osasco` is deleted
 - **Priority:** P0
 
@@ -132,5 +132,5 @@ is in [`../domain/glossary.md`](../domain/glossary.md).
 - `apps/ministry-maps/src/app/features/congregation/bo/congregation/congregation.bo.ts`
 - `apps/ministry-maps/src/app/repositories/firebase/firebase-congregation-datasource.service.ts`
 - `apps/ministry-maps/src/app/repositories/firebase/firebase-territory-datasource.service.ts`
-- `apps/ministry-maps/e2e/page-objects/configuration.page.ts`
+- `../../e2e/page-objects/congregation.page.ts`
 - `apps/ministry-maps/e2e/tests/configuration.spec.ts`

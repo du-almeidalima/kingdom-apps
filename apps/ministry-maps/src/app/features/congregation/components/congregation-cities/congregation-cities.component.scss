@@ -1,19 +1,69 @@
 @use 'libs/common-ui/src/lib/styles/abstract/variables';
 
+:host {
+  display: block;
+  min-width: 0;
+}
+
 .cities-list {
+  width: 100%;
   border: 1px solid var(--kui-color-border, #{variables.$grey-200});
   border-radius: 0.8rem;
   overflow: hidden;
 }
 
 .city-row {
+  display: grid;
+  grid-template-columns: 2.4rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.8rem;
+  min-height: 5.6rem;
+  padding: 0.6rem 0.8rem;
   border-bottom: 1px solid var(--kui-color-border, #{variables.$grey-200});
+  background: var(--kui-color-surface-elevated, #{variables.$white-100});
 
   &:last-child {
     border-bottom: 0;
   }
+
+  &--editing {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  &--add {
+    border-bottom: 0;
+    background: var(--kui-color-surface-muted, #{variables.$white-300});
+  }
+}
+
+.city-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.city-input {
+  width: 100%;
+  min-width: 0;
+}
+
+.city-empty {
+  padding: 2rem 1.2rem;
+  border-bottom: 1px solid var(--kui-color-border, #{variables.$grey-200});
+  text-align: center;
 }
 
 .city-drag-handle {
   cursor: grab;
+}
+
+.icon {
+  width: 2rem;
+  height: 2rem;
 }

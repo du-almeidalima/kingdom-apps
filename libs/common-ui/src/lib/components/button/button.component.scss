@@ -45,6 +45,22 @@
     }
   }
 
+  &.button--danger {
+    color: var(--kui-color-on-danger-action, #{variables.$white-100});
+    background-color: var(--kui-color-danger, #{variables.$red-400});
+    border-color: var(--kui-color-danger, #{variables.$red-400});
+
+    &:hover {
+      background-color: var(--kui-color-danger-action-hover, #{variables.$red-500});
+      border-color: var(--kui-color-danger-action-hover, #{variables.$red-500});
+    }
+
+    &:active {
+      background-color: var(--kui-color-danger-action-active, #{variables.$red-600});
+      border-color: var(--kui-color-danger-action-active, #{variables.$red-600});
+    }
+  }
+
   &:disabled {
     border-color: var(--kui-color-border, #{variables.$grey-100});
     background-color: var(--kui-color-control-disabled, #{variables.$light-grey-100});

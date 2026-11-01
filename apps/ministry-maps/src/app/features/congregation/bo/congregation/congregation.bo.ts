@@ -21,6 +21,25 @@ export class CongregationBO {
   private readonly profileBO = inject(ProfileBO);
   private readonly loggerService = inject(LoggerService);
 
+  getTerritoryCountsByCity(): Observable<Record<string, number>> {
+    const congregationId = this.userState.currentUser?.congregation?.id;
+    if (!congregationId) {
+      return of({});
+    }
+
+    return this.territoryRepository.getAllByCongregation(congregationId).pipe(
+      map((territories) => {
+        const counts = new Map<string, number>();
+        territories.forEach(({ city }) => counts.set(city, (counts.get(city) ?? 0) + 1));
+        return Object.fromEntries(counts);
+      }),
+      catchError((error) => {
+        this.loggerService.error('Error loading territory counts by city: ' + error);
+        return of({});
+      }),
+    );
+  }
+
   createCongregation(data: Omit<Congregation, 'id'>): Observable<Congregation> {
     const user = this.userState.currentUser;
     if (!user) {

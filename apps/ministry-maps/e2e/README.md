@@ -70,7 +70,7 @@ apps/ministry-maps/e2e/
 │   ├── user-edit-dialog.page.ts  # user edit overlay
 │   ├── invite-create-dialog.page.ts # invite link creation overlay
 │   ├── profile.page.ts           # /profile locators
-│   └── configuration.page.ts     # /congregation locators
+│   └── congregation.page.ts     # /congregation locators
 └── tests/
     ├── smoke.spec.ts             # baseline integrity checks
     ├── auth.spec.ts              # auth rendering, guards, and session lifecycle

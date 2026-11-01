@@ -1,14 +1,7 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { FormsModule } from '@angular/forms';
 import { MockBuilder, MockRender, ngMocks } from 'ng-mocks';
-import {
-  ButtonComponent,
-  FormFieldComponent,
-  IconButtonComponent,
-  IconComponent,
-  InputComponent,
-  LabelComponent,
-} from '@kingdom-apps/common-ui';
+import { ButtonComponent, IconButtonComponent, IconComponent, InputComponent } from '@kingdom-apps/common-ui';
 
 import { CongregationCitiesComponent } from './congregation-cities.component';
 
@@ -20,22 +13,25 @@ describe('CongregationCitiesComponent', () => {
       .keep(IconButtonComponent)
       .keep(IconComponent)
       .keep(InputComponent)
-      .keep(FormFieldComponent)
-      .keep(LabelComponent),
   );
 
-  it('renders city rows and empty state when no cities exist', () => {
+  it('renders city rows with territory counts', () => {
     const fixture = MockRender(CongregationCitiesComponent, {
       cities: ['City 1', 'City 2'],
+      territoryCounts: { 'City 1': 1, 'City 2': 0 },
       disabled: false,
     });
     expect(ngMocks.findAll(fixture, '[data-testid="config-city-row"]')).toHaveLength(2);
+    expect(fixture.nativeElement.textContent).toContain('1 território');
+    expect(fixture.nativeElement.textContent).toContain('0 territórios');
+  });
 
-    const emptyFixture = MockRender(CongregationCitiesComponent, {
+  it('renders the empty state when no cities exist', () => {
+    const fixture = MockRender(CongregationCitiesComponent, {
       cities: [],
       disabled: false,
     });
-    expect(ngMocks.find(emptyFixture, '[data-testid="config-empty-cities"]')).toBeTruthy();
+    expect(ngMocks.find(fixture, '[data-testid="config-empty-cities"]')).toBeTruthy();
   });
 
   it('emits addCity when clicking the add button', () => {
@@ -83,6 +79,21 @@ describe('CongregationCitiesComponent', () => {
       oldName: 'City 1',
       newName: 'City 1 Renomeada',
     });
+  });
+
+  it('renders icon-only actions with accessible labels', () => {
+    const fixture = MockRender(CongregationCitiesComponent, {
+      cities: ['City 1'],
+      territoryCounts: {},
+      disabled: false,
+    });
+
+    expect(ngMocks.find(fixture, '[data-testid="config-edit-city"]').nativeElement.getAttribute('aria-label')).toBe(
+      'Editar cidade',
+    );
+    expect(ngMocks.find(fixture, '[data-testid="config-delete-city"]').nativeElement.getAttribute('aria-label')).toBe(
+      'Remover cidade',
+    );
   });
 
   it('emits reorderCities on drag drop and removeCity on delete click', () => {

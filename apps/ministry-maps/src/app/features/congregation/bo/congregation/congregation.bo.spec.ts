@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { MockProvider, ngMocks } from 'ng-mocks';
-import { lastValueFrom, of } from 'rxjs';
+import { lastValueFrom, of, throwError } from 'rxjs';
 
 import { CongregationBO } from './congregation.bo';
 import { CongregationRepository } from '../../../../repositories/congregation.repository';
@@ -34,6 +34,7 @@ describe('CongregationBO', () => {
           update: jest.fn(),
         }),
         MockProvider(TerritoryRepository, {
+          getAllByCongregation: jest.fn(),
           getAllByCongregationAndCities: jest.fn(),
           getNextPositionIndexForCity: jest.fn(),
           batchUpdate: jest.fn(),
@@ -75,6 +76,33 @@ describe('CongregationBO', () => {
         /congregation name cannot be empty/i,
       );
       expect(congregationRepository.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getTerritoryCountsByCity', () => {
+    it('returns territory counts grouped by city for the current congregation', async () => {
+      territoryRepository.getAllByCongregation.mockReturnValue(
+        of([
+          territoryMockBuilder({ id: 't1', city: 'City 1' }),
+          territoryMockBuilder({ id: 't2', city: 'City 1' }),
+          territoryMockBuilder({ id: 't3', city: 'City 2' }),
+        ]),
+      );
+
+      await expect(lastValueFrom(service.getTerritoryCountsByCity())).resolves.toEqual({
+        'City 1': 2,
+        'City 2': 1,
+      });
+      expect(territoryRepository.getAllByCongregation).toHaveBeenCalledWith(congregationMock.id);
+    });
+
+    it('logs repository errors and returns no counts', async () => {
+      territoryRepository.getAllByCongregation.mockReturnValue(throwError(() => new Error('query failed')));
+
+      await expect(lastValueFrom(service.getTerritoryCountsByCity())).resolves.toEqual({});
+      expect(ngMocks.get(LoggerService).error).toHaveBeenCalledWith(
+        expect.stringContaining('Error loading territory counts by city'),
+      );
     });
   });
 
