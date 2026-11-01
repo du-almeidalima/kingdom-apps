@@ -1,10 +1,10 @@
+@use 'apps/ministry-maps/src/styles/components/panel' as *;
 @use 'libs/common-ui/src/lib/styles/abstract/variables';
 
 .designation-card {
+  @extend .panel;
+  padding: 0;
   overflow: hidden;
-  border: 1px solid var(--kui-color-border, #{variables.$light-grey-200});
-  border-radius: 6px;
-  background: var(--kui-color-surface, #{variables.$white-100});
 
   &__toggle { display: flex; width: 100%; align-items: center; gap: 1rem; padding: 1rem; text-align: left; color: inherit; background: transparent; border: 0; cursor: pointer; }
   &__main { display: flex; flex: 1; flex-direction: column; gap: 0.25rem; }

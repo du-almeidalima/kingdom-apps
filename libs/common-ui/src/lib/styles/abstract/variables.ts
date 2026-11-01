@@ -324,6 +324,7 @@ export const shadowZ5 = '0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0,
 export const shadowZ6 = '0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22)';
 
 // SIZES
+export const controlHeight = '3.75rem';
 export const controlPadding = '.8rem';
 export const iconButtonPadding = '.5rem';
 

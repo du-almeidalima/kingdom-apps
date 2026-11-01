@@ -1,9 +1,13 @@
 @use '../../styles/abstract/variables';
 
 :host {
-  display: inline-block;
-  min-height: 4.2rem;
-  padding: 1.2rem 1.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-block-size: var(--kui-control-height, #{variables.$control-height});
+  padding-block: variables.$control-padding;
+  padding-inline: 1.6rem;
   border-radius: 2px;
   border: 1px solid var(--kui-color-border, #{variables.$grey-100});
 
