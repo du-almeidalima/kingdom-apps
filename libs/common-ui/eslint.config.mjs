@@ -27,8 +27,15 @@ export default [
     },
   },
   {
+    files: ['**/*.component.ts'],
+    rules: {
+      '@angular-eslint/prefer-on-push-component-change-detection': 'error',
+    },
+  },
+  {
     files: ['**/*.html'],
-    // Override or add rules here
-    rules: {},
+    rules: {
+      '@angular-eslint/template/prefer-control-flow': 'error',
+    },
   },
 ];

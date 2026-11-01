@@ -14,7 +14,7 @@ description: Builds, budgets, the CI pipeline, and Firebase deployment.
 
 ## CI (`.github/workflows/ci.yml`)
 
-- **main** — `nx affected -t test`.
+- **main** — `nx affected -t lint test build`.
 - **e2e** — Node 22 + Java 21; functions `lint`/`test`/`build`; `typecheck-e2e`; Playwright vs emulators. Deliberately **not** a deploy gate.
 - **deploy** — on push to `main`: affected projects with a `deploy` target run `nx run <proj>:deploy --configuration=production` with `FIREBASE_TOKEN` + `NX_FIREBASE_*` secrets and `NX_ENV=production`.
 

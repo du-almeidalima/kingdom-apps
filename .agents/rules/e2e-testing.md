@@ -76,7 +76,7 @@ apps/ministry-maps/e2e/
 
 ## Golden Rule — Always Import From `fixtures/index.ts`
 
-Never import `test`/`expect` directly from `@playwright/test`. Import from the composed fixture so every spec gets auto reset + seed, `seed`/`db` helpers, and `signInAs`:
+Import `test` and `expect` from the composed fixture (`../fixtures`, enforced by `@typescript-eslint/no-restricted-imports` in `e2e/tests/`) so every spec gets auto reset + seed, `seed`/`db` helpers, and `signInAs`:
 
 ```typescript
 import { test, expect } from '../fixtures';

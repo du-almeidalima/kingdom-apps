@@ -11,16 +11,16 @@ description: Create or modify Angular components — selectors, templates, signa
 
 ## Non-negotiables
 
-- **Standalone** — Angular 21 default; omit `standalone: true`, never add NgModules (legacy routing NgModules under home/territory/users/work are migration debt).
-- **OnPush** — `changeDetection: ChangeDetectionStrategy.OnPush` is required on new components (all existing components now have it).
-- **Zoneless** — the app runs without Zone.js. Never add `zone.js`, `provideZoneChangeDetection`, or `NgZone`. State mutated in async callbacks (subscribe/finalize/timeout) **must** be a signal — plain-field writes there never render.
+- **Standalone** — Angular 21 default; omit `standalone: true` and use standalone route configs (`Routes`).
+- **OnPush** — `changeDetection: ChangeDetectionStrategy.OnPush` on every component (enforced by `@angular-eslint/prefer-on-push-component-change-detection`).
+- **Zoneless** — runs without Zone.js. State mutated in async callbacks (subscribe/finalize/timeout) **must** be a signal — plain-field writes there never render.
 - **Selectors** — app components: `kingdom-apps-*` (e.g. `kingdom-apps-territories-page`); common-ui: `lib-*` elements or attribute selectors (`button[lib-button]`). The `prefix: app` in project.json is dead config — ignore it.
-- **`inject()`** for new DI. Constructor DI survives in ~41 older files — don't copy it.
+- **`inject()`** for new DI.
 - **`data-testid`** on interactive/dynamic elements — unit specs query `By.css('[data-testid=…]')`, Playwright page objects use `page.getByTestId(...)`.
 
 ## Templates — built-in control flow only
 
-`*ngIf`/`*ngFor` are banned (zero usages; 36 files use the modern syntax):
+Enforced by `@angular-eslint/template/prefer-control-flow`:
 
 ```html
 @if (user(); as user) {
@@ -34,7 +34,7 @@ description: Create or modify Angular components — selectors, templates, signa
 } @let total = items().length;
 ```
 
-- Track inline (`track territory.id`); a `trackBy` _method_ survives in one legacy file only.
+- Track inline (`track territory.id`).
 - Keep logic out of templates — expose computed values from the class.
 
 ## Inputs, outputs, state
@@ -95,7 +95,7 @@ One folder per component; files named after the folder:
 src/
 ├── app/
 │   ├── app.config.ts / app.component.* / app-routes.ts
-│   ├── features/<feature>/              # territory, users, work, profile, configuration, home
+│   ├── features/<feature>/
 │   │   ├── pages/<name>-page/           # smart pages: <name>-page.component.{ts,html?,scss}
 │   │   ├── components/<kebab-name>/     # presentation components
 │   │   ├── bo/<area>/<name>.bo.ts       # business objects (see angular-services.md)

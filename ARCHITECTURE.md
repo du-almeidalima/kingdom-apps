@@ -54,8 +54,9 @@ lockfile.
 | Hosting            | `prod` targets `du-ministry-maps`; `beta` targets `du-ministry-maps-beta`.                                                                                                                                                                                                                           |
 
 The application models six roles: `APP_ADMIN`, `ADMIN`, `ELDER`, `ORGANIZER`, `SUPERINTENDENT`, and
-`PUBLISHER`. Route guards and `libAuthorize` control client navigation and visibility; they are not a
-backend security boundary. Firestore security rules are not versioned in this repository.
+`PUBLISHER`. Route guards and `libAuthorize` control client navigation and visibility; backend access is
+enforced by [`firestore.rules`](./firestore.rules) (tested in `apps/ministry-maps/e2e/tests/firestore-rules.spec.ts`)
+and Cloud Functions.
 
 The authoritative collection shapes and invariants are documented in
 [`apps/ministry-maps/docs/domain/data-model.md`](./apps/ministry-maps/docs/domain/data-model.md).

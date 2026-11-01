@@ -4,39 +4,18 @@ Repository-wide instructions for coding agents. [`README.md`](./README.md) has s
 
 ## Core Rules
 
-- **Standalone Angular only:** no NgModules in new code. Existing feature-routing NgModules are migration debt, not examples to copy.
-- **Zoneless + signals:** no Zone.js anywhere (no `zone.js` polyfill, `provideZoneChangeDetection`, or `NgZone`). Every component is OnPush; use signal inputs/outputs/queries and `host` objects. State mutated in async callbacks (subscribe/finalize) must be a signal or it won't render. Unit tests run zoneless (`setupZonelessTestEnv`) — `fakeAsync`/`tick` don't work; use jest fake timers.
-- **Prefer `inject()`** for new dependency injection. Legacy constructor DI exists in older files — don't copy it, don't mass-migrate it.
-- **npm + Node 22:** use `npm`/`npx` (e.g. `npx nx … ministry-maps`); never introduce another package manager. Java 21 is required for the Firebase emulators.
-- **Lean dependencies:** keep third-party packages minimal. Before adding one, check whether `common-ui` already provides the component or the shared styles cover it; otherwise build it yourself (standalone + Tailwind/SCSS + design tokens). Adopt a library only when its logic is complex enough that maintaining it in-house would cost more than the dependency's weight.
-- **Path aliases:** cross-project imports use `@kingdom-apps/common-ui` (the only alias). Intra-app imports stay relative.
-- **kebab-case files**, one folder per component, files named after the folder.
-- **Keep `common-ui` generic:** no Ministry Maps domain models, business logic, or feature-specific UI.
-- **UI copy is pt-BR:** Ministry Maps user-facing strings are Brazilian Portuguese — keep quoted UI text verbatim (selectors in tests rely on it).
-- **Conventional commits:** `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `chore:` — vocabulary and scopes in `.agents/rules/git-commits.md`.
-- **Preserve scope:** smallest change that satisfies the task; no unrelated refactors.
+- **Standalone + zoneless Angular:** write standalone `OnPush` components with `inject()`, signal inputs/outputs/queries, and `host` objects. Mutate async callback state through signals; use Jest fake timers in unit tests (`setupZonelessTestEnv`).
+- **npm + Node 22:** run workspace tasks via `npx nx …` (Java 21 required for Firebase emulators).
+- **Lean dependencies:** reuse `@kingdom-apps/common-ui` (the only cross-project path alias; intra-app imports stay relative) or build with standalone components + design tokens before adding packages. Keep `common-ui` generic and domain-free.
+- **UI copy is pt-BR:** keep user-facing Brazilian Portuguese strings verbatim (selectors in tests rely on them).
+- **Preserve scope:** smallest change that satisfies the task; follow `.agents/rules/git-commits.md` for Conventional Commits.
 
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->
 
-## General Guidelines for working with Nx
+## Nx Workspace
 
-- For navigating/exploring the workspace, invoke the `nx-workspace` skill first - it has patterns for querying projects, targets, and dependencies
-- When running tasks (for example build, lint, test, e2e, etc.), always prefer running the task through `nx` (i.e. `nx run`, `nx run-many`, `nx affected`) instead of using the underlying tooling directly
-- Prefix nx commands with the workspace's package manager (e.g., `pnpm nx build`, `npm exec nx test`) - avoids using globally installed CLI
-- You have access to the Nx MCP server and its tools, use them to help the user
-- For Nx plugin best practices, check `node_modules/@nx/<plugin>/PLUGIN.md`. Not all plugins have this file - proceed without it if unavailable
-- NEVER guess CLI flags - always check nx_docs or `--help` first when unsure
-
-## Scaffolding & Generators
-
-- For scaffolding tasks (creating apps, libs, project structure, setup), ALWAYS invoke the `nx-generate` skill FIRST before exploring or calling MCP tools
-
-## When to use nx_docs
-
-- USE for: advanced config options, unfamiliar flags, migration guides, plugin configuration, edge cases
-- DON'T USE for: basic generator syntax (`nx g @nx/react:app`), standard commands, things you already know
-- The `nx-generate` skill handles generator discovery internally - don't call nx_docs just to look up generator syntax
+- Run tasks through `npx nx` (`npx nx run`, `npx nx run-many`, `npx nx affected`) and use the Nx MCP tools (`nx_docs` for unfamiliar flags or advanced config). See `.agents/rules/monorepo.md` for projects and targets.
 
 <!-- nx configuration end-->
 
@@ -87,12 +66,7 @@ Add or update tests for behavior changes. Do not weaken, skip, or delete a faili
 
 ## CodeGraph
 
-In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the repo root), reach for it BEFORE grep/find or reading files when you need to understand or locate code:
-
-- **MCP tool** (when available): `codegraph_explore` answers most code questions in one call — the relevant symbols' verbatim source plus the call paths between them, including dynamic-dispatch hops grep can't follow. Name a file or symbol in the query to read its current line-numbered source. If it's listed but deferred, load it by name via tool search.
-- **Shell** (always works): `codegraph explore "<symbol names or question>"` prints the same output.
-
-If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is the user's decision.
+When `.codegraph/` exists, query `codegraph_explore` (or `codegraph explore "<query>"`) before `grep`/`read`. When `.codegraph/` is absent, use standard file tools.
 <!-- CODEGRAPH_END -->
 
 ## Agent skills
