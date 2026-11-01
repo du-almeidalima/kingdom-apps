@@ -6,7 +6,6 @@ import {
   AuthUserStateService,
   AuthorizeDirective,
   ButtonComponent,
-  CardComponent,
   FormFieldComponent,
   IconButtonComponent,
   IconComponent,
@@ -114,7 +113,6 @@ describe('CongregationPageComponent', () => {
       .keep(FormsModule)
       .keep(AuthorizeDirective)
       .keep(ButtonComponent)
-      .keep(CardComponent)
       .keep(IconButtonComponent)
       .keep(IconComponent)
       .keep(InputComponent)

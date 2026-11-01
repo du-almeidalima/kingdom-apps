@@ -1,6 +1,6 @@
 <main class="container pb-24">
   <header class="flex flex-wrap items-center justify-between gap-4 mb-6">
-    <h2 class="t-headline2" data-testid="config-heading">Administrar Congregação</h2>
+    <h2 class="t-headline2" data-testid="config-heading">Congregação</h2>
     <button
       lib-button
       btnType="primary"
@@ -15,15 +15,15 @@
 
   @if (congregation(); as cong) {
     <div class="flex flex-col gap-6">
-      <lib-card [customStyle]="cardStyle">
+      <section class="panel">
         <kingdom-apps-congregation-name-form
           [name]="cong.name"
           [disabled]="isLoading()"
           (saveName)="handleSaveCongregationName($event)"
         />
-      </lib-card>
+      </section>
 
-      <lib-card [customStyle]="cardStyle">
+      <section class="panel">
         <kingdom-apps-congregation-cities
           [cities]="cities()"
           [territoryCounts]="territoryCounts()"
@@ -33,7 +33,7 @@
           (reorderCities)="handleReorderCities($event)"
           (removeCity)="handleRemoveCity($event)"
         />
-      </lib-card>
+      </section>
     </div>
   } @else {
     <div class="p-8 text-center rounded-lg border" data-testid="config-no-congregation-banner">

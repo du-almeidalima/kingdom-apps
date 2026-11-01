@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation, inject, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  ViewEncapsulation,
+  computed,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { ControlValueAccessor, FormsModule, NgControl } from '@angular/forms';
 import { NgClass } from '@angular/common';
 
@@ -7,14 +16,24 @@ import { NgClass } from '@angular/common';
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./icon-radio.component.scss'],
+  host: {
+    role: 'radio',
+    '[attr.aria-checked]': 'value() === modelValue()',
+    '[attr.aria-disabled]': 'disabled()',
+    '[attr.disabled]': 'disabled() ? "" : null',
+    '[class.icon-radio-host--disabled]': 'disabled()',
+    '(click)': 'handleClick()',
+  },
   template: `
     <label
       for="icon-radio-{{ value() }}"
       class="icon-radio"
-      tabindex="0"
+      [class.icon-radio--disabled]="disabled()"
+      [attr.tabindex]="disabled() ? -1 : 0"
+      [attr.aria-disabled]="disabled()"
       [ngClass]="{ 'icon-radio--active': value() === modelValue() }"
-      (keydown.enter)="valueChanged(value())"
-      (keydown.space)="valueChanged(value())"
+      (keydown.enter)="!disabled() && valueChanged(value())"
+      (keydown.space)="!disabled() && valueChanged(value())"
     >
       <!-- Icon -->
       <ng-content select="lib-icon"></ng-content>
@@ -26,6 +45,7 @@ import { NgClass } from '@angular/common';
         [(ngModel)]="modelValue"
         [name]="name()"
         [value]="value()"
+        [attr.disabled]="disabled() ? '' : null"
         (change)="valueChanged()"
       />
     </label>
@@ -35,7 +55,9 @@ import { NgClass } from '@angular/common';
 export class IconRadioComponent implements OnInit, ControlValueAccessor {
   private ngControl = inject(NgControl, { self: true });
 
-  disabled = signal(false);
+  private readonly disabledState = signal(false);
+  readonly disabledOption = input(false);
+  readonly disabled = computed(() => this.disabledOption() || this.disabledState());
 
   modelValue = signal<string | number | undefined>(undefined);
 
@@ -78,11 +100,19 @@ export class IconRadioComponent implements OnInit, ControlValueAccessor {
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.disabled.set(isDisabled);
+    this.disabledState.set(isDisabled);
   }
 
   writeValue(value: string | number): void {
     this.modelValue.set(value);
+  }
+
+  handleClick(): void {
+    if (this.disabled()) {
+      return;
+    }
+
+    this.valueChanged(this.value());
   }
 
   /**
@@ -91,12 +121,16 @@ export class IconRadioComponent implements OnInit, ControlValueAccessor {
    * is pressed.
    */
   valueChanged(value?: string | number) {
+    if (this.disabled()) {
+      return;
+    }
+
     // Manually updating the input state
     if (value !== undefined) {
       this.modelValue.set(value);
     }
 
     this.onChange(this.modelValue());
-    this.onTouched();
+    this.onTouched?.();
   }
 }

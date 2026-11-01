@@ -1,6 +1,6 @@
 # Congregation administration — name, cities, and provisioning (`UC-CFG`)
 
-This document describes the behavioural use cases for the `/congregation` screen (`Administrar Congregação`):
+This document describes the behavioural use cases for the `/congregation` screen (`Congregação`):
 immediate-persistence Congregation name editing, adding, inline-renaming, drag-and-drop reordering, and
 removing a Congregation's `cities[]` (with Territory transfer or deletion), plus the `APP_ADMIN`-only
 `Adicionar Congregação` dialog.
@@ -18,7 +18,7 @@ is in [`../domain/glossary.md`](../domain/glossary.md).
 - **Route:** `/congregation`
 - **Preconditions (seed):** default baseline (`seed.ids.congregation` name `Congregação Jardim Primavera`, cities `['São Paulo', 'Osasco']`)
 - **Steps:** 1. `signInAs('admin')` → 2. open `/congregation`
-- **Expected UI:** heading `Administrar Congregação` (`config-heading`); a single-column page with a congregation-name card showing `Congregação Jardim Primavera` (`config-congregation-name`) and an edit icon (`config-edit-name`); the name input (`config-congregation-name-input`) is hidden until edit is clicked, then `Salvar` (`config-save-name`) is disabled while unchanged and `Cancelar` (`config-cancel-name`) is available; `Adicionar Congregação` (`config-add-congregation`) is not rendered in the DOM; the `Cidades` card has the reorder hint `Arraste para reordenar` and 2 rows (`config-city-row`) in array order showing `São Paulo` and `Osasco`, their Territory counts, drag handles (`config-city-drag-handle`), and icon actions (`config-edit-city`, `config-delete-city`)
+- **Expected UI:** heading `Congregação` (`config-heading`); a single-column page with a congregation-name card showing `Congregação Jardim Primavera` (`config-congregation-name`) and an edit icon (`config-edit-name`); the name input (`config-congregation-name-input`) is hidden until edit is clicked, then `Salvar` (`config-save-name`) is disabled while unchanged and `Cancelar` (`config-cancel-name`) is available; `Adicionar Congregação` (`config-add-congregation`) is not rendered in the DOM; the `Cidades` card has the reorder hint `Arraste para reordenar` and 2 rows (`config-city-row`) in array order showing `São Paulo` and `Osasco`, their Territory counts, drag handles (`config-city-drag-handle`), and icon actions (`config-edit-city`, `config-delete-city`)
 - **Expected persistence:** `db.getDoc(db.collections.congregations, seed.ids.congregation).cities` deep-equals `['São Paulo', 'Osasco']`
 - **Edge cases:** when `congregation.cities` is `[]`, `config-empty-cities` renders `Nenhuma cidade cadastrada. Adicione uma cidade abaixo.`
 - **Priority:** P0
