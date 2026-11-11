@@ -25,3 +25,5 @@ export * from './portal/portal.service';
 export * from './progress-bar/progress-bar.component';
 export * from './divider/divider.component';
 export * from './chip';
+export * from './markdown/markdown.component';
+export * from './bottom-sheet/bottom-sheet.component';
