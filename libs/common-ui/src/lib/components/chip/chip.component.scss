@@ -5,24 +5,6 @@
 }
 
 .chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  min-height: 3.2rem;
-  padding: 0.4rem 1.2rem;
-  border-radius: 9999px;
-  border: 1px solid var(--kui-color-border, #{variables.$light-grey-100});
-  background-color: var(--kui-color-surface-elevated, #{variables.$white-100});
-  color: var(--kui-color-text, #{variables.$text});
-  font-size: 1.4rem;
-  line-height: 1.2;
-
-  &__label {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
   &__remove {
     display: inline-flex;
     align-items: center;
@@ -58,11 +40,5 @@
   &__remove-icon {
     width: 1.2rem;
     height: 1.2rem;
-  }
-
-  &--disabled {
-    background-color: var(--kui-color-control-disabled, #{variables.$white-400});
-    color: var(--kui-color-text-disabled, #{variables.$text-low});
-    border-color: var(--kui-color-border, #{variables.$light-grey-100});
   }
 }

@@ -1,0 +1,35 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+
+:host {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.chip {
+  cursor: pointer;
+
+  &:has(:focus-visible) {
+    outline: 2px solid var(--kui-color-focus, #{variables.$primary-green});
+    outline-offset: 2px;
+  }
+
+  &__input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+
+  &__icon {
+    flex: none;
+    width: 1.2rem;
+    height: 1.2rem;
+    color: var(--kui-color-text-muted, #{variables.$text-medium});
+  }
+}

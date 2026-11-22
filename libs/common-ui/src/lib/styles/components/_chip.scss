@@ -1,0 +1,71 @@
+@use '../abstract/variables';
+
+// Base chip styling (used across presentation and interactive chip components)
+.chip {
+  --chip-bg: var(--kui-color-surface-elevated, #{variables.$white-100});
+  --chip-border: var(--kui-color-border, #{variables.$light-grey-100});
+  --chip-color: var(--kui-color-text, #{variables.$text});
+  --chip-hover-bg: var(--kui-color-surface-hover, #{variables.$white-300});
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: 100%;
+  min-height: 3.2rem;
+  padding: 0.4rem 1.2rem;
+  border-radius: 9999px;
+  border: 1px solid var(--chip-border);
+  background-color: var(--chip-bg);
+  color: var(--chip-color);
+  font-size: 1.4rem;
+  line-height: 1.2;
+  box-sizing: border-box;
+  transition: variables.$background-transition;
+
+  &__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // Interactive Hover
+  @media (hover: hover) {
+    &:hover:not(.chip--disabled):not(:has(:disabled)) {
+      background-color: var(--chip-hover-bg);
+    }
+  }
+
+  // Focus Ring
+  &:focus-visible {
+    outline: 2px solid var(--kui-color-focus, #{variables.$primary-green});
+    outline-offset: 2px;
+  }
+
+  // Unified Selected / Active / Checked State
+  &--selected,
+  &--active,
+  &[aria-selected='true'],
+  &:has(:checked) {
+    --chip-border: var(--kui-color-action-primary, #{variables.$primary-green});
+    --chip-bg: color-mix(
+      in srgb,
+      var(--kui-color-action-primary, #{variables.$primary-green}) 16%,
+      var(--kui-color-surface-elevated, #{variables.$white-100})
+    );
+    --chip-hover-bg: color-mix(
+      in srgb,
+      var(--kui-color-action-primary, #{variables.$primary-green}) 24%,
+      var(--kui-color-surface-elevated, #{variables.$white-100})
+    );
+  }
+
+  // Disabled State
+  &--disabled,
+  &:has(:disabled) {
+    cursor: not-allowed;
+    --chip-bg: var(--kui-color-control-disabled, #{variables.$white-400});
+    --chip-color: var(--kui-color-text-disabled, #{variables.$text-low});
+    --chip-border: var(--kui-color-border, #{variables.$light-grey-100});
+  }
+}

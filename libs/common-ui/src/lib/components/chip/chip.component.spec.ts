@@ -27,6 +27,13 @@ describe('ChipComponent & ChipListComponent', () => {
     expect(host.querySelector('[data-testid="chip-remove"]')).toBeNull();
   });
 
+  it('applies the selected class when selected is true', () => {
+    const fixture = MockRender(ChipComponent, { label: 'São Paulo', selected: true });
+    const chipEl = ngMocks.find(fixture, '[data-testid="chip"]').nativeElement as HTMLElement;
+
+    expect(chipEl.classList.contains('chip--selected')).toBe(true);
+  });
+
   it('renders a native button with an accessible label and emits removed when removable is true', () => {
     const removedSpy = jest.fn();
     const fixture = MockRender(

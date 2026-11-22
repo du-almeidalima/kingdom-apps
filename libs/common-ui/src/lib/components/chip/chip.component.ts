@@ -11,7 +11,7 @@ import { IconComponent } from '../icon/icon.component';
     role: 'listitem',
   },
   template: `
-    <div class="chip" [class.chip--disabled]="disabled()" data-testid="chip">
+    <div class="chip" [class.chip--selected]="selected()" [class.chip--disabled]="disabled()" data-testid="chip">
       <span class="chip__label" data-testid="chip-label">{{ label() }}<ng-content /></span>
       @if (removable()) {
         <button
@@ -32,6 +32,7 @@ import { IconComponent } from '../icon/icon.component';
 })
 export class ChipComponent {
   label = input<string>('');
+  selected = input<boolean>(false);
   removable = input<boolean>(false);
   disabled = input<boolean>(false);
   removeAriaLabel = input<string>('');
