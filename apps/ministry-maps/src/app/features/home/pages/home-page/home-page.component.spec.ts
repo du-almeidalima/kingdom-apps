@@ -123,4 +123,22 @@ describe('HomePageComponent', () => {
 
     expect(congregationLink).toBeDefined();
   });
+
+  it('links APP_ADMIN to the notifications management page', () => {
+    const links = renderForRole(RoleEnum.APP_ADMIN);
+    const notificationsLink = links.find((candidate) => candidate.nativeElement.textContent.trim() === 'Notificações');
+
+    if (!notificationsLink) throw new Error('Expected Notificações link to be rendered');
+    expect(ngMocks.input(notificationsLink, 'routerLink')).toBe('/notifications');
+  });
+
+  it.each([RoleEnum.ADMIN, RoleEnum.SUPERINTENDENT, RoleEnum.ELDER, RoleEnum.ORGANIZER])(
+    'hides Notificações from %s',
+    (role) => {
+      const links = renderForRole(role);
+      const notificationsLink = links.find((candidate) => candidate.nativeElement.textContent.trim() === 'Notificações');
+
+      expect(notificationsLink).toBeUndefined();
+    },
+  );
 });

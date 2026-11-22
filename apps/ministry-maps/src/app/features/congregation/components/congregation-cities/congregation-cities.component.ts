@@ -180,9 +180,11 @@ export class CongregationCitiesComponent {
     return pluralTerritories(this.territoryCounts()[city] ?? 0);
   }
 
+  private readonly citiesKey = computed(() => JSON.stringify(this.cities()));
+
   constructor() {
     effect(() => {
-      this.cities();
+      this.citiesKey();
       this.newCityName.set('');
       this.cancelEditCity();
     });

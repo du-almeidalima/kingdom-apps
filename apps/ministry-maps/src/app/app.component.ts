@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { HeaderComponent } from './shared/components/header/header.component';
 import { PortalAnchorComponent } from '@kingdom-apps/common-ui';
 import { AuthService } from './core/features/auth/services/auth.service';
+import { NotificationQueueService } from './features/notification/services/notification-queue.service';
 
 @Component({
   imports: [RouterModule, HeaderComponent, PortalAnchorComponent],
@@ -25,4 +26,6 @@ export class AppComponent {
   // Trigger Change Comment
   title = 'ministry-maps';
   authService = inject(AuthService);
+  // Instantiated for its constructor effect: opens the notification queue when the user signs in.
+  notificationQueue = inject(NotificationQueueService);
 }

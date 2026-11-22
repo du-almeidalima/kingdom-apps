@@ -1,0 +1,107 @@
+<div class="container">
+  <h2 class="t-headline2 mb-8" data-testid="notification-details-heading">Notificação</h2>
+
+  @if (!state().loaded) {
+    <div class="flex items-center justify-center py-12" data-testid="notification-details-loading">
+      <lib-spinner height="4rem" width="4rem" />
+    </div>
+  } @else if (state().notification; as notification) {
+    <section data-testid="notification-details">
+      <div class="flex items-center justify-between gap-4">
+        <span
+          class="t-caption notification-category"
+          data-testid="notification-details-category"
+          [style.color]="presets[notification.category].accent"
+        >
+          {{ presets[notification.category].label }}
+        </span>
+        <kingdom-apps-notification-status-badge [status]="notification.status" />
+      </div>
+      <h3 class="t-headline3 mt-3" data-testid="notification-details-title">{{ notification.title }}</h3>
+      <p class="t-caption t-medium-emphasis mt-1" data-testid="notification-details-created-at">
+        Criada em {{ notification.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+      </p>
+
+      <div class="flex flex-wrap gap-3 mt-6">
+        <button
+          lib-button
+          type="button"
+          data-testid="notification-details-preview"
+          (click)="handlePreview(notification)"
+        >
+          Pré-visualizar
+        </button>
+        <button
+          lib-button
+          type="button"
+          data-testid="notification-details-toggle-status"
+          (click)="handleToggleStatus(notification)"
+        >
+          {{ notification.status === NotificationStatus.ACTIVE ? 'Encerrar' : 'Ativar' }}
+        </button>
+        <button
+          lib-button
+          btnType="danger"
+          type="button"
+          data-testid="notification-details-delete"
+          (click)="handleDelete(notification)"
+        >
+          Excluir
+        </button>
+      </div>
+
+      <h3 class="t-headline3 mt-8 mb-4">Confirmações</h3>
+      @if (acknowledgments(); as entries) {
+        @if (entries.length > 0) {
+          <ul class="flex flex-col gap-3 m-0 p-0 list-none" data-testid="notification-acknowledgments-list">
+            @for (group of acknowledgmentGroups(); track group.key) {
+              <li data-testid="notification-acknowledgment-group">
+                <lib-expansion-panel
+                  class="acknowledgment-group"
+                  [expanded]="expandedCongregations().has(group.key)"
+                  (expandedChange)="handleToggleCongregation(group.key, $event)"
+                >
+                  <span
+                    libExpansionPanelSummary
+                    class="acknowledgment-group__heading"
+                    data-testid="notification-acknowledgment-group-toggle"
+                  >
+                    <span class="t-body1 acknowledgment-group__name">{{ group.name }}</span>
+                    <span class="t-caption t-medium-emphasis" data-testid="notification-acknowledgment-group-count">
+                      {{ group.entries.length }} {{ group.entries.length === 1 ? 'pessoa' : 'pessoas' }}
+                    </span>
+                  </span>
+
+                  <ul class="acknowledgment-group__entries">
+                    @for (entry of group.entries; track entry.userId) {
+                      <li class="acknowledgment" data-testid="notification-acknowledgment-item">
+                        <div class="acknowledgment__person">
+                          <span class="t-body1 acknowledgment__name">{{ entry.name }}</span>
+                          <span class="t-caption t-medium-emphasis">{{ roleLabel(entry.role) }}</span>
+                        </div>
+                        <time
+                          class="t-caption t-medium-emphasis acknowledgment__date"
+                          [attr.datetime]="entry.acknowledgedAt.toISOString()"
+                        >
+                          Confirmada em {{ entry.acknowledgedAt | date: 'dd/MM/yyyy HH:mm' }}
+                        </time>
+                      </li>
+                    }
+                  </ul>
+                </lib-expansion-panel>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="t-body2" data-testid="notification-acknowledgments-empty">Nenhuma confirmação registrada.</p>
+        }
+      } @else {
+        <div class="flex items-center justify-center py-6" data-testid="notification-acknowledgments-loading">
+          <lib-spinner height="3rem" width="3rem" />
+        </div>
+      }
+    </section>
+  } @else {
+    <p class="t-body2" data-testid="notification-details-not-found">Notificação não encontrada.</p>
+  }
+</div>

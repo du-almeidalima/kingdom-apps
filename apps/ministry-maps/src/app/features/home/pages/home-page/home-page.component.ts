@@ -4,6 +4,7 @@ import { TerritoryRoutesEnum } from '../../../territory/models/enums/territory-r
 import { UserStateService } from '../../../../state/user.state.service';
 import { CongregationRoutesEnum } from '../../../congregation/models/enums/congregation-routes';
 import { CONGREGATION_ALLOWED_ROLES } from '../../../congregation/config/congregation-roles.config';
+import { NOTIFICATION_ALLOWED_ROLES } from '../../../notification/config/notification-roles.config';
 import { RouterLink } from '@angular/router';
 import { AuthorizeDirective, CardBodyComponent, CardComponent, CardHeaderComponent } from '@kingdom-apps/common-ui';
 
@@ -21,6 +22,7 @@ export class HomePageComponent {
   public readonly FeatureRoutes = FeatureRoutesEnum;
   protected readonly CongregationRoutes = CongregationRoutesEnum;
   protected readonly CONGREGATION_ALLOWED_ROLES = CONGREGATION_ALLOWED_ROLES;
+  protected readonly NOTIFICATION_ALLOWED_ROLES = NOTIFICATION_ALLOWED_ROLES;
 
   get userName(): string {
     const userNames = this.userState.currentUser?.name.split(' ');

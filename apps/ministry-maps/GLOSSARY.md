@@ -46,7 +46,7 @@ _Avoid_: Student, learner
 
 **Alert** (_Alerta_):
 An unresolved attention marker on a territory triggered by a visit outcome (such as a householder moving, asking not to be visited, or requesting a revisit).
-_Avoid_: Notification, flag, warning
+_Avoid_: Flag, warning
 
 ### People & Roles
 
@@ -76,3 +76,13 @@ A circuit overseer who visits and inspects multiple congregations and can switch
 
 **App Admin** (_App Admin._):
 The system maintainer with cross-congregation access and the ability to provision new congregations.
+
+### Communications
+
+**Notification** (_Notificação_):
+An app-wide message broadcast by the App Admin to authenticated users, optionally visible only to the selected roles; untargeted notifications reach every role.
+_Avoid_: Alert, banner, announcement
+
+**Acknowledgment** (_Confirmação_):
+A user's recorded confirmation that they have read and accepted a notification.
+_Avoid_: Receipt, read status, dismissal

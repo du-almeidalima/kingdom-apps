@@ -7,14 +7,28 @@ import { IconComponent } from '../icon/icon.component';
   styleUrls: ['./dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <dialog class="dialog" open>
+    <dialog class="dialog" data-testid="dialog" open>
       <header class="dialog__header">
-        <h2 class="dialog__header-title">{{ title() }}</h2>
-        <button class="dialog__header-close-btn" (click)="handleCloseDialog()" [tabIndex]="-1">
-          <lib-icon icon="x-mark-lined"></lib-icon>
-        </button>
+        <div class="dialog__header-content">
+          <ng-content select="[dialogHeader]"></ng-content>
+          @if (title()) {
+            <h2 class="dialog__header-title">{{ title() }}</h2>
+          }
+        </div>
+        @if (closable()) {
+          <button
+            type="button"
+            class="dialog__header-close-btn"
+            data-testid="dialog-close"
+            aria-label="Fechar"
+            (click)="handleCloseDialog()"
+            [tabIndex]="-1"
+          >
+            <lib-icon icon="x-mark-lined"></lib-icon>
+          </button>
+        }
       </header>
-      <div class="dialog__content">
+      <div class="dialog__content" data-testid="dialog-content">
         <ng-content></ng-content>
       </div>
       <ng-content select="lib-dialog-footer"></ng-content>
@@ -23,9 +37,10 @@ import { IconComponent } from '../icon/icon.component';
   imports: [IconComponent],
 })
 export class DialogComponent {
-  private dialogRef = inject(DialogRef);
+  private readonly dialogRef = inject(DialogRef);
 
   title = input('');
+  closable = input(true);
 
   handleCloseDialog() {
     this.dialogRef.close();

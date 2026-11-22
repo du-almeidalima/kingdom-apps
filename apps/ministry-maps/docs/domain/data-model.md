@@ -7,16 +7,19 @@ Everything an E2E author needs to build **realistic seeds** and write **backend 
 
 ## 1. Firestore collections
 
-| Collection                 | Doc id                                    | Written by                                          | Notes                                                                                |
-| -------------------------- | ----------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `congregations`            | auto-id (seed uses `seed-congregation`)   | `/congregation` screen (`name`, `cities`, `APP_ADMIN` create) | Holds `name`, `locatedOn`, `cities[]` + `settings`. Create restricted to `APP_ADMIN`. |
-| `users`                    | **=== Firebase Auth `uid`**               | sign-in (auto-create), Users screen                 | `congregation` is a `DocumentReference`.                                             |
-| `territories`              | auto-id (`doc(collection)`)               | Territories screen, Work page write-back            | Parent doc carries `recentHistory` + `lastVisit`.                                    |
-| `territories/{id}/history` | visit id (client-generated)               | Work page (complete/edit/undo visit)                | **Full** visit log, one doc per visit.                                               |
-| `designations`             | auto-id                                   | Assign page                                         | Embeds a **snapshot** of the assigned territories.                                   |
-| `designations_header`      | auto-id                                   | Assign page (lazy, on first designation of a cycle) | One `IN_PROGRESS` doc per congregation; closed by the Stop button or the daily cron. |
-| `designations_header/{id}/progress/summary` | fixed id `summary` | Assign and anonymous Work page | One denormalized progress document per header; independently TTL-deleted. |
-| `invitation_links`         | auto-id                                   | Users screen (invite dialog)                        | ⚠ note the **underscore** in the collection name.                                    |
+| Collection                                  | Doc id                                  | Written by                                                    | Notes                                                                                                                       |
+| ------------------------------------------- | --------------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `congregations`                             | auto-id (seed uses `seed-congregation`) | `/congregation` screen (`name`, `cities`, `APP_ADMIN` create) | Holds `name`, `locatedOn`, `cities[]` + `settings`. Create restricted to `APP_ADMIN`.                                       |
+| `users`                                     | **=== Firebase Auth `uid`**             | sign-in (auto-create), Users screen                           | `congregation` is a `DocumentReference`.                                                                                    |
+| `territories`                               | auto-id (`doc(collection)`)             | Territories screen, Work page write-back                      | Parent doc carries `recentHistory` + `lastVisit`.                                                                           |
+| `territories/{id}/history`                  | visit id (client-generated)             | Work page (complete/edit/undo visit)                          | **Full** visit log, one doc per visit.                                                                                      |
+| `designations`                              | auto-id                                 | Assign page                                                   | Embeds a **snapshot** of the assigned territories.                                                                          |
+| `designations_header`                       | auto-id                                 | Assign page (lazy, on first designation of a cycle)           | One `IN_PROGRESS` doc per congregation; closed by the Stop button or the daily cron.                                        |
+| `designations_header/{id}/progress/summary` | fixed id `summary`                      | Assign and anonymous Work page                                | One denormalized progress document per header; independently TTL-deleted.                                                   |
+| `notifications`                             | auto-id                                 | Notifications screens (`APP_ADMIN`)                           | App-wide broadcast, optionally targeted at `targetRoles` (null = all roles). Any signed-in user reads it; `status` is `ACTIVE` or `INACTIVE`. |
+| `notifications/{id}/acknowledgments`        | fixed id `summary`                      | Login queue acknowledgment flow                               | One aggregated `users` map per notification; read and deleted by `APP_ADMIN` only. Each `User` merges only their own entry. |
+| `users/{uid}/notifications`                 | notification id                         | Login queue, Profile "Notificações" history                   | The user's own acknowledged snapshot of each notification; `User` read/write only.                                          |
+| `invitation_links`                          | auto-id                                 | Users screen (invite dialog)                                  | ⚠ note the **underscore** in the collection name.                                                                           |
 
 The E2E layer re-declares these in `e2e/seed/collections.ts`
 (`db.collections.congregations | users | territories | designations | designations_header`, `db.historySubcollection === 'history'`; progress subcollection `progress`, document `summary`).
@@ -29,6 +32,9 @@ territories/{territoryId}/history/{visitId}
 designations/{designationId}     → congregationId: string, territories: DesignationTerritory[], designationHeaderId?: string
 designations_header/{headerId}   → congregationId: string (plain id, NOT a ref), status: 'IN_PROGRESS' | 'DONE'
 designations_header/{headerId}/progress/summary → per-designation totals + territory completion map; independent TTL
+notifications/{notificationId}   → title, content (Markdown), category, actionLabel, status, createdAt, targetRoles? (§2.9)
+notifications/{notificationId}/acknowledgments/summary → users: Record<userId, acknowledgment entry> (§2.9)
+users/{uid}/notifications/{notificationId} → acknowledged snapshot of the notification, read by the Profile history (§2.9)
 invitation_links/{linkId}        → congregation: DocumentReference on create, embedded object after update (§2.6)
 ```
 
@@ -105,14 +111,14 @@ Reading a user resolves the reference. If the congregation document is missing, 
 
 ### 2.5 `Congregation` / `CongregationSettings` — `src/models/congregation.ts`
 
-| Field                                         | Type       | Meaning / test relevance                                                                     |
-| --------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------- |
-| `id`                                          | `string`   |                                                                                              |
-| `name`                                        | `string`   | Shown on the profile card.                                                                   |
-| `locatedOn`                                   | `string`   | e.g. `'São Paulo, SP'`.                                                                      |
+| Field                                         | Type       | Meaning / test relevance                                                                    |
+| --------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------- |
+| `id`                                          | `string`   |                                                                                             |
+| `name`                                        | `string`   | Shown on the profile card.                                                                  |
+| `locatedOn`                                   | `string`   | e.g. `'São Paulo, SP'`.                                                                     |
 | `cities`                                      | `string[]` | Source of the city `<select>` options everywhere; renamed/added/deleted on `/congregation`. |
-| `settings.designationAccessExpiryDays`        | `number`   | Days added to "now" to compute `Designation.expiresAt`.                                      |
-| `settings.shouldDesignationBlockAfterExpired` | `boolean`  | When `true`, an expired `/work/:id` blocks its actions.                                      |
+| `settings.designationAccessExpiryDays`        | `number`   | Days added to "now" to compute `Designation.expiresAt`.                                     |
+| `settings.shouldDesignationBlockAfterExpired` | `boolean`  | When `true`, an expired `/work/:id` blocks its actions.                                     |
 
 ### 2.6 `InvitationLink` — `src/models/invitation-link.ts`
 
@@ -170,6 +176,16 @@ because Firestore does not cascade parent TTL deletion to subcollections.
 Assign creates or merge-registers designation totals. Anonymous `/work` completion and edit update one map key;
 undo deletes that key. The map shape allows concurrent visits to write separate field paths without reading the doc.
 
+### 2.9 `Notification` — `src/models/notification.ts`
+
+App-wide message broadcast by the `APP_ADMIN`; `content` is Markdown. `category` (`info` | `warning`) selects the header icon, uppercase label and accent (`features/notification/config/notification-category.config.ts`); `actionLabel` defaults to `Entendi`. `createdAt` is a Firestore `Timestamp` exposed as a `Date`.
+
+`targetRoles` narrows who sees a Notification: it holds exactly the roles the App Admin selected, and `null` means every role (an app-wide broadcast). `getActive(role)` applies this filter server-side, so each user downloads only the notifications aimed at their role. Targeting is a visibility filter, not a security boundary: any signed-in user may still read any notification document.
+
+The fixed document `notifications/{id}/acknowledgments/summary` (`id: 'summary'`, `notificationId`) keeps every acknowledging `User` in one map keyed by user id (`userId`, `name`, `congregationName`, `role`, `acknowledgedAt`). The parent document never embeds that list, so the admin receipt view costs one read and the login queue stays small (ADR-0001). A `User` writes only their own key of that map, in the same batch as their `users/{uid}/notifications/{notificationId}` snapshot, which backs the Profile history.
+
+The queue trigger lives in `NotificationQueueService`, not in the auth layer: an `effect()` watches the `UserStateService.user` transition and opens the queue once per session user id (a logout resets it). `AuthService` only sets the state — sign-in, the guard's session resolution, and the server refresh all funnel through `UserStateService.setUser`, so any of those paths triggers the queue while the refresh re-emission does not. Unit-test the transition by setting the user state and flushing effects with `TestBed.tick()`.
+
 ---
 
 ## 3. Enum wire values (get these wrong and seeds silently misbehave)
@@ -215,6 +231,10 @@ Assertions must compare against numbers: `expect(visit.visitOutcome).toBe(2)` (o
 | `ELDER`          | `Ancião`                                            |
 | `SUPERINTENDENT` | `Superintendente`                                   |
 | `PUBLISHER`      | `Publicador` (also the fallback for unknown values) |
+
+### 3.5 `NotificationCategoryEnum` and `NotificationStatusEnum` — string
+
+`NotificationCategoryEnum`: `'info'` | `'warning'`. `NotificationStatusEnum`: `'ACTIVE'` (pt-BR `Ativa`) | `'INACTIVE'` (pt-BR `Inativa`).
 
 ---
 
@@ -291,14 +311,14 @@ The alert badges (bible student / recently moved / unresolved "not answered") ar
 
 ### 4.6 Realtime vs one-shot reads
 
-| Read                                                      | API               | UI updates without reload?                                                              |
-| --------------------------------------------------------- | ----------------- | --------------------------------------------------------------------------------------- |
-| Territories list (`getAllByCongregation`)                 | `collectionData$` | **Yes** — live listener.                                                                |
-| Territories by city (`getAllByCongregationAndCities`)     | `collectionData$` | **Yes**.                                                                                |
-| Users list (`getAllByCongregation`)                       | `collectionData$` | **Yes**.                                                                                |
-| Designation (`getById`)                                   | `docData$`        | **Yes**.                                                                                |
-| Congregation (`getById`)                                  | `docData$`        | **Yes**.                                                                                |
-| Territory by id, `getAllInIds`, visit history, statistics | `getDocs`         | **No** — snapshot at call time.                                                         |
+| Read                                                      | API               | UI updates without reload?                                                                                                                        |
+| --------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Territories list (`getAllByCongregation`)                 | `collectionData$` | **Yes** — live listener.                                                                                                                          |
+| Territories by city (`getAllByCongregationAndCities`)     | `collectionData$` | **Yes**.                                                                                                                                          |
+| Users list (`getAllByCongregation`)                       | `collectionData$` | **Yes**.                                                                                                                                          |
+| Designation (`getById`)                                   | `docData$`        | **Yes**.                                                                                                                                          |
+| Congregation (`getById`)                                  | `docData$`        | **Yes**.                                                                                                                                          |
+| Territory by id, `getAllInIds`, visit history, statistics | `getDocs`         | **No** — snapshot at call time.                                                                                                                   |
 | `UserStateService` (signal-backed)                        | in-memory         | Updated immediately on `/congregation` and `/profile` mutations via `setUser(...)`; external edits made in another browser session need a reload. |
 
 So: a background Admin-SDK write is expected to appear on `/territories` **without** a reload, but the statistics page and the profile/configuration user state require a navigation or reload.
@@ -380,7 +400,7 @@ Every seeded user gets an Auth emulator account with `DEFAULT_PASSWORD = 'test-p
 | `buildDesignation`          | `createdAt 2024-02-01`, `expiresAt 2024-02-08` (**past** — override for active designations), one embedded territory, `settings.shouldDesignationBlockAfterExpired: true`                                               |
 | `buildDesignationTerritory` | `Av. Paulista, 1000 - Bela Vista`, `note: ''`, `icon MAN`, `status PENDING`, **no `history`**                                                                                                                           |
 | `buildDesignationsHeader`   | `status IN_PROGRESS`, `createdAt 2026-09-01T12:00Z`, `congregationId: ''` (**always override**) — no `closedAt`/`closedBy` unless you pass them with a `DONE` status                                                    |
-| `buildDesignationsProgress` | Empty maps, fixed `id: summary`; callers must override owning `headerId` and `congregationId`                                                                                                                         |
+| `buildDesignationsProgress` | Empty maps, fixed `id: summary`; callers must override owning `headerId` and `congregationId`                                                                                                                           |
 
 The seeder derives the parent territory's `lastVisit` (newest history date, else `null`) and
 `recentHistory` (newest 5, **descending**) from `history`. Note the ordering difference versus the app's

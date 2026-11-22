@@ -60,4 +60,26 @@
       </ul>
     </lib-card-body>
   </lib-card>
+  <!-- Notifications -->
+  <lib-card
+    *libAuthorize="NOTIFICATION_ALLOWED_ROLES"
+    class="mt-5"
+    data-testid="home-card-notifications"
+    [customStyle]="{ padding: 0 }"
+  >
+    <lib-card-header
+      icon="speech-bubble-26"
+      title="Notificações"
+      subtitle="Comunicados enviados a todos os usuários"
+    ></lib-card-header>
+    <lib-card-body>
+      <ul class="card-body__link-list">
+        <li class="card-body__link-list-item">
+          <a class="card-body__link" data-testid="home-notifications-link" routerLink="/{{ FeatureRoutes.NOTIFICATIONS }}">
+            Notificações
+          </a>
+        </li>
+      </ul>
+    </lib-card-body>
+  </lib-card>
 </div>

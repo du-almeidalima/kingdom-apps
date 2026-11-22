@@ -5,6 +5,7 @@ export * from './models/territory.mock';
 export * from './models/designation.mock';
 export * from './models/designations-header.mock';
 export * from './models/designations-progress.mock';
+export * from './models/notification.mock';
 export * from './models/invitation-link.mock';
 export * from './models/auth.mock';
 

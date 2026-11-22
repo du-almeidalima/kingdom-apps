@@ -27,6 +27,10 @@
         padding-left: 2rem;
       }
 
+      li {
+        margin: 0.6rem 0;
+      }
+
       a {
         color: var(--kui-color-link, #{variables.$link});
 

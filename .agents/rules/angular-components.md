@@ -72,7 +72,9 @@ open(): void {
 Dialog component conventions:
 
 - Get data/ref with `inject(DIALOG_DATA)` / `inject(DialogRef)` (older dialogs use constructor `@Inject(DIALOG_DATA)` — don't copy).
-- Wrap the body in common-ui shells: `<lib-dialog [title]="…">` + `<lib-dialog-footer>`.
+- Wrap the body in common-ui shells:
+  - `<lib-responsive-dialog>` (+ `<lib-dialog-footer>`) when a modal should render as a centered `<lib-dialog>` on desktop (`>= 768px`) and as a slide-up `<lib-bottom-sheet>` on mobile (`< 768px`). Supports `[title]`, `[closable]`, and a custom `[dialogHeader]` slot.
+  - `<lib-dialog [title]="…">` or `<lib-bottom-sheet [title]="…">` directly only when locking to one presentation across all viewports.
 - Close via the `libDialogClose` attribute on a `lib-button`.
 - `dialogRef.disableClose = true` while submitting; `isSubmitting` signal + inline `@if` spinner on the save button.
 - Confirmations reuse `ConfirmDialogComponent` (+ `ConfirmDialogData`) from common-ui — no bespoke confirm dialogs.
@@ -125,5 +127,5 @@ ng-mocks (`MockBuilder`/`MockRender`/`MockInstance`), never TestBed boilerplate 
 - [ ] `@if/@for/@let` with inline `track` — no `*ngIf`/`*ngFor`
 - [ ] `input()/output()/model()` signal APIs; `toSignal` for Observable state
 - [ ] `data-testid` on queryable elements
-- [ ] Dialogs: `lib-dialog`/`lib-dialog-footer`/`libDialogClose`; reuse `ConfirmDialogComponent`
+- [ ] Dialogs: `lib-responsive-dialog` (or `lib-dialog`)/`lib-dialog-footer`/`libDialogClose`; reuse `ConfirmDialogComponent`
 - [ ] One-folder-per-component, files named after the folder, kebab-case

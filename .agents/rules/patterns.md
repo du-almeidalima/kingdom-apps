@@ -9,6 +9,14 @@ description: Common patterns and utilities reference.
 - **Directives (`libs/common-ui/src/lib/directives/`):** generic UI directives (`authorize`, `dialog-close`, `only-numbers`).
 - **Business Objects (`features/<feature>/bo/`):** feature-scoped domain orchestration services (`*.bo.ts`; see `.agents/rules/angular-services.md`).
 
+## Responsive Component Switching (`BreakpointObserver` + `<ng-template>`)
+
+Keep viewport-specific primitives single-purpose (`lib-bottom-sheet` is strictly mobile; `lib-dialog` is strictly a centered dialog). When a surface should render different components by viewport:
+
+- Encapsulate the switch in a shared wrapper component in `common-ui` (reference: `ResponsiveDialogComponent` / `<lib-responsive-dialog>`).
+- Observe the breakpoint with Angular CDK `BreakpointObserver` (`@angular/cdk/layout`) converted via `toSignal(...)` (aligned with `styles/abstract/_breakpoints.scss`, e.g. `(min-width: 768px)`).
+- Capture projected slots (`<ng-content>`) once inside `<ng-template>` blocks and project them into the active `@if (isDesktop())` / `@else` branch via `[ngTemplateOutlet]` + `ngProjectAs` so consumers write their content once without duplicating templates or breakpoint logic.
+
 ## Folder Structure Pattern
 
 Canonical layouts and naming conventions live in the rule files:

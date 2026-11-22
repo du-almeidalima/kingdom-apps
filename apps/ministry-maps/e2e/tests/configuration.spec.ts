@@ -173,6 +173,7 @@ test.describe('Congregation Administration (/congregation)', () => {
 
     // São Paulo has seed-territory-1 (positionIndex 0) and seed-territory-3 (positionIndex 2).
     // Osasco has seed-territory-2 (positionIndex 1), so next positionIndex in Osasco is 2.
+    await expect(configPage.rowByName('São Paulo')).toContainText('2 territórios');
     await configPage.openRemoveCityDialog('São Paulo');
     await expect(configPage.removeCityDialog).toBeVisible();
     await expect(configPage.removeCityTargetSelect).toHaveValue('Osasco');
@@ -208,6 +209,7 @@ test.describe('Congregation Administration (/congregation)', () => {
     const toast = new ToastPage(authenticatedPage);
     await configPage.goto();
 
+    await expect(configPage.rowByName('São Paulo')).toContainText('2 territórios');
     await configPage.openRemoveCityDialog('São Paulo');
     await expect(configPage.removeCityDialog).toBeVisible();
     await expect(configPage.summary).toContainText('2 territórios');

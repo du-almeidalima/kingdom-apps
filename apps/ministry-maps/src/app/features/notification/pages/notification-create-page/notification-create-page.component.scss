@@ -1,0 +1,11 @@
+:host {
+  display: block;
+}
+
+.notification-markdown {
+  field-sizing: content;
+  height: auto;
+  min-height: 3lh; /* Minimum 3 lines high */
+  max-height: 20lh; /* Stops growing and scrolls after 10 lines */
+  resize: vertical;
+}

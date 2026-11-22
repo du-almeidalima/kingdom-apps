@@ -449,4 +449,143 @@ test.describe('Firestore Security Rules', () => {
     const updatedCong = await db.getDoc(db.collections.congregations, seed.ids.congregation);
     expect(updatedCong?.['name']).toBe('Congregação Atualizada');
   });
+
+  test('UC-RULES-17 — Notifications: signed-in users read; only APP_ADMIN writes and reads or deletes acknowledgments', async ({
+    db,
+    seed,
+  }) => {
+    const notificationsCollection = db.firestore.collection('notifications');
+    await notificationsCollection.doc('notif-1').set({
+      id: 'notif-1',
+      title: 'Termos atualizados',
+      content: '## Termos',
+      category: 'info',
+      actionLabel: 'Entendi',
+      status: 'ACTIVE',
+      createdAt: new Date(),
+    });
+    await notificationsCollection.doc('notif-1').collection('acknowledgments').doc('summary').set({
+      id: 'summary',
+      notificationId: 'notif-1',
+      users: {},
+    });
+
+    const publisherToken = await mintIdToken(seed.ids.publisherUsers[0]);
+    const adminToken = await mintIdToken(seed.ids.adminUser);
+    const appAdminToken = await mintIdToken(seed.ids.appAdminUser);
+
+    // Anonymous read of a notification -> 403; any signed-in role reads it -> 200
+    expect(await readDocAs('notifications/notif-1')).toBe(403);
+    expect(await readDocAs('notifications/notif-1', publisherToken)).toBe(200);
+
+    // Only APP_ADMIN creates, updates and deletes notifications
+    expect(await createDocAs('notifications/notif-2', { title: 'Nova' }, adminToken)).toBe(403);
+    expect(await updateDocAs('notifications/notif-1', { status: 'INACTIVE' }, adminToken)).toBe(403);
+    expect(await deleteDocAs('notifications/notif-1', publisherToken)).toBe(403);
+    expect(await createDocAs('notifications/notif-2', { title: 'Nova' }, appAdminToken)).toBe(200);
+    expect(await updateDocAs('notifications/notif-1', { status: 'INACTIVE' }, appAdminToken)).toBe(200);
+
+    // Acknowledgments summary: read and delete are APP_ADMIN only
+    expect(await readDocAs('notifications/notif-1/acknowledgments/summary', adminToken)).toBe(403);
+    expect(await readDocAs('notifications/notif-1/acknowledgments/summary', appAdminToken)).toBe(200);
+    expect(await deleteDocAs('notifications/notif-1/acknowledgments/summary', adminToken)).toBe(403);
+    expect(await deleteDocAs('notifications/notif-1/acknowledgments/summary', appAdminToken)).toBe(200);
+    expect(await deleteDocAs('notifications/notif-1', appAdminToken)).toBe(200);
+  });
+
+  test('UC-RULES-18 — Acknowledgments: a signed-in user writes only their own summary entry and history', async ({
+    db,
+    seed,
+  }) => {
+    const publisherUid = seed.ids.publisherUsers[0];
+    const adminUid = seed.ids.adminUser;
+    const publisherToken = await mintIdToken(publisherUid);
+    const adminToken = await mintIdToken(adminUid);
+    const entry = (userId: string) => ({
+      userId,
+      name: 'Pessoa',
+      congregationName: 'Central',
+      role: RoleEnum.PUBLISHER,
+      acknowledgedAt: new Date(),
+    });
+    const summary = 'notifications/notif-ack/acknowledgments/summary';
+    const adminEntry = entry(adminUid);
+    const publisherEntry = entry(publisherUid);
+
+    await db.firestore
+      .collection('notifications')
+      .doc('notif-ack')
+      .collection('acknowledgments')
+      .doc('summary')
+      .set({
+        id: 'summary',
+        notificationId: 'notif-ack',
+        users: { [adminUid]: adminEntry },
+      });
+
+    // Merging the publisher's own entry is allowed; the admin's existing entry must stay as it is
+    expect(
+      await updateDocAs(summary, { users: { [adminUid]: adminEntry, [publisherUid]: publisherEntry } }, publisherToken),
+    ).toBe(200);
+    expect(
+      await updateDocAs(summary, { users: { [adminUid]: { ...adminEntry, name: 'Forjado' } } }, publisherToken),
+    ).toBe(403);
+    expect(
+      await updateDocAs(
+        summary,
+        { users: { [adminUid]: adminEntry, [publisherUid]: publisherEntry, other: entry('other') } },
+        publisherToken,
+      ),
+    ).toBe(403);
+    expect(
+      await updateDocAs(
+        summary,
+        { users: { [adminUid]: adminEntry, [publisherUid]: entry(adminUid) } },
+        publisherToken,
+      ),
+    ).toBe(403);
+
+    // Only APP_ADMIN reads the summary
+    expect(await readDocAs(summary, publisherToken)).toBe(403);
+    expect(await readDocAs(summary, adminToken)).toBe(403);
+
+    // A first acknowledgment creates the summary with the creator's key only, under the fixed doc id
+    expect(
+      await createDocAs(
+        'notifications/notif-new/acknowledgments/summary',
+        { id: 'summary', notificationId: 'notif-new', users: { [publisherUid]: entry(publisherUid) } },
+        publisherToken,
+      ),
+    ).toBe(200);
+    expect(
+      await createDocAs(
+        'notifications/notif-other/acknowledgments/summary',
+        { id: 'summary', notificationId: 'notif-other', users: { [adminUid]: entry(adminUid) } },
+        publisherToken,
+      ),
+    ).toBe(403);
+    expect(
+      await createDocAs(
+        'notifications/notif-new/acknowledgments/another',
+        { users: { [publisherUid]: entry(publisherUid) } },
+        publisherToken,
+      ),
+    ).toBe(403);
+
+    // A user's acknowledged-notification history is readable and writable by that user alone
+    const snapshot = {
+      id: 'notif-ack',
+      notificationId: 'notif-ack',
+      title: 'Termos atualizados',
+      content: '## Termos',
+      category: 'info',
+      actionLabel: 'Entendi',
+      acknowledgedAt: new Date(),
+    };
+    const ownHistory = `users/${publisherUid}/notifications/notif-ack`;
+    expect(await createDocAs(ownHistory, snapshot, publisherToken)).toBe(200);
+    expect(await readDocAs(ownHistory, publisherToken)).toBe(200);
+    expect(await readDocAs(ownHistory, adminToken)).toBe(403);
+    expect(await createDocAs(`users/${adminUid}/notifications/notif-ack`, snapshot, publisherToken)).toBe(403);
+  });
 });

@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/features/auth/guards/auth.guard';
 import { USERS_ALLOWED_ROLES } from './features/congregation/config/users-roles.config';
 import { HOME_ALLOWED_ROLES } from './features/home/config/home-roles.config';
+import { NOTIFICATION_ALLOWED_ROLES } from './features/notification/config/notification-roles.config';
 import { TERRITORY_ALLOWED_ROLES } from './features/territory/config/territory-roles.config';
 import { AUTH_ROUTES } from './core/features/auth/auth-routes';
 
@@ -12,6 +13,7 @@ export enum FeatureRoutesEnum {
   WORK = 'work',
   PROFILE = 'profile',
   CONGREGATION = 'congregation',
+  NOTIFICATIONS = 'notifications',
 }
 
 export const APP_ROUTES: Routes = [
@@ -44,6 +46,12 @@ export const APP_ROUTES: Routes = [
     loadChildren: () => import('./features/congregation/congregation.routes').then((m) => m.CONGREGATION_ROUTES),
     canActivateChild: [authGuard],
     data: { roles: USERS_ALLOWED_ROLES },
+  },
+  {
+    path: FeatureRoutesEnum.NOTIFICATIONS,
+    loadChildren: () => import('./features/notification/notification.routes').then((m) => m.NOTIFICATION_ROUTES),
+    canActivateChild: [authGuard],
+    data: { roles: NOTIFICATION_ALLOWED_ROLES },
   },
   {
     path: '',

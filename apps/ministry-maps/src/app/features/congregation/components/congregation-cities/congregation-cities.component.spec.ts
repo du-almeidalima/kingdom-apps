@@ -12,7 +12,7 @@ describe('CongregationCitiesComponent', () => {
       .keep(ButtonComponent)
       .keep(IconButtonComponent)
       .keep(IconComponent)
-      .keep(InputComponent)
+      .keep(InputComponent),
   );
 
   it('renders city rows with territory counts', () => {
@@ -79,6 +79,23 @@ describe('CongregationCitiesComponent', () => {
       oldName: 'City 1',
       newName: 'City 1 Renomeada',
     });
+  });
+
+  it('keeps an inline rename open when the same cities are emitted again, and cancels it when they change', () => {
+    const fixture = MockRender(CongregationCitiesComponent, {
+      cities: ['City 1', 'City 2'],
+      disabled: false,
+    });
+    const comp = fixture.point.componentInstance;
+
+    ngMocks.click(ngMocks.findAll(fixture, '[data-testid="config-edit-city"]')[0]);
+    fixture.componentRef.setInput('cities', ['City 1', 'City 2']);
+    fixture.detectChanges();
+    expect(comp.editingCityIndex()).toBe(0);
+
+    fixture.componentRef.setInput('cities', ['City 1', 'City 2', 'City 3']);
+    fixture.detectChanges();
+    expect(comp.editingCityIndex()).toBeNull();
   });
 
   it('renders icon-only actions with accessible labels', () => {

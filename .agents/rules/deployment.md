@@ -22,6 +22,7 @@ description: Builds, budgets, the CI pipeline, and Firebase deployment.
 
 - Hosting: `npx nx deploy ministry-maps` (`nx:run-commands` → `firebase deploy --only hosting:prod` via firebase-tools; depends on the `build` target). Channels `prod` and `beta`, both serving `dist/apps/ministry-maps` — SPA rewrite, immutable 1y cache for hashed js/css, no-cache for `ngsw-worker.js`/`ngsw.json`.
 - Functions: `npm --prefix functions/ministry-maps run deploy`. Order: **functions first, then Firestore rules**.
+- Firestore indexes: after any `firestore.indexes.json` change, run `npx firebase deploy --only firestore:indexes`. The emulator does **not** enforce index requirements, so e2e green does not prove a prod query has its index.
 - Normal flow is hands-off: merges to `main` deploy via CI.
 
 ## Emulator & seed workflow (dev)

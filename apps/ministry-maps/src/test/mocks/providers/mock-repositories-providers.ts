@@ -14,6 +14,8 @@ import { InvitationLinkRepository } from '../../../app/repositories/invitation-l
 import { AuthRepositoryMock } from '../models/auth.mock';
 import { AuthRepository } from '../../../app/repositories/auth.repository';
 import { InvitationLinkRepositoryMock } from '../models/invitation-link.mock';
+import { NotificationRepositoryMock } from '../models/notification.mock';
+import { NotificationRepository } from '../../../app/repositories/notification.repository';
 
 export const MOCK_REPOSITORIES_PROVIDERS = [
   {
@@ -51,5 +53,9 @@ export const MOCK_REPOSITORIES_PROVIDERS = [
   {
     provide: AuthRepository,
     useClass: AuthRepositoryMock,
+  },
+  {
+    provide: NotificationRepository,
+    useClass: NotificationRepositoryMock,
   },
 ];

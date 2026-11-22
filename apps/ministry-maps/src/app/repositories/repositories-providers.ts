@@ -14,6 +14,8 @@ import { InvitationLinkRepository } from './invitation-link.repository';
 import { FirebaseInvitationLinkDataSourceService } from './firebase/firebase-invitation-link-datasource.service';
 import { AuthRepository } from './auth.repository';
 import { FirebaseAuthDatasourceService } from './firebase/firebase-auth-datasource.service';
+import { NotificationRepository } from './notification.repository';
+import { FirebaseNotificationDatasourceService } from './firebase/firebase-notification-datasource.service';
 
 export const REPOSITORIES_PROVIDERS = [
   {
@@ -47,5 +49,9 @@ export const REPOSITORIES_PROVIDERS = [
   {
     provide: AuthRepository,
     useClass: FirebaseAuthDatasourceService,
+  },
+  {
+    provide: NotificationRepository,
+    useClass: FirebaseNotificationDatasourceService,
   },
 ];

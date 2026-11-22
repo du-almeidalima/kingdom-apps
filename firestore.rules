@@ -40,6 +40,26 @@ service cloud.firestore {
       allow update, delete: if request.auth != null;
     }
 
+    // App-wide notifications: every signed-in user reads them; only APP_ADMIN manages them.
+    // The acknowledgments summary is readable and deletable by APP_ADMIN only; a signed-in user may
+    // only write their own `users.{uid}` entry, touching no other key.
+    match /notifications/{notificationId} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if callerRoleIn(['APP_ADMIN']);
+
+      match /acknowledgments/{docId} {
+        allow read, delete: if callerRoleIn(['APP_ADMIN']);
+        allow create: if request.auth != null
+          && docId == 'summary'
+          && request.resource.data.users.keys().hasOnly([request.auth.uid])
+          && request.resource.data.users[request.auth.uid].userId == request.auth.uid;
+        allow update: if request.auth != null
+          && docId == 'summary'
+          && request.resource.data.users.diff(resource.data.users).affectedKeys().hasOnly([request.auth.uid])
+          && request.resource.data.users[request.auth.uid].userId == request.auth.uid;
+      }
+    }
+
     // Logs: writable by anyone (client logging), readable by APP_ADMIN only.
     match /logs/{document=**} {
       allow read: if callerRoleIn(['APP_ADMIN']);
@@ -80,6 +100,11 @@ service cloud.firestore {
           && sameCongregationAsCaller(resource.data)
           && !isProtectedRole(resource.data.role)
         ) || callerRoleIn(['APP_ADMIN']);
+
+      // Acknowledged-notification history: each user's own snapshots only.
+      match /notifications/{notificationId} {
+        allow read, write: if isSelf(userId);
+      }
     }
 
     // `designations_header` (resumable-assignment cycle headers) is internal congregational
@@ -113,14 +138,16 @@ service cloud.firestore {
       }
     }
 
-    // Catch-all for every other collection. `logs`, `users`, `designations_header`, and `congregations` are excluded
-    // so the dedicated rules above stay their only granters (rules union grants, they never subtract).
+    // Catch-all for every other collection. `logs`, `users`, `designations_header`, `congregations`, and
+    // `notifications` are excluded so the dedicated rules above stay their only granters (rules union grants,
+    // they never subtract).
     match /{collectionId}/{document=**} {
       allow read, write: if request.auth != null
         && collectionId != 'logs'
         && collectionId != 'users'
         && collectionId != 'designations_header'
-        && collectionId != 'congregations';
+        && collectionId != 'congregations'
+        && collectionId != 'notifications';
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────────────

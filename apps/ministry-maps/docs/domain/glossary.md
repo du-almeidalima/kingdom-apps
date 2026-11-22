@@ -40,6 +40,12 @@ Shared components, so these strings appear on many screens.
 | `Transferir para outra cidade` / `Excluir territórios`          | `Remover Cidade` dialog choice tiles    | resolution choices; a warning summarizes the effect |
 | `Transferir territórios` / `Excluir cidade e territórios`       | `Remover Cidade` dialog confirm button | label and primary/danger style follow the choice |
 | `Contatados` / `Ninguém atendeu` / `Mudaram` / `Não visitar` / `Revisita` | Designations history outcome labels | Short labels for visit outcomes. |
+| `Notificações`                                          | `/home` card title and link; `/notifications` heading | `APP_ADMIN` only → `/notifications` |
+| `Nova Notificação`                                      | `/notifications` action; `/notifications/new` heading | `APP_ADMIN` only                    |
+| `Pré-visualizar`                                        | `/notifications/new` and detail screen buttons | opens the responsive notification dialog              |
+| `Ativa` / `Inativa`                                     | notification list and detail status badge | `ACTIVE` / `INACTIVE`                               |
+| `Encerrar` / `Ativar`                                   | detail screen status toggle button      | `Encerrar` while `Ativa`, `Ativar` while `Inativa`  |
+| `Excluir Notificação`                                   | detail screen confirm dialog title      | removes the notification and its acknowledgments    |
 | `Criar Link de Convite`                                         | `/congregation/users` FAB `title`       | `ADMIN` only                                   |
 
 ## 3. Visit dialog labels (`Concluir Visita` / `Editar Visita`)

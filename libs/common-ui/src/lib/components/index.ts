@@ -27,5 +27,6 @@ export * from './divider/divider.component';
 export * from './chip';
 export * from './markdown/markdown.component';
 export * from './bottom-sheet/bottom-sheet.component';
+export * from './responsive-dialog/responsive-dialog.component';
 export * from './multi-select-chips/multi-select-chips.component';
 export * from './expansion-panel/expansion-panel.component';

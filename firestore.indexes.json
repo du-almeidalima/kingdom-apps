@@ -61,6 +61,15 @@
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ],
       "density": "SPARSE_ALL"
+    },
+    {
+      "collectionGroup": "notifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "targetRoles", "arrayConfig": "CONTAINS" }
+      ],
+      "density": "SPARSE_ALL"
     }
   ],
   "fieldOverrides": [

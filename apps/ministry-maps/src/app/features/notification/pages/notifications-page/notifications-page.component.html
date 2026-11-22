@@ -1,0 +1,44 @@
+<div class="container">
+  <div class="flex items-center justify-between gap-4 mb-8">
+    <h2 class="t-headline2" data-testid="notifications-heading">Notificações</h2>
+    <button
+      lib-button
+      btnType="primary"
+      type="button"
+      data-testid="notifications-new-button"
+      [routerLink]="['/', FeatureRoutes.NOTIFICATIONS, NotificationRoutes.NEW]"
+    >
+      Nova Notificação
+    </button>
+  </div>
+
+  @if (notifications(); as items) {
+    @if (items.length > 0) {
+      <ul class="flex flex-col gap-4 m-0 p-0 list-none" data-testid="notifications-list">
+        @for (notification of items; track notification.id) {
+          <li>
+            <a
+              class="notification-item"
+              [routerLink]="['/', FeatureRoutes.NOTIFICATIONS, notification.id]"
+              data-testid="notification-list-item"
+            >
+              <kingdom-apps-notification-list-item
+                [category]="notification.category"
+                [title]="notification.title"
+                [date]="notification.createdAt"
+              >
+                <kingdom-apps-notification-status-badge [status]="notification.status" />
+              </kingdom-apps-notification-list-item>
+            </a>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="t-body2" data-testid="notifications-empty">Nenhuma notificação publicada.</p>
+    }
+  } @else {
+    <div class="flex items-center justify-center py-12" data-testid="notifications-loading">
+      <lib-spinner height="4rem" width="4rem" />
+    </div>
+  }
+</div>

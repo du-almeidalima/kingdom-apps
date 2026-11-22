@@ -1,0 +1,80 @@
+@use 'libs/common-ui/src/lib/styles/abstract/breakpoints' as bp;
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+
+:host {
+  display: block;
+}
+
+.notification-header {
+  --notification-accent: var(--kui-color-info, #{variables.$blue-600});
+  --notification-surface: var(--kui-color-info-surface, #{variables.$blue-100});
+
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  min-width: 0;
+
+  &--warning {
+    --notification-accent: var(--kui-color-warning, #{variables.$amber-600});
+    --notification-surface: var(--kui-color-warning-surface, #{variables.$amber-100});
+  }
+
+  &__badge {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 4.4rem;
+    height: 4.4rem;
+    border-radius: 1.2rem;
+    background-color: var(--notification-surface);
+    color: var(--notification-accent);
+  }
+
+  &__icon {
+    width: 2.4rem;
+    height: 2.4rem;
+  }
+
+  &__text {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  &__category {
+    margin: 0;
+    color: var(--notification-accent);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+
+    @include bp.tablet-up {
+      color: var(--kui-color-on-inverse, #{variables.$white-300});
+      opacity: 0.85;
+    }
+  }
+
+  &__title {
+    margin: 0.2rem 0 0;
+    color: inherit;
+    font-weight: 600;
+    line-height: 1.2;
+    overflow-wrap: break-word;
+  }
+}
+
+.notification-dialog__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  padding: 0.4rem 1.2rem;
+}
+
+.notification-dialog__action {
+  margin-left: auto;
+}
+
+.notification-dialog__sentinel {
+  height: 1px;
+}
