@@ -35,4 +35,5 @@ export type Icons =
   | 'warning-lined'
   | 'download-20'
   | 'filter-down-lined'
-  | 'stop-circle-lined';
+  | 'stop-circle-lined'
+  | 'external-link-lined';

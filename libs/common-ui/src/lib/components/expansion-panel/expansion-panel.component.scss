@@ -1,0 +1,59 @@
+@use '../../styles/abstract/variables';
+
+:host {
+  display: block;
+}
+
+.expansion-panel {
+  &__toggle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.2rem 1.4rem;
+    color: var(--kui-color-text, #{variables.$text});
+    list-style: none;
+    cursor: pointer;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
+
+  &__chevron {
+    width: 0.55rem;
+    height: 0.55rem;
+    flex-shrink: 0;
+    border-top: 2px solid currentColor;
+    border-right: 2px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform 180ms ease;
+  }
+
+  &[open] &__chevron {
+    transform: rotate(135deg);
+  }
+
+  &::details-content {
+    interpolate-size: allow-keywords;
+    contain: layout;
+    overflow: clip;
+    block-size: 0;
+    opacity: 0;
+    transition:
+      block-size 220ms cubic-bezier(0.2, 0, 0, 1),
+      opacity 200ms ease,
+      content-visibility 220ms allow-discrete;
+  }
+
+  &[open]::details-content {
+    block-size: auto;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .expansion-panel__chevron,
+  .expansion-panel::details-content {
+    transition: none;
+  }
+}
