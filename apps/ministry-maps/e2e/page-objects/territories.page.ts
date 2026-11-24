@@ -10,6 +10,7 @@ import { expect, Locator, Page } from '@playwright/test';
  */
 export class TerritoriesPage {
   readonly heading: Locator;
+  readonly loading: Locator;
   readonly list: Locator;
   readonly territoryItems: Locator;
   readonly cityFilter: Locator;
@@ -20,6 +21,7 @@ export class TerritoriesPage {
 
   constructor(private readonly page: Page) {
     this.heading = page.getByTestId('territories-heading');
+    this.loading = page.getByTestId('territories-loading');
     this.list = page.getByTestId('territories-list');
     this.territoryItems = page.getByTestId('territory-list-item');
     this.cityFilter = page.getByTestId('territories-city-filter');

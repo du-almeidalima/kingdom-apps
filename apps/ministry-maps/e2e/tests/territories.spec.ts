@@ -99,6 +99,7 @@ test.describe('Territories page — list scope and filters (WP-13)', () => {
     const territoriesPage = new TerritoriesPage(authenticatedPage);
     await territoriesPage.goto();
 
+    await expect(territoriesPage.cityFilter).toBeVisible();
     // Options in order: cities (in array order) then `Todas`.
     const options = await territoriesPage.cityOptions();
     expect(options).toEqual(['São Paulo', 'Osasco', 'Todas']);
@@ -108,6 +109,11 @@ test.describe('Territories page — list scope and filters (WP-13)', () => {
     await expect(territoriesPage.territoryItems.nth(0)).toContainText('Rua das Acácias, 45 - Pinheiros');
     await expect(territoriesPage.territoryItems.nth(1)).toContainText('Rua Harmonia, 300 - Vila Madalena');
 
+    // Switching to Osasco updates the list.
+    await territoriesPage.selectCity('Osasco');
+    await expect(territoriesPage.territoryItems).toHaveCount(1);
+    await expect(territoriesPage.territoryByAddress('Av. dos Autonomistas, 1200 - Centro')).toBeVisible();
+
     // "Todas" sorts alphabetically by city → Osasco's single territory renders first.
     await territoriesPage.showAllCities();
     await expect(territoriesPage.territoryItems).toHaveCount(3);
@@ -115,6 +121,19 @@ test.describe('Territories page — list scope and filters (WP-13)', () => {
 
     const cong = await db.getDoc(db.collections.congregations, 'seed-congregation');
     expect(cong?.['cities']).toEqual(['São Paulo', 'Osasco']);
+  });
+
+  test('UC-TERR-02b — pre-selects detected city from sessionStorage cache instead of first city', async ({
+    authenticatedPage,
+  }) => {
+    await authenticatedPage.evaluate(() => sessionStorage.setItem('ministry-maps:detected-city', 'osasco'));
+
+    const territoriesPage = new TerritoriesPage(authenticatedPage);
+    await territoriesPage.goto();
+
+    await expect(territoriesPage.cityFilter).toHaveValue('Osasco');
+    await expect(territoriesPage.territoryItems).toHaveCount(1);
+    await expect(territoriesPage.territoryByAddress('Av. dos Autonomistas, 1200 - Centro')).toBeVisible();
   });
 
   test('UC-TERR-03 — empty city yields zero rows', async ({ authenticatedPage, seed, db }) => {
@@ -135,7 +154,7 @@ test.describe('Territories page — list scope and filters (WP-13)', () => {
     expect(await db.queryWhere(db.collections.territories, 'city', '==', 'Guarulhos')).toHaveLength(0);
   });
 
-  test('UC-TERR-04 — empty congregation (cities: []) collapses the filter (⚠ defect)', async ({
+  test('UC-TERR-04 — empty congregation (cities: []) falls back to "Todas"', async ({
     seed,
     signInAsUser,
     db,
@@ -153,13 +172,13 @@ test.describe('Territories page — list scope and filters (WP-13)', () => {
     const territoriesPage = new TerritoriesPage(page);
     await page.goto('/territories');
 
-    // ⚠ Today's reality: `filteredTerritories$` errors inside the `map()` of
-    // `territoriesFilterPipe` (`undefined.toLowerCase()`), which aborts rendering of the
-    // whole page content — the heading, the city `<select>` AND the list are all absent
-    // (the router outlet renders an empty `<main>`).
-    await expect(territoriesPage.heading).toHaveCount(0);
-    await expect(territoriesPage.cityFilter).toHaveCount(0);
-    await expect(territoriesPage.list).toHaveCount(0);
+    // CityLocatorService falls back to ALL_OPTION ('ALL'), so the page renders gracefully.
+    await expect(territoriesPage.heading).toBeVisible();
+    await expect(territoriesPage.cityFilter).toBeVisible();
+    expect(await territoriesPage.cityOptions()).toEqual(['Todas']);
+    await expect(territoriesPage.cityFilter).toHaveValue('ALL');
+    await expect(territoriesPage.list).toBeVisible();
+    await expect(territoriesPage.territoryItems).toHaveCount(0);
 
     const cong = await db.getDoc(db.collections.congregations, congregation.id);
     expect(cong?.['cities']).toEqual([]);

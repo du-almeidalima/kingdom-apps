@@ -15,12 +15,12 @@ This document describes the behavioural use cases for the `/territories/assign` 
 - **Route:** `/territories/assign`
 - **Preconditions (seed):** default baseline (`seed-territory-1`/`-3` São Paulo `positionIndex 0`/`2`, `seed-territory-2` Osasco)
 - **Steps:** 1. sign in as admin → 2. open `/territories/assign`
-- **Expected UI:** heading `Designar Território` (singular, verbatim as written); a native `<select name="Cidade">` (no visible `<label>`, `lib-select` is a bare attribute directive) pre-selected to the congregation's first city, `São Paulo`; a `kingdom-apps-territory-checkbox` row per territory of that city, ordered by `positionIndex` ascending (`Rua das Acácias...` index 0 above `Rua Harmonia...` index 2); the bottom dock (`kingdom-apps-assign-territories-dock`, `data-testid="assign-dock"`) renders with a counter badge reading `0`, and its submit button (`title="Enviar Designação"`, `data-testid="assign-dock-submit-button"`) renders with a paper-plane icon and is `disabled` because `selectedTerritoriesModel.size === 0`
+- **Expected UI:** heading `Designar Território` (singular, verbatim as written); `<kingdom-apps-city-select>` (`data-testid="assign-city-filter"`) pre-selected to the resolved city (via `CityLocatorService` or `São Paulo` as fallback) and disabled while loading; while territories or city resolution are in-flight, a `<lib-spinner>` (`data-testid="assign-loading"`) is displayed; once loaded, a `kingdom-apps-territory-checkbox` row per territory of that city, ordered by `positionIndex` ascending (`Rua das Acácias...` index 0 above `Rua Harmonia...` index 2); the bottom dock (`kingdom-apps-assign-territories-dock`, `data-testid="assign-dock"`) renders with a counter badge reading `0`, and its submit button (`title="Enviar Designação"`, `data-testid="assign-dock-submit-button"`) renders with a paper-plane icon and is `disabled` because `selectedTerritoriesModel.size === 0`
 - **Expected persistence:** `db.getDoc(db.collections.territories,'seed-territory-1').positionIndex === 0`; `db.getDoc(db.collections.territories,'seed-territory-3').positionIndex === 2`; no `designations` doc created (`db.getCollectionDocs(db.collections.designations)` still has only `seed-designation`)
 - **Edge cases:** this screen reuses `territoriesFilterPipe`/`TERRITORY_SORT_FILTER_CONFIG` verbatim from `/territories` (same sort options `Ordem de Cadastro`/`Última Visita`, same toggles); see [`territories-management.md`](./territories-management.md) for the pipe's exact rules, not repeated here
-- **Priority:** P0 · **Gaps:** no `data-testid` anywhere on this screen (none of the app's 4 testids apply here); rows must be located by their rendered address text
+- **Priority:** P0 · **Gaps:** rows must be located by their rendered address text
 
-#### UC-ASSIGN-02 — City `<select>` mirrors `congregation.cities`, "Todas" is a synthetic last option, alphabetical order under "Todas"
+#### UC-ASSIGN-02 — City select mirrors `congregation.cities`, "Todas" is a synthetic last option, alphabetical order under "Todas"
 
 - **Actor:** Admin
 - **Route:** `/territories/assign`
@@ -29,7 +29,7 @@ This document describes the behavioural use cases for the `/territories/assign` 
 - **Expected UI:** options in order `São Paulo`, `Osasco`, `Todas` (`ALL_OPTION`, always last); selecting `Osasco` re-fetches and shows only `Av. dos Autonomistas, 1200 - Centro`; selecting `Todas` fetches via `getAllByCongregation` (no `city` clause) and sorts **alphabetically by `city`** (`territoriesFilterPipe`'s `ALL_OPTION` branch), so Osasco's territory renders before either São Paulo one, ignoring `positionIndex`
 - **Expected persistence:** `db.getDoc(db.collections.congregations, seed.ids.congregation).cities` equals `['São Paulo', 'Osasco']` in that order
 - **Edge cases:** switching city calls `handleSelectedCityChange`, which resets the search box (`searchInputComponent.resetSearch()`) and re-queries Firestore, but does **not** touch `selectedTerritoriesModel` — see UC-ASSIGN-12
-- **Priority:** P0 · **Gaps:** no `data-testid` on the `<select>` or its `<option>`s
+- **Priority:** P0 · **Gaps:** none (city select carries `data-testid="assign-city-filter"`)
 
 #### UC-ASSIGN-03 — Zero-territory congregation: page renders without crashing, submission is impossible
 
@@ -39,27 +39,19 @@ This document describes the behavioural use cases for the `/territories/assign` 
 - **Steps:** 1. sign in as that congregation's admin → 2. open `/territories/assign`
 - **Expected UI:** the page does **not** crash: heading `Designar Território`, city `<select>` shows `São Paulo` / `Todas`, the checkbox list area renders with **zero** rows (the `@for` over `filteredTerritories$ | async` simply iterates nothing — there is no dedicated "nenhum território" empty-state message, matching the pattern in [`territories-management.md#UC-TERR-03`](./territories-management.md)), and the floating submit button is permanently `disabled` since nothing can ever be ticked — **creating a designation is impossible from this screen for such a congregation**
 - **Expected persistence:** `db.queryWhere(db.collections.territories, 'congregationId', '==', <newCongregationId>)` returns `[]`; after the test, `db.getCollectionDocs(db.collections.designations)` is unchanged (still only the default baseline's `seed-designation`, since nothing from the new congregation could be submitted)
-- **Edge cases:** this is the explicitly-requested "zero territories" edge case, distinct from UC-ASSIGN-04 below (which is about zero **cities**, a different and buggier condition)
+- **Edge cases:** this is the explicitly-requested "zero territories" edge case, distinct from UC-ASSIGN-04 below (which is about zero **cities**)
 - **Priority:** P0 · **Gaps:** `signInAs` only supports `'admin'`/`'publisher'` bound to the **default** congregation's users; a second congregation's admin has no `ROLE_UIDS` entry today — this whole use case needs a harness extension (a way to `signInAs` an arbitrary seeded uid, or a second named identity) before it can be automated
 
-#### UC-ASSIGN-04 — ⚠ suspected defect: a congregation with an empty `cities` array collapses city selection
+#### UC-ASSIGN-04 — Empty `cities` array falls back to "Todas"
 
 - **Actor:** Admin (harness extension needed, same as UC-ASSIGN-03)
 - **Route:** `/territories/assign`
 - **Preconditions (seed):** a congregation with `cities: []` and an admin user of that congregation
 - **Steps:** 1. sign in as that admin → 2. open `/territories/assign`
-- **Expected UI:** `ngOnInit` runs the identical buggy ternary found on `/territories`
-  (`const firstCity = cities.length >= 0 ? cities[0] : ALL_OPTION;`) — since an array's `.length` is **always** `>= 0`, `cities[0]` (`undefined`) is assigned instead of falling back to `ALL_OPTION`. The
-  `<select>` then binds `[ngModel]='selectedCity'` to `undefined`, so **no** `<option>` appears selected (only the synthetic `Todas` option exists in the DOM, since `cities` is empty); `fetchTerritories(id,
-undefined)` takes the `getAllByCongregationAndCities(id, [undefined])` branch (because `undefined !==
-'ALL'`), which Firestore rejects when the query executes — the resulting observable errors, so
-  `filteredTerritories$ | async` never emits and the `@for` block renders zero checkbox rows. **Verified
-  reality:** unlike `/territories` (whose whole page collapses — see UC-TERR-04), this page still renders
-  its heading, city `<select>` (with only `Todas`), search box and submit FAB; only the checkbox list is
-  empty, so the FAB is permanently disabled
+- **Expected UI:** `CityLocatorService.resolvedCity()` resolves to `ALL_OPTION` (`'ALL'`), preventing the `undefined` assignment crash. `fetchTerritories(id, ALL_OPTION)` calls `getAllByCongregation(id)` cleanly, the `<kingdom-apps-city-select>` exposes only `Todas` (`ALL_OPTION` selected), and the page renders gracefully without errors (with `0` checkbox rows and a disabled FAB when the congregation has no territories). While territories or city resolution are in-flight, `<lib-spinner>` (`data-testid="assign-loading"`) is displayed and the city selector is disabled.
 - **Expected persistence:** `db.getDoc(db.collections.congregations, id).cities` is `[]`; assert `db.getCollectionDocs(db.collections.designations)` unchanged, same as UC-ASSIGN-03
-- **Edge cases:** shares the root cause with [`territories-management.md#UC-TERR-04`](./territories-management.md) but the outward symptom is milder here (the page shell survives); test today must assert the city `<select>` exposes only `Todas`, zero checkbox rows render, and the FAB stays disabled — do not assert a graceful fallback
-- **Priority:** P2 · **Gaps:** `⚠ suspected defect` (shared root cause with `UC-TERR-04`); same harness extension as UC-ASSIGN-03
+- **Edge cases:** shares the `CityLocatorService` fallback with [`territories-management.md#UC-TERR-04`](./territories-management.md)
+- **Priority:** P2 · **Gaps:** resolved via `CityLocatorService` fallback
 
 ### Search, sort and filter
 
@@ -474,7 +466,7 @@ seed.ids.adminUser`; both `D1.designationHeaderId` and `D2.designationHeaderId` 
   `ORGANIZER`, `SUPERINTENDENT`, `APP_ADMIN` (UC-ASSIGN-22); a way to force a Firestore write failure to automate UC-ASSIGN-21 in e2e (its rollback semantics are unit-tested meanwhile).
 - **Untested boundary:** congregations with more than 30 cities would make `getAllByCongregationAndCities`'s
   `where('city','in',cities)` exceed Firestore's real cap (UC-ASSIGN-18) — not reproduced by any seed today.
-- **Documented current-behaviour-vs-defect items** (see the corresponding entry for the assertion to make today): UC-ASSIGN-04 (empty-`cities` ternary bug, shared with `UC-TERR-04`), UC-ASSIGN-16 (embedded
+- **Documented current-behaviour-vs-defect items** (see the corresponding entry for the assertion to make today): ~~UC-ASSIGN-04 (empty-`cities` ternary bug, shared with `UC-TERR-04`)~~ — **resolved** (falls back to `ALL_OPTION`), UC-ASSIGN-16 (embedded
   `history` sliced from an unordered read, not the true 5 most recent), UC-ASSIGN-18 (batching comment cites the wrong Firestore limit), UC-ASSIGN-19 (share link uses `location.origin`, not `environment.baseUrl`). ~~UC-ASSIGN-21 (optimistic "already assigned" marking survives a failed, silently-swallowed creation error)~~ — **resolved**: assignment is marked only on successful creation; the silent-failure surface remains documented above.
 
 ## Sources

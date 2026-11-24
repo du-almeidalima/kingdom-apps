@@ -1,16 +1,18 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, OnInit, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { finalize, Observable, of, shareReplay } from 'rxjs';
+import { finalize, Observable, of, shareReplay, Subscription } from 'rxjs';
 
 import {
   ConfirmDialogComponent,
   ConfirmDialogData,
   SearchInputComponent,
-  SelectComponent,
   SortFilterComponent,
   SortFilterValue,
+  SpinnerComponent,
   ToasterService,
 } from '@kingdom-apps/common-ui';
+import { CitySelectComponent } from '../../../../shared/components/city-select/city-select.component';
+import { CityLocatorService } from '../../../../shared/services/city-locator/city-locator.service';
 
 import { Territory } from '../../../../../models/territory';
 import { User } from '../../../../../models/user';
@@ -40,18 +42,20 @@ import { AssignTerritoriesDockComponent } from '../../components/assign-territor
   styleUrls: ['./assign-territories-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    SelectComponent,
+    CitySelectComponent,
     FormsModule,
     SearchInputComponent,
     TerritoryCheckboxComponent,
     AsyncPipe,
     AssignTerritoriesDockComponent,
     SortFilterComponent,
+    SpinnerComponent,
   ],
 })
 export class AssignTerritoriesPageComponent implements OnInit {
   private readonly territoryRepository = inject(TerritoryRepository);
   private readonly userState = inject(UserStateService);
+  private readonly cityLocatorService = inject(CityLocatorService);
   private readonly dialog = inject(Dialog);
   private readonly toaster = inject(ToasterService);
   private readonly designationsHeaderBO = inject(DesignationsHeaderBO);
@@ -60,19 +64,40 @@ export class AssignTerritoriesPageComponent implements OnInit {
   /** Navigation-surviving session + cart state. */
   public readonly state = inject(AssignTerritoriesStateService);
 
-  public readonly ALL_OPTION = ALL_OPTION;
   public readonly sortFilterConfig = TERRITORY_SORT_FILTER_CONFIG;
 
   private territories$: Observable<Territory[]> = of([]);
+  private territoriesSubscription?: Subscription;
 
   cities: string[] = [];
-  selectedCity = '';
+  selectedCity = signal<string>('');
+  private hasFetchedInitial = false;
   searchTerm?: string | null;
   searchFilters: TerritoryFilterSettings['filters'] = TERRITORY_SORT_FILTER_CONFIG.filterConfigs.initial;
   orderBy: TerritoriesOrderBy = TerritoriesOrderBy.SAVED_INDEX;
+  private readonly isFetchingTerritories = signal(false);
+  public readonly isLoading = computed(
+    () =>
+      this.isFetchingTerritories() ||
+      this.cityLocatorService.isLoading() ||
+      this.cityLocatorService.resolvedCity() === null,
+  );
   filteredTerritories$: Observable<Territory[]> = of([]);
 
   searchInputComponent = viewChild.required(SearchInputComponent);
+
+  constructor() {
+    effect(() => {
+      const city = this.cityLocatorService.resolvedCity();
+      if (city === null || this.cityLocatorService.isLoading() || this.hasFetchedInitial) {
+        return;
+      }
+
+      this.hasFetchedInitial = true;
+      this.selectedCity.set(city);
+      this.fetchTerritories(this.currentCongregation.id, city);
+    });
+  }
 
   /**
    * This page is only reachable for a signed-in user whose congregation reference is resolved,
@@ -88,12 +113,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
 
   ngOnInit(): void {
     const { id, cities } = this.currentCongregation;
-    const firstCity = cities.length > 0 ? cities[0] : ALL_OPTION;
-
-    this.selectedCity = firstCity;
     this.cities = cities;
-
-    this.fetchTerritories(id, firstCity);
 
     this.state.isLoadingSession.set(true);
     this.designationsHeaderBO
@@ -205,7 +225,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
   filterTerritories() {
     const searchSettings: TerritoryFilterSettings = {
       searchTerm: this.searchTerm,
-      city: this.selectedCity,
+      city: this.selectedCity(),
       orderBy: this.orderBy,
       filters: {
         includeBibleStudent: this.searchFilters?.includeBibleStudent,
@@ -229,7 +249,7 @@ export class AssignTerritoriesPageComponent implements OnInit {
   }
 
   handleSelectedCityChange(city: string) {
-    this.selectedCity = city;
+    this.selectedCity.set(city);
     this.searchTerm = '';
     this.searchInputComponent().resetSearch();
     this.fetchTerritories(this.currentCongregation.id, city);
@@ -259,11 +279,21 @@ export class AssignTerritoriesPageComponent implements OnInit {
   }
 
   private fetchTerritories(congregationId: string, city: string) {
+    this.territoriesSubscription?.unsubscribe();
+    this.isFetchingTerritories.set(true);
+
     // This is the object that will be iterated, since we can't iterate through formGroup.controls...
-    this.territories$ =
+    this.territories$ = (
       city === ALL_OPTION
-        ? this.territoryRepository.getAllByCongregation(congregationId).pipe(shareReplay(1))
-        : this.territoryRepository.getAllByCongregationAndCities(congregationId, [city]).pipe(shareReplay(1));
+        ? this.territoryRepository.getAllByCongregation(congregationId)
+        : this.territoryRepository.getAllByCongregationAndCities(congregationId, [city])
+    ).pipe(shareReplay({ bufferSize: 1, refCount: true }));
+
+    this.territoriesSubscription = this.territories$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => this.isFetchingTerritories.set(false),
+      error: () => this.isFetchingTerritories.set(false),
+      complete: () => this.isFetchingTerritories.set(false),
+    });
 
     this.filterTerritories();
   }

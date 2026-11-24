@@ -27,7 +27,7 @@ import { NgClass } from '@angular/common';
       />
       <h3 class="territory-list-item__address">
         <span class="t-body2">{{ territory().address }}</span>
-        <span class="t-caption text-gray-600"
+        <span class="t-caption"
           >{{ territory().city }}
           @if (territory().peopleQuantity) {
             , {{ territory().peopleQuantity }} pessoa(s)

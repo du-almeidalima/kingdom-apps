@@ -5,6 +5,7 @@ import { HeaderComponent } from './shared/components/header/header.component';
 import { PortalAnchorComponent } from '@kingdom-apps/common-ui';
 import { AuthService } from './core/features/auth/services/auth.service';
 import { NotificationQueueService } from './features/notification/services/notification-queue.service';
+import { CityLocatorService } from './shared/services/city-locator/city-locator.service';
 
 @Component({
   imports: [RouterModule, HeaderComponent, PortalAnchorComponent],
@@ -28,4 +29,6 @@ export class AppComponent {
   authService = inject(AuthService);
   // Instantiated for its constructor effect: opens the notification queue when the user signs in.
   notificationQueue = inject(NotificationQueueService);
+  // Instantiated for its constructor effect: pre-fetches user city location on login.
+  cityLocator = inject(CityLocatorService);
 }

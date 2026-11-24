@@ -56,8 +56,10 @@ test.describe('Assign territories — listing & selection (WP-18)', () => {
     const assignPage = new AssignTerritoriesPage(authenticatedPage);
     await assignPage.goto();
 
+    await expect(assignPage.cityFilter).toBeVisible();
     const options = await assignPage.cityFilter.locator('option').allTextContents();
     expect(options).toEqual(['São Paulo', 'Osasco', 'Todas']);
+    await expect(assignPage.checkboxes).toHaveCount(2);
 
     // Selecting Osasco shows only its single territory.
     await assignPage.selectCity('Osasco');
@@ -73,6 +75,19 @@ test.describe('Assign territories — listing & selection (WP-18)', () => {
       'São Paulo',
       'Osasco',
     ]);
+  });
+
+  test('UC-ASSIGN-02b — pre-selects detected city from sessionStorage cache instead of first city', async ({
+    authenticatedPage,
+  }) => {
+    await authenticatedPage.evaluate(() => sessionStorage.setItem('ministry-maps:detected-city', 'osasco'));
+
+    const assignPage = new AssignTerritoriesPage(authenticatedPage);
+    await assignPage.goto();
+
+    await expect(assignPage.cityFilter).toHaveValue('Osasco');
+    await expect(assignPage.checkboxes).toHaveCount(1);
+    await expect(assignPage.checkboxByAddress('Av. dos Autonomistas, 1200 - Centro')).toBeVisible();
   });
 
   test('UC-ASSIGN-03 — zero-territory congregation: renders, cannot submit', async ({
@@ -102,8 +117,7 @@ test.describe('Assign territories — listing & selection (WP-18)', () => {
     expect(await db.getCollectionDocs(db.collections.designations)).toHaveLength(1);
   });
 
-  // Known low-priority defect: an empty cities array is not a common production data shape.
-  test('UC-ASSIGN-04 — empty `cities` collapses selection (⚠ defect)', async ({ seed, signInAsUser, db, page }) => {
+  test('UC-ASSIGN-04 — empty `cities` falls back to "Todas"', async ({ seed, signInAsUser, db, page }) => {
     const congregation = seed.factories.buildCongregation({ cities: [] });
     const admin = seed.factories.buildUser({
       role: RoleEnum.ADMIN,
@@ -115,15 +129,14 @@ test.describe('Assign territories — listing & selection (WP-18)', () => {
     const assignPage = new AssignTerritoriesPage(page);
     await assignPage.goto();
 
-    // ⚠ Same buggy ternary as /territories: cities.length>=0 → undefined selectedCity,
-    // the filter observable errors, and no checkbox rows render. The list container
-    // and heading still render (unlike /territories, whose whole page collapses),
-    // but the city select only exposes the synthetic `Todas` option and the FAB is
-    // permanently disabled since nothing can be ticked.
+    // CityLocatorService falls back to ALL_OPTION ('ALL'), so the page renders gracefully.
     await expect(assignPage.heading).toBeVisible();
-    await expect(assignPage.checkboxes).toHaveCount(0);
+    await expect(assignPage.cityFilter).toBeVisible();
     const options = await assignPage.cityFilter.locator('option').allTextContents();
     expect(options).toEqual(['Todas']);
+    await expect(assignPage.cityFilter).toHaveValue('ALL');
+    await expect(assignPage.list).toBeVisible();
+    await expect(assignPage.checkboxes).toHaveCount(0);
     await expect(assignPage.fab).toBeDisabled();
 
     expect((await db.getDoc(db.collections.congregations, congregation.id))?.['cities']).toEqual([]);

@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TERRITORY_SORT_FILTER_CONFIG } from '../../config/territory-filter.config';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { UserStateService } from '../../../../state/user.state.service';
-import { finalize, map, Observable, of, shareReplay } from 'rxjs';
+import { map, Observable, of, shareReplay, Subscription } from 'rxjs';
 import { Territory } from '../../../../../models/territory';
 import {
   AuthorizeDirective,
@@ -10,11 +11,13 @@ import {
   IconButtonComponent,
   IconComponent,
   SearchInputComponent,
-  SelectComponent,
   SortFilterComponent,
   SortFilterValue,
+  SpinnerComponent,
   ToasterService,
 } from '@kingdom-apps/common-ui';
+import { CitySelectComponent } from '../../../../shared/components/city-select/city-select.component';
+import { CityLocatorService } from '../../../../shared/services/city-locator/city-locator.service';
 import { Dialog } from '@angular/cdk/dialog';
 import {
   TerritoryDialogData,
@@ -55,7 +58,7 @@ import { TerritoryCsvExporterBO } from '../../bo/territory-csv-exporter/territor
   styleUrls: ['./territories-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    SelectComponent,
+    CitySelectComponent,
     FormsModule,
     SearchInputComponent,
     CdkDrag,
@@ -69,40 +72,60 @@ import { TerritoryCsvExporterBO } from '../../bo/territory-csv-exporter/territor
     AuthorizeDirective,
     CdkMenuModule,
     SortFilterComponent,
+    SpinnerComponent,
   ],
   providers: [TerritoryBO, TerritoryCsvExporterBO],
 })
 export class TerritoriesPageComponent implements OnInit {
   private readonly territoryRepository = inject(TerritoryRepository);
   private readonly userState = inject(UserStateService);
+  private readonly cityLocatorService = inject(CityLocatorService);
   private readonly territoryAlertsBO = inject(TerritoryAlertsBO);
   private readonly territoryBO = inject(TerritoryBO);
   private readonly territoryExporterBO = inject(TerritoryCsvExporterBO);
   private readonly toasterService = inject(ToasterService);
+  private readonly destroyRef = inject(DestroyRef);
   dialog = inject(Dialog);
 
   private territories$: Observable<Territory[]> = of([]);
+  private territoriesSubscription?: Subscription;
 
   protected readonly RoleEnum = RoleEnum;
   protected readonly ALL_OPTION = ALL_OPTION;
   protected readonly TerritoriesOrderBy = TerritoriesOrderBy;
 
   public cities: string[] = [];
-  public selectedCity = ALL_OPTION;
+  public selectedCity = signal<string>(ALL_OPTION);
+  private hasFetchedInitial = false;
   public searchTerm?: string | null;
   public searchFilters: TerritoryFilterSettings['filters'] = TERRITORY_SORT_FILTER_CONFIG.filterConfigs.initial;
   public sortBy = TerritoriesOrderBy.SAVED_INDEX;
-  public isLoading = signal(false);
+  private readonly isFetchingTerritories = signal(false);
+  public readonly isLoading = computed(
+    () =>
+      this.isFetchingTerritories() ||
+      this.cityLocatorService.isLoading() ||
+      this.cityLocatorService.resolvedCity() === null,
+  );
   public filteredTerritories$: Observable<Territory[]> = of([]);
 
   public sortFilterConfig = TERRITORY_SORT_FILTER_CONFIG;
 
+  constructor() {
+    effect(() => {
+      const city = this.cityLocatorService.resolvedCity();
+      if (city === null || this.cityLocatorService.isLoading() || this.hasFetchedInitial) {
+        return;
+      }
+
+      this.hasFetchedInitial = true;
+      this.selectedCity.set(city);
+      this.getTerritories();
+    });
+  }
+
   ngOnInit(): void {
     this.cities = this.userState.currentUser?.congregation?.cities ?? [];
-    // Select First City
-    this.selectedCity = this.cities.length >= 0 ? this.cities[0] : this.ALL_OPTION;
-
-    this.getTerritories();
   }
 
   trackByRepositoryId(item: Territory) {
@@ -124,7 +147,7 @@ export class TerritoriesPageComponent implements OnInit {
   filterTerritories() {
     const searchSettings: TerritoryFilterSettings = {
       searchTerm: this.searchTerm,
-      city: this.selectedCity,
+      city: this.selectedCity(),
       orderBy: this.sortBy as TerritoriesOrderBy,
       filters: {
         includeBibleStudent: this.searchFilters?.includeBibleStudent,
@@ -148,7 +171,7 @@ export class TerritoriesPageComponent implements OnInit {
   }
 
   handleSelectedCityChange(city: string) {
-    this.selectedCity = city;
+    this.selectedCity.set(city);
     this.filterTerritories();
   }
 
@@ -205,7 +228,7 @@ export class TerritoriesPageComponent implements OnInit {
     this.dialog.open<object, TerritoryDialogData>(TerritoryManageDialogComponent, {
       data: {
         territory,
-        selectedCity: this.selectedCity !== ALL_OPTION ? this.selectedCity : undefined,
+        selectedCity: this.selectedCity() !== ALL_OPTION ? this.selectedCity() : undefined,
         cities: this.userState.currentUser?.congregation?.cities ?? [],
         congregationId: this.userState.currentUser?.congregation?.id ?? '',
       },
@@ -315,14 +338,18 @@ export class TerritoriesPageComponent implements OnInit {
   /** Get territories from the repository and create the filtered observable array */
   private getTerritories() {
     const userCongregationId = this.userState.currentUser?.congregation?.id;
-    this.isLoading.set(true);
+    this.territoriesSubscription?.unsubscribe();
+    this.isFetchingTerritories.set(true);
 
-    this.territories$ = this.territoryRepository.getAllByCongregation(userCongregationId ?? '').pipe(
-      finalize(() => {
-        this.isLoading.set(false);
-      }),
-      shareReplay(1),
-    );
+    this.territories$ = this.territoryRepository
+      .getAllByCongregation(userCongregationId ?? '')
+      .pipe(shareReplay({ bufferSize: 1, refCount: true }));
+
+    this.territoriesSubscription = this.territories$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => this.isFetchingTerritories.set(false),
+      error: () => this.isFetchingTerritories.set(false),
+      complete: () => this.isFetchingTerritories.set(false),
+    });
 
     this.filterTerritories();
   }

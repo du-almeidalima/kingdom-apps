@@ -25,13 +25,13 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 - **Edge cases:** the query (`getAllByCongregation`) has no `city` clause — city is filtered client-side, so a large congregation always downloads its full territory set
 - **Priority:** P0 · **Gaps:** none
 
-#### UC-TERR-02 — City `<select>` mirrors `congregation.cities`, "Todas" is a synthetic last option, ordering differs by scope
+#### UC-TERR-02 — City select mirrors `congregation.cities`, "Todas" is a synthetic last option, location pre-selection applied
 
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline (`cities: ['São Paulo', 'Osasco']`)
 - **Steps:** 1. open `/territories` → 2. inspect `territories-city-filter` (`data-testid`) options → 3. select `São Paulo` (default) → 4. select `Todas`
-- **Expected UI:** options are, in order, `São Paulo`, `Osasco`, `Todas` (cities first, in `congregation.cities` array order, `Todas` always last); on load the first city (`São Paulo`) is pre-selected, listing its 2 territories sorted by `positionIndex` (0, 2); selecting `Todas` shows all 3, sorted **alphabetically by `city`** (Osasco's territory first, then the two São Paulo ones) — a different sort rule than the per-city view
+- **Expected UI:** options are, in order, `São Paulo`, `Osasco`, `Todas` (cities first, in `congregation.cities` array order, `Todas` always last). The component `<kingdom-apps-city-select>` pre-selects the city resolved via `CityLocatorService` (using background IP geolocation from `freeipapi.com` without permission prompts, or falling back to `cities[0]`), listing territories for that city; selecting `Todas` shows all 3, sorted **alphabetically by `city`** (Osasco's territory first, then the two São Paulo ones) — a different sort rule than the per-city view
 - **Expected persistence:** `db.getDoc(db.collections.congregations, seed.ids.congregation)` has `cities: ['São Paulo', 'Osasco']` in that order
 - **Edge cases:** `Todas` never applies the "Ordem de Cadastro"/"Última Visita" sort chosen in the sort dialog — it is hard-coded to `city.localeCompare` in `territoriesFilterPipe`
 - **Priority:** P0 · **Gaps:** no `data-testid` on individual `<option>`s
@@ -47,16 +47,15 @@ pt-BR ↔ English vocabulary is in [`../domain/glossary.md`](../domain/glossary.
 - **Edge cases:** no dedicated "nenhum território encontrado" copy exists — the section is simply empty
 - **Priority:** P2 · **Gaps:** no empty-state message/testid to assert against; test must assert row count `0`
 
-#### UC-TERR-04 — ⚠ Empty congregation (no cities) breaks the filter
+#### UC-TERR-04 — Empty congregation (no cities) falls back to "Todas"
 
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** congregation with `cities: []` and 0 territories
 - **Steps:** 1. sign in as a user of that congregation → 2. open `/territories`
-- **Expected UI:** `ngOnInit` runs `this.selectedCity = this.cities.length >= 0 ? this.cities[0] : ALL_OPTION` — since an array's `length` is **always** `>= 0`, `cities[0]` (i.e. `undefined`) is assigned instead of falling back to `ALL_OPTION`. `cityFilter(t, undefined)` then calls `undefined.toLowerCase()` and throws inside the `map()` in `territoriesFilterPipe`, which errors the `filteredTerritories$` observable. **Today's reality (verified):** the error aborts rendering of the **entire** page content — the router outlet renders an empty `<main>` with no heading, no city `<select>` and no `territories-list` section (no error banner either)
+- **Expected UI:** `CityLocatorService.resolvedCity()` resolves to `ALL_OPTION` (`'ALL'`), preventing the `undefined` assignment crash. The page renders gracefully without errors. While territories or city resolution are in-flight, a `<lib-spinner>` (`data-testid="territories-loading"`) is displayed and the city selector is disabled.
 - **Expected persistence:** `db.getDoc(db.collections.congregations, id)` has `cities: []`; `db.getCollectionDocs(db.collections.territories)` is empty
-- **Edge cases:** assert `data-testid="territories-heading"`, `territories-city-filter` and `territories-list` are **all** absent (empty outlet), and that the congregation doc has `cities: []` — do not assert a graceful empty state, that is not current behaviour
-- **Priority:** P1 · **Gaps:** `⚠ suspected defect` — condition should be `cities.length > 0`
+- **Priority:** P1 · **Gaps:** resolved via `CityLocatorService` fallback
 
 ### Search
 
@@ -470,7 +469,7 @@ outcome — only bible-student, `MOVED` (unresolved), `ASKED_TO_NOT_VISIT_AGAIN`
   `SUPERINTENDENT`, `APP_ADMIN` scenario in this document (UC-TERR-35, UC-TERR-36) needs a new seeded user
   and `ROLE_UIDS` entry before it can be automated.
 - Documented current-behaviour-vs-defect items (see corresponding entries for the assertion to make today):
-  UC-TERR-04 (empty-congregation filter throws), UC-TERR-12 (badge miscounts on fresh load), UC-TERR-16
+  ~~UC-TERR-04 (empty-congregation filter throws)~~ — **resolved** (falls back to `ALL_OPTION`), UC-TERR-12 (badge miscounts on fresh load), UC-TERR-16
   (bible-instructor cleared on re-check), UC-TERR-20 (orphaned `history` subcollection after delete),
   UC-TERR-27 (badges gated by `note`, already tracked in `data-model.md`), UC-TERR-28 (history dialog reads
   the unordered full subcollection, not `recentHistory`), UC-TERR-31 (alert resolution truncation —
