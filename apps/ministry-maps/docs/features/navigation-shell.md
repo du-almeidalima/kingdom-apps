@@ -81,7 +81,7 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Steps:** 1. Try to open `/home` directly
 - **Expected UI:** Redirected to `/login`
 - **Expected persistence:** `db.auth` current user is null
-- **Edge cases:** any guarded route (except Profile due to `roles: ['*']`) redirects to `/login`
+- **Edge cases:** any guarded route redirects to `/login`
 - **Priority:** P0 · **Gaps:** none
 
 ### Router Behavior and Guards
@@ -110,16 +110,16 @@ Behavioral specifications for the application's root shell and main navigation h
 - **Priority:** P2 · **Gaps:** no 404 page exists; test should assert empty outlet and console error presence
 - **Sources:** `apps/ministry-maps/src/app/app-routes.ts`
 
-#### UC-NAV-10 — Anonymous can reach Profile (⚠ suspected defect)
+#### UC-NAV-10 — Anonymous cannot reach Profile (Redirects to Login)
 
 - **Actor:** Anonymous visitor
 - **Route:** `/profile`
 - **Preconditions (seed):** none
 - **Steps:** 1. Navigate to `/profile` while signed out
-- **Expected UI:** Navigation succeeds (no redirect to `/login`); page shows empty/placeholder state (e.g., Profile shows no name/role)
+- **Expected UI:** Redirected to `/login` because `authGuard` enforces authentication on `/profile`
 - **Expected persistence:** `db.auth` current user is null
-- **Edge cases:** `authGuard` short-circuits because `roles: ['*']` is evaluated before the login check
-- **Priority:** P1 · **Gaps:** `⚠ suspected defect`: this route should require authentication
+- **Edge cases:** none
+- **Priority:** P1 · **Gaps:** none
 - **Sources:** `apps/ministry-maps/src/app/core/features/auth/guards/auth.guard.ts`
 
 ### Smoke Navigation Links

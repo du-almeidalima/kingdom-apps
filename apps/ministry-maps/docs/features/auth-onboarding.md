@@ -161,7 +161,7 @@ English vocabulary in [`../domain/glossary.md`](../domain/glossary.md).
 - **Steps:** 1. `page.goto(route)` for each of `/home`, `/territories`, `/territories/assign`, `/territories/statistics`, `/congregation`, `/congregation/users`, `/welcome`
 - **Expected UI:** every one of them ends at URL `/login` with the `Login` heading — the guard's `resolveUserFromAuthProvider()` emits `undefined` (no Firebase session) and maps to `UrlTree(['login'])`
 - **Expected persistence:** N/A (guard redirects perform no writes); spot-assert `db.getCollectionDocs(db.collections.designations)` is untouched after the loop
-- **Edge cases:** `/work/:id` is deliberately **absent** from this list (unguarded by design, UC-WORK-01), and `/profile` is absent because of the `roles: ['*']` early return (UC-AUTH-13); per-feature owners of the individual legs: UC-NAV-07 (`/home`), UC-TERR-37 (`/territories`, **already covered** by `territories.spec.ts`), UC-ASSIGN-24, UC-STAT-17, UC-CFG-12, UC-USERS-17, UC-AUTH-09 (`/welcome` is covered for the non-publisher case; the anonymous case lands on `/login` per this entry)
+- **Edge cases:** `/work/:id` is deliberately **absent** from this list (unguarded by design, UC-WORK-01); per-feature owners of the individual legs: UC-NAV-07 (`/home`), UC-PROF-03 (`/profile`), UC-TERR-37 (`/territories`, **already covered** by `territories.spec.ts`), UC-ASSIGN-24, UC-STAT-17, UC-CFG-12, UC-USERS-17, UC-AUTH-09 (`/welcome` is covered for the non-publisher case; the anonymous case lands on `/login` per this entry)
 - **Priority:** P0 · **Gaps:** none — write this as one parametrized spec (`for (const route of [...])`) rather than six specs; do not duplicate the existing `/territories` assertion from `territories.spec.ts`
 
 #### UC-AUTH-12 — A signed-in publisher hitting any guarded admin route is funneled to `/welcome`
@@ -175,16 +175,16 @@ English vocabulary in [`../domain/glossary.md`](../domain/glossary.md).
 - **Edge cases:** per-feature owners of individual legs: UC-NAV-06 (`/home`), UC-ASSIGN-23, UC-STAT-16, UC-CFG-13, UC-USERS-16, and the `/territories` leg inside `territories-management.md` — one parametrized spec can own the whole matrix, or each feature spec can own its own leg; do not duplicate both ways
 - **Priority:** P0 · **Gaps:** none
 
-#### UC-AUTH-13 — ⚠ `roles: ['*']` routes (`/profile`, `/work/:id`) render for anonymous visitors
+#### UC-AUTH-13 — Anonymous visitor to `/profile` redirects to `/login`; `/work/:id` remains unguarded
 
 - **Actor:** Anonymous
 - **Route:** `/profile`, `/work/:id`
 - **Preconditions (seed):** default baseline; do not sign in
 - **Steps:** 1. `page.goto('/profile')` → 2. `page.goto('/work/<any-seeded-id>')`
-- **Expected UI:** neither of them redirects — the guard's step 1 (`!roles || roles.includes('*')`) returns `true` **before** any authentication check (full analysis in [`../domain/roles-and-permissions.md §3.1`](../domain/roles-and-permissions.md#31-suspected-defect--roles--short-circuits-the-login-check)); `/profile` shows the placeholder identity of UC-PROF-03, and `/work/:id` is unguarded **by design** (a publisher receives a bare link — UC-WORK-01)
+- **Expected UI:** `/profile` redirects to `/login`; `/work/:id` does not redirect because it is unguarded **by design** (a publisher receives a bare link — UC-WORK-01)
 - **Expected persistence:** N/A; assert `db.getCollectionDocs(db.collections.users)` unchanged after the visits
-- **Edge cases:** ⚠ suspected defect for `/profile` (it should arguably require a session); `/work/:id` is intentional and must **not** be "fixed" by a test expecting a redirect; the detailed per-page assertions live in UC-PROF-03 / UC-NAV-10 — this entry only owns the consolidated guard-level statement
-- **Priority:** P1 · **Gaps:** ⚠ suspected defect
+- **Edge cases:** none
+- **Priority:** P1 · **Gaps:** none
 
 #### UC-AUTH-24 — `ORGANIZER`, `ELDER`, and `SUPERINTENDENT` cannot access `/congregation` but can access `/congregation/users`
 
@@ -328,8 +328,7 @@ English vocabulary in [`../domain/glossary.md`](../domain/glossary.md).
   paragraphs.
 - **Documented current-behaviour-vs-defect items** (assert today's reality, not the intended one):
   UC-AUTH-09 (cold-state non-publisher hitting `/welcome` gets a **cancelled navigation**, not the
-  warm-state `/home` redirect — UC-NAV-08 family), UC-AUTH-13 (`roles: ['*']` routes render anonymously —
-  `roles-and-permissions.md §3.1`), UC-AUTH-21 (invite-load failure swallowed; the button-click early
+  warm-state `/home` redirect — UC-NAV-08 family), UC-AUTH-21 (invite-load failure swallowed; the button-click early
   return then leaves `loading` stuck `true`), plus the dead `@default` error branch on the sign-in page
   (never assert `Um erro aconteceu ao tentar carregar seu convite.`).
 - **Fault-injection scenarios** (UC-AUTH-21, like UC-ASSIGN-21) need a harness hook that does not exist —

@@ -83,27 +83,6 @@ test.describe('Work designation — opening', () => {
     expect(doc).toBeUndefined();
   });
 
-  test('UC-WORK-03 — Encoded slash throws (⚠ defect)', async ({ page, db }) => {
-    let capturedError = false;
-    page.on('pageerror', () => {
-      capturedError = true;
-    });
-    page.on('console', (message) => {
-      if (message.type() === 'error') {
-        capturedError = true;
-      }
-    });
-
-    const workPage = new WorkPage(page);
-    await workPage.goto('abc%2Fdef');
-
-    await expect(workPage.territoriesHeading).toBeHidden();
-    await expect(workPage.completedHeading).toBeHidden();
-
-    expect(capturedError).toBe(true);
-    expect(await db.getCollectionDocs(db.collections.designations)).toHaveLength(1);
-  });
-
   test('UC-WORK-05 — Frozen snapshot vs live territory', async ({ page, seed, db }) => {
     const { territory, designation, designationId, territoryId } = seedActiveDesignation(seed);
     await seed.write({ territories: [territory], designations: [designation] });

@@ -18,7 +18,9 @@ export const authGuard: CanActivateFn = (route) => {
 
   const currentUser = userState.currentUser;
   const { roles } = route.data;
-  if (!roles || roles?.includes('*')) {
+  const anyRoleAllowed = !roles || roles.includes('*');
+
+  if (currentUser && anyRoleAllowed) {
     return true;
   }
 
@@ -42,6 +44,10 @@ export const authGuard: CanActivateFn = (route) => {
       // User hasn't authenticated yet to this application
       if (!user) {
         return router.createUrlTree(['login']);
+      }
+
+      if (anyRoleAllowed) {
+        return true;
       }
 
       if (user.role === RoleEnum.PUBLISHER) {

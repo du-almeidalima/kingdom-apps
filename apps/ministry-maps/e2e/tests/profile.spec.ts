@@ -55,18 +55,11 @@ test.describe('Profile page (WP-24)', () => {
     expect(pubDoc?.['role']).toBe('PUBLISHER');
   });
 
-  test('UC-PROF-03 — ⚠ Anonymous visit does not redirect and renders placeholder identity content', async ({
-    page,
-  }) => {
+  test('UC-PROF-03 — Anonymous visit redirects to /login', async ({ page }) => {
     const profilePage = new ProfilePage(page);
     await profilePage.goto();
 
-    expect(page.url()).toContain('/profile');
-
-    await expect(profilePage.initials).toContainText('MN');
-    await expect(profilePage.name).toHaveText('Meu Nome');
-    await expect(profilePage.congregationName).toHaveText('LS Congregação');
-    await expect(profilePage.roleBadge).toHaveText('Publicador');
+    await expect(page).toHaveURL(/.*\/login/);
   });
 
   // ── Congregation switch ──────────────────────────────────────────────────────

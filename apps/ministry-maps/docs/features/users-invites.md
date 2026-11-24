@@ -213,7 +213,7 @@ scope here except where needed to explain what a created `invitation_links` doc 
 - **Steps:** 1. `page.goto('/congregation/users')` without signing in
 - **Expected UI:** the URL becomes `/login`
 - **Expected persistence:** N/A (auth guard, no Firestore write); assert `db.getCollectionDocs(db.collections.users)` is unchanged
-- **Edge cases:** contrast with `/profile`, which uses `roles: ['*']` and does **not** redirect anonymous visitors (see [`../domain/roles-and-permissions.md §3.1`](../domain/roles-and-permissions.md#31--suspected-defect--roles--short-circuits-the-login-check)) — `/congregation/users` redirects because its `data.roles` is a concrete list, not `['*']`
+- **Edge cases:** none
 - **Priority:** P0 · **Gaps:** none
 
 ## Testability gaps (summary)

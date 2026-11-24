@@ -120,9 +120,9 @@ test.describe('Auth', () => {
   }
 
   // UC-AUTH-13 Resolves duplicate: UC-NAV-10
-  test('UC-AUTH-13 — routes with no redirect for roles: ["*"]', async ({ page, db }) => {
+  test('UC-AUTH-13 — anonymous navigating to /profile redirects to /login', async ({ page, db }) => {
     await page.goto('/profile');
-    await expect(page).toHaveURL(/.*\/profile/);
+    await expect(page).toHaveURL(/.*\/login/);
     expect(await db.getCollectionDocs(db.collections.users)).toHaveLength(8);
   });
 

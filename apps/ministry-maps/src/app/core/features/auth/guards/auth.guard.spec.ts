@@ -9,7 +9,7 @@ import { CongregationRoutesEnum } from '../../../../features/congregation/models
 import { UserStateService } from '../../../../state/user.state.service';
 import { organizerUserStateServiceMock, userMockBuilder } from '../../../../../test/mocks';
 import { RoleEnum } from '../../../../../models/enums/role';
-import { Observable, of } from 'rxjs';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { AuthRoutesEnum } from '../models/enums/auth-routes';
 import { AuthService } from '../services/auth.service';
 
@@ -24,13 +24,84 @@ describe('AuthGuard', () => {
     });
   });
 
-  it('should allow access to route if required roles is "*"', () => {
-    const route: ActivatedRouteSnapshot = { data: { roles: '*' } } as never;
-    const state: RouterStateSnapshot = { url: `/${FeatureRoutesEnum.TERRITORIES}` } as never;
+  it('should allow an authenticated user on a wildcard route synchronously', () => {
+    const route: ActivatedRouteSnapshot = {
+      data: { roles: ['*'] },
+      routeConfig: { path: FeatureRoutesEnum.PROFILE },
+    } as never;
+    const state: RouterStateSnapshot = { url: `/${FeatureRoutesEnum.PROFILE}` } as never;
+    const userStateService = ngMocks.get(UserStateService);
+    const authService = ngMocks.get(AuthService);
+    const resolveUser = jest.fn().mockReturnValue(of(undefined));
+
+    userStateService.setUser(userMockBuilder({ role: RoleEnum.PUBLISHER }));
+    authService.resolveUserFromAuthProvider = resolveUser;
+    const result = TestBed.runInInjectionContext(() => authGuard(route, state));
+
+    expect(result).toBe(true);
+    expect(resolveUser).not.toHaveBeenCalled();
+  });
+
+  it('should resolve an authenticated user before allowing a wildcard route', async () => {
+    const route: ActivatedRouteSnapshot = {
+      data: { roles: ['*'] },
+      routeConfig: { path: FeatureRoutesEnum.PROFILE },
+    } as never;
+    const state: RouterStateSnapshot = { url: `/${FeatureRoutesEnum.PROFILE}` } as never;
+    const userStateService = ngMocks.get(UserStateService);
+    const authService = ngMocks.get(AuthService);
+    const resolveUser = jest.fn().mockReturnValue(of(userMockBuilder({ role: RoleEnum.PUBLISHER })));
+
+    userStateService.setUser(null);
+    authService.resolveUserFromAuthProvider = resolveUser;
 
     const result = TestBed.runInInjectionContext(() => authGuard(route, state));
 
-    expect(result).toBeTruthy();
+    expect(resolveUser).toHaveBeenCalledTimes(1);
+    expect(result).toBeInstanceOf(Observable);
+    if (!(result instanceof Observable)) {
+      throw new Error('Expected authentication to resolve asynchronously');
+    }
+
+    await expect(firstValueFrom(result)).resolves.toBe(true);
+  });
+
+  it('should redirect unauthenticated users to login on a wildcard route', async () => {
+    const route: ActivatedRouteSnapshot = {
+      data: { roles: ['*'] },
+      routeConfig: { path: FeatureRoutesEnum.PROFILE },
+    } as never;
+    const state: RouterStateSnapshot = { url: `/${FeatureRoutesEnum.PROFILE}` } as never;
+    const userStateService = ngMocks.get(UserStateService);
+    const authService = ngMocks.get(AuthService);
+    const router = ngMocks.get(Router);
+    const resolveUser = jest.fn().mockReturnValue(of(undefined));
+
+    userStateService.setUser(null);
+    authService.resolveUserFromAuthProvider = resolveUser;
+
+    const result = TestBed.runInInjectionContext(() => authGuard(route, state));
+
+    expect(resolveUser).toHaveBeenCalledTimes(1);
+    expect(result).toBeInstanceOf(Observable);
+    if (!(result instanceof Observable)) {
+      throw new Error('Expected authentication to resolve asynchronously');
+    }
+
+    await expect(firstValueFrom(result)).resolves.toEqual(router.createUrlTree(['login']));
+  });
+
+  it.each([
+    AuthRoutesEnum.LOGIN,
+    AuthRoutesEnum.NO_ACCOUNT,
+    `${AuthRoutesEnum.SIGN_IN}/:inviteId`,
+    FeatureRoutesEnum.WORK,
+  ])('should keep public route %s unguarded', (path) => {
+    const route = APP_ROUTES.find((candidate) => candidate.path === path);
+
+    expect(route).toBeDefined();
+    expect(route?.canActivate).toBeUndefined();
+    expect(route?.canActivateChild).toBeUndefined();
   });
 
   it('should redirect authenticated Publishers users to Welcome Page', () => {

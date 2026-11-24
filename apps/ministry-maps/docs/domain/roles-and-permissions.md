@@ -52,24 +52,22 @@ Redirects come from the custom `authGuard` only — no other guard is registered
 `src/app/core/features/auth/guards/auth.guard.ts`, evaluated in this exact order:
 
 ```
-1. roles missing OR roles.includes('*')      → return true              (no login check!)
-2. user already in UserStateService:
-   2a. role === PUBLISHER && path !== 'welcome' → UrlTree(['welcome'])
-   2b. path === 'welcome' && role !== PUBLISHER → UrlTree(['home'])
-   2c. role === APP_ADMIN || roles.includes(role) → true, else false
-3. no user in state → authService.resolveUserFromAuthProvider():
-   3a. resolved user is falsy      → UrlTree(['login'])
-   3b. resolved role === PUBLISHER → UrlTree(['welcome'])
-   3c. APP_ADMIN || roles.includes(role) → true, else false
+1. user already in UserStateService:
+   1a. roles missing OR roles.includes('*')     → return true (authenticated)
+   1b. role === PUBLISHER && path !== 'welcome' → UrlTree(['welcome'])
+   1c. path === 'welcome' && role !== PUBLISHER → UrlTree(['home'])
+   1d. role === APP_ADMIN || roles.includes(role) → true, else false
+2. no user in state → authService.resolveUserFromAuthProvider():
+   2a. resolved user is falsy                   → UrlTree(['login'])
+   2b. roles missing OR roles.includes('*')     → return true
+   2c. resolved role === PUBLISHER              → UrlTree(['welcome'])
+   2d. APP_ADMIN || roles.includes(role)        → true, else false
 ```
 
-### 3.1 ⚠ Suspected defect — `roles: ['*']` short-circuits the login check
+### 3.1 Wildcard roles require authenticated session
 
-Step 1 returns `true` **before** any authentication check. Consequently `/profile`
-renders for anonymous visitors (showing empty/placeholder state rather than redirecting to `/login`).
-
-**Assert today's behaviour:** anonymous navigation to `/profile` stays on that URL
-(no redirect) and shows placeholder content. Do not write a test that expects a redirect to `/login`.
+`authGuard` requires an authenticated session on wildcard routes (`roles: ['*']` or omitted `roles`).
+Anonymous visitors hitting `/profile` are redirected to `/login`.
 
 ### 3.2 Returning `false` vs redirecting
 
@@ -139,7 +137,7 @@ Read as "can reach and use":
 | `/congregation/users` (list) | → `/welcome` | ✔         | ✔         | ✔         | ✔              | ✔         | → `/login`            |
 | ↳ edit / delete user menu    | –            | ✖ hidden  | ✖ hidden  | ✔         | ✔              | ✔         | –                     |
 | ↳ create invite link         | –            | ✖ hidden  | ✖ hidden  | ✔         | ✖ hidden       | ✔         | –                     |
-| `/profile`                   | ✔            | ✔         | ✔         | ✔         | ✔              | ✔         | ✔ (placeholders)      |
+| `/profile`                   | ✔            | ✔         | ✔         | ✔         | ✔              | ✔         | → `/login`            |
 | ↳ change congregation        | ✖ hidden     | ✖ hidden  | ✖ hidden  | ✖ hidden  | ✔              | ✔         | ✖ hidden              |
 | `/congregation`              | → `/welcome` | ✖ denied  | ✖ denied  | ✔         | ✖ denied       | ✔         | → `/login`            |
 
