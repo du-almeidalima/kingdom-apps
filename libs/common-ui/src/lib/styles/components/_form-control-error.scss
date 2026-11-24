@@ -1,8 +1,10 @@
 @use '../abstract/variables';
 @use '../base/typography';
 
-// This class is used in all form controls components as a base styling
-.form-control-error {
-  color: var(--kui-color-danger, #{variables.$text-error});
-  @extend .t-caption;
+@layer kui.components {
+  // This class is used in all form controls components as a base styling
+  .form-control-error {
+    color: var(--kui-color-danger, #{variables.$text-error});
+    @extend .t-caption;
+  }
 }
