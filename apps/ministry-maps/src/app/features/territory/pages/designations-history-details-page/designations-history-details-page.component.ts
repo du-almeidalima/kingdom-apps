@@ -10,6 +10,7 @@ import { DesignationProgressCardComponent } from '../../components/designation-p
 import { DesignationsProgressSummaryComponent } from '../../components/designations-progress-summary/designations-progress-summary.component';
 import { DesignationTerritoryRow, DesignationsHeaderDetail } from '../../models/designations-history.models';
 import { shareDesignationLink } from '../../../../shared/utils/share-utils';
+import { FeatureRoutesEnum } from '../../../../app-routes';
 
 @Component({
   selector: 'kingdom-apps-designations-history-details-page',
@@ -79,5 +80,9 @@ export class DesignationsHistoryDetailsPageComponent {
 
   protected handleShare(id: string): void {
     shareDesignationLink(id);
+  }
+
+  protected handleOpen(id: string): void {
+    window.open(`/${FeatureRoutesEnum.WORK}/${id}`, '_blank');
   }
 }

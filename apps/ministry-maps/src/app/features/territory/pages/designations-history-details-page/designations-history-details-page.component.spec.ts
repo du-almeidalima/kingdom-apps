@@ -1,4 +1,5 @@
 import { ActivatedRoute } from '@angular/router';
+import { ExpansionPanelComponent } from '@kingdom-apps/common-ui';
 import { MockBuilder, MockRender } from 'ng-mocks';
 import { Subject, of } from 'rxjs';
 
@@ -11,6 +12,7 @@ import { DesignationProgressCardComponent } from '../../components/designation-p
 import { DesignationsProgressSummaryComponent } from '../../components/designations-progress-summary/designations-progress-summary.component';
 import { DesignationsHeaderDetail } from '../../models/designations-history.models';
 import { shareDesignationLink } from '../../../../shared/utils/share-utils';
+import { spyWindowOpen } from '../../../../../test/mocks/utils';
 import { DesignationsHistoryDetailsPageComponent } from './designations-history-details-page.component';
 
 jest.mock('../../../../shared/utils/share-utils', () => ({ shareDesignationLink: jest.fn() }));
@@ -46,6 +48,7 @@ describe('DesignationsHistoryDetailsPageComponent', () => {
     return MockBuilder(DesignationsHistoryDetailsPageComponent)
       .keep(DesignationProgressCardComponent)
       .keep(DesignationsProgressSummaryComponent)
+      .keep(ExpansionPanelComponent)
       .provide({ provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'H1' } } } })
       .provide({ provide: DesignationsHistoryBO, useValue: bo });
   });
@@ -75,22 +78,36 @@ describe('DesignationsHistoryDetailsPageComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Progresso indisponível para esta sessão.');
   });
 
-  it('loads an expanded designation once and shares its work link', () => {
+  it('loads an expanded designation once and shares its work link', async () => {
     const fixture = MockRender(DesignationsHistoryDetailsPageComponent);
     detail$.next({ header, progress, rawTerritories: {} });
     fixture.detectChanges();
 
-    const toggle = () => fixture.nativeElement.querySelector('[data-testid="designation-progress-card-toggle"]') as HTMLButtonElement;
+    const toggle = () => fixture.nativeElement.querySelector('[data-testid="designation-progress-card-toggle"]') as HTMLElement;
+    const panel = () => fixture.nativeElement.querySelector('[data-testid="expansion-panel"]') as HTMLDetailsElement;
+    const flushToggle = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      fixture.detectChanges();
+    };
+
+    expect(panel().open).toBe(false);
     toggle().click();
-    fixture.detectChanges();
+    await flushToggle();
     expect(bo.getDesignation).toHaveBeenCalledTimes(1);
-    expect(toggle().getAttribute('aria-expanded')).toBe('true');
+    expect(panel().open).toBe(true);
 
     toggle().click();
-    fixture.detectChanges();
+    await flushToggle();
+    expect(panel().open).toBe(false);
+
     toggle().click();
-    fixture.detectChanges();
+    await flushToggle();
+    expect(panel().open).toBe(true);
     expect(bo.getDesignation).toHaveBeenCalledTimes(1);
+
+    const windowOpenSpy = spyWindowOpen();
+    fixture.nativeElement.querySelector('[data-testid="designation-open-button"]').click();
+    expect(windowOpenSpy).toHaveBeenCalledWith('/work/D1', '_blank');
 
     fixture.nativeElement.querySelector('[data-testid="designation-share-button"]').click();
     expect(shareDesignationLink).toHaveBeenCalledWith('D1');

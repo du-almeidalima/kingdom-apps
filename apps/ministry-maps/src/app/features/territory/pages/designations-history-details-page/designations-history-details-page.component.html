@@ -23,6 +23,7 @@
               [rows]="rowsById().get(summary.designationId) ?? null"
               (cardToggle)="handleToggle($event)"
               (share)="handleShare($event)"
+              (open)="handleOpen($event)"
             />
           </li>
         }
