@@ -3,13 +3,24 @@ import { addDoc, collection, Timestamp } from 'firebase/firestore';
 import type { CollectionReference } from 'firebase/firestore';
 import { environment } from '../../../../environments/environment';
 import { FIRESTORE } from '../../../repositories/firebase/firebase-providers';
+import { UserStateService } from '../../../state/user.state.service';
+
+export type LogMetadata = {
+  userId?: string | null;
+  userEmail?: string | null;
+  congregationId?: string | null;
+  userAgent?: string;
+  url?: string;
+  environment?: string;
+  [key: string]: unknown;
+};
 
 export type LogEntry = {
   timestamp: Date;
   expireAt: Timestamp;
   level: string;
   message: string;
-  metadata: object;
+  metadata: LogMetadata;
 };
 
 export enum LogLevelEnum {
@@ -23,7 +34,8 @@ export enum LogLevelEnum {
   providedIn: 'root',
 })
 export class LoggerService {
-  private firestore = inject(FIRESTORE);
+  private readonly firestore = inject(FIRESTORE);
+  private readonly userState = inject(UserStateService, { optional: true });
 
   // TTL retention: 6 months
   private static readonly RETENTION_DAYS = 180;
@@ -68,12 +80,20 @@ export class LoggerService {
    */
   private async log(level: LogLevelEnum, message: string, metadata: object = {}): Promise<string> {
     try {
+      const currentUser = this.userState?.currentUser;
+      const userId = currentUser?.id ?? null;
+      const userEmail = currentUser?.email ?? null;
+      const congregationId = currentUser?.congregation?.id ?? null;
+
       const logEntry: LogEntry = {
         timestamp: new Date(),
         expireAt: Timestamp.fromDate(new Date(Date.now() + LoggerService.RETENTION_DAYS * LoggerService.MS_PER_DAY)),
         level: level,
         message,
         metadata: {
+          userId,
+          userEmail,
+          congregationId,
           ...metadata,
           userAgent: navigator.userAgent,
           url: window.location.href,

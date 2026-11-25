@@ -1,0 +1,70 @@
+@use '../../styles/abstract/variables';
+
+:host {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  max-width: 40rem;
+  max-height: 85dvh;
+  margin-inline: auto;
+  animation: bottom-sheet-slide-up 250ms ease-out;
+}
+
+@keyframes bottom-sheet-slide-up {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+.bottom-sheet {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+
+  border: 1px solid var(--kui-color-border, #{variables.$light-grey-100});
+  border-radius: 16px 16px 0 0;
+  box-shadow: var(--kui-shadow-dialog, #{variables.$shadow-z6});
+  background-color: var(--kui-color-surface, #{variables.$white-200});
+  color: var(--kui-color-text, #{variables.$text});
+
+  &__header {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.4rem;
+
+    padding: 0.8rem 1.5rem;
+    border-bottom: 1px solid var(--kui-color-border, #{variables.$light-grey-100});
+  }
+
+  &__header-content {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  &__title {
+    margin: 0;
+    font-weight: normal;
+  }
+
+  &__content {
+    flex: 1 1 auto;
+    padding: 1.5rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  &__footer {
+    flex: none;
+  }
+}

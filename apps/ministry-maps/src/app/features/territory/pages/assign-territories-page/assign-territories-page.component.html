@@ -1,40 +1,42 @@
 <div class="container">
   <h2 class="t-headline2 mb-8" data-testid="assign-heading">Designar Território</h2>
-  <select
-    lib-select
+  <kingdom-apps-city-select
     class="w-full"
-    name="Cidade"
-    data-testid="assign-city-filter"
-    [ngModel]="selectedCity"
+    testId="assign-city-filter"
+    [cities]="cities"
+    [disabled]="isLoading()"
+    [ngModel]="selectedCity()"
     (ngModelChange)="handleSelectedCityChange($event)"
-  >
-    @for (city of cities; track city) {
-      <option [value]="city">{{ city }}</option>
-    }
-    <option [value]="ALL_OPTION">Todas</option>
-  </select>
-  <!-- Search, Filters, and Sort -->
-  <div class="flex mt-3 gap-3">
-    <lib-search-input class="flex-1" (searched)="handleTerritorySearchTermChange($event)" />
-    <lib-sort-filter [config]="sortFilterConfig" (changed)="handleSortFilterChange($event)" />
-  </div>
+  />
 
-  <!-- Territories -->
-  <form id="territory-form" (submit)="$event.preventDefault()">
-    <div class="flex flex-col gap-5 mt-8 pb-56" data-testid="assign-territory-list">
-      @for (territory of filteredTerritories$ | async; track territory.id) {
-        <kingdom-apps-territory-checkbox
-          [territory]="territory"
-          [name]="territory.id"
-          [ngModel]="hasAlreadyBeenSelected(territory.id)"
-          [disabled]="isTerritoryAssigned(territory.id)"
-          (ngModelChange)="handleTerritoryCheck($event, territory)"
-          (assignedClick)="handleAssignedTerritoryClick(territory.id)"
-        >
-        </kingdom-apps-territory-checkbox>
-      }
+  @if (isLoading()) {
+    <div class="flex items-center justify-center mt-52 py-6" data-testid="assign-loading">
+      <lib-spinner [height]="'5rem'" [width]="'5rem'" class="mx-auto" />
     </div>
-  </form>
+  } @else {
+    <!-- Search, Filters, and Sort -->
+    <div class="flex mt-3 gap-3">
+      <lib-search-input class="flex-1" (searched)="handleTerritorySearchTermChange($event)" />
+      <lib-sort-filter [config]="sortFilterConfig" (changed)="handleSortFilterChange($event)" />
+    </div>
+
+    <!-- Territories -->
+    <form id="territory-form" (submit)="$event.preventDefault()">
+      <div class="flex flex-col gap-5 mt-8 pb-56" data-testid="assign-territory-list">
+        @for (territory of filteredTerritories$ | async; track territory.id) {
+          <kingdom-apps-territory-checkbox
+            [territory]="territory"
+            [name]="territory.id"
+            [ngModel]="hasAlreadyBeenSelected(territory.id)"
+            [disabled]="isTerritoryAssigned(territory.id)"
+            (ngModelChange)="handleTerritoryCheck($event, territory)"
+            (assignedClick)="handleAssignedTerritoryClick(territory.id)"
+          >
+          </kingdom-apps-territory-checkbox>
+        }
+      </div>
+    </form>
+  }
 
   <kingdom-apps-assign-territories-dock
     [selectedCount]="state.selectedCount()"

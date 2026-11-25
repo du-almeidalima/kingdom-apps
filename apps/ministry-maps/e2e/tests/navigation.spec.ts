@@ -64,17 +64,37 @@ test.describe('Navigation & Shell', () => {
 
     // Cards
     await expect(home.cardTerritories).toBeVisible();
-    await expect(home.cardPeople).toBeVisible();
+    await expect(home.cardCongregation).toBeVisible();
+    await expect(home.cardCongregation).toContainText('Congregação');
+    await expect(home.cardCongregation).toContainText('Administrar congregação e publicadores');
 
     // Links
     await expect(home.linkDesignarTerritorios).toBeVisible();
-    await expect(home.linkAdministrarTerritorios).toBeVisible();
-    await expect(home.linkEstatisticasTerritorios).toBeVisible();
-    await expect(home.linkAdministrarPessoas).toBeVisible();
+    await expect(home.linkTerritorios).toBeVisible();
+    await expect(home.linkEstatisticas).toBeVisible();
+    await expect(home.linkPessoas).toBeVisible();
+    await expect(home.linkCongregacao).toBeVisible();
 
     const userDoc = await db.getDoc(db.collections.users, seed.ids.adminUser);
     expect(userDoc?.role).toBe(RoleEnum.ADMIN);
     expect(userDoc?.name).toBe('Carlos Almeida');
+  });
+
+  test('UC-NAV-05b — Home hub role-gates Congregação link', async ({ page, signInAs }) => {
+    const home = new HomePage(page);
+
+    for (const role of ['organizer', 'elder', 'superintendent'] as const) {
+      await signInAs(role);
+      await home.goto();
+      await expect(home.cardCongregation).toBeVisible();
+      await expect(home.linkPessoas).toBeVisible();
+      await expect(home.linkCongregacao).toHaveCount(0);
+    }
+
+    await signInAs('app_admin');
+    await home.goto();
+    await expect(home.linkPessoas).toBeVisible();
+    await expect(home.linkCongregacao).toBeVisible();
   });
 
   test('UC-NAV-08 — Unauthorized role cancelled navigation', async ({ page, signInAsUser, seed, db }) => {
@@ -120,7 +140,7 @@ test.describe('Navigation & Shell', () => {
     const home = new HomePage(page);
     await home.goto();
 
-    await home.linkAdministrarTerritorios.click();
+    await home.linkTerritorios.click();
     await expect(page).toHaveURL(/\/territories$/);
     await expect(page.getByTestId('territories-heading')).toBeVisible();
     expect((await db.getDoc(db.collections.users, seed.ids.adminUser))?.['role']).toBe(RoleEnum.ADMIN);
@@ -142,20 +162,41 @@ test.describe('Navigation & Shell', () => {
     const home = new HomePage(page);
     await home.goto();
 
-    await home.linkEstatisticasTerritorios.click();
+    await home.linkEstatisticas.click();
     await expect(page).toHaveURL(/\/territories\/statistics$/);
     await expect(page.getByTestId('statistics-heading')).toBeVisible();
     expect((await db.getDoc(db.collections.users, seed.ids.adminUser))?.['role']).toBe(RoleEnum.ADMIN);
   });
 
-  test('UC-NAV-14 — Home link to /users', async ({ page, signInAs, db, seed }) => {
+  test('UC-NAV-14 — Home link to /congregation/users', async ({ page, signInAs, db, seed }) => {
     await signInAs('admin');
     const home = new HomePage(page);
     await home.goto();
 
-    await home.linkAdministrarPessoas.click();
-    await expect(page).toHaveURL(/\/users$/);
+    await home.linkPessoas.click();
+    await expect(page).toHaveURL(/\/congregation\/users$/);
     await expect(page.getByTestId('users-heading')).toBeVisible();
+    expect((await db.getDoc(db.collections.users, seed.ids.adminUser))?.['role']).toBe(RoleEnum.ADMIN);
+  });
+
+  test('UC-NAV-15 — Home link to /territories/designations', async ({ page, signInAs }) => {
+    await signInAs('admin');
+    const home = new HomePage(page);
+    await home.goto();
+    await expect(home.linkHistoricoDesignacoes).toBeVisible();
+    await home.linkHistoricoDesignacoes.click();
+    await expect(page).toHaveURL(/\/territories\/designations$/);
+    await expect(page.getByTestId('designations-history-heading')).toBeVisible();
+  });
+
+  test('UC-NAV-16 — Home link to /congregation', async ({ page, signInAs, db, seed }) => {
+    await signInAs('admin');
+    const home = new HomePage(page);
+    await home.goto();
+
+    await home.linkCongregacao.click();
+    await expect(page).toHaveURL(/\/congregation$/);
+    await expect(page.getByRole('heading', { name: 'Congregação', exact: true })).toBeVisible();
     expect((await db.getDoc(db.collections.users, seed.ids.adminUser))?.['role']).toBe(RoleEnum.ADMIN);
   });
 });

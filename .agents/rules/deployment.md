@@ -14,7 +14,7 @@ description: Builds, budgets, the CI pipeline, and Firebase deployment.
 
 ## CI (`.github/workflows/ci.yml`)
 
-- **main** — `nx affected -t test`.
+- **main** — `nx affected -t lint test build`.
 - **e2e** — Node 22 + Java 21; functions `lint`/`test`/`build`; `typecheck-e2e`; Playwright vs emulators. Deliberately **not** a deploy gate.
 - **deploy** — on push to `main`: affected projects with a `deploy` target run `nx run <proj>:deploy --configuration=production` with `FIREBASE_TOKEN` + `NX_FIREBASE_*` secrets and `NX_ENV=production`.
 
@@ -22,6 +22,7 @@ description: Builds, budgets, the CI pipeline, and Firebase deployment.
 
 - Hosting: `npx nx deploy ministry-maps` (`nx:run-commands` → `firebase deploy --only hosting:prod` via firebase-tools; depends on the `build` target). Channels `prod` and `beta`, both serving `dist/apps/ministry-maps` — SPA rewrite, immutable 1y cache for hashed js/css, no-cache for `ngsw-worker.js`/`ngsw.json`.
 - Functions: `npm --prefix functions/ministry-maps run deploy`. Order: **functions first, then Firestore rules**.
+- Firestore indexes: after any `firestore.indexes.json` change, run `npx firebase deploy --only firestore:indexes`. The emulator does **not** enforce index requirements, so e2e green does not prove a prod query has its index.
 - Normal flow is hands-off: merges to `main` deploy via CI.
 
 ## Emulator & seed workflow (dev)

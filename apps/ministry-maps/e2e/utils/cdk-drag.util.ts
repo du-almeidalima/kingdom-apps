@@ -6,8 +6,8 @@ const DRAG_STEPS = 5;
 /**
  * Drags `source` onto `target` with the low-level mouse API — the only way to
  * drive Angular CDK drag-drop (`cdkDropList`/`cdkDrag`) from Playwright, used
- * by `/territories` manual reorder (UC-TERR-21; see `docs/testability-gaps.md`
- * §2.6). `locator.dragTo()` and synthetic HTML5 drag events do **not** work:
+ * by `/territories` manual reorder (UC-TERR-21). `locator.dragTo()` and synthetic
+ * HTML5 drag events do **not** work:
  * CDK listens for pointer events with intermediate moves, so this helper
  * hovers the handle, presses the button, moves in explicit steps, and only
  * then releases.

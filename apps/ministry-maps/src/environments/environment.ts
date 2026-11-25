@@ -16,6 +16,6 @@ export const environment = {
   baseUrl: process.env['NX_APP_BASE_URL'],
   congregationSettingsDefaultValues: {
     designationAccessExpiryDays: 45,
-    shouldDesignationBlockAfterExpired: false,
+    shouldDesignationBlockAfterExpired: true,
   } as CongregationSettings,
 };

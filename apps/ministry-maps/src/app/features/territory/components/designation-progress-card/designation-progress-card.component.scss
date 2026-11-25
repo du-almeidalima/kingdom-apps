@@ -1,0 +1,71 @@
+@use 'apps/ministry-maps/src/styles/components/panel' as *;
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+
+.designation-card {
+  @extend .panel;
+  padding: 0;
+  overflow: hidden;
+
+  &__toggle { display: flex; flex: 1; align-items: center; gap: 1rem; }
+  &__main { display: flex; flex: 1; flex-direction: column; gap: 0.25rem; }
+  &__title { font-size: 1.5rem; font-weight: 600; color: var(--kui-color-text, #{variables.$text}); }
+  &__bar { width: min(18rem, 25vw); }
+
+  &__body { display: flex; flex-direction: column; align-items: flex-start; gap: 1rem; padding: 0 1rem 1rem; }
+  &__rows { width: 100%; margin: 0; padding: 0; list-style: none; }
+  &__row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.75rem 0; border-top: 1px solid var(--kui-color-border, #{variables.$light-grey-200}); }
+  &__address {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  &__status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  &__outcome {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    white-space: nowrap;
+  }
+
+  &__outcome-icon {
+    width: 1.4rem;
+    height: 1.4rem;
+    flex-shrink: 0;
+    display: inline-block;
+  }
+
+  &__actions {
+    display: flex;
+    align-self: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__action-btn,
+  &__share-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    min-height: 3.6rem;
+    padding: 0.6rem 1.4rem;
+    font-size: 1.3rem;
+    font-weight: 500;
+  }
+
+  &__action-icon,
+  &__share-icon {
+    width: 1.4rem;
+    height: 1.4rem;
+    flex-shrink: 0;
+    display: inline-block;
+  }
+}

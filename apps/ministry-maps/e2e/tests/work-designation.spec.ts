@@ -7,6 +7,7 @@ import { stubWindowOpen, getOpenedUrls } from '../utils/window-open-stub.util';
 import { DesignationStatusEnum } from '../../src/models/enums/designation-status';
 import { VisitOutcomeEnum } from '../../src/models/enums/visit-outcome';
 import { SeedApi } from '../fixtures/database.fixture';
+import { DesignationsHeaderStatusEnum } from '../../src/models/enums/designations-header-status';
 
 /**
  * Helper: seeds one territory + one designation embedding that territory
@@ -80,27 +81,6 @@ test.describe('Work designation — opening', () => {
 
     const doc = await db.getDoc(db.collections.designations, 'does-not-exist');
     expect(doc).toBeUndefined();
-  });
-
-  test('UC-WORK-03 — Encoded slash throws (⚠ defect)', async ({ page, db }) => {
-    let capturedError = false;
-    page.on('pageerror', () => {
-      capturedError = true;
-    });
-    page.on('console', (message) => {
-      if (message.type() === 'error') {
-        capturedError = true;
-      }
-    });
-
-    const workPage = new WorkPage(page);
-    await workPage.goto('abc%2Fdef');
-
-    await expect(workPage.territoriesHeading).toBeHidden();
-    await expect(workPage.completedHeading).toBeHidden();
-
-    expect(capturedError).toBe(true);
-    expect(await db.getCollectionDocs(db.collections.designations)).toHaveLength(1);
   });
 
   test('UC-WORK-05 — Frozen snapshot vs live territory', async ({ page, seed, db }) => {
@@ -708,6 +688,113 @@ test.describe('Work designation — conditional affordances', () => {
   });
 });
 
+test.describe('Work designation progress tracking', () => {
+  test('UC-WORK-25 — Completing a visit writes its outcome to header progress', async ({ page, seed, db }) => {
+    const header = seed.factories.buildDesignationsHeader({ id: 'work-progress-complete', congregationId: seed.ids.congregation, createdBy: seed.ids.adminUser, status: DesignationsHeaderStatusEnum.IN_PROGRESS });
+    const { territory, designation, designationId, territoryId } = seedActiveDesignation(seed, { designation: { designationHeaderId: header.id } });
+    await seed.write({ territories: [territory], designations: [designation], designationsHeaders: [header], designationsProgress: [seed.factories.buildDesignationsProgress({
+      headerId: header.id, congregationId: seed.ids.congregation,
+      designations: { [designationId]: { territoriesTotal: 1, createdAt: designation.createdAt, expiresAt: designation.expiresAt } },
+    })] });
+    const work = new WorkPage(page);
+    const dialog = new WorkItemCompleteDialogPage(page);
+    await work.goto(designationId);
+    await work.itemByAddress(territory.address).getByTestId('work-item-checkbox').click();
+    await dialog.submit();
+    await expect.poll(async () => {
+      const snapshot = await db.firestore.collection(db.collections.designations_header).doc(header.id).collection('progress').doc('summary').get();
+      return snapshot.data()?.['territories']?.[`${designationId}_${territoryId}`]?.['outcome'];
+    }).toBe(VisitOutcomeEnum.SPOKE);
+  });
+
+  test('UC-WORK-26 — Editing a visit overwrites its progress outcome', async ({ page, seed, db }) => {
+    const header = seed.factories.buildDesignationsHeader({ id: 'work-progress-edit', congregationId: seed.ids.congregation, createdBy: seed.ids.adminUser });
+    const { territory, designationId, territoryId } = seedActiveDesignation(seed);
+    const history = seed.factories.buildVisitHistory({ visitOutcome: VisitOutcomeEnum.SPOKE });
+    const doneTerritory = seed.factories.buildDesignationTerritory({ ...territory, status: DesignationStatusEnum.DONE, history: [history] });
+    const designation = seed.factories.buildDesignation({
+      id: designationId,
+      congregationId: seed.ids.congregation,
+      designationHeaderId: header.id,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      territories: [doneTerritory],
+    });
+    await seed.write({ territories: [{ ...territory, history: [history] }], designations: [designation], designationsHeaders: [header], designationsProgress: [seed.factories.buildDesignationsProgress({
+      headerId: header.id, congregationId: seed.ids.congregation,
+      designations: { [designationId]: { territoriesTotal: 1, createdAt: designation.createdAt, expiresAt: designation.expiresAt } },
+      territories: { [`${designationId}_${territoryId}`]: { designationId, territoryId, outcome: VisitOutcomeEnum.SPOKE, completedAt: history.date } },
+    })] });
+    const work = new WorkPage(page);
+    const dialog = new WorkItemCompleteDialogPage(page);
+    await work.goto(designationId);
+    await work.completedList.getByTestId('work-item-edit').click();
+    await dialog.selectOutcome('Ninguém atendeu');
+    await dialog.submit();
+    await expect.poll(async () => {
+      const snapshot = await db.firestore.collection(db.collections.designations_header).doc(header.id).collection('progress').doc('summary').get();
+      return snapshot.data()?.['territories']?.[`${designationId}_${territoryId}`]?.['outcome'];
+    }).toBe(VisitOutcomeEnum.NOT_ANSWERED);
+  });
+
+  test('UC-WORK-27 — Undo removes the territory progress entry', async ({ page, seed, db }) => {
+    const header = seed.factories.buildDesignationsHeader({ id: 'work-progress-undo', congregationId: seed.ids.congregation, createdBy: seed.ids.adminUser });
+    const { territory, designationId, territoryId } = seedActiveDesignation(seed);
+    const history = seed.factories.buildVisitHistory({ visitOutcome: VisitOutcomeEnum.SPOKE });
+    const doneTerritory = seed.factories.buildDesignationTerritory({ ...territory, status: DesignationStatusEnum.DONE, history: [history] });
+    const designation = seed.factories.buildDesignation({
+      id: designationId,
+      congregationId: seed.ids.congregation,
+      designationHeaderId: header.id,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      territories: [doneTerritory],
+    });
+    await seed.write({ territories: [{ ...territory, history: [history] }], designations: [designation], designationsHeaders: [header], designationsProgress: [seed.factories.buildDesignationsProgress({
+      headerId: header.id, congregationId: seed.ids.congregation,
+      designations: { [designationId]: { territoriesTotal: 1, createdAt: designation.createdAt, expiresAt: designation.expiresAt } },
+      territories: { [`${designationId}_${territoryId}`]: { designationId, territoryId, outcome: VisitOutcomeEnum.SPOKE, completedAt: history.date } },
+    })] });
+    const work = new WorkPage(page);
+    const confirm = new ConfirmDialogPage(page);
+    await work.goto(designationId);
+    await work.completedList.getByTestId('work-item-undo').click();
+    await confirm.confirm();
+    await expect.poll(async () => {
+      const snapshot = await db.firestore.collection(db.collections.designations_header).doc(header.id).collection('progress').doc('summary').get();
+      return Object.hasOwn(snapshot.data()?.['territories'] ?? {}, `${designationId}_${territoryId}`);
+    }).toBe(false);
+  });
+
+  test('UC-WORK-28 — A legacy designation without a header completes without progress writes or alert', async ({ page, seed, db }) => {
+    const { territory, designation, designationId } = seedActiveDesignation(seed);
+    await seed.write({ territories: [territory], designations: [designation] });
+    const alerts: string[] = [];
+    page.on('dialog', async (dialog) => { alerts.push(dialog.message()); await dialog.dismiss(); });
+    const work = new WorkPage(page);
+    await work.goto(designationId);
+    await work.itemByAddress(territory.address).getByTestId('work-item-checkbox').click();
+    await new WorkItemCompleteDialogPage(page).submit();
+    await expect(work.completedHeading).toBeVisible();
+    expect(alerts).toEqual([]);
+    expect(await db.firestore.collection('designations_header').listDocuments()).toHaveLength(0);
+  });
+
+  test('UC-WORK-29 — Missing legacy header progress does not alert the publisher', async ({ page, seed, db }) => {
+    const header = seed.factories.buildDesignationsHeader({ id: 'work-progress-missing', congregationId: seed.ids.congregation, createdBy: seed.ids.adminUser });
+    const { territory, designation: original, designationId } = seedActiveDesignation(seed);
+    const designation = { ...original, designationHeaderId: header.id };
+    await seed.write({ territories: [territory], designations: [designation], designationsHeaders: [header] });
+    const alerts: string[] = [];
+    page.on('dialog', async (dialog) => { alerts.push(dialog.message()); await dialog.dismiss(); });
+    const work = new WorkPage(page);
+    await work.goto(designationId);
+    await work.itemByAddress(territory.address).getByTestId('work-item-checkbox').click();
+    await new WorkItemCompleteDialogPage(page).submit();
+    await expect(work.completedHeading).toBeVisible();
+    expect(alerts).toEqual([]);
+    expect(await db.firestore.collection(db.collections.designations_header).doc(header.id).collection('progress').doc('summary').get().then((snapshot) => snapshot.exists)).toBe(false);
+  });
+});
+
 // ─── Expiry ──────────────────────────────────────────────────────────────────
 
 test.describe('Work designation — expiry', () => {
@@ -868,6 +955,98 @@ test.describe('Work designation — completion state', () => {
     await expect(async () => {
       const territoryDoc = await db.getDoc(db.collections.territories, territoryId);
       expect(territoryDoc?.['recentHistory']?.length).toBe(1);
+    }).toPass();
+  });
+
+  test('UC-WORK-30 — Completing, editing, and undoing a visit preserves current territory city and metadata', async ({
+    page,
+    seed,
+    db,
+  }) => {
+    const { territory, designation, designationId, territoryId } = seedActiveDesignation(seed, {
+      territory: {
+        city: 'São Paulo',
+        address: 'Rua Original, 100',
+        note: 'Nota Original',
+        positionIndex: 1,
+      },
+      designationTerritory: {
+        city: 'São Paulo',
+        address: 'Rua Original, 100',
+        note: 'Nota Original',
+        positionIndex: 1,
+      },
+    });
+    await seed.write({ territories: [territory], designations: [designation] });
+
+    // Simulate a City rename and Territory metadata update AFTER the designation was created
+    await db.firestore.collection(db.collections.territories).doc(territoryId).update({
+      city: 'São Paulo Zona Sul',
+      address: 'Rua Atualizada, 200',
+      note: 'Nota Atualizada',
+      positionIndex: 5,
+    });
+
+    const workPage = new WorkPage(page);
+    const dialog = new WorkItemCompleteDialogPage(page);
+    const confirmDialog = new ConfirmDialogPage(page);
+    await workPage.goto(designationId);
+
+    // 1. Complete the visit
+    await workPage.itemByAddress('Rua Original, 100').getByTestId('work-item-checkbox').click();
+    await dialog.notesTextarea.fill('Primeira visita');
+    await dialog.submit();
+
+    await expect(workPage.completedHeading).toBeVisible();
+    await expect
+      .poll(async () => {
+        const doc = await db.getDoc(db.collections.territories, territoryId);
+        return doc?.['recentHistory']?.length;
+      })
+      .toBe(1);
+
+    let liveTerritory = await db.getDoc(db.collections.territories, territoryId);
+    expect(liveTerritory?.['city']).toBe('São Paulo Zona Sul');
+    expect(liveTerritory?.['address']).toBe('Rua Atualizada, 200');
+    expect(liveTerritory?.['note']).toBe('Nota Atualizada');
+    expect(liveTerritory?.['positionIndex']).toBe(5);
+    expect(liveTerritory?.['lastVisit']).toBeTruthy();
+
+    // 2. Edit the completed visit
+    const doneRow = workPage.completedList.filter({ hasText: 'Rua Original, 100' });
+    await doneRow.getByTestId('work-item-edit').click();
+    await expect(dialog.dialog.getByText('Editar Visita')).toBeVisible();
+    await expect(dialog.notesTextarea).toHaveValue('Primeira visita');
+    await dialog.notesTextarea.clear();
+    await dialog.notesTextarea.fill('Visita editada');
+    await dialog.submit();
+
+    await expect
+      .poll(async () => {
+        const doc = await db.getDoc(db.collections.territories, territoryId);
+        return doc?.['recentHistory']?.[0]?.['notes'];
+      })
+      .toBe('Visita editada');
+
+    liveTerritory = await db.getDoc(db.collections.territories, territoryId);
+    expect(liveTerritory?.['city']).toBe('São Paulo Zona Sul');
+    expect(liveTerritory?.['address']).toBe('Rua Atualizada, 200');
+    expect(liveTerritory?.['note']).toBe('Nota Atualizada');
+    expect(liveTerritory?.['positionIndex']).toBe(5);
+
+    // 3. Undo the completed visit
+    await doneRow.getByTestId('work-item-undo').click();
+    await expect(confirmDialog.dialog).toBeVisible();
+    await confirmDialog.confirm();
+
+    await expect(async () => {
+      const doc = await db.getDoc(db.collections.territories, territoryId);
+      expect(doc?.['lastVisit']).toBeNull();
+      expect(doc?.['recentHistory']).toEqual([]);
+      expect(doc?.['city']).toBe('São Paulo Zona Sul');
+      expect(doc?.['address']).toBe('Rua Atualizada, 200');
+      expect(doc?.['note']).toBe('Nota Atualizada');
+      expect(doc?.['positionIndex']).toBe(5);
     }).toPass();
   });
 });

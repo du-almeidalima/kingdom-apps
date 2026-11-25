@@ -1,0 +1,35 @@
+<div class="container">
+  <h2 class="t-headline2 mb-8" data-testid="designations-history-heading">Histórico de designações</h2>
+
+  @if (isLoading()) {
+    <div class="flex items-center justify-center py-12" data-testid="designations-history-loading">
+      <lib-spinner height="4rem" width="4rem" />
+    </div>
+  } @else if (headers().length > 0) {
+    <ul class="flex flex-col gap-4 m-0 p-0 list-none" data-testid="designations-history-list">
+      @for (header of headers(); track header.id) {
+        <li>
+          <kingdom-apps-designations-header-list-item [header]="header" />
+        </li>
+      }
+    </ul>
+
+    @if (hasMore()) {
+      <button
+        type="button"
+        lib-button
+        btnType="secondary"
+        class="mt-6"
+        data-testid="designations-history-load-more"
+        [disabled]="isLoadingMore()"
+        (click)="handleLoadMore()"
+      >
+        Carregar mais
+      </button>
+    }
+  } @else {
+    <p class="t-body2" data-testid="designations-history-empty">
+      Nenhuma sessão de designações encontrada.
+    </p>
+  }
+</div>

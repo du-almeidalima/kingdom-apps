@@ -1,0 +1,13 @@
+:host {
+  display: block;
+  width: min(34rem, calc(100vw - 3.2rem));
+  max-width: 100%;
+}
+
+.radio-option__title {
+  font-size: 1.4rem;
+}
+
+.target-select {
+  width: 100%;
+}

@@ -1,5 +1,5 @@
 import { auth, firestore } from '../config/firebase-admin.context';
-import { Collections, TERRITORY_HISTORY_SUBCOLLECTION } from './collections';
+import { Collections, DESIGNATIONS_PROGRESS_DOC_ID, DESIGNATIONS_PROGRESS_SUBCOLLECTION, TERRITORY_HISTORY_SUBCOLLECTION } from './collections';
 import { DEFAULT_PASSWORD } from '../config/auth.config';
 import { InvitationLinkSeed, SeedDefinition, SeedResult, UserSeed } from './types';
 
@@ -27,6 +27,7 @@ export async function seed(def: SeedDefinition): Promise<SeedResult> {
     territories = [],
     designations = [],
     designationsHeaders = [],
+    designationsProgress = [],
     invitationLinks = [],
   } = def;
 
@@ -66,6 +67,14 @@ export async function seed(def: SeedDefinition): Promise<SeedResult> {
 
   for (const designationsHeader of designationsHeaders) {
     batch.set(firestore.collection(Collections.designations_header).doc(designationsHeader.id), designationsHeader);
+  }
+
+  for (const progress of designationsProgress) {
+    batch.set(
+      firestore.collection(Collections.designations_header).doc(progress.headerId)
+        .collection(DESIGNATIONS_PROGRESS_SUBCOLLECTION).doc(DESIGNATIONS_PROGRESS_DOC_ID),
+      progress,
+    );
   }
 
   for (const invitationLink of invitationLinks) {

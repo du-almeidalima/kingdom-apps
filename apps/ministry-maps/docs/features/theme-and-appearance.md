@@ -155,9 +155,3 @@ Injected anywhere via `inject(ThemeService)`:
 - **`AppearanceSettingsComponent` (`kingdom-apps-appearance-settings`):**
   - Reuses `<kingdom-apps-section title="Aparência">` to maintain visual consistency with the `Administrador` card.
   - Houses the generic `<lib-radio-group>` bound to `ThemeService.preference()`.
-
----
-
-## 10. Design Review & Feedback Record
-
-For the complete log of review feedback items, root cause analyses, and architectural decisions, see [`apps/ministry-maps/backlog/dark-light-mode-feature/design-review-and-feedback.md`](../backlog/dark-light-mode-feature/design-review-and-feedback.md).

@@ -1,0 +1,40 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+
+:host {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  width: 100%;
+  padding: 1.2rem 1.4rem;
+  background: var(--kui-color-surface, #{variables.$white-100});
+  border: 1px solid var(--kui-color-border, #{variables.$light-grey-200});
+  border-radius: 6px;
+  box-shadow: var(--kui-shadow-surface, #{variables.$shadow-z1});
+}
+
+.notification-list-item__icon {
+  width: 1.6rem;
+  height: 1.6rem;
+  flex-shrink: 0;
+}
+
+.notification-list-item__overview {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.notification-list-item__category {
+  font-weight: 600;
+}
+
+.notification-list-item__chevron {
+  width: 0.7rem;
+  height: 0.7rem;
+  flex-shrink: 0;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  transform: rotate(45deg);
+}

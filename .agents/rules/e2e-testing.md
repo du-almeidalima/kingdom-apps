@@ -24,7 +24,7 @@ E2E tests run against a **real emulated Firebase**, never mocks. After a UI acti
 
 > The E2E emulators start **EMPTY**. Playwright's `webServer` runs the dedicated stack supervisor in `e2e/scripts/e2e-servers.mjs`; Admin SDK seeding is the sole source of test data.
 
-> **Use-case catalog:** what to test (every screen's use cases `UC-<AREA>-NN`, multi-role journeys `J-NN`, seed preconditions, Firestore assertions, priorities, and testability gaps) is documented in `apps/ministry-maps/docs/` — start from `apps/ministry-maps/docs/test-catalog.md` and reference the UC/J ID in test titles.
+> **Use-case specifications:** what to test (every screen's use cases `UC-<AREA>-NN`, multi-role journeys `J-NN`, seed preconditions, Firestore assertions, priorities, and testability gaps) is documented in `apps/ministry-maps/docs/` — start from `apps/ministry-maps/docs/README.md` and reference the UC/J ID in test titles.
 
 ## Running E2E Tests
 
@@ -76,7 +76,7 @@ apps/ministry-maps/e2e/
 
 ## Golden Rule — Always Import From `fixtures/index.ts`
 
-Never import `test`/`expect` directly from `@playwright/test`. Import from the composed fixture so every spec gets auto reset + seed, `seed`/`db` helpers, and `signInAs`:
+Import `test` and `expect` from the composed fixture (`../fixtures`, enforced by `@typescript-eslint/no-restricted-imports` in `e2e/tests/`) so every spec gets auto reset + seed, `seed`/`db` helpers, and `signInAs`:
 
 ```typescript
 import { test, expect } from '../fixtures';

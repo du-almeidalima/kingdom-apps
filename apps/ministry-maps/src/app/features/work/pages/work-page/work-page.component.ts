@@ -84,14 +84,18 @@ export class WorkPageComponent implements OnInit, OnDestroy {
     if (!designation) {
       return;
     }
+
+    // TODO: This process has become a bit complex and should probably be moved into a BO class, the component should
+    //  not handle so much of the logic
     const updatedDesignation = this.workBO.updateDesignationTerritoryObject(designation, designationTerritory);
     const designationTerritoryUpdate$ = this.designationRepository.update(updatedDesignation);
 
     // Update Territory lastVisit and history
-    const { status: _, ...territory } = designationTerritory;
-    territory.lastVisit = new Date();
-
-    const territoryUpdate$ = this.territoryRepository.update(territory);
+    const territoryUpdate$ = this.territoryRepository.update({
+      id: designationTerritory.id,
+      lastVisit: new Date(),
+      history: designationTerritory.history,
+    });
     let visitHistoryUpdate$ = of(undefined) as Observable<void>;
 
     // Updating also the territory with the new history entry
@@ -108,7 +112,9 @@ export class WorkPageComponent implements OnInit, OnDestroy {
 
     // The observables must be spread out: `concat([a$, b$])` would emit them as values and
     // never subscribe the writes.
-    concat(designationTerritoryUpdate$, territoryUpdate$, visitHistoryUpdate$)
+    const progressUpdate$ = this.workBO.recordTerritoryProgress(designation, designationTerritory);
+
+    concat(designationTerritoryUpdate$, territoryUpdate$, visitHistoryUpdate$, progressUpdate$)
       .pipe(
         retry(2),
         catchError((err) => {

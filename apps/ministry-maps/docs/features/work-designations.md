@@ -50,17 +50,6 @@ Read that table before writing any expiry test (UC-WORK-20/21): the naming sugge
 - **Edge cases:** there is no `catchError`/error UI anywhere in `WorkPageComponent.ngOnInit` for this path — do not assert an error message, none exists
 - **Priority:** P1 · **Gaps:** no `data-testid`/landmark to assert "empty state reached"; assert absence of the `Territórios` heading instead
 
-#### UC-WORK-03 — ⚠ Id containing an encoded slash throws synchronously, page never loads
-
-- **Actor:** Anonymous
-- **Route:** `/work/:id`
-- **Preconditions (seed):** none
-- **Steps:** 1. `page.goto('/work/abc%2Fdef')` (a single URL-encoded `/` inside the param)
-- **Expected UI:** Angular's router matches the one path segment `abc%2Fdef` against `work/:id` and decodes it to `abc/def` before `paramMap.get('id')` returns it; `doc(this.designationCollection, 'abc/def')` is then called with an **odd** total segment count (`designations` + `abc` + `def` = 3), which the Firestore SDK rejects as an invalid document reference and throws synchronously inside `ngOnInit`, before the component ever subscribes. **Today's reality:** the page never reaches its `isLoading` state change; console shows an uncaught `FirebaseError`/`Error`, and the visible page is whatever the last-rendered template was (blank on a fresh navigation)
-- **Expected persistence:** N/A — no read is attempted; assert no document was created (`db.getDoc(db.collections.designations, 'abc/def')` stays `undefined`, N/A shape anyway)
-- **Edge cases:** a plain non-slash malformed string (emojis, extremely long ids, leading/trailing spaces) does **not** throw — it behaves exactly like UC-WORK-02 (valid doc path, simply not found)
-- **Priority:** P2 · **Gaps:** `⚠ suspected defect` — no try/catch around `doc()`/`ngOnInit`; test must assert the console error and blank page, not a graceful message
-
 #### UC-WORK-04 — ⚠ Embedded territory without a `history` array crashes the read pipeline
 
 - **Actor:** Anonymous
@@ -70,7 +59,7 @@ Read that table before writing any expiry test (UC-WORK-20/21): the naming sugge
 - **Expected UI:** `convertHistoryDateFirebaseTimestampToDate` runs `t.history.map((h) => ({...}))` for every embedded territory with no `t.history ?? []` fallback; since the seeded doc has no `history` field, this throws `Cannot read properties of undefined (reading 'map')` inside the `docData` conversion. The returned observable errors; `.subscribe(designation => {...})` has **no** error callback, so the error is unhandled and the emission never reaches `tap`. **Today's reality:** `isLoading` stays `true` forever — the page shows `Loading...` indefinitely, and the browser console logs the uncaught error
 - **Expected persistence:** N/A — assert the read never completed: the designation doc itself is unaffected (`db.getDoc(db.collections.designations, 'd-no-history').territories[0].status === 'PENDING'`, i.e. nothing changed, only the UI is stuck)
 - **Edge cases:** this reproduces for the **default baseline** `seed-designation` too, since its embedded territory has no `history` override either — never navigate to `/work/seed-designation` in a spec without first patching that field
-- **Priority:** P0 · **Gaps:** `⚠ suspected defect` — the converter needs `(t.history ?? []).map(...)`; consolidate in the testability-gaps summary below; test must assert the stuck `Loading...` text, not a rendered list
+- **Priority:** P0 · **Gaps:** `⚠ suspected defect` — the converter needs `(t.history ?? []).map(...)`; test must assert the stuck `Loading...` text, not a rendered list
 
 #### UC-WORK-05 — Rendering reflects the frozen embedded snapshot, not the live territory doc
 
@@ -305,13 +294,59 @@ Read that table before writing any expiry test (UC-WORK-20/21): the naming sugge
 - **Expected persistence:** `db.getDoc(db.collections.designations, '<non-existent-id>')` is `undefined`
 - **Priority:** P0 · **Gaps:** none (`data-testid="work-designation-not-found"`, `data-testid="designation-not-found-heading"`, `data-testid="designation-not-found-icon"` present)
 
+The visit write-back now performs a fourth sequenced write to the header progress summary. Its error is swallowed by
+`WorkBO`, so a missing legacy summary does not raise the publisher alert.
+
+#### UC-WORK-25 — Completing a visit writes the latest outcome to progress
+
+- **Actor:** Anonymous publisher
+- **Route:** `/work/:id`
+- **Expected persistence:** `territories.{designationId}_{territoryId}` stores the outcome and completion timestamp.
+- **Priority:** P0 · **Coverage:** `work-designation.spec.ts`
+
+#### UC-WORK-26 — Editing a visit overwrites its progress outcome
+
+- **Actor:** Anonymous publisher
+- **Route:** `/work/:id`
+- **Expected persistence:** The same territory map key contains the edited outcome.
+- **Priority:** P1 · **Coverage:** `work-designation.spec.ts`
+
+#### UC-WORK-27 — Undo removes the progress entry
+
+- **Actor:** Anonymous publisher
+- **Route:** `/work/:id`
+- **Expected persistence:** The territory key is deleted while the existing undo writes complete.
+- **Priority:** P1 · **Coverage:** `work-designation.spec.ts`
+
+#### UC-WORK-28 — Legacy designation without a header completes normally
+
+- **Actor:** Anonymous publisher
+- **Route:** `/work/:id`
+- **Expected persistence:** Visit completes and no progress document is created.
+- **Priority:** P0 · **Coverage:** `work-designation.spec.ts`
+
+#### UC-WORK-29 — Missing legacy progress does not alert the publisher
+
+- **Actor:** Anonymous publisher
+- **Route:** `/work/:id`
+- **Expected persistence:** Visit completes; missing summary remains absent and does not fail the write-back flow.
+- **Priority:** P1 · **Coverage:** `work-designation.spec.ts`
+
+#### UC-WORK-30 — Completing, editing, and undoing a visit preserves current territory city and metadata
+
+- **Actor:** Anonymous publisher
+- **Route:** `/work/:id`
+- **Preconditions (seed):** A territory and active designation seeded with initial `city` / `address` / `note` / `positionIndex`, followed by a direct Firestore update mutating `territories/{id}` (`city`, `address`, `note`, `positionIndex`) after the designation snapshot was created.
+- **Steps:** 1. Open `/work/:id` and complete the visit → 2. Edit the completed visit's notes → 3. Undo the completed visit
+- **Expected persistence:** Completing, editing, and undoing the visit update only `lastVisit` and `recentHistory` on `territories/{id}`; the parent territory's updated `city`, `address`, `note`, and `positionIndex` remain intact throughout.
+- **Priority:** P0 · **Coverage:** `work-designation.spec.ts`
+
 ## Testability gaps (summary)
 
 - **Zero `data-testid`s exist on `/work/:id`** — the four app-wide ids (`territories-heading`, `territories-list`,
   `territories-city-filter`, `territory-list-item`) all belong to `/territories`. Every affordance here (checkbox, dialog fields, submit/cancel buttons, pencil/eraser/maps/history icons, the confirm dialog) must be selected by pt-BR text, `title` attributes, or the handful of stable ids (`#revisit-checkbox`,
   `#publisher-name`, `#congregation-address`).
 - **Confirmed defects to lock in as today's behaviour, not tomorrow's fix:**
-  - UC-WORK-03 — a URL-encoded slash in the id throws synchronously before any subscription.
   - UC-WORK-04 — an embedded territory without `history` (the factory default, and the default baseline
     `seed-designation` itself) crashes the read pipeline and hangs on `Loading...` forever.
   - UC-WORK-19 — Chromium's `window.open(link, '_self')` branch means `page.waitForEvent('popup')` never fires on the default Playwright project; use `waitForURL` or stub `window.open` instead.

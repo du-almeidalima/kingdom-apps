@@ -11,16 +11,16 @@ description: Create or modify Angular components — selectors, templates, signa
 
 ## Non-negotiables
 
-- **Standalone** — Angular 21 default; omit `standalone: true`, never add NgModules (legacy routing NgModules under home/territory/users/work are migration debt).
-- **OnPush** — `changeDetection: ChangeDetectionStrategy.OnPush` is required on new components (all existing components now have it).
-- **Zoneless** — the app runs without Zone.js. Never add `zone.js`, `provideZoneChangeDetection`, or `NgZone`. State mutated in async callbacks (subscribe/finalize/timeout) **must** be a signal — plain-field writes there never render.
+- **Standalone** — Angular 21 default; omit `standalone: true` and use standalone route configs (`Routes`).
+- **OnPush** — `changeDetection: ChangeDetectionStrategy.OnPush` on every component (enforced by `@angular-eslint/prefer-on-push-component-change-detection`).
+- **Zoneless** — runs without Zone.js. State mutated in async callbacks (subscribe/finalize/timeout) **must** be a signal — plain-field writes there never render.
 - **Selectors** — app components: `kingdom-apps-*` (e.g. `kingdom-apps-territories-page`); common-ui: `lib-*` elements or attribute selectors (`button[lib-button]`). The `prefix: app` in project.json is dead config — ignore it.
-- **`inject()`** for new DI. Constructor DI survives in ~41 older files — don't copy it.
+- **`inject()`** for new DI.
 - **`data-testid`** on interactive/dynamic elements — unit specs query `By.css('[data-testid=…]')`, Playwright page objects use `page.getByTestId(...)`.
 
 ## Templates — built-in control flow only
 
-`*ngIf`/`*ngFor` are banned (zero usages; 36 files use the modern syntax):
+Enforced by `@angular-eslint/template/prefer-control-flow`:
 
 ```html
 @if (user(); as user) {
@@ -34,7 +34,7 @@ description: Create or modify Angular components — selectors, templates, signa
 } @let total = items().length;
 ```
 
-- Track inline (`track territory.id`); a `trackBy` _method_ survives in one legacy file only.
+- Track inline (`track territory.id`).
 - Keep logic out of templates — expose computed values from the class.
 
 ## Inputs, outputs, state
@@ -72,7 +72,9 @@ open(): void {
 Dialog component conventions:
 
 - Get data/ref with `inject(DIALOG_DATA)` / `inject(DialogRef)` (older dialogs use constructor `@Inject(DIALOG_DATA)` — don't copy).
-- Wrap the body in common-ui shells: `<lib-dialog [title]="…">` + `<lib-dialog-footer>`.
+- Wrap the body in common-ui shells:
+  - `<lib-responsive-dialog>` (+ `<lib-dialog-footer>`) when a modal should render as a centered `<lib-dialog>` on desktop (`>= 768px`) and as a slide-up `<lib-bottom-sheet>` on mobile (`< 768px`). Supports `[title]`, `[closable]`, and a custom `[dialogHeader]` slot.
+  - `<lib-dialog [title]="…">` or `<lib-bottom-sheet [title]="…">` directly only when locking to one presentation across all viewports.
 - Close via the `libDialogClose` attribute on a `lib-button`.
 - `dialogRef.disableClose = true` while submitting; `isSubmitting` signal + inline `@if` spinner on the save button.
 - Confirmations reuse `ConfirmDialogComponent` (+ `ConfirmDialogData`) from common-ui — no bespoke confirm dialogs.
@@ -95,7 +97,7 @@ One folder per component; files named after the folder:
 src/
 ├── app/
 │   ├── app.config.ts / app.component.* / app-routes.ts
-│   ├── features/<feature>/              # territory, users, work, profile, configuration, home
+│   ├── features/<feature>/
 │   │   ├── pages/<name>-page/           # smart pages: <name>-page.component.{ts,html?,scss}
 │   │   ├── components/<kebab-name>/     # presentation components
 │   │   ├── bo/<area>/<name>.bo.ts       # business objects (see angular-services.md)
@@ -125,5 +127,5 @@ ng-mocks (`MockBuilder`/`MockRender`/`MockInstance`), never TestBed boilerplate 
 - [ ] `@if/@for/@let` with inline `track` — no `*ngIf`/`*ngFor`
 - [ ] `input()/output()/model()` signal APIs; `toSignal` for Observable state
 - [ ] `data-testid` on queryable elements
-- [ ] Dialogs: `lib-dialog`/`lib-dialog-footer`/`libDialogClose`; reuse `ConfirmDialogComponent`
+- [ ] Dialogs: `lib-responsive-dialog` (or `lib-dialog`)/`lib-dialog-footer`/`libDialogClose`; reuse `ConfirmDialogComponent`
 - [ ] One-folder-per-component, files named after the folder, kebab-case

@@ -22,18 +22,15 @@ English vocabulary in [`../domain/glossary.md`](../domain/glossary.md).
 >
 > 1. **The OAuth popup leg is not automatable.** Both `/login` and `/sign-in/:inviteId` sign in via
 >    `signInWithPopup(auth, new GoogleAuthProvider())` — a real browser popup against a Google account,
->    which the Playwright suite does not exercise (see
->    [`../testability-gaps.md`](../testability-gaps.md)). Entries whose core behaviour **requires** that
->    popup (marked _manual-only leg_) are documented with full steps/persistence contracts so they can be
->    executed as manual acceptance checks today and automated later if the suite ever adopts the Auth
->    emulator's popup automation. Everything else uses the `signInAs` custom-token fixture.
-> 2. **There is no `invitation_links` support in the seed harness yet.** The collection (note the
->    **underscore**) is absent from `e2e/seed/collections.ts`, there is no `buildInvitationLink` factory,
->    and the seeder writes no invites. Invite entries below write the raw doc via the `db.firestore`
->    escape hatch until the harness extension lands — see
->    [`../test-catalog.md#harness-extensions-needed`](../test-catalog.md#harness-extensions-needed). The
->    persisted shape that matters: `congregation` is stored as a **`DocumentReference`** (the datasource
->    resolves it on read), and the doc's own `id` is also written **inside** the document body.
+>    which the Playwright suite does not exercise (see [`../../e2e/MANUAL-ACCEPTANCE.md`](../../e2e/MANUAL-ACCEPTANCE.md)).
+>    Entries whose core behaviour **requires** that popup (marked _manual-only leg_) are documented with full
+>    steps/persistence contracts so they can be executed as manual acceptance checks today and automated later
+>    if the suite ever adopts the Auth emulator's popup automation. Everything else uses the `signInAs` custom-token fixture.
+> 2. **`invitation_links` seed support:** The collection (note the **underscore**) is supported via
+>    `seed.factories.buildInvitationLink` and `Collections.invitation_links` (see
+>    [`../../e2e/README.md`](../../e2e/README.md)). The persisted shape that matters:
+>    `congregation` is stored as a **`DocumentReference`** (the datasource resolves it on read), and the doc's own
+>    `id` is also written **inside** the document body.
 >
 > Also note the fixture invariant the whole suite relies on: **`/login` never auto-navigates on
 > auth-state change** (UC-AUTH-03) — that is why `signInAs` can leave the page on `/login` with a live
@@ -161,33 +158,43 @@ English vocabulary in [`../domain/glossary.md`](../domain/glossary.md).
 - **Actor:** Anonymous
 - **Route:** all routes whose `data.roles` is a concrete list
 - **Preconditions (seed):** default baseline; do not sign in
-- **Steps:** 1. `page.goto(route)` for each of `/home`, `/territories`, `/territories/assign`, `/territories/statistics`, `/users`, `/welcome`
+- **Steps:** 1. `page.goto(route)` for each of `/home`, `/territories`, `/territories/assign`, `/territories/statistics`, `/congregation`, `/congregation/users`, `/welcome`
 - **Expected UI:** every one of them ends at URL `/login` with the `Login` heading — the guard's `resolveUserFromAuthProvider()` emits `undefined` (no Firebase session) and maps to `UrlTree(['login'])`
 - **Expected persistence:** N/A (guard redirects perform no writes); spot-assert `db.getCollectionDocs(db.collections.designations)` is untouched after the loop
-- **Edge cases:** `/work/:id` is deliberately **absent** from this list (unguarded by design, UC-WORK-01), and `/profile` + `/configuration` are absent because of the `roles: ['*']` early return (UC-AUTH-13); per-feature owners of the individual legs: UC-NAV-07 (`/home`), UC-TERR-37 (`/territories`, **already covered** by `territories.spec.ts`), UC-ASSIGN-24, UC-STAT-17, UC-USERS-17, UC-AUTH-09 (`/welcome` is covered for the non-publisher case; the anonymous case lands on `/login` per this entry)
+- **Edge cases:** `/work/:id` is deliberately **absent** from this list (unguarded by design, UC-WORK-01); per-feature owners of the individual legs: UC-NAV-07 (`/home`), UC-PROF-03 (`/profile`), UC-TERR-37 (`/territories`, **already covered** by `territories.spec.ts`), UC-ASSIGN-24, UC-STAT-17, UC-CFG-12, UC-USERS-17, UC-AUTH-09 (`/welcome` is covered for the non-publisher case; the anonymous case lands on `/login` per this entry)
 - **Priority:** P0 · **Gaps:** none — write this as one parametrized spec (`for (const route of [...])`) rather than six specs; do not duplicate the existing `/territories` assertion from `territories.spec.ts`
 
 #### UC-AUTH-12 — A signed-in publisher hitting any guarded admin route is funneled to `/welcome`
 
 - **Actor:** Publisher
-- **Route:** `/home`, `/territories`, `/territories/assign`, `/territories/statistics`, `/users`
+- **Route:** `/home`, `/territories`, `/territories/assign`, `/territories/statistics`, `/congregation`, `/congregation/users`
 - **Preconditions (seed):** default baseline; `signInAs('publisher')`
 - **Steps:** 1. `page.goto(route)` for each admin route
 - **Expected UI:** every attempt ends at URL `/welcome` rendering the UC-AUTH-08 content (`Bem-Vindo Ana!`) — the guard's publisher rule (`role === PUBLISHER && path !== 'welcome' → UrlTree(['welcome'])`) fires regardless of which concrete role list the route declares
 - **Expected persistence:** N/A (redirect only); assert `db.getDoc(db.collections.users, seed.ids.publisherUsers[0]).role === 'PUBLISHER'`
-- **Edge cases:** per-feature owners of individual legs: UC-NAV-06 (`/home`), UC-ASSIGN-23, UC-STAT-16, UC-USERS-16, and the `/territories` leg inside `territories-management.md` — one parametrized spec can own the whole matrix, or each feature spec can own its own leg; do not duplicate both ways
+- **Edge cases:** per-feature owners of individual legs: UC-NAV-06 (`/home`), UC-ASSIGN-23, UC-STAT-16, UC-CFG-13, UC-USERS-16, and the `/territories` leg inside `territories-management.md` — one parametrized spec can own the whole matrix, or each feature spec can own its own leg; do not duplicate both ways
 - **Priority:** P0 · **Gaps:** none
 
-#### UC-AUTH-13 — ⚠ `roles: ['*']` routes (`/profile`, `/configuration`, `/work/:id`) render for anonymous visitors
+#### UC-AUTH-13 — Anonymous visitor to `/profile` redirects to `/login`; `/work/:id` remains unguarded
 
 - **Actor:** Anonymous
-- **Route:** `/profile`, `/configuration`, `/work/:id`
+- **Route:** `/profile`, `/work/:id`
 - **Preconditions (seed):** default baseline; do not sign in
-- **Steps:** 1. `page.goto('/profile')` → 2. `page.goto('/configuration')` → 3. `page.goto('/work/<any-seeded-id>')`
-- **Expected UI:** none of them redirect — the guard's step 1 (`!roles || roles.includes('*')`) returns `true` **before** any authentication check (full analysis in [`../domain/roles-and-permissions.md §3.1`](../domain/roles-and-permissions.md#31-suspected-defect--roles--short-circuits-the-login-check)); `/profile` shows the placeholder identity of UC-PROF-03, `/configuration` shows the no-congregation state of UC-CFG-12, and `/work/:id` is unguarded **by design** (a publisher receives a bare link — UC-WORK-01)
-- **Expected persistence:** N/A; assert `db.getCollectionDocs(db.collections.users)` unchanged after all three visits
-- **Edge cases:** ⚠ suspected defect for `/profile` and `/configuration` (they should arguably require a session); `/work/:id` is intentional and must **not** be "fixed" by a test expecting a redirect; the detailed per-page assertions live in UC-PROF-03 / UC-CFG-12 / UC-NAV-10 — this entry only owns the consolidated guard-level statement
-- **Priority:** P1 · **Gaps:** ⚠ suspected defect (consolidated in [`../testability-gaps.md`](../testability-gaps.md#documented-current-behaviour-vs-suspected-defects))
+- **Steps:** 1. `page.goto('/profile')` → 2. `page.goto('/work/<any-seeded-id>')`
+- **Expected UI:** `/profile` redirects to `/login`; `/work/:id` does not redirect because it is unguarded **by design** (a publisher receives a bare link — UC-WORK-01)
+- **Expected persistence:** N/A; assert `db.getCollectionDocs(db.collections.users)` unchanged after the visits
+- **Edge cases:** none
+- **Priority:** P1 · **Gaps:** none
+
+#### UC-AUTH-24 — `ORGANIZER`, `ELDER`, and `SUPERINTENDENT` cannot access `/congregation` but can access `/congregation/users`
+
+- **Actor:** Organizer, Elder, Superintendent
+- **Route:** `/congregation`, `/congregation/users`
+- **Preconditions (seed):** default baseline
+- **Steps:** 1. `signInAs(role)` → 2. `page.goto('/congregation')` → 3. `page.goto('/congregation/users')`
+- **Expected UI:** `/congregation` navigation is cancelled (`Configurações` heading does not render); `/congregation/users` renders the People list (`users-heading` visible)
+- **Expected persistence:** N/A
+- **Priority:** P0 · **Coverage:** `auth.spec.ts`
 
 ### Invite sign-in (`/sign-in/:inviteId`)
 
@@ -312,20 +319,16 @@ English vocabulary in [`../domain/glossary.md`](../domain/glossary.md).
 - **The OAuth popup is the fundamental blocker of this feature** (`signInWithPopup` on both `/login` and
   `/sign-in/:inviteId`): UC-AUTH-04/05/06/07 and UC-AUTH-17/18/19/20 are **manual-only legs** today. Their
   render-level and persistence-level pre/post-conditions are fully documented above so they can run as
-  manual acceptance checks; the automatable approximations (`signInAs` + `goto`) are stated per entry.
-  Consolidated, with candidate techniques, in
-  [`../testability-gaps.md`](../testability-gaps.md).
-- **No `invitation_links` harness support** — the collection is missing from `e2e/seed/collections.ts`,
-  there is no factory, and the seeder never writes invites (UC-AUTH-14/16/17/18/19/20 all seed via the raw
-  `db.firestore` escape hatch). See
-  [`../test-catalog.md#harness-extensions-needed`](../test-catalog.md#harness-extensions-needed).
+  manual acceptance checks (see [`../../e2e/MANUAL-ACCEPTANCE.md`](../../e2e/MANUAL-ACCEPTANCE.md)); the
+  automatable approximations (`signInAs` + `goto`) are stated per entry.
+- **`invitation_links` harness support (HX-2)** — delivered via `seed.factories.buildInvitationLink` and
+  `Collections.invitation_links` (see [`../../e2e/README.md`](../../e2e/README.md)).
 - **Zero `data-testid`s on any auth screen** — usable selectors today: `h1` text (`Login`, `Cadastrar`),
   `button.provider-login-button`, `a#profile-link`, `img[alt="MM Image"]`, and the verbatim pt-BR error
   paragraphs.
 - **Documented current-behaviour-vs-defect items** (assert today's reality, not the intended one):
   UC-AUTH-09 (cold-state non-publisher hitting `/welcome` gets a **cancelled navigation**, not the
-  warm-state `/home` redirect — UC-NAV-08 family), UC-AUTH-13 (`roles: ['*']` routes render anonymously —
-  `roles-and-permissions.md §3.1`), UC-AUTH-21 (invite-load failure swallowed; the button-click early
+  warm-state `/home` redirect — UC-NAV-08 family), UC-AUTH-21 (invite-load failure swallowed; the button-click early
   return then leaves `loading` stuck `true`), plus the dead `@default` error branch on the sign-in page
   (never assert `Um erro aconteceu ao tentar carregar seu convite.`).
 - **Fault-injection scenarios** (UC-AUTH-21, like UC-ASSIGN-21) need a harness hook that does not exist —
@@ -345,8 +348,8 @@ English vocabulary in [`../domain/glossary.md`](../domain/glossary.md).
 - `apps/ministry-maps/src/app/repositories/firebase/firebase-invitation-link-datasource.service.ts`
 - `apps/ministry-maps/src/app/repositories/firebase/firebase-user-datasource.service.ts`
 - `apps/ministry-maps/src/app/repositories/auth.repository.ts`, `invitation-link.repository.ts`
-- `apps/ministry-maps/src/app/features/users/bo/invite/invite-bo.service.ts`
-- `apps/ministry-maps/src/app/features/users/components/invite-create-dialog/invite-create-dialog.component.ts`
+- `apps/ministry-maps/src/app/features/congregation/bo/invite/invite-bo.service.ts`
+- `apps/ministry-maps/src/app/features/congregation/components/invite-create-dialog/invite-create-dialog.component.ts`
 - `apps/ministry-maps/src/app/state/user.state.service.ts`
 - `libs/common-ui/src/lib/state/auth-user/auth-user.state.service.ts`
 - `libs/common-ui/src/lib/components/provider-login-button/provider-login-button.component.ts`

@@ -19,6 +19,13 @@ export class CongregationRepositoryMock implements CongregationRepository {
     ]);
   }
 
+  add(congregation: Omit<Congregation, 'id'>): Observable<Congregation> {
+    return of({
+      ...congregation,
+      id: 'CONGREGATION-NEW',
+    });
+  }
+
   update(_congregation: Congregation): Observable<void> {
     return of(void 0);
   }

@@ -15,6 +15,14 @@ describe('ProfilePageComponent', () => {
     expect(fixture.point.componentInstance).toBeTruthy();
   });
 
+  it('links the Notificações card to the history page without reading any data', () => {
+    const fixture = MockRender(ProfilePageComponent);
+
+    const link = ngMocks.find(fixture, '[data-testid="profile-notifications-link"]');
+
+    expect(ngMocks.input(link, 'routerLink')).toBe('notifications');
+  });
+
   it.each([
     [RoleEnum.PUBLISHER, 'Publicador'],
     [RoleEnum.ADMIN, 'Admin'],

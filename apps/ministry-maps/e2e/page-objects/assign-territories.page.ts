@@ -1,4 +1,4 @@
-import { Locator, Page } from '@playwright/test';
+import { expect, Locator, Page } from '@playwright/test';
 
 /**
  * Page object for the `/territories/assign` route.
@@ -16,6 +16,7 @@ import { Locator, Page } from '@playwright/test';
 export class AssignTerritoriesPage {
   readonly heading: Locator;
   readonly cityFilter: Locator;
+  readonly loading: Locator;
   readonly list: Locator;
   readonly checkboxes: Locator;
   readonly dock: Locator;
@@ -31,6 +32,7 @@ export class AssignTerritoriesPage {
   constructor(private readonly page: Page) {
     this.heading = page.getByTestId('assign-heading');
     this.cityFilter = page.getByTestId('assign-city-filter');
+    this.loading = page.getByTestId('assign-loading');
     this.list = page.getByTestId('assign-territory-list');
     this.checkboxes = page.getByTestId('assign-territory-checkbox');
     this.dock = page.getByTestId('assign-dock');
@@ -46,7 +48,7 @@ export class AssignTerritoriesPage {
   /** Navigate to the assign page and wait for the list to render. */
   async goto(): Promise<void> {
     await this.page.goto('/territories/assign');
-    await this.heading.waitFor();
+    await expect(this.list).toBeVisible();
   }
 
   /** Select the "Todas" city filter so every territory is shown. */

@@ -7,6 +7,8 @@ import { AssignTerritoriesPageComponent } from './pages/assign-territories-page/
 import { StatisticsTerritoriesPageComponent } from './pages/statistics-territories-page/statistics-territories-page.component';
 import { TerritoriesPageComponent } from './pages/territories-page/territories-page.component';
 import { TerritoryRoutesEnum } from './models/enums/territory-routes';
+import { DesignationsHistoryPageComponent } from './pages/designations-history-page/designations-history-page.component';
+import { DesignationsHistoryDetailsPageComponent } from './pages/designations-history-details-page/designations-history-details-page.component';
 
 export const TERRITORY_ROUTES: Route[] = [
   {
@@ -25,6 +27,8 @@ export const TERRITORY_ROUTES: Route[] = [
         path: TerritoryRoutesEnum.STATISTICS,
         component: StatisticsTerritoriesPageComponent,
       },
+      { path: TerritoryRoutesEnum.DESIGNATIONS_HISTORY, component: DesignationsHistoryPageComponent },
+      { path: `${TerritoryRoutesEnum.DESIGNATIONS_HISTORY}/:headerId`, component: DesignationsHistoryDetailsPageComponent },
     ],
   },
 ];

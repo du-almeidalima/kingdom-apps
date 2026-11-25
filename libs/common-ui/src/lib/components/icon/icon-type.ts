@@ -34,4 +34,6 @@ export type Icons =
   | 'error-8'
   | 'warning-lined'
   | 'download-20'
-  | 'filter-down-lined';
+  | 'filter-down-lined'
+  | 'stop-circle-lined'
+  | 'external-link-lined';

@@ -14,6 +14,13 @@
       </div>
     </div>
   </lib-card>
+  <!-- NOTIFICATIONS -->
+  <lib-card [customStyle]="{ padding: 0 }">
+    <a class="notifications-link" routerLink="notifications" data-testid="profile-notifications-link">
+      <span class="t-headline4">Notificações</span>
+      <span class="notifications-link__chevron" aria-hidden="true"></span>
+    </a>
+  </lib-card>
   <!-- APPEARANCE SETTINGS -->
   <kingdom-apps-appearance-settings />
 

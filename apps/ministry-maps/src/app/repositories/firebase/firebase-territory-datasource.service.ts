@@ -20,7 +20,7 @@ import type { CollectionReference, DocumentReference } from 'firebase/firestore'
 import { combineLatest, defer, EMPTY, forkJoin, from, map, Observable, of, switchMap } from 'rxjs';
 
 import { firebaseEntityConverterFactory, removeUndefined } from '../../shared/utils/firebase-entity-converter';
-import { TerritoryRepository, TerritoryRepositoryQueryOptions } from '../territories.repository';
+import { TerritoryRepository, TerritoryRepositoryQueryOptions, TerritoryUpdate } from '../territories.repository';
 import { Territory } from '../../../models/territory';
 import { TerritoryVisitHistory } from '../../../models/territory-visit-history';
 import {
@@ -191,7 +191,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
     );
   }
 
-  update(territory: Territory): Observable<void> {
+  update(territory: TerritoryUpdate): Observable<void> {
     const territoryDocRef = doc(this.territoriesCollection, `${territory.id}`);
     // History will be a collection in FireStore
     const { history, ...territoryWithoutHistory } = {
@@ -199,7 +199,7 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
     };
 
     if (history && history.length) {
-      territoryWithoutHistory.recentHistory = history.sort((a, b) => a.date.getTime() - b.date.getTime()).slice(-5);
+      territoryWithoutHistory.recentHistory = [...history].sort((a, b) => a.date.getTime() - b.date.getTime()).slice(-5);
     }
 
     const territoryCopy = structuredClone(territoryWithoutHistory);
@@ -233,6 +233,35 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
   delete(id: string): Observable<void> {
     const deletePromise = deleteDoc(doc(this.territoriesCollection, id));
     return from(deletePromise);
+  }
+
+  batchDelete(ids: string[]): Observable<void> {
+    if (!ids || ids.length === 0) {
+      return of(undefined);
+    }
+
+    return defer(() =>
+      from(
+        (async () => {
+          const historySnapshots = await Promise.all(
+            ids.map((id) => getDocs(this.getTerritoryHistoryCollection(id))),
+          );
+
+          await runTransaction(this.firestore, async (transaction) => {
+            for (const snapshot of historySnapshots) {
+              for (const historyDoc of snapshot.docs) {
+                transaction.delete(historyDoc.ref);
+              }
+            }
+
+            for (const id of ids) {
+              const territoryDocRef = doc(this.territoriesCollection, `${id}`);
+              transaction.delete(territoryDocRef);
+            }
+          });
+        })(),
+      ),
+    );
   }
 
   getTerritoryVisitHistory(id: string): Observable<TerritoryVisitHistory[]> {
@@ -299,12 +328,10 @@ export class FirebaseTerritoryDatasourceService implements TerritoryRepository, 
           return EMPTY;
         }
 
-        const updatedTerritory: Territory = {
-          ...territoryCopy,
+        return this.update({
+          id: territoryCopy.id,
           recentHistory: territoryCopy?.recentHistory?.filter((h) => h.id !== historyId),
-        };
-
-        return this.update(updatedTerritory);
+        });
       }),
     );
 

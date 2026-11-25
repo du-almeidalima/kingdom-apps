@@ -26,7 +26,9 @@ No component, page, or BO calls `collection()`/`collectionData$()` directly. All
 
 - `users` **create is denied** — `provisionUserFromInvite` (Admin SDK, bypasses rules) is the only creation path, so roles can't be forged client-side.
 - Helpers: `callerRoleIn()`, `sameCongregationAsCaller()`, `isProtectedRole()`, `unchanged()`.
-- Deliberately public: `designations`, `territories` (+ `history` subcollection read/update), `invitation_links` (read), `congregations` (read). Catch-all: auth-only, excluding `logs`/`users`.
+- `notifications`: any signed-in user reads; create/update/delete and `acknowledgments/{docId}` read/delete are `APP_ADMIN` only. A signed-in user may create/update only `acknowledgments/summary` and only their own `users.{uid}` key.
+- `users/{uid}/notifications/{id}`: owner read/write only (`isSelf`).
+- Deliberately public: `designations`, `territories` (+ `history` subcollection read/update), `invitation_links` (read), `congregations` (read). Catch-all: auth-only, excluding `logs`/`users`/`designations_header`/`congregations`/`notifications`.
 - Deploy rules **after** functions; indexes live in `firestore.indexes.json`.
 
 ## Query limits

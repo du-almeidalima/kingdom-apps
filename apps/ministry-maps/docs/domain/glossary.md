@@ -8,28 +8,7 @@ Portuguese strings. This file is the shared vocabulary; screen-specific labels l
 
 ## 1. Domain vocabulary
 
-| pt-BR (UI / user speech)             | English (code)          | Meaning                                                                          |
-| ------------------------------------ | ----------------------- | -------------------------------------------------------------------------------- |
-| Território                           | `Territory`             | A household/address to visit. **Not** a map area — one `Territory` ≈ one door.   |
-| Endereço                             | `address`               | Street address of the territory.                                                 |
-| Cidade                               | `city`                  | City the territory belongs to; also the grouping key for ordering and filtering. |
-| Nota / Observação                    | `note`                  | Free-text note about the household.                                              |
-| Designação                           | `Designation`           | A shareable list of territories assigned to a publisher for a period.            |
-| Designar                             | assign                  | The act of creating a designation.                                               |
-| Visita                               | `TerritoryVisitHistory` | A recorded contact attempt at a territory.                                       |
-| Revisita                             | `isRevisit`             | A return visit that the householder agreed to.                                   |
-| Resultado da visita                  | `visitOutcome`          | Outcome of the contact attempt (4 selectable options).                           |
-| Estudante da Bíblia / Estudo bíblico | `isBibleStudent`        | Territory that is an ongoing bible study.                                        |
-| Instrutor                            | `bibleInstructor`       | User id of the publisher conducting the study.                                   |
-| Congregação                          | `Congregation`          | Tenant of the system; owns cities, users, territories.                           |
-| Publicador                           | `PUBLISHER`             | Regular member who receives designations.                                        |
-| Organizador                          | `ORGANIZER`             | Organises field-service group work.                                              |
-| Ancião                               | `ELDER`                 | Elder.                                                                           |
-| Superintendente                      | `SUPERINTENDENT`        | Circuit-level oversight; may switch congregation.                                |
-| Pessoas                              | users                   | The `/users` screen is labelled "Pessoas" (people), not "usuários".              |
-| Convite / Link de Convite            | `InvitationLink`        | Single-use onboarding link that grants a role.                                   |
-| Mudou de endereço                    | `MOVED` outcome         | The householder moved away.                                                      |
-| Alerta                               | alert / badge           | Attention marker on a territory list item.                                       |
+Canonical domain definitions and preferred terminology live in [`../../GLOSSARY.md`](../../GLOSSARY.md) (mapped from the workspace root [`/GLOSSARY-MAP.md`](../../../../GLOSSARY-MAP.md)). This document retains only the verbatim UI label and E2E selector dictionary below.
 
 ---
 
@@ -46,12 +25,28 @@ Shared components, so these strings appear on many screens.
 | `Bem-Vindo {firstName}!`                                        | `/home` heading                         | first token of `User.name`                     |
 | `Designar Territórios`                                          | `/home` card title **and** link         | → `/territories/assign`                        |
 | `Crie listas com territórios e compartilhe com os publicadores` | `/home` card subtitle                   |                                                |
-| `Administrar Territórios`                                       | `/home` link                            | → `/territories`                               |
-| `Estatísticas Territórios`                                      | `/home` link                            | → `/territories/statistics`                    |
-| `Pessoas`                                                       | `/home` card title                      |                                                |
-| `Administrar pessoas associadas a sua congregação`              | `/home` card subtitle                   |                                                |
-| `Administrar Pessoas`                                           | `/home` link                            | → `/users`                                     |
-| `Criar Link de Convite`                                         | `/users` floating action button `title` | `ADMIN` only                                   |
+| `Territórios`                                                   | `/home` link and `/territories` heading | → `/territories`                               |
+| `Estatísticas`                                                  | `/home` link                            | → `/territories/statistics`                    |
+| `Histórico de Designações`                                      | `/home` link                            | → `/territories/designations`                  |
+| `Congregação`                                                   | `/home` card title, link, and `/congregation` heading | link → `/congregation` (`ADMIN` / `APP_ADMIN` only) |
+| `Administrar congregação e publicadores`                        | `/home` card subtitle                   |                                                |
+| `Pessoas`                                                       | `/home` link and `/congregation/users` heading | → `/congregation/users`                        |
+| `Adicionar Congregação`                                         | `/congregation` button & dialog title   | `APP_ADMIN` only                               |
+| `Nome da Congregação`                                           | `/congregation` name-card caption       | name is edited through the adjacent pencil icon |
+| `Cidades`                                                       | `/congregation` card heading            | cities show a per-city territory count          |
+| `Arraste para reordenar`                                        | `/congregation` cities hint             | drag a city row to change its order              |
+| `Adicionar`                                                     | `/congregation` city-row button         | appends a new city to the congregation         |
+| `Remover Cidade`                                                | `/congregation` dialog title            | final city removal confirmation dialog         |
+| `Transferir para outra cidade` / `Excluir territórios`          | `Remover Cidade` dialog choice tiles    | resolution choices; a warning summarizes the effect |
+| `Transferir territórios` / `Excluir cidade e territórios`       | `Remover Cidade` dialog confirm button | label and primary/danger style follow the choice |
+| `Contatados` / `Ninguém atendeu` / `Mudaram` / `Não visitar` / `Revisita` | Designations history outcome labels | Short labels for visit outcomes. |
+| `Notificações`                                          | `/home` card title and link; `/notifications` heading | `APP_ADMIN` only → `/notifications` |
+| `Nova Notificação`                                      | `/notifications` action; `/notifications/new` heading | `APP_ADMIN` only                    |
+| `Pré-visualizar`                                        | `/notifications/new` and detail screen buttons | opens the responsive notification dialog              |
+| `Ativa` / `Inativa`                                     | notification list and detail status badge | `ACTIVE` / `INACTIVE`                               |
+| `Encerrar` / `Ativar`                                   | detail screen status toggle button      | `Encerrar` while `Ativa`, `Ativar` while `Inativa`  |
+| `Excluir Notificação`                                   | detail screen confirm dialog title      | removes the notification and its acknowledgments    |
+| `Criar Link de Convite`                                         | `/congregation/users` FAB `title`       | `ADMIN` only                                   |
 
 ## 3. Visit dialog labels (`Concluir Visita` / `Editar Visita`)
 
@@ -102,8 +97,7 @@ Used in the manage dialog, the CSV export and the list item's accessible text.
 
 ## 6. Writing selectors against pt-BR text
 
-- Prefer `data-testid` where it exists (only four exist today — see
-  [`../testability-gaps.md`](../testability-gaps.md)).
+- Prefer `data-testid` where it exists, or the shared page objects under `apps/ministry-maps/e2e/page-objects/`.
 - Otherwise use accessible-name queries with the **verbatim** string:
   `page.getByRole('button', { name: 'Concluir' })`.
 - Accents matter: `Ninguém`, `Ancião`, `Estatísticas`, `Congregação`. Never normalise them.
@@ -120,6 +114,6 @@ Used in the manage dialog, the CSV export and the list item's accessible text.
 - `apps/ministry-maps/src/app/features/home/pages/home-page/home-page.component.html`
 - `apps/ministry-maps/src/app/features/work/components/work-item-complete-dialog/work-item-complete-dialog.component.ts`
 - `apps/ministry-maps/src/app/shared/pipes/territory-icon-translator/territory-icon-translator.pipe.ts`
-- `apps/ministry-maps/src/app/features/users/pages/users-page/users-page.component.html`
+- `apps/ministry-maps/src/app/features/congregation/pages/users-page/users-page.component.html`
 - `libs/common-ui/src/lib/components/confirm-dialog/confirm-dialog.component.ts`
 - `apps/ministry-maps/src/models/enums/role.ts`

@@ -1,8 +1,12 @@
 import { AssignTerritoriesPageComponent } from './assign-territories-page.component';
 import { MockBuilder, MockInstance, MockRender, ngMocks } from 'ng-mocks';
 import { EMPTY, Subject, of, throwError } from 'rxjs';
+import { signal } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 import { ConfirmDialogComponent, ToasterService } from '@kingdom-apps/common-ui';
+import { CityLocatorService } from '../../../../shared/services/city-locator/city-locator.service';
+import { UserStateService } from '../../../../state/user.state.service';
+import { ALL_OPTION } from '../../../../shared/utils/territories-filter-pipe';
 
 import { TerritoryAlertsBO } from '../../bo/territory-alerts/territory-alerts.bo';
 import { DesignationsHeaderBO } from '../../bo/designations-header/designations-header.bo';
@@ -15,6 +19,8 @@ import {
   mockTerritory2,
   designationsHeaderMockBuilder,
   congregationMock,
+  userMockBuilder,
+  TerritoryRepositoryMock,
 } from '../../../../../test/mocks';
 import { MOCK_REPOSITORIES_PROVIDERS } from '../../../../../test/mocks/providers/mock-repositories-providers';
 
@@ -59,6 +65,7 @@ describe('AssignTerritoriesPageComponent', () => {
 
   afterEach(() => {
     openSpy.mockRestore();
+    jest.restoreAllMocks();
   });
 
   const render = (): {
@@ -90,6 +97,104 @@ describe('AssignTerritoriesPageComponent', () => {
     const fixture = MockRender(AssignTerritoriesPageComponent);
 
     expect(fixture.point.componentInstance).toBeTruthy();
+  });
+
+  it('initializes selectedCity from CityLocatorService', () => {
+    const { component } = render();
+
+    expect(component.selectedCity()).toBe('City 1');
+  });
+
+  it('renders loading spinner and defers territory fetch while locator is loading', () => {
+    const getAllByCitiesSpy = jest.spyOn(TerritoryRepositoryMock.prototype, 'getAllByCongregationAndCities');
+    const getAllSpy = jest.spyOn(TerritoryRepositoryMock.prototype, 'getAllByCongregation');
+
+    MockInstance(CityLocatorService, () => ({
+      isLoading: signal(true),
+      resolvedCity: signal<string | null>(null),
+    }));
+
+    const { fixture } = render();
+
+    expect(ngMocks.find(fixture, '[data-testid="assign-loading"]')).toBeTruthy();
+    expect(ngMocks.findAll(fixture, '[data-testid="assign-territory-list"]')).toHaveLength(0);
+    expect(getAllByCitiesSpy).not.toHaveBeenCalled();
+    expect(getAllSpy).not.toHaveBeenCalled();
+  });
+
+  it('waits for in-flight locator to resolve before fetching territories once with the resolved city', () => {
+    const getAllByCitiesSpy = jest.spyOn(TerritoryRepositoryMock.prototype, 'getAllByCongregationAndCities');
+    const isLocatorLoading = signal(true);
+    const resolvedCity = signal<string | null>(null);
+
+    MockInstance(CityLocatorService, () => ({
+      isLoading: isLocatorLoading,
+      resolvedCity,
+    }));
+
+    const { fixture, component } = render();
+
+    expect(ngMocks.find(fixture, '[data-testid="assign-loading"]')).toBeTruthy();
+    expect(getAllByCitiesSpy).not.toHaveBeenCalled();
+
+    isLocatorLoading.set(false);
+    resolvedCity.set('City 2');
+    fixture.detectChanges();
+
+    expect(component.selectedCity()).toBe('City 2');
+    expect(getAllByCitiesSpy).toHaveBeenCalledTimes(1);
+    expect(getAllByCitiesSpy).toHaveBeenCalledWith(congregationMock.id, ['City 2']);
+    expect(ngMocks.findAll(fixture, '[data-testid="assign-loading"]')).toHaveLength(0);
+    expect(ngMocks.find(fixture, '[data-testid="assign-territory-list"]')).toBeTruthy();
+  });
+
+  it('fetches all congregation territories when congregation has empty cities array', () => {
+    const getAllSpy = jest.spyOn(TerritoryRepositoryMock.prototype, 'getAllByCongregation');
+    const getAllByCitiesSpy = jest.spyOn(TerritoryRepositoryMock.prototype, 'getAllByCongregationAndCities');
+    const emptyCitiesCongregation = { ...congregationMock, cities: [] };
+    const userWithEmptyCities = userMockBuilder({ congregation: emptyCitiesCongregation });
+
+    MockInstance(UserStateService, () => ({
+      currentUser: userWithEmptyCities,
+      user: signal(userWithEmptyCities),
+    }));
+    MockInstance(CityLocatorService, () => ({
+      isLoading: signal(false),
+      resolvedCity: signal<string | null>(ALL_OPTION),
+    }));
+
+    const { component, fixture } = render();
+    fixture.detectChanges();
+
+    expect(component.selectedCity()).toBe(ALL_OPTION);
+    expect(getAllSpy).toHaveBeenCalledTimes(1);
+    expect(getAllSpy).toHaveBeenCalledWith(congregationMock.id);
+    expect(getAllByCitiesSpy).not.toHaveBeenCalled();
+    expect(ngMocks.find(fixture, '[data-testid="assign-territory-list"]')).toBeTruthy();
+  });
+
+  it('does not overwrite user city selection when resolvedCity updates after initial fetch', () => {
+    const getAllByCitiesSpy = jest.spyOn(TerritoryRepositoryMock.prototype, 'getAllByCongregationAndCities');
+    const resolvedCity = signal<string | null>('City 1');
+
+    MockInstance(CityLocatorService, () => ({
+      isLoading: signal(false),
+      resolvedCity,
+    }));
+
+    const { component, fixture } = render();
+    fixture.detectChanges();
+
+    expect(component.selectedCity()).toBe('City 1');
+    expect(getAllByCitiesSpy).toHaveBeenCalledTimes(1);
+
+    component.handleSelectedCityChange('City 2');
+    resolvedCity.set('City 3');
+    fixture.detectChanges();
+
+    expect(component.selectedCity()).toBe('City 2');
+    expect(getAllByCitiesSpy).toHaveBeenCalledTimes(2);
+    expect(getAllByCitiesSpy).toHaveBeenLastCalledWith(congregationMock.id, ['City 2']);
   });
 
   it('resumes the congregation session stream on init', () => {

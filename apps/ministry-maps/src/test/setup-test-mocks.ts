@@ -1,26 +1,36 @@
 import { MockService, ngMocks } from 'ng-mocks';
 import { UserStateService } from '../app/state/user.state.service';
-import { CongregationRepositoryMock, organizerUserStateServiceMock, UserRepositoryMock } from './mocks';
+import {
+  AuthRepositoryMock,
+  CongregationRepositoryMock,
+  DesignationRepositoryMock,
+  DesignationsHeaderRepositoryMock,
+  InvitationLinkRepositoryMock,
+  organizerUserStateServiceMock,
+  TerritoryRepositoryMock,
+  UserRepositoryMock,
+} from './mocks';
 import { CongregationRepository } from '../app/repositories/congregation.repository';
 import { DefaultTitleStrategy, TitleStrategy } from '@angular/router';
 
 import { TerritoryRepository } from '../app/repositories/territories.repository';
-import { TerritoryRepositoryMock } from './mocks/models/territory.mock';
 import { AuthRepository } from '../app/repositories/auth.repository';
-import { AuthRepositoryMock } from './mocks/models/auth.mock';
 import { DesignationRepository } from '../app/repositories/designation.repository';
-import { DesignationRepositoryMock } from './mocks/models/designation.mock';
 import { DesignationsHeaderRepository } from '../app/repositories/designations-header.repository';
-import { DesignationsHeaderRepositoryMock } from './mocks/models/designations-header.mock';
 import { UserRepository } from '../app/repositories/user.repository';
 import { InvitationLinkRepository } from '../app/repositories/invitation-link.repository';
-import { InvitationLinkRepositoryMock } from './mocks/models/invitation-link.mock';
+import { CityLocatorService } from '../app/shared/services/city-locator/city-locator.service';
+import { signal } from '@angular/core';
 
 // auto spy
 ngMocks.autoSpy('jest');
 
 ngMocks.defaultMock([TitleStrategy], () => MockService(DefaultTitleStrategy));
 ngMocks.defaultMock([UserStateService], () => organizerUserStateServiceMock);
+ngMocks.defaultMock([CityLocatorService], () => ({
+  isLoading: signal(false),
+  resolvedCity: signal<string | null>('City 1'),
+}));
 ngMocks.defaultMock([UserRepository], () => new UserRepositoryMock());
 ngMocks.defaultMock([CongregationRepository], () => new CongregationRepositoryMock());
 ngMocks.defaultMock([TerritoryRepository], () => new TerritoryRepositoryMock());

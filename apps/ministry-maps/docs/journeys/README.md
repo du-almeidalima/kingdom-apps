@@ -5,7 +5,7 @@ and **multiple identities**, asserting both the DOM and Firestore at every hand-
 app's real value is proven end-to-end (e.g. "an admin assigns, a publisher works, an elder verifies").
 
 Each journey becomes **one spec file** under `e2e/tests/` (suggested names are listed per journey and in
-[`../test-catalog.md`](../test-catalog.md)); the `test()` title starts with the journey ID
+the table below); the `test()` title starts with the journey ID
 (`test('J-02 — visit feedback loop to elder', ...)`) and the steps inside reference the composed UC IDs in
 comments. Splitting a journey into several `test()` blocks is acceptable **only** if each block re-establishes
 its own seed (remember: `resetAndSeed` wipes the emulators before every test — state never carries over
@@ -63,17 +63,16 @@ the default `page`) — prefer sequential legs unless a journey explicitly calls
   2. **The WhatsApp popup URL:** `page.waitForEvent('popup')` after submitting on `/territories/assign`,
      then decode the `text=` query param (UC-ASSIGN-19). Use this when the journey also wants to prove the
      share-link composition itself; otherwise prefer Firestore.
-- The WhatsApp deep link, the real Google OAuth popup, and a mobile device are **out of scope** — see
-  [`../testability-gaps.md`](../testability-gaps.md). Manual-only legs inside a journey are marked
-  `✋ MANUAL-ONLY` and the automated alternative/simulation is stated right next to them.
+- The WhatsApp deep link, the real Google OAuth popup, and a mobile device are **out of scope** (see
+  [`../../e2e/README.md`](../../e2e/README.md) and [`../../e2e/MANUAL-ACCEPTANCE.md`](../../e2e/MANUAL-ACCEPTANCE.md)).
+  Manual-only legs inside a journey are marked `✋ MANUAL-ONLY` and the automated alternative/simulation is
+  stated right next to them.
 
 ### 4. Seed discipline
 
 - Every journey states its full seed up front, in harness vocabulary (`seed.factories.build*`,
-  `seed.write`, `DEFAULT_SEED_IDS`). Anything the harness cannot express yet (a second congregation admin,
-  an `ELDER` identity, an invitation link) is marked `⚙ HARNESS-EXTENSION` and cross-referenced in
-  [`../test-catalog.md#harness-extensions-needed`](../test-catalog.md#harness-extensions-needed); the
-  interim workaround is written out inline, so the journey is executable today.
+  `seed.write`, `DEFAULT_SEED_IDS`). Harness extensions (such as additional roles, second-congregation
+  identities, or invitation links) are documented in [`../../e2e/README.md`](../../e2e/README.md).
 - `/work/:id` seeds must override `history: []` (or real entries) on **every** `buildDesignationTerritory`
   — the factory default omits `history` and crashes the page's read converter (UC-WORK-04).
 

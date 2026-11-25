@@ -1,0 +1,70 @@
+@use 'apps/ministry-maps/src/styles/components/panel' as *;
+@use 'libs/common-ui/src/lib/styles/abstract/breakpoints' as bp;
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+
+:host {
+  display: block;
+}
+
+.notification-category {
+  font-weight: 600;
+}
+
+.acknowledgment-group {
+  @extend .panel;
+  padding: 0;
+  overflow: hidden;
+
+  &__heading {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  &__name {
+    font-weight: 600;
+  }
+
+  &__entries {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+}
+
+.acknowledgment {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.4rem;
+  border-top: 1px solid var(--kui-color-border, #{variables.$light-grey-200});
+
+  &__person {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  &__name {
+    font-weight: 500;
+  }
+
+  &__date {
+    flex-shrink: 0;
+    text-align: right;
+  }
+}
+
+@include bp.mobile-only {
+  .acknowledgment {
+    align-items: flex-start;
+    flex-direction: column;
+
+    &__date {
+      text-align: left;
+    }
+  }
+}

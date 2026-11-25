@@ -1,7 +1,7 @@
 import { expect, Locator, Page } from '@playwright/test';
 
 /**
- * Page object for the `/users` route.
+ * Page object for the `/congregation/users` route.
  *
  * Each row is a `kingdom-apps-user-list-item` component exposing three testids:
  * `user-list-item` (root), `user-item-initials` (figure), `user-item-role-badge`
@@ -27,7 +27,7 @@ export class UsersPage {
 
   /** Navigate to the users page and wait for the list container to render. */
   async goto(): Promise<void> {
-    await this.page.goto('/users');
+    await this.page.goto('/congregation/users');
     await expect(this.list).toBeVisible();
   }
 

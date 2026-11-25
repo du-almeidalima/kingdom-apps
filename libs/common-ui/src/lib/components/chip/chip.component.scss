@@ -1,0 +1,44 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+
+:host {
+  display: inline-block;
+}
+
+.chip {
+  &__remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    margin-right: -0.4rem;
+    padding: 0.2rem;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--kui-color-text-muted, #{variables.$text-medium});
+    cursor: pointer;
+    transition: variables.$background-transition;
+
+    &:hover,
+    &:active {
+      background-color: var(--kui-color-surface-hover, #{variables.$white-300});
+      color: var(--kui-color-text, #{variables.$text});
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--kui-color-focus, #{variables.$primary-green});
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      color: var(--kui-color-text-disabled, #{variables.$text-low});
+      cursor: not-allowed;
+    }
+  }
+
+  &__remove-icon {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+}

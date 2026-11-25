@@ -36,7 +36,28 @@ service cloud.firestore {
 
     match /congregations/{document=**} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow create: if callerRoleIn(['APP_ADMIN']);
+      allow update, delete: if request.auth != null;
+    }
+
+    // App-wide notifications: every signed-in user reads them; only APP_ADMIN manages them.
+    // The acknowledgments summary is readable and deletable by APP_ADMIN only; a signed-in user may
+    // only write their own `users.{uid}` entry, touching no other key.
+    match /notifications/{notificationId} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if callerRoleIn(['APP_ADMIN']);
+
+      match /acknowledgments/{docId} {
+        allow read, delete: if callerRoleIn(['APP_ADMIN']);
+        allow create: if request.auth != null
+          && docId == 'summary'
+          && request.resource.data.users.keys().hasOnly([request.auth.uid])
+          && request.resource.data.users[request.auth.uid].userId == request.auth.uid;
+        allow update: if request.auth != null
+          && docId == 'summary'
+          && request.resource.data.users.diff(resource.data.users).affectedKeys().hasOnly([request.auth.uid])
+          && request.resource.data.users[request.auth.uid].userId == request.auth.uid;
+      }
     }
 
     // Logs: writable by anyone (client logging), readable by APP_ADMIN only.
@@ -79,6 +100,11 @@ service cloud.firestore {
           && sameCongregationAsCaller(resource.data)
           && !isProtectedRole(resource.data.role)
         ) || callerRoleIn(['APP_ADMIN']);
+
+      // Acknowledged-notification history: each user's own snapshots only.
+      match /notifications/{notificationId} {
+        allow read, write: if isSelf(userId);
+      }
     }
 
     // `designations_header` (resumable-assignment cycle headers) is internal congregational
@@ -90,15 +116,38 @@ service cloud.firestore {
         && (callerRoleIn(['APP_ADMIN']) || isCallerInCongregation(request.resource.data.congregationId));
       allow update, delete: if request.auth != null
         && (callerRoleIn(['APP_ADMIN']) || isCallerInCongregation(resource.data.congregationId));
+
+      // Cycle progress aggregation (subcollection).
+      // Reading requires congregation membership (non-existent docs return empty without 403).
+      // Anonymous publishers holding a designation link may only update `territories`; signed-in
+      // users from another congregation get no anonymous path.
+      match /progress/{progressId} {
+        allow read: if request.auth != null
+          && (resource == null || callerRoleIn(['APP_ADMIN']) || isCallerInCongregation(resource.data.congregationId));
+        allow create: if request.auth != null
+          && (callerRoleIn(['APP_ADMIN']) || isCallerInCongregation(request.resource.data.congregationId));
+        allow update: if (
+            request.auth != null
+            && (callerRoleIn(['APP_ADMIN']) || isCallerInCongregation(resource.data.congregationId))
+          ) || (
+            request.auth == null
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['territories'])
+          );
+        allow delete: if request.auth != null
+          && (callerRoleIn(['APP_ADMIN']) || isCallerInCongregation(resource.data.congregationId));
+      }
     }
 
-    // Catch-all for every other collection. `logs`, `users`, and `designations_header` are excluded
-    // so the dedicated rules above stay their only granters (rules union grants, they never subtract).
+    // Catch-all for every other collection. `logs`, `users`, `designations_header`, `congregations`, and
+    // `notifications` are excluded so the dedicated rules above stay their only granters (rules union grants,
+    // they never subtract).
     match /{collectionId}/{document=**} {
       allow read, write: if request.auth != null
         && collectionId != 'logs'
         && collectionId != 'users'
-        && collectionId != 'designations_header';
+        && collectionId != 'designations_header'
+        && collectionId != 'congregations'
+        && collectionId != 'notifications';
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────────────

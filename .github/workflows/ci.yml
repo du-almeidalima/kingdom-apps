@@ -36,7 +36,7 @@ jobs:
       # Prepend any command with "nx-cloud record --" to record its logs to Nx Cloud
       # - run: npx nx-cloud record -- echo Hello World
       # Nx Affected runs only tasks affected by the changes in this PR/commit. Learn more: https://nx.dev/ci/features/affected
-      - run: npx nx affected -t test --no-cloud
+      - run: npx nx affected -t lint test build --no-cloud
 
   # E2E job: Playwright against the Firebase emulators. Deliberately NOT a
   # dependency of `deploy` — a flaky browser run must never block a release.

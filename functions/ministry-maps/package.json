@@ -12,7 +12,8 @@
     "logs": "firebase functions:log",
     "test": "jest",
     "backfill:ttl": "node lib/scripts/backfill-ttl.js",
-    "backfill:history-stamps": "node lib/scripts/backfill-territory-history-stamps.js"
+    "backfill:history-stamps": "node lib/scripts/backfill-territory-history-stamps.js",
+    "backfill:designations-progress": "node lib/scripts/backfill-designations-progress.js"
   },
   "engines": {
     "node": "22"

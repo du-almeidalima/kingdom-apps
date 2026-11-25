@@ -1,0 +1,9 @@
+@use 'libs/common-ui/src/lib/styles/abstract/variables';
+
+.panel {
+  border: 1px solid var(--kui-color-border, #{variables.$light-grey-200});
+  border-radius: 6px;
+  background: var(--kui-color-surface, #{variables.$white-100});
+  box-shadow: none;
+  padding: 1.6rem;
+}

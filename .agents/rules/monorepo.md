@@ -27,4 +27,4 @@ Cross-project imports use `@kingdom-apps/common-ui` → `libs/common-ui/src/inde
 
 ## CI quick facts
 
-Test gate is `npx nx affected -t test`; deployment runs only from `main` (see `.agents/rules/deployment.md`).
+Main gate is `npx nx affected -t lint test build`; deployment runs only from `main` (see `.agents/rules/deployment.md`).

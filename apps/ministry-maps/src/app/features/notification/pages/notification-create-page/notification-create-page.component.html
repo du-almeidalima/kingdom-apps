@@ -1,0 +1,92 @@
+<div class="container">
+  <h2 class="t-headline2 mb-8" data-testid="notification-create-heading">Nova Notificação</h2>
+
+  <form id="notification-form" [formGroup]="form" (ngSubmit)="handlePublish()" data-testid="notification-form">
+    <lib-form-field>
+      <label lib-label for="notification-category">Categoria</label>
+      <select
+        lib-select
+        formControlName="category"
+        id="notification-category"
+        data-testid="notification-category-select"
+      >
+        @for (category of categories; track category) {
+          <option [value]="category">{{ presets[category].label }}</option>
+        }
+      </select>
+    </lib-form-field>
+
+    <lib-form-field class="mt-5">
+      <label lib-label for="notification-title">Título</label>
+      <input
+        lib-input
+        formControlName="title"
+        type="text"
+        id="notification-title"
+        data-testid="notification-title-input"
+      />
+    </lib-form-field>
+
+    <lib-form-field class="mt-5">
+      <label lib-label for="notification-content">Conteúdo (Markdown)</label>
+      <textarea
+        lib-input
+        formControlName="content"
+        id="notification-content"
+        class="notification-markdown"
+        data-testid="notification-content-input"
+      ></textarea>
+    </lib-form-field>
+
+    <lib-form-field class="mt-5">
+      <label lib-label for="notification-action-label">Texto do botão</label>
+      <input
+        lib-input
+        formControlName="actionLabel"
+        type="text"
+        id="notification-action-label"
+        data-testid="notification-action-label-input"
+      />
+    </lib-form-field>
+
+    <lib-form-field class="mt-5">
+      <span lib-label id="notification-roles-label">Visível para</span>
+      <lib-multi-select-chips
+        formControlName="targetRoles"
+        aria-labelledby="notification-roles-label"
+        [options]="roleOptions"
+      />
+      @if (form.controls.targetRoles.value.length === 0) {
+        <p class="t-caption t-low-emphasis mt-3" data-testid="notification-roles-hint">
+          Nenhum papel selecionado — todos os usuários verão esta notificação.
+        </p>
+      }
+    </lib-form-field>
+  </form>
+
+  <div class="flex justify-end gap-4 mt-8">
+    <button
+      lib-button
+      type="button"
+      data-testid="notification-preview-button"
+      [disabled]="form.controls.title.invalid || form.controls.content.invalid"
+      (click)="handlePreview()"
+    >
+      Pré-visualizar
+    </button>
+    <button
+      lib-button
+      btnType="primary"
+      type="submit"
+      form="notification-form"
+      data-testid="notification-publish-button"
+      [disabled]="form.invalid || isSubmitting()"
+    >
+      @if (isSubmitting()) {
+        <lib-spinner height="1.75rem" width="1.75rem" />
+      } @else {
+        Publicar
+      }
+    </button>
+  </div>
+</div>

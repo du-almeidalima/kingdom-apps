@@ -8,6 +8,7 @@ import {
   orderBy,
   query,
   setDoc,
+  startAfter,
   Timestamp,
   updateDoc,
   where,
@@ -88,6 +89,21 @@ export class FirebaseDesignationsHeaderDatasourceService
     );
 
     return collectionData$<DesignationsHeader>(q).pipe(map((headers) => headers[0]));
+  }
+
+  getPageByCongregation(congregationId: string, pageSize: number, startAfterCreatedAt?: Date): Observable<DesignationsHeader[]> {
+    const q = query(
+      this.designationsHeaderCollection,
+      where('congregationId', '==', congregationId),
+      orderBy('createdAt', 'desc'),
+      ...(startAfterCreatedAt ? [startAfter(Timestamp.fromDate(startAfterCreatedAt))] : []),
+      limit(pageSize),
+    );
+    return from(getDocs(q)).pipe(map((snapshot) => snapshot.docs.map((item) => item.data())));
+  }
+
+  getById(id: string): Observable<DesignationsHeader | undefined> {
+    return docData$<DesignationsHeader>(doc(this.designationsHeaderCollection, id));
   }
 
   add(header: Omit<DesignationsHeader, 'id'>): Observable<DesignationsHeader> {

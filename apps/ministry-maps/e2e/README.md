@@ -52,6 +52,8 @@ apps/ministry-maps/e2e/
 │   ├── territory-alerts.page.ts   # territory alert-resolution dialogs
 │   ├── assign-territories.page.ts # /territories/assign locators
 │   ├── statistics.page.ts        # /territories/statistics locators
+│   ├── designations-history.page.ts # /territories/designations locators
+│   ├── designations-history-details.page.ts # designation history detail locators
 │   ├── confirm-dialog.page.ts    # shared confirm-dialog overlay
 │   ├── history-dialog.page.ts    # shared visit-history dialog
 │   ├── sort-filter-dialog.page.ts # shared sort/filter trigger + dialog
@@ -64,11 +66,11 @@ apps/ministry-maps/e2e/
 │   ├── home.page.ts              # home hub
 │   ├── work.page.ts              # receiving designation page
 │   ├── work-item-complete-dialog.page.ts # visit completion/edit dialog
-│   ├── users.page.ts             # /users list locators
+│   ├── users.page.ts             # /congregation/users list locators
 │   ├── user-edit-dialog.page.ts  # user edit overlay
 │   ├── invite-create-dialog.page.ts # invite link creation overlay
 │   ├── profile.page.ts           # /profile locators
-│   └── configuration.page.ts     # /configuration locators
+│   └── congregation.page.ts     # /congregation locators
 └── tests/
     ├── smoke.spec.ts             # baseline integrity checks
     ├── auth.spec.ts              # auth rendering, guards, and session lifecycle
@@ -80,6 +82,7 @@ apps/ministry-maps/e2e/
     ├── territories-alerts.spec.ts # territory badges, history, and alerts
     ├── territories-export.spec.ts # CSV export and role gating
     ├── territories-assign.spec.ts # designation selection, creation, and sharing
+    ├── territories-designations-history.spec.ts # UC-HIST list, progress, access, and live updates
     ├── territories-statistics.spec.ts # territory metrics and period filters
     ├── work-designation.spec.ts  # receive, complete, edit, undo, and expiry paths
     ├── users.spec.ts             # user management & role editing specs
@@ -138,6 +141,9 @@ test('on-demand seeding', async ({ seed, db }) => {
 > `DEFAULT_PASSWORD` (`config/auth.config.ts`) — the single source of truth
 > for the seeded password. Override `password` only when a test needs a
 > different one.
+
+For history scenarios, `buildDesignationsProgress()` returns empty maps with the fixed `summary` id;
+always override its owning `headerId` and `congregationId`.
 
 ### Firestore Storage Contract (critical)
 
@@ -316,8 +322,7 @@ await toast.expectText('Salvo com sucesso');
 
 ## Browser-Interaction Utilities (`utils/`)
 
-Canonical helpers for the browser-level techniques catalogued in
-[`../docs/testability-gaps.md`](../docs/testability-gaps.md) §2 — use them instead of copying boilerplate into specs. All are pure Playwright + Node (no
+Canonical helpers for browser-level interactions — use them instead of copying boilerplate into specs. All are pure Playwright + Node (no
 `test`/`expect` imports), so they also work from fixtures.
 
 | Helper                                               | Technique                                                                                                                                         | Serves                                          |
@@ -364,13 +369,12 @@ npx nx typecheck-e2e ministry-maps
 5. For guarded routes, use the `authenticatedPage` fixture (with
    `test.use({ role })`) or call `signInAs(role)` first.
 
-> **What should I test?** The full behavioural use-case and journey catalog lives in
+> **What should I test?** The full behavioural use-case and journey specifications live in
 > [`../docs`](../docs/README.md) (`UC-<AREA>-NN` entries, `J-NN` journeys, priorities, seed preconditions,
-> Firestore assertions, and the testability-gap list). Start from [`../docs/test-catalog.md`](../docs/test-catalog.md)
-> — test titles should reference the UC/J ID they implement.
+> and Firestore assertions) — test titles should reference the UC/J ID they implement.
 
 ## Out of Scope (Future)
 
-- Fault-injecting targeted Firestore read/write failures (HX-4 is deliberately deferred; see `docs/test-catalog.md`).
-- Exercising the real `signInWithPopup` OAuth flow (manual regression only).
+- Fault-injecting targeted Firestore read/write failures (deliberately deferred; no production test hooks or emulator fault shims added).
+- Exercising the real `signInWithPopup` OAuth flow (manual regression only; see [`MANUAL-ACCEPTANCE.md`](./MANUAL-ACCEPTANCE.md)).
 - Cross-test session reuse (currently sign-in per test).

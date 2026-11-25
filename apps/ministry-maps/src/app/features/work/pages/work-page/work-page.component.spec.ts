@@ -100,6 +100,7 @@ describe('WorkPageComponent', () => {
       const designationUpdate = jest.fn().mockReturnValue(update$);
       const territoryUpdate = jest.fn().mockReturnValue(of(undefined));
       const setVisitHistory = jest.fn().mockReturnValue(of(undefined));
+      const recordTerritoryProgress = jest.fn().mockReturnValue(of(undefined));
 
       TestBed.overrideProvider(DesignationRepository, {
         useValue: {
@@ -116,10 +117,11 @@ describe('WorkPageComponent', () => {
       TestBed.overrideProvider(WorkBO, {
         useValue: {
           updateDesignationTerritoryObject: () => designation,
+          recordTerritoryProgress,
         },
       });
 
-      return { designationUpdate, territoryUpdate, setVisitHistory };
+      return { designationUpdate, territoryUpdate, setVisitHistory, recordTerritoryProgress };
     }
 
     function renderComponent(): WorkPageComponent {
@@ -141,6 +143,11 @@ describe('WorkPageComponent', () => {
 
         expect(spies.designationUpdate).toHaveBeenCalledTimes(1);
         expect(spies.territoryUpdate).toHaveBeenCalledTimes(1);
+        expect(spies.territoryUpdate).toHaveBeenCalledWith({
+          id: designationTerritory.id,
+          lastVisit: expect.any(Date),
+          history: designationTerritory.history,
+        });
         expect(spies.setVisitHistory).toHaveBeenCalledWith(
           designationTerritory.id,
           expect.objectContaining({
@@ -149,6 +156,7 @@ describe('WorkPageComponent', () => {
             territoryId: designationTerritory.id,
           }),
         );
+        expect(spies.recordTerritoryProgress).toHaveBeenCalledWith(designation, designationTerritory);
         expect(alertSpy).not.toHaveBeenCalled();
       } finally {
         jest.useRealTimers();

@@ -5,9 +5,7 @@ identity card, the congregation-switch affordance (`APP_ADMIN`/`SUPERINTENDENT` 
 
 **Route:** `/profile`
 **Actors:** every signed-in role (`PUBLISHER`, `ORGANIZER`, `ELDER`, `ADMIN`, `SUPERINTENDENT`,
-`APP_ADMIN`) reaches the page — there is no redirect for anyone. **Anonymous** visitors also reach it,
-because the route's `data.roles` is `['*']`, which makes `authGuard` return `true` **before** any login
-check (see [`../domain/roles-and-permissions.md §3.1`](../domain/roles-and-permissions.md#31-suspected-defect--roles--short-circuits-the-login-check)).
+`APP_ADMIN`) reaches the page. **Anonymous** visitors are redirected to `/login`.
 Only `APP_ADMIN`/`SUPERINTENDENT` see the congregation-switch card. Field/model shapes referenced below
 are in [`../domain/data-model.md`](../domain/data-model.md); pt-BR ↔ English vocabulary is in
 [`../domain/glossary.md`](../domain/glossary.md).
@@ -36,16 +34,16 @@ are in [`../domain/data-model.md`](../domain/data-model.md); pt-BR ↔ English v
 - **Edge cases:** the congregation-switch card (see `UC-PROF-04`) is absent for this role — `*libAuthorize` clears the `<kingdom-apps-change-congregation>` block since `PUBLISHER` is not in `[APP_ADMIN, SUPERINTENDENT]`
 - **Priority:** P1 · **Gaps:** none
 
-#### UC-PROF-03 — ⚠ Anonymous visit does not redirect and renders placeholder identity content
+#### UC-PROF-03 — Anonymous visit redirects to `/login`
 
 - **Actor:** Anonymous
 - **Route:** `/profile`
 - **Preconditions (seed):** none required; do not sign in
 - **Steps:** 1. `page.goto('/profile')` without calling `signInAs`
-- **Expected UI:** the URL stays `/profile` (no redirect to `/login`) because `authGuard`'s step 1 (`roles.includes('*')`) returns `true` before checking authentication. `user()` (the readonly `UserStateService.user` signal, seeded `null`) is falsy, so the computed signals fall back to their defaults: initials figure reads `XX` (`getUserInitials(undefined)`), name reads `Meu Nome`, congregation subtitle reads `LS Congregação`, badge reads `Publicador` (`getTranslatedRole(RoleEnum.PUBLISHER)` fallback). The congregation-switch card and any `*libAuthorize`-gated block are absent (no user → directive clears content). The `SAIR` logout button still renders and is clickable
-- **Expected persistence:** N/A (no Firestore read happens without a resolved uid); assert `db.getCollectionDocs(db.collections.users)` is unchanged (still the 8 baseline users) to prove no side effect
-- **Edge cases:** do not write a test expecting a `/login` redirect here — that is not current behaviour; the correct assertion is "stays on `/profile` and shows the placeholder strings above"
-- **Priority:** P1 · **Gaps:** `⚠ suspected defect` (tracked in [`../domain/roles-and-permissions.md §3.1`](../domain/roles-and-permissions.md#31-suspected-defect--roles--short-circuits-the-login-check)); no `data-testid`s to assert the placeholder state, must match on the literal fallback strings
+- **Expected UI:** the URL redirects to `/login`
+- **Expected persistence:** N/A; assert `db.getCollectionDocs(db.collections.users)` is unchanged (still the 8 baseline users)
+- **Edge cases:** none
+- **Priority:** P1 · **Gaps:** none
 
 ### Congregation switch (`APP_ADMIN` / `SUPERINTENDENT` only)
 
@@ -163,8 +161,7 @@ are in [`../domain/data-model.md`](../domain/data-model.md); pt-BR ↔ English v
   `APP_ADMIN` scenario in this document (`UC-PROF-05`, `UC-PROF-06`, `UC-PROF-07`, `UC-PROF-08`) needs a new
   seeded user and `ROLE_UIDS` entry before it can be automated end-to-end.
 - Documented current-behaviour-vs-defect items (see the corresponding entry for the assertion to make
-  today): `UC-PROF-03` (anonymous visitor sees placeholder identity content instead of a `/login` redirect),
-  `UC-PROF-07` (no-congregation guard is unreachable dead code from the UI), `UC-PROF-08` (unauthorized
+  today): `UC-PROF-07` (no-congregation guard is unreachable dead code from the UI), `UC-PROF-08` (unauthorized
   congregation-switch error is thrown but never surfaced to the user).
 - `UC-PROF-06` documents a nuance that a future author must not conflate with `UC-CFG-11`: switching
   congregation on `/profile` **does** call `UserStateService.setUser(...)`, so a same-tab navigation

@@ -97,6 +97,6 @@ Commit intentional seed changes that application or test behavior depends on.
 ## Documentation
 
 - [`AGENTS.md`](./AGENTS.md) — repository rules for coding agents.
-- [`apps/ministry-maps/docs/README.md`](./apps/ministry-maps/docs/README.md) — product behavior, domain model, test catalog, and developer follow-ups.
+- [`apps/ministry-maps/docs/README.md`](./apps/ministry-maps/docs/README.md) — product behavior, domain model, and E2E use-case specifications.
 - [`apps/ministry-maps/e2e/README.md`](./apps/ministry-maps/e2e/README.md) — Playwright/Firebase harness and test workflow.
 - [`.agents/rules/`](./.agents/rules) — context-specific implementation and workflow guidance.

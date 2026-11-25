@@ -1,9 +1,11 @@
 import { CongregationRepository } from './congregation.repository';
 import { DesignationRepository } from './designation.repository';
 import { DesignationsHeaderRepository } from './designations-header.repository';
+import { DesignationsProgressRepository } from './designations-progress.repository';
 import { FirebaseCongregationDatasourceService } from './firebase/firebase-congregation-datasource.service';
 import { FirebaseDesignationDatasourceService } from './firebase/firebase-designation-datasource.service';
 import { FirebaseDesignationsHeaderDatasourceService } from './firebase/firebase-designations-header-datasource.service';
+import { FirebaseDesignationsProgressDatasourceService } from './firebase/firebase-designations-progress-datasource.service';
 import { FirebaseTerritoryDatasourceService } from './firebase/firebase-territory-datasource.service';
 import { FirebaseUserDatasourceService } from './firebase/firebase-user-datasource.service';
 import { TerritoryRepository } from './territories.repository';
@@ -12,6 +14,8 @@ import { InvitationLinkRepository } from './invitation-link.repository';
 import { FirebaseInvitationLinkDataSourceService } from './firebase/firebase-invitation-link-datasource.service';
 import { AuthRepository } from './auth.repository';
 import { FirebaseAuthDatasourceService } from './firebase/firebase-auth-datasource.service';
+import { NotificationRepository } from './notification.repository';
+import { FirebaseNotificationDatasourceService } from './firebase/firebase-notification-datasource.service';
 
 export const REPOSITORIES_PROVIDERS = [
   {
@@ -35,11 +39,19 @@ export const REPOSITORIES_PROVIDERS = [
     useClass: FirebaseDesignationsHeaderDatasourceService,
   },
   {
+    provide: DesignationsProgressRepository,
+    useClass: FirebaseDesignationsProgressDatasourceService,
+  },
+  {
     provide: InvitationLinkRepository,
     useClass: FirebaseInvitationLinkDataSourceService,
   },
   {
     provide: AuthRepository,
     useClass: FirebaseAuthDatasourceService,
+  },
+  {
+    provide: NotificationRepository,
+    useClass: FirebaseNotificationDatasourceService,
   },
 ];

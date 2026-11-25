@@ -1,0 +1,44 @@
+<main class="container">
+  <h2 class="t-headline2 mb-8" data-testid="profile-notifications-heading">Notificações</h2>
+
+  @if (isLoading()) {
+    <div class="flex items-center justify-center py-12" data-testid="profile-notifications-loading">
+      <lib-spinner height="4rem" width="4rem" />
+    </div>
+  } @else if (notifications().length > 0) {
+    <ul class="flex flex-col gap-4 m-0 p-0 list-none" data-testid="profile-notifications-list">
+      @for (notification of notifications(); track notification.id) {
+        <li>
+          <button
+            type="button"
+            class="notification-item"
+            data-testid="profile-notification-item"
+            (click)="handleOpen(notification)"
+          >
+            <kingdom-apps-notification-list-item
+              [category]="notification.category"
+              [title]="notification.title"
+              [date]="notification.acknowledgedAt"
+            />
+          </button>
+        </li>
+      }
+    </ul>
+
+    @if (hasMore()) {
+      <button
+        type="button"
+        lib-button
+        btnType="secondary"
+        class="mt-6"
+        data-testid="profile-notifications-load-all"
+        [disabled]="isLoadingAll()"
+        (click)="handleLoadAll()"
+      >
+        Carregar todas
+      </button>
+    }
+  } @else {
+    <p class="t-body2" data-testid="profile-notifications-empty">Nenhuma notificação confirmada.</p>
+  }
+</main>

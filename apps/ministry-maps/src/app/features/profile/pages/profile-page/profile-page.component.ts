@@ -8,6 +8,7 @@ import {
   IconComponent,
 } from '@kingdom-apps/common-ui';
 import { Dialog } from '@angular/cdk/dialog';
+import { RouterLink } from '@angular/router';
 
 import { UserStateService } from '../../../../state/user.state.service';
 import { AuthService } from '../../../../core/features/auth/services/auth.service';
@@ -32,6 +33,7 @@ import { ProfileBO } from '../../bo/profile.bo';
     ButtonComponent,
     IconComponent,
     AuthorizeDirective,
+    RouterLink,
   ],
 })
 export class ProfilePageComponent {

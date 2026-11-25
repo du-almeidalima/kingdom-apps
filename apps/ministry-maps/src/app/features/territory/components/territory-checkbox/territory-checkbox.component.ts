@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, forwardRef, computed, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, forwardRef, inject, input, output, signal } from '@angular/core';
 import { Territory } from '../../../../../models/territory';
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
 import openGoogleMapsHandler from '../../../../shared/utils/open-google-maps';
@@ -86,7 +86,8 @@ import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
                     }"
                     class="territory-checkbox__last-visit-icon"
                     [icon]="
-                      territory().recentHistory![territory().recentHistory!.length - 1].visitOutcome | visitOutcomeToIcon
+                      territory().recentHistory![territory().recentHistory!.length - 1].visitOutcome
+                        | visitOutcomeToIcon
                     "
                     [fillColor]="iconColor"
                   />
@@ -132,7 +133,7 @@ import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
               <lib-icon [fillColor]="buttonIconColor" icon="map-5"></lib-icon>
             </button>
           }
-          @if (territory().recentHistory) {
+          @if (territory().recentHistory?.length) {
             <button lib-icon-button type="button" (click)="handleOpenHistory()">
               <lib-icon [fillColor]="buttonIconColor" icon="time-17"></lib-icon>
             </button>

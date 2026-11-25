@@ -4,6 +4,7 @@ import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { finalize, Observable, retry, switchMap } from 'rxjs';
 
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
+import { TerritoryBO } from '../../bo/territory/territory.bo';
 import { Congregation } from '../../../../../models/congregation';
 import { Territory, TerritoryIcon } from '../../../../../models/territory';
 import {
@@ -182,6 +183,7 @@ type TerritoryForm = {
 export class TerritoryManageDialogComponent implements OnInit {
   readonly data = inject<TerritoryDialogData>(DIALOG_DATA);
   private readonly territoriesRepository = inject(TerritoryRepository);
+  private readonly territoryBO = inject(TerritoryBO);
   private readonly dialogRef = inject(DialogRef);
 
   private readonly destroyRef = inject(DestroyRef);
@@ -244,7 +246,7 @@ export class TerritoryManageDialogComponent implements OnInit {
 
     // Update if this.data.territory is true
     if (this.data.territory) {
-      territoryRequest$ = this.territoriesRepository.update({ ...territory, id: this.data.territory.id });
+      territoryRequest$ = this.territoryBO.updateTerritory({ ...territory, id: this.data.territory.id });
     } else {
       // Getting next positionIndex and creating the territory
       territoryRequest$ = this.territoriesRepository.getNextPositionIndexForCity(territory.city).pipe(

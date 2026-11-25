@@ -48,14 +48,15 @@ lockfile.
 | Service            | Usage                                                                                                                                                                                                                                                                                                |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Auth               | Google and Microsoft OAuth; emulator custom-token sign-in is exposed only in local development.                                                                                                                                                                                                      |
-| Cloud Firestore    | Primary application data, accessed through repositories. `logs` and `designations` are TTL-deleted (~6 months); `designations_header` follows the same policy and holds the resumable assignment cycles.                                                                                             |
-| Cloud Functions v2 | The `deleteUser` callable performs privileged Firebase Auth deletion; the `provisionUserFromInvite` callable provisions users from invites; the `closeDesignationsHeaders` scheduled function (v2 `onSchedule`) closes every `IN_PROGRESS` `designations_header` daily at 00:00 `America/Sao_Paulo`. |
+| Cloud Firestore    | Primary application data, accessed through repositories. `logs`, `designations`, `designations_header` and `designations_header/{id}/progress/summary` are TTL-deleted (~6 months); progress is written by Assign and anonymous Work clients. |
+| Cloud Functions v2 | The `deleteUser` callable performs privileged Firebase Auth deletion; the `provisionUserFromInvite` callable provisions users from invites; the `closeDesignationsHeaders` scheduled function closes open cycles daily; `backfill:designations-progress` reconciles legacy progress summaries. |
 | Remote Config      | Runtime configuration; no local emulator is wired in `app.config.ts`.                                                                                                                                                                                                                                |
 | Hosting            | `prod` targets `du-ministry-maps`; `beta` targets `du-ministry-maps-beta`.                                                                                                                                                                                                                           |
 
 The application models six roles: `APP_ADMIN`, `ADMIN`, `ELDER`, `ORGANIZER`, `SUPERINTENDENT`, and
-`PUBLISHER`. Route guards and `libAuthorize` control client navigation and visibility; they are not a
-backend security boundary. Firestore security rules are not versioned in this repository.
+`PUBLISHER`. Route guards and `libAuthorize` control client navigation and visibility; backend access is
+enforced by [`firestore.rules`](./firestore.rules) (tested in `apps/ministry-maps/e2e/tests/firestore-rules.spec.ts`)
+and Cloud Functions.
 
 The authoritative collection shapes and invariants are documented in
 [`apps/ministry-maps/docs/domain/data-model.md`](./apps/ministry-maps/docs/domain/data-model.md).

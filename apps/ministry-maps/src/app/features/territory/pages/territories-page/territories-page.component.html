@@ -28,75 +28,76 @@
       </menu>
     </ng-template>
   </div>
-  <select
-    lib-select
+  <kingdom-apps-city-select
     class="w-full"
-    name="Cidade"
-    data-testid="territories-city-filter"
-    [ngModel]="selectedCity"
+    testId="territories-city-filter"
+    [cities]="cities"
+    [disabled]="isLoading()"
+    [ngModel]="selectedCity()"
     (ngModelChange)="handleSelectedCityChange($event)"
-  >
-    @for (city of cities; track city) {
-      <option [value]="city">{{ city }}</option>
+  />
+
+  @if (isLoading()) {
+    <div class="flex items-center justify-center mt-52 py-6" data-testid="territories-loading">
+      <lib-spinner [height]="'5rem'" [width]="'5rem'" class="mx-auto" />
+    </div>
+  } @else {
+    <!-- Search, Filters, and Sort -->
+    <div class="flex mt-5 gap-5">
+      <lib-search-input class="flex-1" (searched)="handleTerritorySearchTermChange($event)" />
+      <lib-sort-filter storeFilterState [config]="sortFilterConfig" (changed)="handleSortFilterChange($event)" />
+    </div>
+
+    @if (filteredTerritories$ | async; as territories) {
+      <section
+        class="territories-list mt-8 pb-56"
+        data-testid="territories-list"
+        cdkDropList
+        (cdkDropListDropped)="handleTerritoryDrop($event, territories)"
+      >
+        @for (territory of territories; track trackByRepositoryId(territory)) {
+          <kingdom-apps-territory-list-item
+            class="territory-list-item mb-3"
+            cdkDrag
+            [cdkDragDisabled]="selectedCity() === ALL_OPTION || sortBy !== TerritoriesOrderBy.SAVED_INDEX"
+            [territory]="territory"
+            (edit)="handleOpenManageTerritoryDialog($event)"
+            (history)="handleOpenHistory($event)"
+            (remove)="handleRemoveTerritory($event)"
+            (resolveMove)="handleResolveMoveAlert($event)"
+            (resolveRevisit)="handleResolveRevisitAlert($event)"
+            (resolveStopVisiting)="handleResolveStopVisitingAlert($event)"
+          >
+            @if (selectedCity() !== ALL_OPTION) {
+              <button
+                lib-icon-button
+                cdkDragHandle
+                data-testid="territory-item-drag-handle"
+                [cdkDragHandleDisabled]="sortBy !== TerritoriesOrderBy.SAVED_INDEX"
+                [disabled]="sortBy !== TerritoriesOrderBy.SAVED_INDEX"
+                type="button"
+                style="cursor: grab"
+                [title]="
+                  sortBy === TerritoriesOrderBy.SAVED_INDEX
+                    ? ''
+                    : 'Para ordernar manualmente, use a ordenação Ordem de Cadastro'
+                "
+              >
+                <lib-icon icon="cursor-23" fillColor="currentColor" />
+              </button>
+            }
+          </kingdom-apps-territory-list-item>
+        }
+      </section>
     }
-    <option [value]="ALL_OPTION">Todas</option>
-  </select>
 
-  <!-- Search, Filters, and Sort -->
-  <div class="flex mt-5 gap-5">
-    <lib-search-input class="flex-1" (searched)="handleTerritorySearchTermChange($event)" />
-    <lib-sort-filter storeFilterState [config]="sortFilterConfig" (changed)="handleSortFilterChange($event)" />
-  </div>
-
-  @if (filteredTerritories$ | async; as territories) {
-    <section
-      class="territories-list mt-8 pb-56"
-      data-testid="territories-list"
-      cdkDropList
-      (cdkDropListDropped)="handleTerritoryDrop($event, territories)"
+    <button
+      lib-floating-action-button
+      title="Adicionar Território"
+      data-testid="territories-add-button"
+      (click)="handleOpenManageTerritoryDialog()"
     >
-      @for (territory of territories; track trackByRepositoryId(territory)) {
-        <kingdom-apps-territory-list-item
-          class="territory-list-item mb-3"
-          cdkDrag
-          [cdkDragDisabled]="selectedCity === ALL_OPTION || sortBy !== TerritoriesOrderBy.SAVED_INDEX"
-          [territory]="territory"
-          (edit)="handleOpenManageTerritoryDialog($event)"
-          (history)="handleOpenHistory($event)"
-          (remove)="handleRemoveTerritory($event)"
-          (resolveMove)="handleResolveMoveAlert($event)"
-          (resolveRevisit)="handleResolveRevisitAlert($event)"
-          (resolveStopVisiting)="handleResolveStopVisitingAlert($event)"
-        >
-          @if (selectedCity !== ALL_OPTION) {
-            <button
-              lib-icon-button
-              cdkDragHandle
-              data-testid="territory-item-drag-handle"
-              [cdkDragHandleDisabled]="sortBy !== TerritoriesOrderBy.SAVED_INDEX"
-              [disabled]="sortBy !== TerritoriesOrderBy.SAVED_INDEX"
-              type="button"
-              style="cursor: grab"
-              [title]="
-                sortBy === TerritoriesOrderBy.SAVED_INDEX
-                  ? ''
-                  : 'Para ordernar manualmente, use a ordenação Ordem de Cadastro'
-              "
-            >
-              <lib-icon icon="cursor-23" fillColor="currentColor" />
-            </button>
-          }
-        </kingdom-apps-territory-list-item>
-      }
-    </section>
+      <lib-icon icon="plus-lined"></lib-icon>
+    </button>
   }
-
-  <button
-    lib-floating-action-button
-    title="Adicionar Território"
-    data-testid="territories-add-button"
-    (click)="handleOpenManageTerritoryDialog()"
-  >
-    <lib-icon icon="plus-lined"></lib-icon>
-  </button>
 </div>

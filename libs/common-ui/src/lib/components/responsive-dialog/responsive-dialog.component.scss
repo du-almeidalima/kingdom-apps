@@ -1,0 +1,9 @@
+:host {
+  display: block;
+}
+
+:host(.responsive-dialog--desktop) {
+  display: flex;
+  width: min(56rem, 90dvw);
+  max-height: 85dvh;
+}

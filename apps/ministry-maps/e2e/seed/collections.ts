@@ -13,6 +13,7 @@
  * - `FirebaseTerritoryDatasourceService['historySubCollectionName']` → 'history'
  * - `FirebaseDesignationDatasourceService['collectionName']` → 'designations'
  * - `FirebaseDesignationsHeaderDatasourceService.COLLECTION_NAME` → 'designations_header' (exact, singular "header")
+ * - `FirebaseDesignationsProgressDatasourceService.SUBCOLLECTION_NAME` → 'progress'; `DESIGNATIONS_PROGRESS_DOC_ID` → 'summary'
  * - `FirebaseInvitationLinkDataSourceService.COLLECTION_NAME` → 'invitation_links' (mind the underscore)
  */
 export const Collections = {
@@ -27,3 +28,7 @@ export const Collections = {
 
 /** Subcollection that stores a territory's full visit history. */
 export const TERRITORY_HISTORY_SUBCOLLECTION = 'history';
+
+/** Designation-cycle progress subcollection and its fixed summary document id. */
+export const DESIGNATIONS_PROGRESS_SUBCOLLECTION = 'progress';
+export const DESIGNATIONS_PROGRESS_DOC_ID = 'summary';

@@ -1,5 +1,30 @@
 import { expect, test } from '../fixtures';
+import { SeedApi } from '../fixtures/database.fixture';
 import { createDocAs, deleteDocAs, mintIdToken, readDocAs, updateDocAs } from '../firebase/firestore-rules.util';
+import { Collections, DESIGNATIONS_PROGRESS_DOC_ID, DESIGNATIONS_PROGRESS_SUBCOLLECTION } from '../seed/collections';
+import { RoleEnum } from '../../src/models/enums/role';
+
+const progressPath = (headerId: string) =>
+  `${Collections.designations_header}/${headerId}/${DESIGNATIONS_PROGRESS_SUBCOLLECTION}/${DESIGNATIONS_PROGRESS_DOC_ID}`;
+
+/** Seeds a same-congregation header with one registered designation and no completed territories. */
+async function seedProgressSummary(seed: SeedApi, headerId: string) {
+  const header = seed.factories.buildDesignationsHeader({
+    id: headerId,
+    congregationId: seed.ids.congregation,
+    createdBy: seed.ids.adminUser,
+  });
+  const progress = seed.factories.buildDesignationsProgress({
+    headerId,
+    congregationId: seed.ids.congregation,
+    designations: {
+      D1: { territoriesTotal: 2, createdAt: header.createdAt, expiresAt: new Date('2026-09-08T12:00:00.000Z') },
+    },
+  });
+  await seed.write({ designationsHeaders: [header], designationsProgress: [progress] });
+}
+
+const territoryEntry = { designationId: 'D1', territoryId: 'T1', outcome: 0, completedAt: new Date() };
 
 test.describe('Firestore Security Rules', () => {
   test('UC-RULES-01 — Anonymous read access to public collections (200 allowed)', async ({ seed }) => {
@@ -289,5 +314,278 @@ test.describe('Firestore Security Rules', () => {
     // Publisher deletes anyone -> 403
     expect(await deleteDocAs(`users/${seed.ids.adminUser}`, publisherToken)).toBe(403);
     expect(await db.getDoc(db.collections.users, seed.ids.adminUser)).toBeDefined();
+  });
+
+  test('UC-RULES-13 — Anonymous progress: only a territories update is allowed (200), everything else denied (403)', async ({
+    db,
+    seed,
+  }) => {
+    await seedProgressSummary(seed, 'rules-progress-anon');
+    const path = progressPath('rules-progress-anon');
+    const readStored = async () =>
+      (
+        await db.firestore
+          .collection(db.collections.designations_header)
+          .doc('rules-progress-anon')
+          .collection(DESIGNATIONS_PROGRESS_SUBCOLLECTION)
+          .doc(DESIGNATIONS_PROGRESS_DOC_ID)
+          .get()
+      ).data();
+
+    expect(await readDocAs(path)).toBe(403);
+    expect(
+      await createDocAs(progressPath('rules-progress-anon-new'), {
+        headerId: 'rules-progress-anon-new',
+        congregationId: seed.ids.congregation,
+      }),
+    ).toBe(403);
+
+    expect(await updateDocAs(path, { territories: { D1_T1: territoryEntry } })).toBe(200);
+    expect((await readStored())?.['territories']?.['D1_T1']?.['territoryId']).toBe('T1');
+
+    expect(await updateDocAs(path, { designations: { D1: { territoriesTotal: 99 } } })).toBe(403);
+    expect((await readStored())?.['designations']?.['D1']?.['territoriesTotal']).toBe(2);
+
+    expect(await deleteDocAs(path)).toBe(403);
+    expect(await readStored()).toBeDefined();
+  });
+
+  test('UC-RULES-14 — Same-congregation admin progress: read, create and update allowed (200)', async ({ seed }) => {
+    await seedProgressSummary(seed, 'rules-progress-admin');
+    const adminToken = await mintIdToken(seed.ids.adminUser);
+    const path = progressPath('rules-progress-admin');
+
+    expect(await readDocAs(path, adminToken)).toBe(200);
+    expect(
+      await createDocAs(
+        progressPath('rules-progress-admin-new'),
+        { headerId: 'rules-progress-admin-new', congregationId: seed.ids.congregation },
+        adminToken,
+      ),
+    ).toBe(200);
+    expect(await updateDocAs(path, { designations: { D1: { territoriesTotal: 3 } } }, adminToken)).toBe(200);
+    expect(await updateDocAs(path, { territories: { D1_T1: territoryEntry } }, adminToken)).toBe(200);
+  });
+
+  test('UC-RULES-15 — Foreign-congregation admin progress: read and update denied (403)', async ({ db, seed }) => {
+    await seedProgressSummary(seed, 'rules-progress-foreign');
+    const congregation = seed.factories.buildCongregation({ id: 'rules-foreign-congregation' });
+    const foreignAdmin = seed.factories.buildUser({
+      id: 'rules-foreign-admin',
+      role: RoleEnum.ADMIN,
+      congregationId: congregation.id,
+    });
+    await seed.write({ congregations: [congregation], users: [foreignAdmin] });
+    const foreignToken = await mintIdToken(foreignAdmin.id);
+    const path = progressPath('rules-progress-foreign');
+
+    expect(await readDocAs(path, foreignToken)).toBe(403);
+    // The anonymous territories-only path must not open up to signed-in outsiders.
+    expect(await updateDocAs(path, { territories: { D1_T1: territoryEntry } }, foreignToken)).toBe(403);
+
+    const stored = await db.firestore
+      .collection(db.collections.designations_header)
+      .doc('rules-progress-foreign')
+      .collection(DESIGNATIONS_PROGRESS_SUBCOLLECTION)
+      .doc(DESIGNATIONS_PROGRESS_DOC_ID)
+      .get();
+    expect(stored.data()?.['territories']).toEqual({});
+  });
+
+  test('UC-RULES-16 — Congregations write matrix: only APP_ADMIN can create (200); non-APP_ADMIN create denied (403); authenticated update allowed (200)', async ({
+    db,
+    seed,
+  }) => {
+    const adminToken = await mintIdToken(seed.ids.adminUser);
+    const publisherToken = await mintIdToken(seed.ids.publisherUsers[0]);
+    const superintendentToken = await mintIdToken(seed.ids.superintendentUser);
+    const appAdminToken = await mintIdToken(seed.ids.appAdminUser);
+
+    // Anonymous create -> 403
+    expect(
+      await createDocAs('congregations/anon-cong', {
+        name: 'Anon Congregação',
+        locatedOn: 'São Paulo, SP',
+        cities: ['São Paulo'],
+      }),
+    ).toBe(403);
+
+    // Non-APP_ADMIN roles create -> 403
+    for (const token of [publisherToken, adminToken, superintendentToken]) {
+      expect(
+        await createDocAs(
+          'congregations/non-app-admin-cong',
+          {
+            name: 'Unauthorized Congregação',
+            locatedOn: 'São Paulo, SP',
+            cities: ['São Paulo'],
+          },
+          token,
+        ),
+      ).toBe(403);
+    }
+    expect(await db.getDoc(db.collections.congregations, 'non-app-admin-cong')).toBeUndefined();
+
+    // APP_ADMIN create -> 200
+    expect(
+      await createDocAs(
+        'congregations/app-admin-created-cong',
+        {
+          id: 'app-admin-created-cong',
+          name: 'Congregação Criada pelo App Admin',
+          locatedOn: 'Campinas, SP',
+          cities: ['Campinas'],
+        },
+        appAdminToken,
+      ),
+    ).toBe(200);
+    const createdCong = await db.getDoc(db.collections.congregations, 'app-admin-created-cong');
+    expect(createdCong?.['name']).toBe('Congregação Criada pelo App Admin');
+
+    // Authenticated user (ADMIN) can update an existing congregation -> 200
+    expect(
+      await updateDocAs(`congregations/${seed.ids.congregation}`, { name: 'Congregação Atualizada' }, adminToken),
+    ).toBe(200);
+    const updatedCong = await db.getDoc(db.collections.congregations, seed.ids.congregation);
+    expect(updatedCong?.['name']).toBe('Congregação Atualizada');
+  });
+
+  test('UC-RULES-17 — Notifications: signed-in users read; only APP_ADMIN writes and reads or deletes acknowledgments', async ({
+    db,
+    seed,
+  }) => {
+    const notificationsCollection = db.firestore.collection('notifications');
+    await notificationsCollection.doc('notif-1').set({
+      id: 'notif-1',
+      title: 'Termos atualizados',
+      content: '## Termos',
+      category: 'info',
+      actionLabel: 'Entendi',
+      status: 'ACTIVE',
+      createdAt: new Date(),
+    });
+    await notificationsCollection.doc('notif-1').collection('acknowledgments').doc('summary').set({
+      id: 'summary',
+      notificationId: 'notif-1',
+      users: {},
+    });
+
+    const publisherToken = await mintIdToken(seed.ids.publisherUsers[0]);
+    const adminToken = await mintIdToken(seed.ids.adminUser);
+    const appAdminToken = await mintIdToken(seed.ids.appAdminUser);
+
+    // Anonymous read of a notification -> 403; any signed-in role reads it -> 200
+    expect(await readDocAs('notifications/notif-1')).toBe(403);
+    expect(await readDocAs('notifications/notif-1', publisherToken)).toBe(200);
+
+    // Only APP_ADMIN creates, updates and deletes notifications
+    expect(await createDocAs('notifications/notif-2', { title: 'Nova' }, adminToken)).toBe(403);
+    expect(await updateDocAs('notifications/notif-1', { status: 'INACTIVE' }, adminToken)).toBe(403);
+    expect(await deleteDocAs('notifications/notif-1', publisherToken)).toBe(403);
+    expect(await createDocAs('notifications/notif-2', { title: 'Nova' }, appAdminToken)).toBe(200);
+    expect(await updateDocAs('notifications/notif-1', { status: 'INACTIVE' }, appAdminToken)).toBe(200);
+
+    // Acknowledgments summary: read and delete are APP_ADMIN only
+    expect(await readDocAs('notifications/notif-1/acknowledgments/summary', adminToken)).toBe(403);
+    expect(await readDocAs('notifications/notif-1/acknowledgments/summary', appAdminToken)).toBe(200);
+    expect(await deleteDocAs('notifications/notif-1/acknowledgments/summary', adminToken)).toBe(403);
+    expect(await deleteDocAs('notifications/notif-1/acknowledgments/summary', appAdminToken)).toBe(200);
+    expect(await deleteDocAs('notifications/notif-1', appAdminToken)).toBe(200);
+  });
+
+  test('UC-RULES-18 — Acknowledgments: a signed-in user writes only their own summary entry and history', async ({
+    db,
+    seed,
+  }) => {
+    const publisherUid = seed.ids.publisherUsers[0];
+    const adminUid = seed.ids.adminUser;
+    const publisherToken = await mintIdToken(publisherUid);
+    const adminToken = await mintIdToken(adminUid);
+    const entry = (userId: string) => ({
+      userId,
+      name: 'Pessoa',
+      congregationName: 'Central',
+      role: RoleEnum.PUBLISHER,
+      acknowledgedAt: new Date(),
+    });
+    const summary = 'notifications/notif-ack/acknowledgments/summary';
+    const adminEntry = entry(adminUid);
+    const publisherEntry = entry(publisherUid);
+
+    await db.firestore
+      .collection('notifications')
+      .doc('notif-ack')
+      .collection('acknowledgments')
+      .doc('summary')
+      .set({
+        id: 'summary',
+        notificationId: 'notif-ack',
+        users: { [adminUid]: adminEntry },
+      });
+
+    // Merging the publisher's own entry is allowed; the admin's existing entry must stay as it is
+    expect(
+      await updateDocAs(summary, { users: { [adminUid]: adminEntry, [publisherUid]: publisherEntry } }, publisherToken),
+    ).toBe(200);
+    expect(
+      await updateDocAs(summary, { users: { [adminUid]: { ...adminEntry, name: 'Forjado' } } }, publisherToken),
+    ).toBe(403);
+    expect(
+      await updateDocAs(
+        summary,
+        { users: { [adminUid]: adminEntry, [publisherUid]: publisherEntry, other: entry('other') } },
+        publisherToken,
+      ),
+    ).toBe(403);
+    expect(
+      await updateDocAs(
+        summary,
+        { users: { [adminUid]: adminEntry, [publisherUid]: entry(adminUid) } },
+        publisherToken,
+      ),
+    ).toBe(403);
+
+    // Only APP_ADMIN reads the summary
+    expect(await readDocAs(summary, publisherToken)).toBe(403);
+    expect(await readDocAs(summary, adminToken)).toBe(403);
+
+    // A first acknowledgment creates the summary with the creator's key only, under the fixed doc id
+    expect(
+      await createDocAs(
+        'notifications/notif-new/acknowledgments/summary',
+        { id: 'summary', notificationId: 'notif-new', users: { [publisherUid]: entry(publisherUid) } },
+        publisherToken,
+      ),
+    ).toBe(200);
+    expect(
+      await createDocAs(
+        'notifications/notif-other/acknowledgments/summary',
+        { id: 'summary', notificationId: 'notif-other', users: { [adminUid]: entry(adminUid) } },
+        publisherToken,
+      ),
+    ).toBe(403);
+    expect(
+      await createDocAs(
+        'notifications/notif-new/acknowledgments/another',
+        { users: { [publisherUid]: entry(publisherUid) } },
+        publisherToken,
+      ),
+    ).toBe(403);
+
+    // A user's acknowledged-notification history is readable and writable by that user alone
+    const snapshot = {
+      id: 'notif-ack',
+      notificationId: 'notif-ack',
+      title: 'Termos atualizados',
+      content: '## Termos',
+      category: 'info',
+      actionLabel: 'Entendi',
+      acknowledgedAt: new Date(),
+    };
+    const ownHistory = `users/${publisherUid}/notifications/notif-ack`;
+    expect(await createDocAs(ownHistory, snapshot, publisherToken)).toBe(200);
+    expect(await readDocAs(ownHistory, publisherToken)).toBe(200);
+    expect(await readDocAs(ownHistory, adminToken)).toBe(403);
+    expect(await createDocAs(`users/${adminUid}/notifications/notif-ack`, snapshot, publisherToken)).toBe(403);
   });
 });
