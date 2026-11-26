@@ -35,7 +35,7 @@ test.describe('Territories page — export & role gating (WP-17)', () => {
     const lines = body.split('\r\n');
     // Header row exactly.
     expect(lines[0]).toBe(
-      'Cidade;Endereço;Observação;Link do Mapa;Ícone;Estudante da Bíblia;Instrutor da Bíblia;Última Visita',
+      'Cidade;Endereço;Observação;Link do Mapa;Ícone;Estudante da Bíblia;Instrutor da Bíblia;Última Visita;Resultado da Última Visita',
     );
 
     // One data row per congregation territory, sorted by city (Osasco before São Paulo).
@@ -45,28 +45,30 @@ test.describe('Territories page — export & role gating (WP-17)', () => {
     expect(dataRows[0].startsWith('Osasco;')).toBe(true);
 
     // The bible-student territory (seed-territory-3) exports a `Sim` flag and
-    // its raw instructor uid; dates are dd/MM/yyyy (lastVisit 2024-03-12).
+    // its raw instructor uid; dates are dd/MM/yyyy (lastVisit 2024-03-12) and the
+    // last column carries the most recent visit's outcome in pt-BR.
     const studentRow = expectData(dataRows.find((l) => l.includes('Rua Harmonia, 300 - Vila Madalena')));
     expect(studentRow).toContain('Homem'); // icon label
     expect(studentRow).toContain('Sim'); // isBibleStudent → "Sim"
     expect(studentRow).toContain('seed-user-publisher-1'); // raw instructor uid
-    expect(studentRow).toMatch(/12\/03\/2024$/);
+    expect(studentRow).toMatch(/12\/03\/2024;Morador contatado$/);
+
+    // seed-territory-1's most recent visit is a REVISIT (2024-03-10).
+    const revisitRow = expectData(dataRows.find((l) => l.includes('Rua das Acácias, 45 - Pinheiros')));
+    expect(revisitRow).toMatch(/10\/03\/2024;Revisita$/);
   });
 
-  test('UC-TERR-35 — export/overflow menu hidden for ORGANIZER and ELDER', async ({ signInAs, db, page }) => {
-    for (const role of ['organizer', 'elder'] as const) {
-      await signInAs(role);
-      const territoriesPage = new TerritoriesPage(page);
-      await territoriesPage.goto();
-      // The ⋮ overflow button is gated to [APP_ADMIN, SUPERINTENDENT, ADMIN].
-      await expect(territoriesPage.overflowMenu).toHaveCount(0);
+  test('UC-TERR-35 — overflow menu hidden for ORGANIZER, visible for ELDER', async ({ signInAs, page }) => {
+    await signInAs('organizer');
+    const territoriesPage = new TerritoriesPage(page);
+    await territoriesPage.goto();
+    // The ⋮ overflow button is gated to [APP_ADMIN, SUPERINTENDENT, ADMIN, ELDER].
+    await expect(territoriesPage.overflowMenu).toHaveCount(0);
 
-      expect(
-        (await db.getDoc(db.collections.users, role === 'organizer' ? 'seed-user-organizer' : 'seed-user-elder'))?.[
-          'role'
-        ],
-      ).toBe(role === 'organizer' ? 'ORGANIZER' : 'ELDER');
-    }
+    // ELDER is also allowed to export territories.
+    await signInAs('elder');
+    await territoriesPage.goto();
+    await expect(territoriesPage.overflowMenu).toBeVisible();
   });
 
   test('UC-TERR-36 — list-item menu excludes ORGANIZER (only Histórico visible)', async ({ signInAs, page }) => {

@@ -72,7 +72,7 @@ baseline `seed-designation`) — nothing could be submitted.
 9. `page.waitForEvent('download')` → assert the download's suggested filename matches
    `mm-territorios-*.csv` and the success toast `Territórios exportados com sucesso.` appears.
 10. Read the downloaded file and assert it contains **only** the header row
-    `Cidade;Endereço;Observação;Link do Mapa;Ícone;Estudante da Bíblia;Instrutor da Bíblia;Última Visita`
+    `Cidade;Endereço;Observação;Link do Mapa;Ícone;Estudante da Bíblia;Instrutor da Bíblia;Última Visita;Resultado da Última Visita`
     (UTF-8 BOM prefixed, `;`-delimited) and **zero** data rows — an empty export is a valid CSV, not an
     error (UC-TERR-34's shape with `n = 0`).
 

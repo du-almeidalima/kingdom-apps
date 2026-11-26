@@ -104,7 +104,7 @@ test('J-08 — Empty congregation: list, assign, statistics and CSV export all b
   const body = content.slice(1);
   const lines = body.split('\r\n');
   expect(lines[0]).toBe(
-    'Cidade;Endereço;Observação;Link do Mapa;Ícone;Estudante da Bíblia;Instrutor da Bíblia;Última Visita',
+    'Cidade;Endereço;Observação;Link do Mapa;Ícone;Estudante da Bíblia;Instrutor da Bíblia;Última Visita;Resultado da Última Visita',
   );
   const dataRows = lines.slice(1).filter((l) => l.length > 0);
   expect(dataRows).toHaveLength(0);

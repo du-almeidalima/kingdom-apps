@@ -105,7 +105,7 @@ Note step 2a is evaluated _before_ it, but an `APP_ADMIN` is never a `PUBLISHER`
 
 | Affordance                                                      | Location                                                                | Allowed roles                                                               |
 | --------------------------------------------------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Territories page overflow menu (sort/filter, export CSV, …)     | `territories-page.component.html`                                       | `APP_ADMIN, SUPERINTENDENT, ADMIN`                                          |
+| Territories page overflow menu (sort/filter, export CSV, …)     | `territories-page.component.html`                                       | `APP_ADMIN, SUPERINTENDENT, ADMIN, ELDER`                                   |
 | Territory list-item menu: edit, alerts block, separator, delete | `territory-list-item.component.ts` (`EDIT_ALLOWED`)                     | `ADMIN, ELDER, SUPERINTENDENT` (+ `APP_ADMIN` bypass) — **not** `ORGANIZER` |
 | User list-item overflow menu (edit / remove)                    | `user-list-item.component.ts`                                           | `APP_ADMIN, SUPERINTENDENT, ADMIN`                                          |
 | "Criar Link de Convite" FAB                                     | `users-page.component.html` (`CREATE_INVITE_LINK_ALLOWED`)              | `ADMIN` (+ `APP_ADMIN` bypass)                                              |
@@ -131,7 +131,7 @@ Read as "can reach and use":
 | `/work/:id`                  | ✔            | ✔         | ✔         | ✔         | ✔              | ✔         | ✔                     |
 | `/home`                      | → `/welcome` | ✔         | ✔         | ✔         | ✔              | ✔         | → `/login`            |
 | `/territories` (list, CRUD)  | → `/welcome` | ✔         | ✔         | ✔         | ✔              | ✔         | → `/login`            |
-| ↳ overflow menu (filter/CSV) | –            | ✖ hidden  | ✖ hidden  | ✔         | ✔              | ✔         | –                     |
+| ↳ overflow menu (filter/CSV) | –            | ✖ hidden  | ✔         | ✔         | ✔              | ✔         | –                     |
 | `/territories/assign`        | → `/welcome` | ✔         | ✔         | ✔         | ✔              | ✔         | → `/login`            |
 | `/territories/statistics`    | → `/welcome` | ✔         | ✔         | ✔         | ✔              | ✔         | → `/login`            |
 | `/congregation/users` (list) | → `/welcome` | ✔         | ✔         | ✔         | ✔              | ✔         | → `/login`            |

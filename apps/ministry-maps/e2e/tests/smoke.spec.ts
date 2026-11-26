@@ -1,6 +1,8 @@
 import { DocumentReference, Timestamp } from 'firebase-admin/firestore';
 
+import { RoleEnum } from '../../src/models/enums/role';
 import { TerritoryIcon } from '../../src/models/territory';
+import { ROLE_UIDS, TestRole } from '../config/auth.config';
 import { expect, test } from '../fixtures';
 
 test.describe('E2E seeding smoke test', () => {
@@ -21,6 +23,13 @@ test.describe('E2E seeding smoke test', () => {
     expect(users).toHaveLength(8);
     expect(territories).toHaveLength(3);
     expect(designations).toHaveLength(1);
+  });
+
+  test('maps every sign-in role to a baseline user with the matching RoleEnum', async ({ db }) => {
+    for (const role of Object.keys(ROLE_UIDS) as TestRole[]) {
+      const user = await db.getDoc(db.collections.users, ROLE_UIDS[role]);
+      expect(user?.['role']).toBe(RoleEnum[role.toUpperCase() as keyof typeof RoleEnum]);
+    }
   });
 
   test('seeds users with a congregation DocumentReference', async ({ db, seed }) => {
