@@ -1,20 +1,26 @@
 import { DatePipe } from '@angular/common';
 import { inject, Injectable } from '@angular/core';
 import { map, take } from 'rxjs';
-import type { Territory } from '../../../../../models/territory';
 import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
+import type { Territory } from '../../../../../models/territory';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { TerritoryIconTranslatorPipe } from '../../../../shared/pipes/territory-icon-translator/territory-icon-translator.pipe';
 import { UserStateService } from '../../../../state/user.state.service';
+import { buildXlsxWorkbook, sanitizeCellText, XLSX_MIME_TYPE } from './xlsx-workbook';
+
+export type TerritoryExportFormat = 'csv' | 'xlsx';
 
 /**
- * Service for exporting Territories into CSV.
+ * Service for exporting a congregation's Territories into either:
+ * - `.xlsx` (Office Open XML workbook — works cleanly on desktop and mobile spreadsheet apps), or
+ * - `.csv` (UTF-8 with BOM, `;`-delimited, CRLF line breaks).
  *
- * The file is meant to be opened in Excel (pt-BR): UTF-8 with BOM, `;` as delimiter and CRLF line breaks.
+ * Both formats share the same column definitions and territory-to-row mapping (`buildRows`).
  */
 @Injectable()
 export class TerritoryCsvExporterBO {
-  private static readonly HEADERS = [
+  static readonly SHEET_NAME = 'Territórios';
+  static readonly HEADERS = [
     'Cidade',
     'Endereço',
     'Observação',
@@ -24,7 +30,8 @@ export class TerritoryCsvExporterBO {
     'Instrutor da Bíblia',
     'Última Visita',
     'Resultado da Última Visita',
-  ];
+  ] as const;
+
   private static readonly UTF8_BOM = '\uFEFF';
   private static readonly collator = new Intl.Collator('pt-BR');
 
@@ -43,9 +50,10 @@ export class TerritoryCsvExporterBO {
   private readonly territoryRepository = inject(TerritoryRepository);
 
   /**
-   * Exports all Territories into a downloadable blob of CSV.
+   * Fetches all Territories for the current user's congregation, sorts them by city,
+   * and triggers a file download in the requested format (`'csv'` or `'xlsx'`).
    */
-  export() {
+  export(format: TerritoryExportFormat = 'csv') {
     const congregationId = this.userState.currentUser?.congregation?.id;
 
     if (!congregationId) {
@@ -62,7 +70,11 @@ export class TerritoryCsvExporterBO {
           TerritoryCsvExporterBO.collator.compare(a.city ?? '', b.city ?? ''),
         );
 
-        this.exportCsv(sorted);
+        if (format === 'xlsx') {
+          this.exportXlsx(sorted);
+        } else {
+          this.exportCsv(sorted);
+        }
 
         return true;
       }),
@@ -74,13 +86,67 @@ export class TerritoryCsvExporterBO {
    */
   exportCsv(territories: Territory[]): void {
     const csv = this.buildCsv(territories);
-
-    // The BOM makes Excel and most viewers detect UTF-8 instead of guessing a legacy code page.
+    // The BOM makes desktop Excel and most viewers detect UTF-8 instead of guessing a legacy code page.
     const blob = new Blob([TerritoryCsvExporterBO.UTF8_BOM, csv], { type: 'text/csv;charset=utf-8;' });
+    this.triggerDownload(blob, 'csv');
+  }
 
-    const fileName = `mm-territorios-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.csv`;
+  /**
+   * Generates and triggers the download of an `.xlsx` workbook for the provided Territories.
+   */
+  exportXlsx(territories: Territory[]): void {
+    const workbookBytes = this.buildXlsx(territories);
+    const blob = new Blob([workbookBytes], { type: XLSX_MIME_TYPE });
+    this.triggerDownload(blob, 'xlsx');
+  }
 
-    // Trigger download (browser environment)
+  /**
+   * Builds the CSV text (without BOM) for the provided Territories.
+   */
+  buildCsv(territories: Territory[]): string {
+    const escape = (value: unknown) => TerritoryCsvExporterBO.escapeCsv(value);
+
+    const header = TerritoryCsvExporterBO.HEADERS.map(escape).join(';');
+    const rows = this.buildRows(territories).map((row) => row.map(escape).join(';'));
+
+    return [header, ...rows].join('\r\n');
+  }
+
+  /**
+   * Builds the binary `.xlsx` workbook (`Uint8Array`) for the provided Territories.
+   */
+  buildXlsx(territories: Territory[]): Uint8Array<ArrayBuffer> {
+    return buildXlsxWorkbook({
+      sheetName: TerritoryCsvExporterBO.SHEET_NAME,
+      headers: TerritoryCsvExporterBO.HEADERS,
+      rows: this.buildRows(territories),
+    });
+  }
+
+  /**
+   * Maps each Territory into its 9 human-readable worksheet cells.
+   * Columns: city, address, note, mapsLink, icon, isBibleStudent, bibleInstructor, lastVisit, lastVisitOutcome
+   */
+  buildRows(territories: Territory[]): string[][] {
+    return (territories ?? []).map((t) =>
+      [
+        t.city,
+        t.address,
+        t.note,
+        t.mapsLink,
+        t.icon ? this.territoryIconTranslatorPipe.transform(t.icon) : '',
+        t.isBibleStudent ? 'Sim' : '',
+        t.bibleInstructor,
+        t.lastVisit ? this.datePipe.transform(t.lastVisit, 'dd/MM/yyyy') : '',
+        TerritoryCsvExporterBO.lastVisitOutcome(t),
+      ].map(sanitizeCellText),
+    );
+  }
+
+  private triggerDownload(blob: Blob, extension: TerritoryExportFormat): void {
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+    const fileName = `mm-territorios-${timestamp}.${extension}`;
+
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.href = url;
@@ -92,35 +158,7 @@ export class TerritoryCsvExporterBO {
   }
 
   /**
-   * Builds the CSV text (without BOM) for the provided Territories.
-   * Columns: city, address, note, mapsLink, icon, isBibleStudent, bibleInstructor, lastVisit, lastVisitOutcome
-   */
-  buildCsv(territories: Territory[]): string {
-    const escape = (value: unknown) => TerritoryCsvExporterBO.escapeCsv(value);
-
-    const header = TerritoryCsvExporterBO.HEADERS.map(escape).join(';');
-
-    const rows = (territories ?? []).map((t) =>
-      [
-        t.city,
-        t.address,
-        t.note,
-        t.mapsLink,
-        t.icon ? this.territoryIconTranslatorPipe.transform(t.icon) : '',
-        t.isBibleStudent ? 'Sim' : '',
-        t.bibleInstructor,
-        t.lastVisit ? this.datePipe.transform(t.lastVisit, 'dd/MM/yyyy') : '',
-        TerritoryCsvExporterBO.lastVisitOutcome(t),
-      ]
-        .map(escape)
-        .join(';'),
-    );
-
-    return [header, ...rows].join('\r\n');
-  }
-
-  /**
-   * Outcome of the most recent visit in pt-BR, or '' when there is none.
+   * Outcome of the most recent visit in pt-BR, or `''` when there is none.
    *
    * `recentHistory`'s ordering is a storage detail (ascending when written by the app,
    * descending when seeded by e2e), so the entry is gated by date, not by position.
@@ -141,16 +179,10 @@ export class TerritoryCsvExporterBO {
    * Makes a single value safe for a `;`-delimited CSV that will be opened in a spreadsheet.
    */
   private static escapeCsv(value: unknown): string {
-    if (value === null || value === undefined) return '';
-
-    let text = String(value)
-      // Precomposed form ('a' + U+0303 -> 'ã'): decomposed accents render badly in some readers/fonts.
-      .normalize('NFC')
-      // One record per line: line breaks and tabs become a single space.
-      .replace(/[\r\n\t]+/g, ' ')
-      // Drop any other control characters.
-      .replace(/\p{Cc}/gu, '')
-      .trim();
+    let text = sanitizeCellText(value);
+    if (!text) {
+      return '';
+    }
 
     // Spreadsheet formula injection: a note such as "=HYPERLINK(...)" or "-- evitar" would be evaluated on open.
     if (/^[=+\-@]/.test(text)) {
