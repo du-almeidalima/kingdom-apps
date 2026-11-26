@@ -1,9 +1,12 @@
-*,
-*::before,
-*::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: inherit;
+// The reset must sit in kui.base so layered component styles (kui.components) win over it.
+@layer kui.base {
+  *,
+  *::before,
+  *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: inherit;
+  }
 }
 
 html {

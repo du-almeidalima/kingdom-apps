@@ -412,20 +412,20 @@ outcome — only bible-student, `MOVED` (unresolved), `ASKED_TO_NOT_VISIT_AGAIN`
 - **Preconditions (seed):** default baseline
 - **Steps:** 1. open the overflow menu (⋮ button) → `Exportar Territórios` → 2. `page.waitForEvent('download')`
 - **Expected UI:** a success toast `Territórios exportados com sucesso.` appears; the download's suggested filename matches `mm-territorios-<timestamp>.csv` where `<timestamp>` is `new Date().toISOString().slice(0,19)` with `:`/`T` replaced by `-` (UTC time, e.g. `mm-territorios-2026-07-25-10-11-00.csv`)
-- **Expected persistence:** read the downloaded file (`download.path()`/`createReadStream`) and assert: `;`-delimited, UTF-8 **BOM** (`\uFEFF`) prefix, header row exactly `Cidade;Endereço;Observação;Link do Mapa;Ícone;Estudante da Bíblia;Instrutor da Bíblia;Última Visita`, one data row per `db.getCollectionDocs(db.collections.territories)` entry, rows sorted by `city.localeCompare` (Osasco before São Paulo), dates formatted `dd/MM/yyyy`
+- **Expected persistence:** read the downloaded file (`download.path()`/`createReadStream`) and assert: `;`-delimited, UTF-8 **BOM** (`\uFEFF`) prefix, header row exactly `Cidade;Endereço;Observação;Link do Mapa;Ícone;Estudante da Bíblia;Instrutor da Bíblia;Última Visita;Resultado da Última Visita`, one data row per `db.getCollectionDocs(db.collections.territories)` entry, rows sorted by `city.localeCompare` (Osasco before São Paulo), dates formatted `dd/MM/yyyy`, and the last column carrying the most recent visit's outcome in pt-BR (`Morador contatado`/`Ninguém atendeu`/`Morador mudou de endereço`/`Morador pediu para não ser visitado`/`Revisita`; empty when the territory has no recent history)
 - **Edge cases:** `bibleInstructor` is exported as the **raw stored id** (e.g. `seed-user-publisher-1`), not a resolved display name — the CSV never joins against `users`; `;` characters inside `note`/`address` are replaced with `,` to protect the delimiter
 - **Priority:** P1 · **Gaps:** requires `page.waitForEvent('download')`; no `data-testid` on the menu trigger or the `Exportar Territórios` item
 
-#### UC-TERR-35 — Export/overflow menu hidden for `ORGANIZER`/`ELDER`
+#### UC-TERR-35 — Export/overflow menu hidden for `ORGANIZER`, visible for `ELDER`
 
-- **Actor:** Organizer (harness extension needed — only `admin`/`publisher` exist in `signInAs` today)
+- **Actor:** Organizer
 - **Route:** `/territories`
-- **Preconditions (seed):** default baseline; a user with `role: 'ORGANIZER'`
-- **Steps:** 1. sign in as that user → 2. open `/territories`
-- **Expected UI:** the `⋮` overflow button (`*libAuthorize="[APP_ADMIN, SUPERINTENDENT, ADMIN]"`) is absent — `ORGANIZER` and `ELDER` cannot see `Exportar Territórios` at all
-- **Expected persistence:** `db.getDoc(db.collections.users, uid).role === 'ORGANIZER'`
-- **Edge cases:** `ELDER` can edit/delete territories (see UC-TERR-36) but still cannot export, since the overflow menu's role list (`APP_ADMIN, SUPERINTENDENT, ADMIN`) excludes it
-- **Priority:** P1 · **Gaps:** `signInAs('organizer')`/`signInAs('elder')` harness extension needed
+- **Preconditions (seed):** default baseline; users with `role: 'ORGANIZER'` and `role: 'ELDER'`
+- **Steps:** 1. sign in as each user → 2. open `/territories`
+- **Expected UI:** for `ORGANIZER`, the `⋮` overflow button (`*libAuthorize="[APP_ADMIN, SUPERINTENDENT, ADMIN, ELDER]"`) is absent — no `Exportar Territórios`; for `ELDER`, the overflow button and `Exportar Territórios` are present
+- **Expected persistence:** N/A (client-side gating only; the role↔uid baseline mapping is asserted once in the seeding smoke suite)
+- **Edge cases:** `ELDER` can now export, matching its list-item edit permissions (see UC-TERR-36); `ORGANIZER` remains excluded
+- **Priority:** P1 · **Gaps:** none
 
 ### Role gating
 

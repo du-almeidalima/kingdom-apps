@@ -6,11 +6,14 @@ import { TerritoryCsvExporterBO } from './territory-csv-exporter.bo';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { UserStateService } from '../../../../state/user.state.service';
 import type { Territory } from '../../../../../models/territory';
+import type { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
+import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 import {
   mockTerritory1,
   mockTerritory2,
   mockTerritory3,
   mockTerritory4,
+  territoryMockBuilder,
 } from '../../../../../test/mocks/models/territory.mock';
 import { adminUser, congregationMock } from '../../../../../test/mocks';
 
@@ -120,5 +123,57 @@ describe('TerritoryCsvExporterBO', () => {
     expect(removeSpy).toHaveBeenCalled();
     expect(revokeSpy).toHaveBeenCalledWith('blob:url');
     expect(anchor.download).toMatch(/^mm-territorios-/);
+  });
+
+  describe('buildCsv', () => {
+    const daysAgo = (n: number) => {
+      const date = new Date();
+      date.setDate(date.getDate() - n);
+      return date;
+    };
+
+    const visit = (id: string, days: number, visitOutcome: VisitOutcomeEnum): TerritoryVisitHistory => ({
+      id,
+      notes: '',
+      isRevisit: false,
+      date: daysAgo(days),
+      visitOutcome,
+    });
+
+    it('appends the most recent visit outcome label as the last column', () => {
+      const lines = territoryCsvExporterBO.buildCsv([mockTerritory1]).split('\r\n');
+
+      expect(lines[0]).toBe(
+        'Cidade;Endereço;Observação;Link do Mapa;Ícone;Estudante da Bíblia;Instrutor da Bíblia;Última Visita;Resultado da Última Visita',
+      );
+      // mockVisit1 (SPOKE) and mockVisit2 (NOT_ANSWERED) share a date; the last entry wins.
+      expect(lines[1].endsWith('Ninguém atendeu')).toBe(true);
+    });
+
+    it('gates the outcome by date, not by array position', () => {
+      // Stored descending (as the e2e seeder writes it) — the newest entry comes first.
+      const territory = territoryMockBuilder({
+        recentHistory: [visit('NEW', 0, VisitOutcomeEnum.MOVED), visit('OLD', 30, VisitOutcomeEnum.SPOKE)],
+      });
+
+      const lines = territoryCsvExporterBO.buildCsv([territory]).split('\r\n');
+
+      expect(lines[1].endsWith('Morador mudou de endereço')).toBe(true);
+    });
+
+    it('leaves the outcome cell empty when the recent visit info is missing', () => {
+      const territories = [
+        territoryMockBuilder({ recentHistory: undefined }),
+        territoryMockBuilder({ recentHistory: [] }),
+        territoryMockBuilder({ recentHistory: [visit('DRIFT', 0, 999 as unknown as VisitOutcomeEnum)] }),
+      ];
+
+      const rows = territoryCsvExporterBO.buildCsv(territories).split('\r\n').slice(1);
+
+      for (const row of rows) {
+        expect(row.split(';')).toHaveLength(9);
+        expect(row.endsWith(';')).toBe(true);
+      }
+    });
   });
 });

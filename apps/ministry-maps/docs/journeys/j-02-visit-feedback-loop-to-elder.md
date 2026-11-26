@@ -46,8 +46,7 @@ await seed.write({ territories: [territory], designations: [designation] });
 journey wants an `ELDER` (`ROLE_UIDS.elder` → a seeded `ELDER` user). **Interim substitution:** run the
 elder legs with `signInAs('admin')` and leave a `TODO(J-02)` comment — everything asserted here renders
 identically for `ADMIN` and `ELDER` on the paths used (both reach `/territories` and
-`/territories/statistics`; the only UI difference is the overflow/export menu, which this journey never
-touches — see UC-TERR-35).
+`/territories/statistics`, and both see the overflow/export menu — see UC-TERR-35).
 
 ## Script
 
