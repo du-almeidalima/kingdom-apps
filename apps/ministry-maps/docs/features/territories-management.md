@@ -403,18 +403,29 @@ outcome — only bible-student, `MOVED` (unresolved), `ASKED_TO_NOT_VISIT_AGAIN`
 - **Edge cases:** do **not** write a `window.open`/`page.on('popup')` test against `/territories` — that belongs to the assign/work feature docs; this entry exists only to record the gap for this screen
 - **Priority:** P2 · **Gaps:** `⚠ suspected defect` (or at least an inconsistency) — no UI affordance despite the field being fully modelled and editable here
 
-### CSV export
+### Territory export (CSV + Excel)
 
 #### UC-TERR-34 — Export downloads a pt-BR CSV, sorted by city
 
 - **Actor:** Admin
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline
-- **Steps:** 1. open the overflow menu (⋮ button) → `Exportar Territórios` → 2. `page.waitForEvent('download')`
+- **Steps:** 1. open the overflow menu (⋮ button) → `Exportar CSV (.csv)` → 2. `page.waitForEvent('download')`
 - **Expected UI:** a success toast `Territórios exportados com sucesso.` appears; the download's suggested filename matches `mm-territorios-<timestamp>.csv` where `<timestamp>` is `new Date().toISOString().slice(0,19)` with `:`/`T` replaced by `-` (UTC time, e.g. `mm-territorios-2026-07-25-10-11-00.csv`)
 - **Expected persistence:** read the downloaded file (`download.path()`/`createReadStream`) and assert: `;`-delimited, UTF-8 **BOM** (`\uFEFF`) prefix, header row exactly `Cidade;Endereço;Observação;Link do Mapa;Ícone;Estudante da Bíblia;Instrutor da Bíblia;Última Visita;Resultado da Última Visita`, one data row per `db.getCollectionDocs(db.collections.territories)` entry, rows sorted by `city.localeCompare` (Osasco before São Paulo), dates formatted `dd/MM/yyyy`, and the last column carrying the most recent visit's outcome in pt-BR (`Morador contatado`/`Ninguém atendeu`/`Morador mudou de endereço`/`Morador pediu para não ser visitado`/`Revisita`; empty when the territory has no recent history)
 - **Edge cases:** `bibleInstructor` is exported as the **raw stored id** (e.g. `seed-user-publisher-1`), not a resolved display name — the CSV never joins against `users`; `;` characters inside `note`/`address` are replaced with `,` to protect the delimiter
-- **Priority:** P1 · **Gaps:** requires `page.waitForEvent('download')`; no `data-testid` on the menu trigger or the `Exportar Territórios` item
+- **Priority:** P1 · **Gaps:** requires `page.waitForEvent('download')`
+
+#### UC-TERR-34b — Export downloads a valid `.xlsx`, sorted by city
+
+- **Actor:** Admin
+- **Route:** `/territories`
+- **Preconditions (seed):** default baseline
+- **Steps:** 1. open the overflow menu (⋮ button) → `Exportar Excel (.xlsx)` → 2. `page.waitForEvent('download')`
+- **Expected UI:** the same success toast; suggested filename `mm-territorios-<timestamp>.xlsx`
+- **Expected persistence:** read the downloaded workbook and parse its first worksheet (the built-in OOXML reader in `e2e/utils/csv-download.util.ts`): the same 9 headers as the CSV, one row per territory in the same city order, `dd/MM/yyyy` last-visit string and the same pt-BR outcome label in the last column. The workbook is a real OOXML package (Shared Strings Table), so pt-BR accents and coordinates render unchanged on desktop (OnlyOffice, Excel) and mobile (Google Sheets Android/iOS)
+- **Edge cases:** an empty congregation still exports a header-only workbook (see J-08)
+- **Priority:** P1 · **Gaps:** none
 
 #### UC-TERR-35 — Export/overflow menu hidden for `ORGANIZER`, visible for `ELDER`
 
@@ -422,7 +433,7 @@ outcome — only bible-student, `MOVED` (unresolved), `ASKED_TO_NOT_VISIT_AGAIN`
 - **Route:** `/territories`
 - **Preconditions (seed):** default baseline; users with `role: 'ORGANIZER'` and `role: 'ELDER'`
 - **Steps:** 1. sign in as each user → 2. open `/territories`
-- **Expected UI:** for `ORGANIZER`, the `⋮` overflow button (`*libAuthorize="[APP_ADMIN, SUPERINTENDENT, ADMIN, ELDER]"`) is absent — no `Exportar Territórios`; for `ELDER`, the overflow button and `Exportar Territórios` are present
+- **Expected UI:** for `ORGANIZER`, the `⋮` overflow button (`*libAuthorize="[APP_ADMIN, SUPERINTENDENT, ADMIN, ELDER]"`) is absent — neither `Exportar CSV (.csv)` nor `Exportar Excel (.xlsx)` is reachable; for `ELDER`, the overflow button and both export items are present
 - **Expected persistence:** N/A (client-side gating only; the role↔uid baseline mapping is asserted once in the seeding smoke suite)
 - **Edge cases:** `ELDER` can now export, matching its list-item edit permissions (see UC-TERR-36); `ORGANIZER` remains excluded
 - **Priority:** P1 · **Gaps:** none
@@ -437,7 +448,7 @@ outcome — only bible-student, `MOVED` (unresolved), `ASKED_TO_NOT_VISIT_AGAIN`
 - **Steps:** 1. sign in as organizer → 2. open the menu on any `territory-list-item`
 - **Expected UI:** only `Histórico` is visible (ungated); `Editar`, the alert-resolution actions (`Mudou`/`Revisita`/`Não Visitar`), the separators and `Apagar` are all hidden — `EDIT_ALLOWED = [ADMIN, ELDER, SUPERINTENDENT]` (see [`territory-roles.config.ts`](../../src/app/features/territory/config/territory-roles.config.ts)) does not include `ORGANIZER`, and `*libAuthorize` clears content when there is no matching role
 - **Expected persistence:** N/A (client-side gating only — a malicious `ORGANIZER` could still call the repository directly; there is no Firestore security-rule assertion in scope here)
-- **Edge cases:** `APP_ADMIN` bypasses every `*libAuthorize` check regardless of the listed roles (see [`roles-and-permissions.md §4`](../domain/roles-and-permissions.md#4-in-template-authorization---libauthorize))
+- **Edge cases:** `APP_ADMIN` bypasses every `*libAuthorize` check regardless of the listed roles (see [`roles-and-permissions.md §4`](../domain/roles-and-permissions.md#4-in-template-authorization--libauthorize))
 - **Priority:** P1 · **Gaps:** `signInAs('organizer')` harness extension needed
 
 #### UC-TERR-37 — Anonymous access redirects to `/login`
@@ -456,8 +467,8 @@ outcome — only bible-student, `MOVED` (unresolved), `ASKED_TO_NOT_VISIT_AGAIN`
 - Only 4 `data-testid`s exist for this whole screen (`territories-heading`, `territories-list`,
   `territories-city-filter`, `territory-list-item`); every dialog, form field, menu item, badge, toggle and
   the search input must be selected by pt-BR text/role.
-- No `data-testid` on: the sort/filter trigger button and its badge, the overflow-menu `⋮` trigger and
-  `Exportar Territórios` item, the list-item `⋮` trigger and its menu items (`Editar`/`Histórico`/`Mudou`/
+- No `data-testid` on: the sort/filter trigger button and its badge, the overflow-menu `⋮` trigger,
+  the list-item `⋮` trigger and its menu items (`Editar`/`Histórico`/`Mudou`/
   `Revisita`/`Não Visitar`/`Apagar`), the drag handle, the FAB, and every field in the create/edit,
   delete, move-alert, generic-alert and history dialogs.
 - Native/browser obstacles: CSV export uses a synthetic `<a download>` + `URL.createObjectURL` click,

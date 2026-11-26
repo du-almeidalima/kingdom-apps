@@ -3,7 +3,7 @@ import { TerritoriesPage } from '../page-objects/territories.page';
 import { AssignTerritoriesPage } from '../page-objects/assign-territories.page';
 import { StatisticsPage } from '../page-objects/statistics.page';
 import { ToastPage } from '../page-objects/toast.page';
-import { downloadCsv } from '../utils/csv-download.util';
+import { downloadCsv, downloadXlsx } from '../utils/csv-download.util';
 import { RoleEnum } from '../../src/models/enums/role';
 
 /**
@@ -108,6 +108,26 @@ test('J-08 — Empty congregation: list, assign, statistics and CSV export all b
   );
   const dataRows = lines.slice(1).filter((l) => l.length > 0);
   expect(dataRows).toHaveLength(0);
+
+  // The same empty export in Excel format: header-only workbook, no data rows.
+  const xlsx = await downloadXlsx(page, async () => {
+    await territoriesPage.overflowMenu.click();
+    await territoriesPage.exportXlsxItem.click();
+  });
+  expect(xlsx.suggestedFilename).toMatch(/^mm-territorios-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}\.xlsx$/);
+  expect(xlsx.rows).toEqual([
+    [
+      'Cidade',
+      'Endereço',
+      'Observação',
+      'Link do Mapa',
+      'Ícone',
+      'Estudante da Bíblia',
+      'Instrutor da Bíblia',
+      'Última Visita',
+      'Resultado da Última Visita',
+    ],
+  ]);
 
   // ── FINAL SWEEP (Firestore) — the whole journey was write-free ────────────
   expect(await db.getCollectionDocs(db.collections.congregations)).toHaveLength(2);

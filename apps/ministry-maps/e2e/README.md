@@ -34,7 +34,7 @@ apps/ministry-maps/e2e/
 ├── utils/                        ← shared browser-interaction helpers (pure Playwright + Node)
 │   ├── window-open-stub.util.ts  # stubWindowOpen/getOpenedUrls — window.open recorder
 │   ├── whatsapp-link.util.ts     # captureWhatsAppPopup — whatsapp:// popup URL decoder
-│   ├── csv-download.util.ts      # downloadCsv — BOM-aware CSV download reader
+│   ├── csv-download.util.ts      # downloadCsv / downloadXlsx — BOM-aware CSV reader + OOXML worksheet reader
 │   ├── native-dialog.util.ts     # acceptNextDialog/dismissNextDialog — native confirm() handlers
 │   └── cdk-drag.util.ts          # dragRowByMouse — CDK drag-drop via the low-level mouse API
 ├── seed/                         ← composable data seeding
@@ -80,7 +80,7 @@ apps/ministry-maps/e2e/
     ├── territories-filters.spec.ts # territory sort/filter dialog
     ├── territories-crud.spec.ts  # territory create, edit, delete, and reorder
     ├── territories-alerts.spec.ts # territory badges, history, and alerts
-    ├── territories-export.spec.ts # CSV export and role gating
+    ├── territories-export.spec.ts # CSV/Excel export and role gating
     ├── territories-assign.spec.ts # designation selection, creation, and sharing
     ├── territories-designations-history.spec.ts # UC-HIST list, progress, access, and live updates
     ├── territories-statistics.spec.ts # territory metrics and period filters
@@ -330,6 +330,7 @@ Canonical helpers for browser-level interactions — use them instead of copying
 | `stubWindowOpen(page)` / `getOpenedUrls(page)`       | Records `window.open` URLs via `addInitScript` — the robust option when `waitForEvent('popup')` can't work (custom protocols, `_self` navigation) | UC-USERS-14, UC-WORK-19 (Firefox/Safari branch) |
 | `captureWhatsAppPopup(page, trigger)`                | Wraps `waitForEvent('popup')` around the trigger, decodes the `whatsapp://send?text=…` URL → `{ whatsappUrl, text, sharedUrl }`                   | UC-ASSIGN-19, J-01                              |
 | `downloadCsv(page, trigger)`                         | Wraps `waitForEvent('download')`, reads the file from `download.path()` — keeps the `\uFEFF` BOM for the caller to assert                         | UC-TERR-34, J-08                                |
+| `downloadXlsx(page, trigger)`                        | Same capture for an `.xlsx` download; parses its first worksheet into `[headerRow, ...dataRows]` via the built-in OOXML reader                   | UC-TERR-34b, J-08                               |
 | `acceptNextDialog(page)` / `dismissNextDialog(page)` | One-shot native `confirm()` handlers — register **before** the click                                                                              | UC-CFG-10, J-05                                 |
 | `dragRowByMouse(page, source, target)`               | CDK drag-drop via hover → `mouse.down()` → stepped `mouse.move()` → `mouse.up()` (`dragTo()` does not work)                                       | UC-TERR-21                                      |
 

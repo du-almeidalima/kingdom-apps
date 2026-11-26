@@ -16,14 +16,25 @@
       <menu class="menu" cdkMenu>
         <li
           class="menu__item"
-          data-testid="territories-export-item"
+          data-testid="territories-export-xlsx-item"
           cdkMenuItem
-          (cdkMenuItemTriggered)="handleExportTerritories()"
+          (cdkMenuItemTriggered)="handleExportTerritories('xlsx')"
         >
           <button lib-icon-button type="button">
             <lib-icon icon="download-20"></lib-icon>
           </button>
-          <span>Exportar Territórios</span>
+          <span>Exportar Excel (.xlsx)</span>
+        </li>
+        <li
+          class="menu__item"
+          data-testid="territories-export-item"
+          cdkMenuItem
+          (cdkMenuItemTriggered)="handleExportTerritories('csv')"
+        >
+          <button lib-icon-button type="button">
+            <lib-icon icon="download-20"></lib-icon>
+          </button>
+          <span>Exportar CSV (.csv)</span>
         </li>
       </menu>
     </ng-template>
