@@ -18,6 +18,7 @@ export class TerritoriesPage {
   readonly addButton: Locator;
   readonly overflowMenu: Locator;
   readonly exportItem: Locator;
+  readonly exportXlsxItem: Locator;
 
   constructor(private readonly page: Page) {
     this.heading = page.getByTestId('territories-heading');
@@ -30,6 +31,7 @@ export class TerritoriesPage {
     this.addButton = page.getByTestId('territories-add-button');
     this.overflowMenu = page.getByTestId('territories-overflow-menu');
     this.exportItem = page.getByTestId('territories-export-item');
+    this.exportXlsxItem = page.getByTestId('territories-export-xlsx-item');
   }
 
   /** Navigate to the territory list page and wait for the list to render. Does not touch the city filter. */

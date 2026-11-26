@@ -1,7 +1,7 @@
 import { expect, test } from '../fixtures';
 import { TerritoriesPage } from '../page-objects/territories.page';
 import { ToastPage } from '../page-objects/toast.page';
-import { downloadCsv } from '../utils/csv-download.util';
+import { downloadCsv, downloadXlsx } from '../utils/csv-download.util';
 import { expectData } from '../utils/firestore-assert.util';
 
 // ─── WP-17: CSV export + overflow role gating ─────────────────────────────────
@@ -58,6 +58,48 @@ test.describe('Territories page — export & role gating (WP-17)', () => {
     expect(revisitRow).toMatch(/10\/03\/2024;Revisita$/);
   });
 
+  test('UC-TERR-34b — Excel export downloads a valid .xlsx sorted by city', async ({ signInAs, db, page }) => {
+    await signInAs('admin');
+
+    const territoriesPage = new TerritoriesPage(page);
+    await territoriesPage.goto();
+
+    const { suggestedFilename, rows } = await downloadXlsx(page, async () => {
+      await territoriesPage.overflowMenu.click();
+      await territoriesPage.exportXlsxItem.click();
+    });
+
+    expect(suggestedFilename).toMatch(/^mm-territorios-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}\.xlsx$/);
+
+    const toast = new ToastPage(page);
+    await toast.expectText('Territórios exportados com sucesso.');
+
+    expect(rows[0]).toEqual([
+      'Cidade',
+      'Endereço',
+      'Observação',
+      'Link do Mapa',
+      'Ícone',
+      'Estudante da Bíblia',
+      'Instrutor da Bíblia',
+      'Última Visita',
+      'Resultado da Última Visita',
+    ]);
+    expect(rows.slice(1)).toHaveLength((await db.getCollectionDocs(db.collections.territories)).length);
+    expect(rows[1][0]).toBe('Osasco'); // sorted by city
+
+    const studentRow = expectData(rows.find((row) => row[1].includes('Rua Harmonia, 300 - Vila Madalena')));
+    expect(studentRow[4]).toBe('Homem'); // icon label
+    expect(studentRow[5]).toBe('Sim'); // isBibleStudent
+    expect(studentRow[6]).toBe('seed-user-publisher-1'); // raw instructor uid
+    expect(studentRow[7]).toBe('12/03/2024');
+    expect(studentRow[8]).toBe('Morador contatado');
+
+    const revisitRow = expectData(rows.find((row) => row[1].includes('Rua das Acácias, 45 - Pinheiros')));
+    expect(revisitRow[7]).toBe('10/03/2024');
+    expect(revisitRow[8]).toBe('Revisita');
+  });
+
   test('UC-TERR-35 — overflow menu hidden for ORGANIZER, visible for ELDER', async ({ signInAs, page }) => {
     await signInAs('organizer');
     const territoriesPage = new TerritoriesPage(page);
@@ -65,10 +107,13 @@ test.describe('Territories page — export & role gating (WP-17)', () => {
     // The ⋮ overflow button is gated to [APP_ADMIN, SUPERINTENDENT, ADMIN, ELDER].
     await expect(territoriesPage.overflowMenu).toHaveCount(0);
 
-    // ELDER is also allowed to export territories.
+    // ELDER is also allowed to export territories, in both formats.
     await signInAs('elder');
     await territoriesPage.goto();
     await expect(territoriesPage.overflowMenu).toBeVisible();
+    await territoriesPage.overflowMenu.click();
+    await expect(territoriesPage.exportItem).toBeVisible();
+    await expect(territoriesPage.exportXlsxItem).toBeVisible();
   });
 
   test('UC-TERR-36 — list-item menu excludes ORGANIZER (only Histórico visible)', async ({ signInAs, page }) => {

@@ -50,7 +50,10 @@ import { TerritoryListItemComponent } from '../../components/territory-list-item
 import { AsyncPipe } from '@angular/common';
 import { CdkMenuModule } from '@angular/cdk/menu';
 import { RoleEnum } from '../../../../../models/enums/role';
-import { TerritoryCsvExporterBO } from '../../bo/territory-csv-exporter/territory-csv-exporter.bo';
+import {
+  TerritoryCsvExporterBO,
+  type TerritoryExportFormat,
+} from '../../bo/territory-csv-exporter/territory-csv-exporter.bo';
 
 @Component({
   selector: 'kingdom-apps-territories-page',
@@ -329,8 +332,8 @@ export class TerritoriesPageComponent implements OnInit {
     });
   }
 
-  handleExportTerritories() {
-    this.territoryExporterBO.export().subscribe(() => {
+  handleExportTerritories(format: TerritoryExportFormat = 'csv') {
+    this.territoryExporterBO.export(format).subscribe(() => {
       this.toasterService.success('Territórios exportados com sucesso.');
     });
   }

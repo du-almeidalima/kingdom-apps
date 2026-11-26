@@ -3,23 +3,39 @@ import { MockProvider, ngMocks } from 'ng-mocks';
 import { of } from 'rxjs';
 
 import { TerritoryCsvExporterBO } from './territory-csv-exporter.bo';
+import { parseXlsxWorksheetRows, toColumnLetter, XLSX_MIME_TYPE } from './xlsx-workbook';
+import { readStoredZipArchive } from './zip-archive';
 import { TerritoryRepository } from '../../../../repositories/territories.repository';
 import { UserStateService } from '../../../../state/user.state.service';
+import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 import type { Territory } from '../../../../../models/territory';
 import type { TerritoryVisitHistory } from '../../../../../models/territory-visit-history';
-import { VisitOutcomeEnum } from '../../../../../models/enums/visit-outcome';
 import {
   mockTerritory1,
   mockTerritory2,
   mockTerritory3,
   mockTerritory4,
   territoryMockBuilder,
-} from '../../../../../test/mocks/models/territory.mock';
+} from '../../../../../test/mocks';
 import { adminUser, congregationMock } from '../../../../../test/mocks';
 
 describe('TerritoryCsvExporterBO', () => {
   let territoryCsvExporterBO: TerritoryCsvExporterBO;
   let territoryRepository: TerritoryRepository;
+
+  const daysAgo = (n: number) => {
+    const date = new Date();
+    date.setDate(date.getDate() - n);
+    return date;
+  };
+
+  const visit = (id: string, days: number, visitOutcome: VisitOutcomeEnum): TerritoryVisitHistory => ({
+    id,
+    notes: '',
+    isRevisit: false,
+    date: daysAgo(days),
+    visitOutcome,
+  });
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -56,10 +72,8 @@ describe('TerritoryCsvExporterBO', () => {
     expect(() => svc.export()).toThrow('No congregation id found');
   });
 
-  it('calls repository.getAllByCongregation and passes sorted territories to exportCsv', (done) => {
-    const exportCsvSpy = jest
-      .spyOn(territoryCsvExporterBO as unknown as { exportCsv: (t: Territory[]) => void }, 'exportCsv')
-      .mockImplementation(() => undefined);
+  it('calls repository.getAllByCongregation and passes sorted territories to exportCsv by default', (done) => {
+    const exportCsvSpy = jest.spyOn(territoryCsvExporterBO, 'exportCsv').mockImplementation(() => undefined);
 
     const obs = territoryCsvExporterBO.export();
     expect(typeof obs.subscribe).toBe('function');
@@ -79,16 +93,25 @@ describe('TerritoryCsvExporterBO', () => {
     });
   });
 
-  it('exportCsv creates a CSV blob and triggers a download', () => {
-    // Prepare spies for DOM and URL operations
+  it('calls exportXlsx when format is "xlsx"', (done) => {
+    const exportXlsxSpy = jest.spyOn(territoryCsvExporterBO, 'exportXlsx').mockImplementation(() => undefined);
+
+    territoryCsvExporterBO.export('xlsx').subscribe({
+      complete: () => {
+        expect(exportXlsxSpy).toHaveBeenCalled();
+        done();
+      },
+      error: (err) => done.fail(err),
+    });
+  });
+
+  it('exportCsv and exportXlsx create the expected blobs and trigger downloads', () => {
     const anchor = document.createElement('a');
     jest.spyOn(document, 'createElement').mockReturnValue(anchor as unknown as HTMLElement);
     const appendSpy = jest.spyOn(document.body, 'appendChild').mockImplementation((node: Node) => node);
     const removeSpy = jest.spyOn(document.body, 'removeChild').mockImplementation((node: Node) => node);
 
-    let createdBlob: Blob | undefined;
-    // JSDOM / test env may not provide URL.createObjectURL / revokeObjectURL.
-    // Use a typed proxy for URL to avoid `any` and satisfy linting rules.
+    const createdBlobs: Blob[] = [];
     const urlLike = URL as unknown as {
       createObjectURL?: (obj: Blob | MediaSource) => string;
       revokeObjectURL?: (url: string) => void;
@@ -98,11 +121,12 @@ describe('TerritoryCsvExporterBO', () => {
       urlLike.createObjectURL = (() => 'blob:url') as (obj: Blob | MediaSource) => string;
     }
 
-    // Use `any` for the spy target to satisfy jest.spyOn overloads. Disable the lint rule locally.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     jest.spyOn(urlLike as unknown as any, 'createObjectURL').mockImplementation((...args: unknown[]) => {
       const obj = args[0] as Blob | undefined;
-      createdBlob = obj as Blob | undefined;
+      if (obj) {
+        createdBlobs.push(obj);
+      }
       return 'blob:url';
     });
 
@@ -113,33 +137,21 @@ describe('TerritoryCsvExporterBO', () => {
     const revokeSpy = jest.spyOn(urlLike as unknown as any, 'revokeObjectURL').mockImplementation(() => void 0);
     const clickSpy = jest.spyOn(anchor, 'click').mockImplementation(() => void 0);
 
-    // Call exportCsv
-    territoryCsvExporterBO.exportCsv([mockTerritory1, mockTerritory2, mockTerritory3, mockTerritory4]);
+    territoryCsvExporterBO.exportCsv([mockTerritory1]);
+    expect(createdBlobs[0]?.type).toContain('text/csv');
+    expect(anchor.download).toMatch(/^mm-territorios-.*\.csv$/);
 
-    expect(createdBlob).toBeDefined();
-    expect(createdBlob?.type).toContain('text/csv');
-    expect(appendSpy).toHaveBeenCalled();
-    expect(clickSpy).toHaveBeenCalled();
-    expect(removeSpy).toHaveBeenCalled();
+    territoryCsvExporterBO.exportXlsx([mockTerritory1]);
+    expect(createdBlobs[1]?.type).toBe(XLSX_MIME_TYPE);
+    expect(anchor.download).toMatch(/^mm-territorios-.*\.xlsx$/);
+
+    expect(appendSpy).toHaveBeenCalledTimes(2);
+    expect(clickSpy).toHaveBeenCalledTimes(2);
+    expect(removeSpy).toHaveBeenCalledTimes(2);
     expect(revokeSpy).toHaveBeenCalledWith('blob:url');
-    expect(anchor.download).toMatch(/^mm-territorios-/);
   });
 
   describe('buildCsv', () => {
-    const daysAgo = (n: number) => {
-      const date = new Date();
-      date.setDate(date.getDate() - n);
-      return date;
-    };
-
-    const visit = (id: string, days: number, visitOutcome: VisitOutcomeEnum): TerritoryVisitHistory => ({
-      id,
-      notes: '',
-      isRevisit: false,
-      date: daysAgo(days),
-      visitOutcome,
-    });
-
     it('appends the most recent visit outcome label as the last column', () => {
       const lines = territoryCsvExporterBO.buildCsv([mockTerritory1]).split('\r\n');
 
@@ -174,6 +186,58 @@ describe('TerritoryCsvExporterBO', () => {
         expect(row.split(';')).toHaveLength(9);
         expect(row.endsWith(';')).toBe(true);
       }
+    });
+  });
+
+  describe('buildXlsx', () => {
+    it('packages a complete OOXML .xlsx archive with all required parts and headers', () => {
+      const xlsxBytes = territoryCsvExporterBO.buildXlsx([mockTerritory1]);
+      const archiveFiles = readStoredZipArchive(xlsxBytes);
+
+      expect([...archiveFiles.keys()]).toEqual([
+        '[Content_Types].xml',
+        '_rels/.rels',
+        'xl/workbook.xml',
+        'xl/_rels/workbook.xml.rels',
+        'xl/styles.xml',
+        'xl/sharedStrings.xml',
+        'xl/worksheets/sheet1.xml',
+      ]);
+
+      const rows = parseXlsxWorksheetRows(xlsxBytes);
+      expect(rows[0]).toEqual([
+        'Cidade',
+        'Endereço',
+        'Observação',
+        'Link do Mapa',
+        'Ícone',
+        'Estudante da Bíblia',
+        'Instrutor da Bíblia',
+        'Última Visita',
+        'Resultado da Última Visita',
+      ]);
+      expect(rows[1][8]).toBe('Ninguém atendeu');
+    });
+
+    it('preserves pt-BR accents, coordinates, and XML special characters cleanly', () => {
+      const territory = territoryMockBuilder({
+        city: 'São Paulo',
+        address: '-22,4855180, -47,1152300 (1º R. Sebastião & "Filhos" <A>)',
+        note: "Observação\ncom\tquebra\x00 e 'aspas'",
+      });
+
+      const rows = parseXlsxWorksheetRows(territoryCsvExporterBO.buildXlsx([territory]));
+
+      expect(rows[1][0]).toBe('São Paulo');
+      expect(rows[1][1]).toBe('-22,4855180, -47,1152300 (1º R. Sebastião & "Filhos" <A>)');
+      expect(rows[1][2]).toBe("Observação com quebra e 'aspas'");
+    });
+
+    it('converts column indices to A1-style column letters', () => {
+      expect(toColumnLetter(0)).toBe('A');
+      expect(toColumnLetter(8)).toBe('I');
+      expect(toColumnLetter(25)).toBe('Z');
+      expect(toColumnLetter(26)).toBe('AA');
     });
   });
 });
